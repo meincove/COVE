@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <body>
+    <p>Hi {{ first_name|default:"there" }},</p>
+    <p>Thanks for your order <strong>#{{ order_id }}</strong> at <strong>Cove</strong>.</p>
+
+    <table border="0" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr><th align="left">Item</th><th align="right">Qty</th><th align="right">Price</th></tr>
+      </thead>
+      <tbody>
+      {% for it in items %}
+        <tr>
+          <td>{{ it.variant_id }} ({{ it.size }}, {{ it.color }})</td>
+          <td align="right">{{ it.quantity }}</td>
+          <td align="right">€{{ it.price }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td><strong>Total</strong></td><td></td><td align="right"><strong>€{{ total }}</strong></td></tr>
+      </tfoot>
+    </table>
+
+    <p>We’ll email you when your order ships.<br/>— Team Cove</p>
+  </body>
+</html>

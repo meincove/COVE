@@ -1,0 +1,13 @@
+Hi {{ first_name|default:"there" }},
+
+Thanks for your order #{{ order_id }} at Cove.
+
+Items:
+{% for it in items %}
+- {{ it.quantity }} x {{ it.variant_id }} ({{ it.size }}, {{ it.color }}) @ €{{ it.price }}
+{% endfor %}
+
+Total: €{{ total }}
+
+We'll email you when your order ships.
+— Team Cove
