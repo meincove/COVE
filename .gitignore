@@ -31,3 +31,25 @@ backend/staticfiles/
 
 _safety_backup/
 
+# Python
+**/__pycache__/
+**/*.py[cod]
+*.sqlite3
+.venv/
+.env
+.env.*
+
+# Node/Next
+node_modules/
+.next/
+out/
+.env.local
+.env.development.local
+.env.production.local
+
+# Django
+staticfiles/
+media/
+
+# OS
+.DS_Store
