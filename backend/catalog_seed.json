@@ -1,0 +1,993 @@
+[
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-BOMBER-ORIGINALS-100%COTTON-69.99",
+  "fields": {
+    "name": "Bomber (100% Cotton)",
+    "slug": "bomber-originals-cotton-69.99",
+    "tier": "originals",
+    "type": "bomber",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Lightweight bomber jacket in cotton finish",
+    "base_price": "69.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-BOMBER-ORIGINALS-100%COTTON-89.99",
+  "fields": {
+    "name": "Bomber (100% Cotton)",
+    "slug": "bomber-originals-cotton-89.99",
+    "tier": "originals",
+    "type": "bomber",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Lightweight bomber jacket in cotton finish",
+    "base_price": "89.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-HOODIE-CASUAL-BRUSHEDFLEECE-19.99",
+  "fields": {
+    "name": "Hoodie (Brushed Fleece)",
+    "slug": "hoodie-casual-fleece-59.99",
+    "tier": "casual",
+    "type": "hoodie",
+    "material": "Brushed Fleece",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Premium hoodie made from Brushed Fleece",
+    "base_price": "19.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-HOODIE-CASUAL-BRUSHEDFLEECE-99.99",
+  "fields": {
+    "name": "Hoodie (Brushed Fleece)",
+    "slug": "hoodie-casual-fleece-99.99",
+    "tier": "casual",
+    "type": "hoodie",
+    "material": "Brushed Fleece",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Premium hoodie made from Brushed Fleece",
+    "base_price": "99.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-JACKET-DESIGNER-100%COTTON-29.99",
+  "fields": {
+    "name": "Jacket (100% Cotton)",
+    "slug": "hoodie-designer-100cotton-29.99",
+    "tier": "designer",
+    "type": "jacket",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Streetwear premium cotton jacket",
+    "base_price": "29.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-JACKET-DESIGNER-100%COTTON-39.99",
+  "fields": {
+    "name": "Jacket (100% Cotton)",
+    "slug": "hoodie-designer-100cotton-39.99",
+    "tier": "designer",
+    "type": "jacket",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Streetwear premium cotton jacket",
+    "base_price": "39.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-JACKET-DESIGNER-100%COTTON-59.99",
+  "fields": {
+    "name": "Jacket (100% Cotton)",
+    "slug": "hoodie-designer-100cotton-59.99",
+    "tier": "designer",
+    "type": "jacket",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Streetwear premium cotton jacket",
+    "base_price": "59.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-JACKET-DESIGNER-100%COTTON-79.99",
+  "fields": {
+    "name": "Jacket (100% Cotton)",
+    "slug": "jacket-designer-100cotton-79.99",
+    "tier": "designer",
+    "type": "jacket",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Streetwear premium cotton jacket",
+    "base_price": "79.99"
+  }
+},
+{
+  "model": "catalog.productmastergroup",
+  "pk": "G-JEANS-ORIGINALS-100%COTTON-39.99",
+  "fields": {
+    "name": "Cargo Jeans (100% Cotton)",
+    "slug": "cargo-originals-cotton-39.99",
+    "tier": "originals",
+    "type": "jeans",
+    "material": "100% Cotton",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "description": "Lightweight bomber jacket in cotton finish",
+    "base_price": "39.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "CUHD001",
+  "fields": {
+    "product": "G-HOODIE-CASUAL-BRUSHEDFLEECE-19.99",
+    "color_name": "black",
+    "hex": "#000000",
+    "slug": "hoodie-casual-fleece-59.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "CUHD002",
+  "fields": {
+    "product": "G-HOODIE-CASUAL-BRUSHEDFLEECE-19.99",
+    "color_name": "green",
+    "hex": "#228B22",
+    "slug": "hoodie-casual-fleece-59.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "CUHD003",
+  "fields": {
+    "product": "G-HOODIE-CASUAL-BRUSHEDFLEECE-99.99",
+    "color_name": "green",
+    "hex": "#228B22",
+    "slug": "hoodie-casual-fleece-99.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "DUJK001",
+  "fields": {
+    "product": "G-JACKET-DESIGNER-100%COTTON-79.99",
+    "color_name": "ghostgreen",
+    "hex": "#278c72",
+    "slug": "jacket-designer-100cotton-79.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "DUJK002",
+  "fields": {
+    "product": "G-JACKET-DESIGNER-100%COTTON-59.99",
+    "color_name": "nightOrange",
+    "hex": "#dcc693",
+    "slug": "hoodie-designer-100cotton-59.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "DUJK003",
+  "fields": {
+    "product": "G-JACKET-DESIGNER-100%COTTON-39.99",
+    "color_name": "shadeLime",
+    "hex": "#98deb4",
+    "slug": "hoodie-designer-100cotton-39.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "DUJK004",
+  "fields": {
+    "product": "G-JACKET-DESIGNER-100%COTTON-29.99",
+    "color_name": "hotpink",
+    "hex": "#d0b7bd",
+    "slug": "hoodie-designer-100cotton-29.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "OBMR001",
+  "fields": {
+    "product": "G-BOMBER-ORIGINALS-100%COTTON-69.99",
+    "color_name": "blue",
+    "hex": "#0000FF",
+    "slug": "bomber-originals-cotton-69.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "OBMR002",
+  "fields": {
+    "product": "G-BOMBER-ORIGINALS-100%COTTON-69.99",
+    "color_name": "green",
+    "hex": "#228B22",
+    "slug": "bomber-originals-cotton-69.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "OBMR003",
+  "fields": {
+    "product": "G-BOMBER-ORIGINALS-100%COTTON-89.99",
+    "color_name": "green",
+    "hex": "#228B22",
+    "slug": "bomber-originals-cotton-89.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "OBMR004",
+  "fields": {
+    "product": "G-JEANS-ORIGINALS-100%COTTON-39.99",
+    "color_name": "blue",
+    "hex": "#0000FF",
+    "slug": "cargo-originals-cotton-39.99"
+  }
+},
+{
+  "model": "catalog.colorgroup",
+  "pk": "OBMR005",
+  "fields": {
+    "product": "G-JEANS-ORIGINALS-100%COTTON-39.99",
+    "color_name": "cream",
+    "hex": "#f6ddcc",
+    "slug": "cargo-originals-cotton-39.99"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 1,
+  "fields": {
+    "variant": "CUHD001",
+    "image_name": "CUHD001-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 2,
+  "fields": {
+    "variant": "CUHD001",
+    "image_name": "CUHD001-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 3,
+  "fields": {
+    "variant": "CUHD001",
+    "image_name": "CUHD001-left.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 4,
+  "fields": {
+    "variant": "CUHD001",
+    "image_name": "CUHD001-right.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 5,
+  "fields": {
+    "variant": "CUHD002",
+    "image_name": "CUHD002-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 6,
+  "fields": {
+    "variant": "CUHD002",
+    "image_name": "CUHD002-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 7,
+  "fields": {
+    "variant": "CUHD003",
+    "image_name": "CUHD003-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 8,
+  "fields": {
+    "variant": "CUHD003",
+    "image_name": "CUHD003-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 9,
+  "fields": {
+    "variant": "OBMR001",
+    "image_name": "OBMR001-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 10,
+  "fields": {
+    "variant": "OBMR002",
+    "image_name": "OBMR002-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 11,
+  "fields": {
+    "variant": "OBMR003",
+    "image_name": "OBMR003-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 12,
+  "fields": {
+    "variant": "OBMR004",
+    "image_name": "OBMR004-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 13,
+  "fields": {
+    "variant": "OBMR004",
+    "image_name": "OBMR004-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 14,
+  "fields": {
+    "variant": "OBMR005",
+    "image_name": "OBMR005-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 15,
+  "fields": {
+    "variant": "DUJK001",
+    "image_name": "DUJK001-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 16,
+  "fields": {
+    "variant": "DUJK001",
+    "image_name": "DUJK001-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 17,
+  "fields": {
+    "variant": "DUJK002",
+    "image_name": "DUJK002-front.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 18,
+  "fields": {
+    "variant": "DUJK003",
+    "image_name": "DUJK003-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 19,
+  "fields": {
+    "variant": "DUJK004",
+    "image_name": "DUJK004-back.png"
+  }
+},
+{
+  "model": "catalog.productimage",
+  "pk": 20,
+  "fields": {
+    "variant": "DUJK004",
+    "image_name": "DUJK004-front.png"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 1,
+  "fields": {
+    "variant": "CUHD001",
+    "size": "S",
+    "quantity": 8,
+    "price": "19.99",
+    "stripe_product_id": "prod_Swn7gNbwnKy08O",
+    "stripe_price_id": "price_1S0tXIPvEqNq4PmbM6kV47nV"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 2,
+  "fields": {
+    "variant": "CUHD001",
+    "size": "M",
+    "quantity": 0,
+    "price": "19.99",
+    "stripe_product_id": "prod_Swn7gNbwnKy08O",
+    "stripe_price_id": "price_1S0tXIPvEqNq4PmbDObKw8NO"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 3,
+  "fields": {
+    "variant": "CUHD001",
+    "size": "L",
+    "quantity": 3,
+    "price": "19.99",
+    "stripe_product_id": "prod_Swn7gNbwnKy08O",
+    "stripe_price_id": "price_1S0tXHPvEqNq4PmbSfT9Pb4m"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 4,
+  "fields": {
+    "variant": "CUHD001",
+    "size": "XL",
+    "quantity": 13,
+    "price": "19.99",
+    "stripe_product_id": "prod_Swn7gNbwnKy08O",
+    "stripe_price_id": "price_1S0tXJPvEqNq4PmbRCkG2I55"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 5,
+  "fields": {
+    "variant": "CUHD002",
+    "size": "S",
+    "quantity": 9,
+    "price": "19.99",
+    "stripe_product_id": "prod_SwnGCPaJDmI7Sc",
+    "stripe_price_id": "price_1S0tfaPvEqNq4Pmb9GQfCH6l"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 6,
+  "fields": {
+    "variant": "CUHD002",
+    "size": "M",
+    "quantity": 7,
+    "price": "19.99",
+    "stripe_product_id": "prod_SwnGCPaJDmI7Sc",
+    "stripe_price_id": "price_1S0tfaPvEqNq4PmbX9smsXxR"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 7,
+  "fields": {
+    "variant": "CUHD002",
+    "size": "L",
+    "quantity": 3,
+    "price": "19.99",
+    "stripe_product_id": "prod_SwnGCPaJDmI7Sc",
+    "stripe_price_id": "price_1S0tfZPvEqNq4PmbkA7dyghX"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 8,
+  "fields": {
+    "variant": "CUHD002",
+    "size": "XL",
+    "quantity": 20,
+    "price": "19.99",
+    "stripe_product_id": "prod_SwnGCPaJDmI7Sc",
+    "stripe_price_id": "price_1S0tfaPvEqNq4PmbQHmeHogg"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 9,
+  "fields": {
+    "variant": "CUHD003",
+    "size": "S",
+    "quantity": 20,
+    "price": "99.99",
+    "stripe_product_id": "prod_SwnGdeIwmyGbBp",
+    "stripe_price_id": "price_1S0tfcPvEqNq4PmbOWrQixz6"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 10,
+  "fields": {
+    "variant": "CUHD003",
+    "size": "M",
+    "quantity": 20,
+    "price": "99.99",
+    "stripe_product_id": "prod_SwnGdeIwmyGbBp",
+    "stripe_price_id": "price_1S0tfbPvEqNq4Pmbn2IoLeAL"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 11,
+  "fields": {
+    "variant": "CUHD003",
+    "size": "L",
+    "quantity": 20,
+    "price": "99.99",
+    "stripe_product_id": "prod_SwnGdeIwmyGbBp",
+    "stripe_price_id": "price_1S0tfbPvEqNq4PmbLAOYLKC7"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 12,
+  "fields": {
+    "variant": "CUHD003",
+    "size": "XL",
+    "quantity": 18,
+    "price": "99.99",
+    "stripe_product_id": "prod_SwnGdeIwmyGbBp",
+    "stripe_price_id": "price_1S0tfcPvEqNq4Pmb7vwpKr5o"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 13,
+  "fields": {
+    "variant": "OBMR001",
+    "size": "S",
+    "quantity": 19,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGtV1rAE53f0",
+    "stripe_price_id": "price_1S0tfkPvEqNq4PmbK1ecIeYu"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 14,
+  "fields": {
+    "variant": "OBMR001",
+    "size": "M",
+    "quantity": 19,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGtV1rAE53f0",
+    "stripe_price_id": "price_1S0tfkPvEqNq4Pmb4KILCp8d"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 15,
+  "fields": {
+    "variant": "OBMR001",
+    "size": "L",
+    "quantity": 20,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGtV1rAE53f0",
+    "stripe_price_id": "price_1S0tfkPvEqNq4PmbmWOmPsat"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 16,
+  "fields": {
+    "variant": "OBMR001",
+    "size": "XL",
+    "quantity": 20,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGtV1rAE53f0",
+    "stripe_price_id": "price_1S0tflPvEqNq4PmbNcQoclrX"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 17,
+  "fields": {
+    "variant": "OBMR002",
+    "size": "S",
+    "quantity": 20,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGwSMQgY4gNM",
+    "stripe_price_id": "price_1S0tfmPvEqNq4PmbcialJOSG"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 18,
+  "fields": {
+    "variant": "OBMR002",
+    "size": "M",
+    "quantity": 20,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGwSMQgY4gNM",
+    "stripe_price_id": "price_1S0tfmPvEqNq4PmbQSV8KHs6"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 19,
+  "fields": {
+    "variant": "OBMR002",
+    "size": "L",
+    "quantity": 20,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGwSMQgY4gNM",
+    "stripe_price_id": "price_1S0tflPvEqNq4PmbyZORedRJ"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 20,
+  "fields": {
+    "variant": "OBMR002",
+    "size": "XL",
+    "quantity": 20,
+    "price": "69.99",
+    "stripe_product_id": "prod_SwnGwSMQgY4gNM",
+    "stripe_price_id": "price_1S0tfnPvEqNq4PmbWuE0o35u"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 21,
+  "fields": {
+    "variant": "OBMR003",
+    "size": "S",
+    "quantity": 20,
+    "price": "89.99",
+    "stripe_product_id": "prod_SwnG45g9qOMGsN",
+    "stripe_price_id": "price_1S0tfoPvEqNq4PmbykR6MbvH"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 22,
+  "fields": {
+    "variant": "OBMR003",
+    "size": "M",
+    "quantity": 20,
+    "price": "89.99",
+    "stripe_product_id": "prod_SwnG45g9qOMGsN",
+    "stripe_price_id": "price_1S0tfoPvEqNq4PmbdUYsrEe1"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 23,
+  "fields": {
+    "variant": "OBMR003",
+    "size": "L",
+    "quantity": 20,
+    "price": "89.99",
+    "stripe_product_id": "prod_SwnG45g9qOMGsN",
+    "stripe_price_id": "price_1S0tfnPvEqNq4PmbkGCIgDob"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 24,
+  "fields": {
+    "variant": "OBMR003",
+    "size": "XL",
+    "quantity": 20,
+    "price": "89.99",
+    "stripe_product_id": "prod_SwnG45g9qOMGsN",
+    "stripe_price_id": "price_1S0tfoPvEqNq4PmbWrg4cbxT"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 25,
+  "fields": {
+    "variant": "OBMR004",
+    "size": "S",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGmVYGf4uwih",
+    "stripe_price_id": "price_1S0tfqPvEqNq4Pmb6bqR9ECK"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 26,
+  "fields": {
+    "variant": "OBMR004",
+    "size": "M",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGmVYGf4uwih",
+    "stripe_price_id": "price_1S0tfpPvEqNq4PmbCABsRQJF"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 27,
+  "fields": {
+    "variant": "OBMR004",
+    "size": "L",
+    "quantity": 13,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGmVYGf4uwih",
+    "stripe_price_id": "price_1S0tfpPvEqNq4Pmbs2adn1aZ"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 28,
+  "fields": {
+    "variant": "OBMR004",
+    "size": "XL",
+    "quantity": 19,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGmVYGf4uwih",
+    "stripe_price_id": "price_1S0tfqPvEqNq4Pmb4ZsQNYw0"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 29,
+  "fields": {
+    "variant": "OBMR005",
+    "size": "S",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGV0IqnWlvrP",
+    "stripe_price_id": "price_1S0tfrPvEqNq4PmbELVJ3b2u"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 30,
+  "fields": {
+    "variant": "OBMR005",
+    "size": "M",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGV0IqnWlvrP",
+    "stripe_price_id": "price_1S0tfrPvEqNq4PmbCgMdrZiL"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 31,
+  "fields": {
+    "variant": "OBMR005",
+    "size": "L",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGV0IqnWlvrP",
+    "stripe_price_id": "price_1S0tfrPvEqNq4Pmb7K4iKGb8"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 32,
+  "fields": {
+    "variant": "OBMR005",
+    "size": "XL",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGV0IqnWlvrP",
+    "stripe_price_id": "price_1S0tfsPvEqNq4PmbirVN3vri"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 33,
+  "fields": {
+    "variant": "DUJK001",
+    "size": "S",
+    "quantity": 20,
+    "price": "79.99",
+    "stripe_product_id": "prod_SwnGb0ARyJYAlg",
+    "stripe_price_id": "price_1S0tfePvEqNq4PmbdOd0o673"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 34,
+  "fields": {
+    "variant": "DUJK001",
+    "size": "M",
+    "quantity": 20,
+    "price": "79.99",
+    "stripe_product_id": "prod_SwnGb0ARyJYAlg",
+    "stripe_price_id": "price_1S0tfdPvEqNq4PmbOQ6N9fFR"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 35,
+  "fields": {
+    "variant": "DUJK001",
+    "size": "L",
+    "quantity": 18,
+    "price": "79.99",
+    "stripe_product_id": "prod_SwnGb0ARyJYAlg",
+    "stripe_price_id": "price_1S0tfdPvEqNq4PmbaJk5FGEY"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 36,
+  "fields": {
+    "variant": "DUJK001",
+    "size": "XL",
+    "quantity": 20,
+    "price": "79.99",
+    "stripe_product_id": "prod_SwnGb0ARyJYAlg",
+    "stripe_price_id": "price_1S0tfePvEqNq4PmbtcTfoVS8"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 37,
+  "fields": {
+    "variant": "DUJK002",
+    "size": "S",
+    "quantity": 20,
+    "price": "59.99",
+    "stripe_product_id": "prod_SwnGAOwf25DUr5",
+    "stripe_price_id": "price_1S0tffPvEqNq4PmbPF2UrOQg"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 38,
+  "fields": {
+    "variant": "DUJK002",
+    "size": "M",
+    "quantity": 19,
+    "price": "59.99",
+    "stripe_product_id": "prod_SwnGAOwf25DUr5",
+    "stripe_price_id": "price_1S0tffPvEqNq4PmbEpqS8ILI"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 39,
+  "fields": {
+    "variant": "DUJK002",
+    "size": "L",
+    "quantity": 20,
+    "price": "59.99",
+    "stripe_product_id": "prod_SwnGAOwf25DUr5",
+    "stripe_price_id": "price_1S0tffPvEqNq4PmbCZtlGWod"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 40,
+  "fields": {
+    "variant": "DUJK002",
+    "size": "XL",
+    "quantity": 20,
+    "price": "59.99",
+    "stripe_product_id": "prod_SwnGAOwf25DUr5",
+    "stripe_price_id": "price_1S0tfgPvEqNq4PmbJg7Gln1L"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 41,
+  "fields": {
+    "variant": "DUJK003",
+    "size": "S",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGH84zSGEFUz",
+    "stripe_price_id": "price_1S0tfhPvEqNq4PmbDkOoXrQ3"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 42,
+  "fields": {
+    "variant": "DUJK003",
+    "size": "M",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGH84zSGEFUz",
+    "stripe_price_id": "price_1S0tfhPvEqNq4PmbTXm6afF6"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 43,
+  "fields": {
+    "variant": "DUJK003",
+    "size": "L",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGH84zSGEFUz",
+    "stripe_price_id": "price_1S0tfgPvEqNq4Pmb8n695xo1"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 44,
+  "fields": {
+    "variant": "DUJK003",
+    "size": "XL",
+    "quantity": 20,
+    "price": "39.99",
+    "stripe_product_id": "prod_SwnGH84zSGEFUz",
+    "stripe_price_id": "price_1S0tfhPvEqNq4PmbA6YpKaZn"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 45,
+  "fields": {
+    "variant": "DUJK004",
+    "size": "S",
+    "quantity": 20,
+    "price": "29.99",
+    "stripe_product_id": "prod_SwnGZswHpabiBE",
+    "stripe_price_id": "price_1S0tfjPvEqNq4PmbzZXXAvDk"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 46,
+  "fields": {
+    "variant": "DUJK004",
+    "size": "M",
+    "quantity": 20,
+    "price": "29.99",
+    "stripe_product_id": "prod_SwnGZswHpabiBE",
+    "stripe_price_id": "price_1S0tfiPvEqNq4PmbcctnQGZM"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 47,
+  "fields": {
+    "variant": "DUJK004",
+    "size": "L",
+    "quantity": 20,
+    "price": "29.99",
+    "stripe_product_id": "prod_SwnGZswHpabiBE",
+    "stripe_price_id": "price_1S0tfiPvEqNq4PmbtxKeh71a"
+  }
+},
+{
+  "model": "catalog.sizestockprice",
+  "pk": 48,
+  "fields": {
+    "variant": "DUJK004",
+    "size": "XL",
+    "quantity": 20,
+    "price": "29.99",
+    "stripe_product_id": "prod_SwnGZswHpabiBE",
+    "stripe_price_id": "price_1S0tfjPvEqNq4PmbJ6teQeBx"
+  }
+}
+]
