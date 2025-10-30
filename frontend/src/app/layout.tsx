@@ -67,6 +67,7 @@ import { ModalProvider } from "@/src/context/ModalContext";
 import Navbar from "@/src/components/Navbar";
 import ModalHost from "@/src/components/ModalHost";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
+import ChatWidget from "@/src/components/cove-ai/ChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -99,6 +100,8 @@ export default function RootLayout({
               <ModalHost />
             </ModalProvider>
           </ThemeProvider>
+          {children}
+          <ChatWidget />
         </body>
       </html>
     </ClerkProvider>
