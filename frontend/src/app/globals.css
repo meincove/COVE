@@ -248,3 +248,83 @@ html {
     background-position: 0% 50%;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- Root / reset for full-viewport pages --- */
+html, body {
+  height: 100%;
+  width: 100%;
+  overscroll-behavior-y: none;           /* avoid rubber-banding between sections */
+  background: #000;                      /* your site background */
+  color: #fff;
+}
+
+/* Make <canvas> behave nicely in full-bleed sections */
+canvas { display: block; }
+
+/* --- Full-screen snap-scrolling --- */
+/* If you prefer classes, you can keep using Tailwind utilities in page.tsx.
+   These classes mirror those utilities for clarity/reuse. */
+
+.snap-container {
+  height: 100svh;                        /* safe viewport height on mobile */
+  min-height: 100dvh;                    /* fallback for iOS/older browsers */
+  width: 100vw;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.snap-section {
+  height: 100svh;
+  min-height: 100dvh;
+  width: 100vw;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.fullsize {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+/* Optional: hide scrollbars (you asked for no visible scrollbars) */
+.snap-container::-webkit-scrollbar { display: none; }
+.snap-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* --- Motion preferences & minor polish --- */
+@media (prefers-reduced-motion: reduce) {
+  .snap-container { scroll-behavior: auto; }
+}
+
+/* If you keep a subtle grain overlay somewhere, here’s a tiny helper */
+@keyframes coveGrainShift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 256px 256px; }
+}
+.animate-cove-grain {
+  animation: coveGrainShift 6s steps(6) infinite;
+}
+
+html, body { background:#000; color:#fff; }
+
+/* Optional scrollbar hiding for the whole page */
+html::-webkit-scrollbar { display:none; }
+html { -ms-overflow-style:none; scrollbar-width:none; }

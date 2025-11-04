@@ -1,12 +1,7 @@
-import Hero from '@/src/sections/Hero'
-
+import LandingPage from '@/src/sections/Hero';
+import Tester from '../sections/tester';
 
 export default function HomePage() {
-  return (
-    <>
-      <Hero />
-    </>
-  )
+  return <LandingPage />;
+  // return <Tester /> ;
 }
-
-

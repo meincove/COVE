@@ -5,6 +5,7 @@
 *.sqlite3
 .env
 .env.*
+backend/.env
 
 # Node/Next
 node_modules/
