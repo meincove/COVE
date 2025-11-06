@@ -22,3 +22,6 @@ media/
 # macOS
 .DS_Store
 _safety_backup/
+
+backend/venv/
+backend/.venv/
