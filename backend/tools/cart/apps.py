@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
-class ToolsConfig(AppConfig):
+class CartConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "tools"   # exactly this
+    name = "tools.cart"
