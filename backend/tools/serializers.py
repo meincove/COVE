@@ -60,3 +60,32 @@ class CatalogDetailsQuery(serializers.Serializer):
     
 class VariantDetailsQuery(serializers.Serializer):
     variantId = serializers.CharField(required=True, max_length=64)   
+
+
+
+# ---------- Identity ----------
+class IdentityResolveOut(serializers.Serializer):
+    userId   = serializers.CharField(allow_blank=True, required=False)
+    email    = serializers.EmailField(allow_blank=True, required=False)
+    source   = serializers.ChoiceField(choices=["jwt","params","none"])
+
+# ---------- Consent ----------
+class ConsentGetQuery(serializers.Serializer):
+    userId         = serializers.CharField(required=False, allow_blank=True)
+    guestSessionId = serializers.CharField(required=False, allow_blank=True)
+    email          = serializers.EmailField(required=False, allow_blank=True)
+
+class ConsentOut(serializers.Serializer):
+    key           = serializers.CharField()
+    userId        = serializers.CharField(allow_blank=True, required=False)
+    guestSessionId= serializers.CharField(allow_blank=True, required=False)
+    email         = serializers.EmailField(allow_blank=True, required=False)
+    marketing     = serializers.BooleanField()
+    analytics     = serializers.BooleanField()
+    personalized  = serializers.BooleanField()
+    updated_at    = serializers.DateTimeField()
+
+class ConsentSetIn(ConsentGetQuery):
+    marketing     = serializers.BooleanField(required=False)
+    analytics     = serializers.BooleanField(required=False)
+    personalized  = serializers.BooleanField(required=False)

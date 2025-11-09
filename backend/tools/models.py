@@ -1,4 +1,3 @@
-# tools/cart/models.py
 from __future__ import annotations
 import uuid
 from decimal import Decimal, ROUND_HALF_UP
@@ -83,3 +82,27 @@ class CartEvent(models.Model):
     class Meta:
         db_table = "tools_cart_event"
         app_label = "tools"
+
+# --- Consent ---------------------------------------------------------------
+from django.db import models
+from django.utils import timezone
+
+class Consent(models.Model):
+    """
+    One row per identity. We use a unique synthetic key so we can upsert
+    by whichever identifier we have (userId > guestSessionId > email).
+    """
+    key               = models.CharField(max_length=128, unique=True)  # e.g., user:abc, guest:xyz, email:test@x.com
+    clerk_user_id     = models.CharField(max_length=128, null=True, blank=True)
+    guest_session_id  = models.CharField(max_length=128, null=True, blank=True)
+    email             = models.EmailField(null=True, blank=True)
+
+    marketing         = models.BooleanField(default=False)
+    analytics         = models.BooleanField(default=False)
+    personalized      = models.BooleanField(default=False)
+
+    created_at        = models.DateTimeField(default=timezone.now)
+    updated_at        = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Consent<{self.key}>"
