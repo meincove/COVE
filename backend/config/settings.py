@@ -26,7 +26,7 @@ load_dotenv(BASE_DIR / ".env")
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
 
 CLERK_WEBHOOK_SECRET = os.getenv("CLERK_WEBHOOK_SECRET")
-
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -110,10 +110,29 @@ LOGGING = {
 
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+# --- Host/CORS/CSRF ---------------------------------------------------------
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+# Allow both localhost and 127.0.0.1 by default (env can still override)
+ALLOWED_HOSTS = [
+    h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]").split(",") if h.strip()
+]
+
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
+    ).split(",") if o.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.getenv(
+        "CSRF_TRUSTED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
+    ).split(",") if o.strip()
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 
@@ -135,14 +154,16 @@ INSTALLED_APPS = [
     'catalog',
     "drf_spectacular",
     "drf_spectacular_sidecar",
-
-
+    "tools",
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 12,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
 
     # NEW: Throttling
     "DEFAULT_THROTTLE_CLASSES": [
@@ -325,3 +346,5 @@ if not DEBUG:
     SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
     X_FRAME_OPTIONS = "DENY"
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    
+    

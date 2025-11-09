@@ -96,64 +96,64 @@ def assemble_product(p) -> Dict:
     }
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def catalog_search(request):
-    sf = SearchFilters(data=request.data or {})
-    sf.is_valid(raise_exception=True)
-    f = sf.validated_data
+# @csrf_exempt
+# @api_view(["POST"])
+# @permission_classes([AllowAny])
+# def catalog_search(request):
+#     sf = SearchFilters(data=request.data or {})
+#     sf.is_valid(raise_exception=True)
+#     f = sf.validated_data
 
-    qs = ProductModel.objects.all()
+#     qs = ProductModel.objects.all()
 
-    if q := f.get("q"):
-        qs = qs.filter(Q(name__icontains=q) | Q(slug__icontains=q) | Q(type__icontains=q) | Q(tier__icontains=q))
-    if tier := f.get("tier"):
-        qs = qs.filter(tier__iexact=tier)
-    if t := f.get("type"):
-        qs = qs.filter(type__iexact=t)
+#     if q := f.get("q"):
+#         qs = qs.filter(Q(name__icontains=q) | Q(slug__icontains=q) | Q(type__icontains=q) | Q(tier__icontains=q))
+#     if tier := f.get("tier"):
+#         qs = qs.filter(tier__iexact=tier)
+#     if t := f.get("type"):
+#         qs = qs.filter(type__iexact=t)
 
-    # Optional filters across relations (works if those relations exist)
-    if f.get("color"):
-        qs = qs.filter(color_variants__color_name__iexact=f["color"]).distinct()
-    if f.get("size"):
-        qs = qs.filter(color_variants__sizes__size__iexact=f["size"]).distinct()
-    if f.get("price_min") is not None:
-        qs = qs.filter(color_variants__sizes__price__gte=f["price_min"]).distinct()
-    if f.get("price_max") is not None:
-        qs = qs.filter(color_variants__sizes__price__lte=f["price_max"]).distinct()
+#     # Optional filters across relations (works if those relations exist)
+#     if f.get("color"):
+#         qs = qs.filter(color_variants__color_name__iexact=f["color"]).distinct()
+#     if f.get("size"):
+#         qs = qs.filter(color_variants__sizes__size__iexact=f["size"]).distinct()
+#     if f.get("price_min") is not None:
+#         qs = qs.filter(color_variants__sizes__price__gte=f["price_min"]).distinct()
+#     if f.get("price_max") is not None:
+#         qs = qs.filter(color_variants__sizes__price__lte=f["price_max"]).distinct()
 
-    cursor, limit = f["cursor"], f["limit"]
-    total = qs.count()
-    pk = ProductModel._meta.pk.name  # "product_id" for your schema
-    page = qs.order_by(pk)[cursor: cursor + limit]
-    next_cursor = cursor + limit if (cursor + limit) < total else None
+#     cursor, limit = f["cursor"], f["limit"]
+#     total = qs.count()
+#     pk = ProductModel._meta.pk.name  # "product_id" for your schema
+#     page = qs.order_by(pk)[cursor: cursor + limit]
+#     next_cursor = cursor + limit if (cursor + limit) < total else None
 
-    items = [assemble_product(p) for p in page]
-    payload = {"total": total, "next_cursor": next_cursor, "items": items}
-    out = SearchResult(data=payload)
-    out.is_valid(raise_exception=True)
-    return Response(out.validated_data) 
+#     items = [assemble_product(p) for p in page]
+#     payload = {"total": total, "next_cursor": next_cursor, "items": items}
+#     out = SearchResult(data=payload)
+#     out.is_valid(raise_exception=True)
+#     return Response(out.validated_data) 
 
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def catalog_details(request):
-    dq = DetailsQuery(data=request.query_params)
-    dq.is_valid(raise_exception=True)
-    variant_id = dq.validated_data["variantId"]
+# @api_view(["GET"])
+# @permission_classes([AllowAny])
+# def catalog_details(request):
+#     dq = DetailsQuery(data=request.query_params)
+#     dq.is_valid(raise_exception=True)
+#     variant_id = dq.validated_data["variantId"]
 
-    # ✅ Use the true PK name (variant_id in your ColorGroup)
-    pk = VariantModel._meta.pk.name  # "variant_id"
-    try:
-        v = VariantModel.objects.select_related("product").get(**{pk: variant_id})
-    except VariantModel.DoesNotExist:
-        return Response({"detail": "variant not found"}, status=status.HTTP_404_NOT_FOUND)
+#     # ✅ Use the true PK name (variant_id in your ColorGroup)
+#     pk = VariantModel._meta.pk.name  # "variant_id"
+#     try:
+#         v = VariantModel.objects.select_related("product").get(**{pk: variant_id})
+#     except VariantModel.DoesNotExist:
+#         return Response({"detail": "variant not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    p = getattr(v, "product")
-    payload = {"product": assemble_product(p), "selected": assemble_variant(v)}
-    out = DetailsOut(data=payload)
-    out.is_valid(raise_exception=True)
-    return Response(out.validated_data)
+#     p = getattr(v, "product")
+#     payload = {"product": assemble_product(p), "selected": assemble_variant(v)}
+#     out = DetailsOut(data=payload)
+#     out.is_valid(raise_exception=True)
+#     return Response(out.validated_data)
 
 @api_view(["GET"])
 @permission_classes([AllowAny])

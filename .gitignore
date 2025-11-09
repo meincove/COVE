@@ -25,3 +25,9 @@ _safety_backup/
 
 backend/venv/
 backend/.venv/
+
+# Local env
+backend/venv/
+frontend/install.log
+__pycache__/
+*.pyc

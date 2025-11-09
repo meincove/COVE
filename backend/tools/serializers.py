@@ -42,3 +42,21 @@ class SearchResult(serializers.Serializer):
 class DetailsOut(serializers.Serializer):
     product  = ProductOut()
     selected = VariantOut()
+
+from rest_framework import serializers
+
+class CatalogDetailsQuery(serializers.Serializer):
+    # Option A: allow letters, numbers, underscore, hyphen, dot
+    slug = serializers.RegexField(r'^[A-Za-z0-9._-]+$', required=False)
+    # (or Option B: simply)
+    # slug = serializers.CharField(required=False, max_length=128)
+
+    variantId = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        if not attrs.get("slug") and not attrs.get("variantId"):
+            raise serializers.ValidationError("Provide slug or variantId")
+        return attrs
+    
+class VariantDetailsQuery(serializers.Serializer):
+    variantId = serializers.CharField(required=True, max_length=64)   
