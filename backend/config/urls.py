@@ -33,7 +33,8 @@ urlpatterns = [
 
     # tools gateway
     path("tools/", include("tools.urls")),
-    path("tools/", include("tools.cart.urls"))
+    path("tools/", include("tools.cart.urls")),
+    path("tools/", include("tools.orders.urls")),  
 ]
 from django.urls import re_path
 from tools.cart import views as cart_views
