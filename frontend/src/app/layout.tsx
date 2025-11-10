@@ -1,18 +1,16 @@
+// app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 
-import { ModalProvider } from "@/src/context/ModalContext";
-import Navbar from "@/src/components/Navbar";
+import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
 import ModalHost from "@/src/components/ModalHost";
+import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
 import ChatWidget from "@/src/components/cove-ai/ChatWidget";
-
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
+import NavbarController from "../components/Navbar/NavbarController";
 
 export const metadata: Metadata = {
   title: "Cove",
@@ -23,16 +21,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider appearance={{ baseTheme: dark }}>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <body className="antialiased">
           <ThemeProvider>
             <ModalProvider>
-              <Navbar />
-              {/* Keep the single children here, with top padding for the fixed navbar */}
-              <main className="pt-16">{children}</main>
+              {/* Keep global overlay if it needs to darken background on menu */}
+              <RootOverlay />
+
+              {/* Render the actual pages; no navbar or tester-frame here */}
+              {/* {children} */}
+              <div className="tester-frame"> <NavbarController /> <main>{children}</main> </div>
+
               <ModalHost />
             </ModalProvider>
           </ThemeProvider>
+
           <ChatWidget />
+          {process.env.NODE_ENV === "development" && <IslandDevToggle />}
         </body>
       </html>
     </ClerkProvider>
