@@ -63,26 +63,25 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
   --input: oklch(0.92 0.004 286.32);
 
   /* === Frame sizing knobs === */
-  /* We don't use scale for shrink; keep at 1 */
-  --frame-scale: 1;
+  --frame-scale: 1;  /* no scale; we use margin+size */
 
-  /* Per-side rims (tune freely) */
-  --gap-top: 80px;     /* larger top rim */
-  --gap-right: 15px;
-  --gap-bottom: 15px;
-  --gap-left: 15px;
+  /* Per-side rims (pixel-perfect per side) */
+  --gap-top: 72px;     /* tune */
+  --gap-right: 16px;   /* tune */
+  --gap-bottom: 24px;  /* tune */
+  --gap-left: 28px;    /* tune */
 
   /* Bands behind the frame follow the gaps exactly */
   --band-top-height:    var(--gap-top);
-  --band-left-width:    var(--gap-left);
-  --band-right-width:   var(--gap-right);
-  --band-bottom-height: var(--gap-bottom);
 
-  /* Overlay bar spacing/size (optional) */
-  --overlay-top-pad: 0px;
-  --overlay-left-pad: 0px;
-  --overlay-top-bar-height: 0px;
-  --overlay-left-bar-width: 0px;
+  /* Overlay top bar spacing/sizing */
+  --overlay-top-pad: 12px;          /* gap from screen top to the bar */
+  --overlay-top-bar-height: 56px;   /* bar thickness */
+
+  /* Inner layout of the top bar */
+  --overlay-top-hpad: 16px;         /* inner left/right padding in the bar */
+  --overlay-top-gap: 12px;          /* gap between grid columns */
+  --overlay-top-max-w: 1400px;      /* set to none for full-bleed */
 }
 
 .dark {
@@ -98,11 +97,11 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
 .perspective { perspective: 1200px; }
 @layer utilities { .animate-spin-slow { animation: spin 20s linear infinite; } }
 
-.grainy {
+/* .grainy {
   position: absolute; inset: 0; z-index: 0;
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEUAAAD8/vz08vT09vT8+vzs7uxH16TeAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAuFJREFUOI0Vk+3NLiEIRG1B8ClAYAsQ2AIEt4D9ePtv5Xp/mZgYJ2fOFJKEfInkVWY2aglmQFkimRTV7MblYyVqD7HXyhKsSuPX12MeDhRHLtGvRG+P+B/S0Vu4OswR9tmvwNPyhdCDbVayJGads/WiUWcjCvCnruTBNHS9gmX2VzVbk7ZvB1gb1hkWFGl+A/n+/FowcO34U/XvKqZ/fHY+6vgRfU92XrOBUbGeeDfQmjWjdrK+frc6FdGReQhfSF5JvR29O2QrfNw1huTwlgsyXLo0u+5So82sgv7tsFZR2nxB6lXiquHrfD8nfYZ9SeT0LiuvSoVrxGY16pCNRZKqvwWsn5OHypPBELzohMCaRaa0ceTHYqe7X/gfJEEtKFbJpWoNqO+aS1cuTykGPpK5Ga48m6L3NefTr013KqYBQu929iP1oQ/7UwSR+i3zqruUmT84qmhzLpxyj7pr9kg7LKvqaXxZmdpn+6o8sHqSqojy02gU3U8q9PnpidiaLks0mbMYz+q2uVXsoBQ8bfURULYxRgZVYCHMv9F4OA7qxT2NPPpvGQ/sTDH2yznKh7E2AcErfcNsaIoN1izzbJiaY63x4QjUFdBSvDCvugPpu5xDny0jzEeuUQbcP1aGT9V90uixngTRLYNEIIZ6yOF1H8tm7rj2JxiefsVy53zGVy3ag5uuPsdufYOzYxLRxngKe7nhx3VAq54pmz/DK9/Q3aDam2Yt3hNXB4HuU87jKNd/CKZn77Qdn5QkXPfqSkhk7hGOXXB+7v09KbBbqdvxGqa0AqfK/atIrL2WXdAgXAJ43Wtwe/aIoacXezeGPMlhDOHDbSfHnaXsL2QzbT82GRwZuezdwcoWzx5pnOnGMUdHuiY7lhdyWzWiHnucLZQxYStMJbtcydHaQ6vtMbe0AcDbxG+QG14AL94xry4297xpy9Cpf1OoxZ740gHDfrK+gtsy0xabwJmfgtCeii79B6aj0SJeLbd7AAAAAElFTkSuQmCC);
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEUAAAD8/vz08vT09vT8+vzs7uxH16TeAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAuFJREFUOI0Vk+3NLiEIRG1B8ClAYAsQ2AIEt4D9ePtv5Xp/mZgYJ2fOFJKEfInkVWY2aglmQFkimRTV7MblYyVqD7HXyhKsSuPX12MeDhRHLtGvRG+P+B/S0Vu4OswR9tmvwNPyhdCDbVayJGads/WiUWcjCvCnruTBNHS9gmX2VzVbk7ZvB1gb1hkWFGl+A/n+/FowcO34U/XvKqZ/fHY+6vgRfU92XrOBUbGeeDfQmjWjdrK+frc6FdGReQhfSF5JvR29O2QrfNw1huTwlgsyXLo0u+5So82sgv7tsFZR2nxB6lXiquHrfD8nfYZ9SeT0LiuvSoVrxGY16pCNRZKqvwWsn5OHypPBELzohMCaRaa0ceTHYqe7X/gfJEEtKFbJpWoNqO+a1...");
   background-repeat: repeat; pointer-events: none; opacity: 1; mix-blend-mode: overlay;
-}
+} */
 
 /* === The single global scroll frame === */
 .tester-frame {
@@ -119,9 +118,8 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
     height .28s ease,
     border-radius .28s ease,
     box-shadow .28s ease;
-
-  scrollbar-gutter: stable both-edges;   /* reduces layout jiggle on toggle */
-  will-change: margin, width, height;    /* smoother animation */
+  scrollbar-gutter: stable both-edges;
+  will-change: margin, width, height;
 }
 
 /* Optional: hide scrollbar UI, keep scroll */
@@ -133,16 +131,13 @@ html.menu-open .tester-frame {
   margin: var(--gap-top) var(--gap-right) var(--gap-bottom) var(--gap-left);
   width:  calc(100vw  - var(--gap-left) - var(--gap-right));
   height: calc(100dvh - var(--gap-top)  - var(--gap-bottom));
-
   border-radius: 24px;
-  /* keep scrolling intact; don't remove overflow during toggle */
-  /* optional visual masking instead of overflow: clip; */
+  /* keep scrolling; use visual mask to match radius */
   clip-path: inset(0 round 24px);
   box-shadow:
     0 40px 120px -24px rgba(0,0,0,.55),
     inset 0 0 0 1px rgba(255,255,255,.08);
 }
-
 
 /* Navbar sits inside the frame so it moves with it */
 .nav-stick { position: sticky; top: 0; z-index: 210; pointer-events: auto; }
@@ -176,39 +171,46 @@ html.menu-open .tester-frame {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--band-top-height);
-  display: flex; align-items: center;
+  padding: var(--overlay-top-pad) var(--overlay-top-hpad) 0 var(--overlay-top-hpad);
+  display: flex; align-items: flex-start;
   pointer-events: auto;
+  box-sizing: border-box;
 }
 
-/* LEFT band fills the left rim revealed by margins */
-.overlay-left-band {
-  position: fixed;
-  top: 0; bottom: 0; left: 0;
-  width: var(--band-left-width);
-  display: flex; align-items: center; justify-content: center;
-  pointer-events: auto;
-}
-
-/* Inner content (glass bars) */
+/* Inner bar: 3 slots grid (Left | Center | Right) */
 .overlay-top-inner {
-  margin: 12px 16px 0 16px;
-  padding: 10px 14px;
+  height: var(--overlay-top-bar-height);
+  width: 100%;
+  max-width: var(--overlay-top-max-w);
+  margin: 0 auto;                            /* centers the bar if max-width set */
+  padding: 10px var(--overlay-top-hpad);
   border-radius: 16px;
   background: oklch(0.99 0.01 95 / 0.85);
   backdrop-filter: blur(10px);
   box-shadow: 0 12px 30px rgba(0,0,0,.12);
-  width: calc(100% - 32px);
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;      /* left | center | right */
+  align-items: center;
+  gap: var(--overlay-top-gap);
+  box-sizing: border-box;
 }
 
-.overlay-left-inner {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  margin: 16px 0 16px 12px;
-  padding: 12px;
-  border-radius: 16px;
-  background: oklch(0.99 0.01 95 / 0.85);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 12px 30px rgba(0,0,0,.12);
-  display: flex; align-items: center;
+.overlay-slot-left  { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.overlay-slot-center{ display: flex; align-items: center; min-width: 0; }
+.overlay-slot-right { display: flex; align-items: center; gap: 8px;  min-width: 0; }
+
+/* Center content (SearchBar) fills middle column */
+.overlay-slot-center > * { width: 100%; }
+
+.overlay-logo {
+  font-weight: 600;
+  letter-spacing: 0.24em;
+}
+
+.overlay-close {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #0b0b0b;
+  color: white;
 }
