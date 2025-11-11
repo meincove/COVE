@@ -1,5 +1,5 @@
 /* =========================
-   globals.css (clean, unified)
+   globals.css (clean)
    ========================= */
 
 /* Fonts */
@@ -55,6 +55,8 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
 :root {
   --radius: 0rem;
 
+ 
+
   /* light theme */
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -81,7 +83,9 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
   /* Inner layout of the top bar */
   --overlay-top-hpad: 16px;         /* inner left/right padding in the bar */
   --overlay-top-gap: 12px;          /* gap between grid columns */
-  --overlay-top-max-w: 1400px;      /* set to none for full-bleed */
+  --overlay-top-max-w: 1400px;      /* cap; set to something large if you want full-bleed */
+
+
 }
 
 .dark {
@@ -96,12 +100,6 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
 .text-white { text-shadow: 0 1px 2px rgba(0,0,0,.5); }
 .perspective { perspective: 1200px; }
 @layer utilities { .animate-spin-slow { animation: spin 20s linear infinite; } }
-
-/* .grainy {
-  position: absolute; inset: 0; z-index: 0;
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEUAAAD8/vz08vT09vT8+vzs7uxH16TeAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAuFJREFUOI0Vk+3NLiEIRG1B8ClAYAsQ2AIEt4D9ePtv5Xp/mZgYJ2fOFJKEfInkVWY2aglmQFkimRTV7MblYyVqD7HXyhKsSuPX12MeDhRHLtGvRG+P+B/S0Vu4OswR9tmvwNPyhdCDbVayJGads/WiUWcjCvCnruTBNHS9gmX2VzVbk7ZvB1gb1hkWFGl+A/n+/FowcO34U/XvKqZ/fHY+6vgRfU92XrOBUbGeeDfQmjWjdrK+frc6FdGReQhfSF5JvR29O2QrfNw1huTwlgsyXLo0u+5So82sgv7tsFZR2nxB6lXiquHrfD8nfYZ9SeT0LiuvSoVrxGY16pCNRZKqvwWsn5OHypPBELzohMCaRaa0ceTHYqe7X/gfJEEtKFbJpWoNqO+a1...");
-  background-repeat: repeat; pointer-events: none; opacity: 1; mix-blend-mode: overlay;
-} */
 
 /* === The single global scroll frame === */
 .tester-frame {
@@ -132,15 +130,14 @@ html.menu-open .tester-frame {
   width:  calc(100vw  - var(--gap-left) - var(--gap-right));
   height: calc(100dvh - var(--gap-top)  - var(--gap-bottom));
   border-radius: 24px;
-  /* keep scrolling; use visual mask to match radius */
-  clip-path: inset(0 round 24px);
+  clip-path: inset(0 round 24px);  /* visual mask, keeps scrolling intact */
   box-shadow:
     0 40px 120px -24px rgba(0,0,0,.55),
     inset 0 0 0 1px rgba(255,255,255,.08);
 }
 
 /* Navbar sits inside the frame so it moves with it */
-.nav-stick { position: sticky; top: 0; z-index: 210; pointer-events: auto; }
+.nav-stick { position: sticky; top: 0; height: 0; z-index: 210; pointer-events: auto; }
 
 /* Navbar shell cosmetics (demo) */
 .nav-shell {
@@ -171,7 +168,12 @@ html.menu-open .tester-frame {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--band-top-height);
-  padding: var(--overlay-top-pad) var(--overlay-top-hpad) 0 var(--overlay-top-hpad);
+  /* ⬇ aligns the bar to the shrunken page rims */
+  padding:
+    var(--overlay-top-pad)
+    calc(var(--gap-right) + var(--overlay-top-hpad))
+    0
+    calc(var(--gap-left)  + var(--overlay-top-hpad));
   display: flex; align-items: flex-start;
   pointer-events: auto;
   box-sizing: border-box;
@@ -181,8 +183,12 @@ html.menu-open .tester-frame {
 .overlay-top-inner {
   height: var(--overlay-top-bar-height);
   width: 100%;
-  max-width: var(--overlay-top-max-w);
-  margin: 0 auto;                            /* centers the bar if max-width set */
+  /* ⬇ width matches visible page area; capped by max-w */
+  max-width: min(
+    var(--overlay-top-max-w),
+    calc(100vw - var(--gap-left) - var(--gap-right) - 2*var(--overlay-top-hpad))
+  );
+  margin: 0 auto;                            /* centers the bar if capped */
   padding: 10px var(--overlay-top-hpad);
   border-radius: 16px;
   background: oklch(0.99 0.01 95 / 0.85);
@@ -213,4 +219,163 @@ html.menu-open .tester-frame {
   border-radius: 12px;
   background: #0b0b0b;
   color: white;
+}
+
+
+/* Overlay bar: make all inline text dark by default */
+.overlay-top-inner { color: #0b0b0b; }
+
+/* Ensure links/buttons/icons from RightActions inherit dark color */
+.overlay-top-inner :where(a, button, span, svg) {
+  color: #0b0b0b !important;
+  fill: currentColor;           /* icons follow text color */
+}
+
+
+/* ==== NAV: full (space-taking) vs island (floating) ==== */
+
+/* Full navbar wrapper TAKES space (good for top-of-page layout) */
+.nav-full-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 210;
+  background: transparent;          /* body scrolls under the shell's bg */
+}
+
+/* Full shell (your regular, wide bar) */
+.nav-full-shell {
+  height: 72px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+
+  width: min(calc(100% - 24px), 1200px);
+  margin: 8px auto;
+  padding: 10px 12px;
+
+  border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 18px 40px rgba(0,0,0,.25);
+  backdrop-filter: blur(12px);
+
+  color: #0b0b0b;
+  transition: transform .28s ease, opacity .28s ease;
+}
+
+/* Island wrapper: sticky but ZERO height; doesn't take space */
+.nav-island-wrap {
+  position: sticky;
+  top: 0;
+  height: 0;                        /* critical: no layout space */
+  z-index: 211;                     /* float above content, under modals */
+  pointer-events: none;             /* only shell handles clicks */
+}
+
+/* Island shell (the floating compact bar) */
+.nav-island-shell {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translate(-50%, -16px); /* start slightly above */
+  opacity: 0;
+  pointer-events: auto;
+
+  height: 64px;
+  width: clamp(360px, 60vw, 680px);
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 18px 40px rgba(0,0,0,.25);
+  backdrop-filter: blur(12px);
+
+  color: #0b0b0b;
+  transition: transform .28s ease, opacity .28s ease;
+}
+
+/* Slot helpers */
+.nav-left, .nav-right { display:flex; align-items:center; gap:10px; min-width:0; }
+.nav-center { display:flex; align-items:center; min-width:0; }
+.nav-center > * { width: 100%; } /* Search fills center */
+
+/* Make nested buttons/links/icons dark by default */
+.nav-full-shell :where(a,button,span,svg),
+.nav-island-shell :where(a,button,span,svg){
+  color:#0b0b0b !important;
+  fill: currentColor;
+}
+
+/* ====== Animated states toggled by data-attrs ====== */
+
+/* Collapsing full bar out when user scrolls */
+[data-collapse-full="true"] .nav-full-shell {
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Showing the island bar in */
+[data-show-island="true"] .nav-island-shell {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .nav-full-shell, .nav-island-shell { transition: none; }
+}
+
+
+/* Floating island pill — same in island & menu */
+.floating-nav{
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 260;          /* above overlay bands and tester-frame */
+  pointer-events: auto;  /* clickable even during menu */
+}
+
+
+/* Anchor lives inside .tester-frame; follows its scroll without taking space */
+.island-anchor{
+  position: sticky;   /* sticky relative to .tester-frame (scroll container) */
+  top: 0;             /* stick to the top edge of the frame */
+  height: 0;          /* zero height so it doesn't push content */
+  z-index: 210;       /* above page content in the frame */
+  pointer-events: none;  /* anchor itself ignores clicks */
+}
+
+/* The pill itself is absolutely positioned over the anchor and clickable */
+.island-pill{
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);  /* center horizontally in the frame */
+  pointer-events: auto;          /* the pill is interactive */
+  z-index: 260;                  /* above overlay bands (180) and frame (200) */
+}
+
+
+/* already added earlier; keeping for context */
+.island-anchor{
+  position: sticky; top: 0; height: 0;
+  z-index: 210; pointer-events: none;
+}
+.island-pill{
+  position: absolute; top: 14px; left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto; z-index: 260;
+}
+/* When search is shown, make the pill wide but not full-bleed */
+.island-pill.withSearch{
+  width: min(92vw, 1000px);
 }

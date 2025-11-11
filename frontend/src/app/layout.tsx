@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/src/components/ThemeProvider";
 import ChatWidget from "@/src/components/cove-ai/ChatWidget";
 import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
 import NavbarController from "../components/Navbar/NavbarController";
+import ScrollHUD from "@/src/components/dev/ScrollHUD";
 
 export const metadata: Metadata = {
   title: "Cove",
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="tester-frame"> <NavbarController /> <main>{children}</main> </div>
 
               <ModalHost />
+              <ScrollHUD devOnly />
             </ModalProvider>
           </ThemeProvider>
 
