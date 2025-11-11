@@ -1,0 +1,304 @@
+{
+  "casual": [
+    {
+      "id": "G-HOODIE-CASUAL-BRUSHEDFLEECE-19.99",
+      "slug": "hoodie-casual-fleece-59.99",
+      "name": "Hoodie (Brushed Fleece)",
+      "tier": "casual",
+      "type": "hoodie",
+      "material": "Brushed Fleece",
+      "price": 19.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Premium hoodie made from Brushed Fleece",
+      "colors": [
+        {
+          "colorName": "black",
+          "hex": "#000000",
+          "variantId": "CUHD001",
+          "images": [
+            "CUHD001-back.png",
+            "CUHD001-front.png",
+            "CUHD001-left.png",
+            "CUHD001-right.png"
+          ],
+          "slug": "hoodie-casual-fleece-59.99"
+        },
+        {
+          "colorName": "green",
+          "hex": "#228B22",
+          "variantId": "CUHD002",
+          "images": [
+            "CUHD002-back.png",
+            "CUHD002-front.png"
+          ],
+          "slug": "hoodie-casual-fleece-59.99"
+        }
+      ],
+      "sizes": {
+        "S": 10,
+        "M": 7,
+        "L": 3,
+        "XL": 20
+      }
+    },
+    {
+      "id": "G-HOODIE-CASUAL-BRUSHEDFLEECE-99.99",
+      "slug": "hoodie-casual-fleece-99.99",
+      "name": "Hoodie (Brushed Fleece)",
+      "tier": "casual",
+      "type": "hoodie",
+      "material": "Brushed Fleece",
+      "price": 99.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Premium hoodie made from Brushed Fleece",
+      "colors": [
+        {
+          "colorName": "green",
+          "hex": "#228B22",
+          "variantId": "CUHD003",
+          "images": [
+            "CUHD003-back.png",
+            "CUHD003-front.png"
+          ],
+          "slug": "hoodie-casual-fleece-99.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    }
+  ],
+  "originals": [
+    {
+      "id": "G-BOMBER-ORIGINALS-100%COTTON-69.99",
+      "slug": "bomber-originals-cotton-69.99",
+      "name": "Bomber (100% Cotton)",
+      "tier": "originals",
+      "type": "bomber",
+      "material": "100% Cotton",
+      "price": 69.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Lightweight bomber jacket in cotton finish",
+      "colors": [
+        {
+          "colorName": "blue",
+          "hex": "#0000FF",
+          "variantId": "OBMR001",
+          "images": [
+            "OBMR001-back.png"
+          ],
+          "slug": "bomber-originals-cotton-69.99"
+        },
+        {
+          "colorName": "green",
+          "hex": "#228B22",
+          "variantId": "OBMR002",
+          "images": [
+            "OBMR002-back.png"
+          ],
+          "slug": "bomber-originals-cotton-69.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    },
+    {
+      "id": "G-BOMBER-ORIGINALS-100%COTTON-89.99",
+      "slug": "bomber-originals-cotton-89.99",
+      "name": "Bomber (100% Cotton)",
+      "tier": "originals",
+      "type": "bomber",
+      "material": "100% Cotton",
+      "price": 89.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Lightweight bomber jacket in cotton finish",
+      "colors": [
+        {
+          "colorName": "green",
+          "hex": "#228B22",
+          "variantId": "OBMR003",
+          "images": [
+            "OBMR003-front.png"
+          ],
+          "slug": "bomber-originals-cotton-89.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    },
+    {
+      "id": "G-JEANS-ORIGINALS-100%COTTON-39.99",
+      "slug": "cargo-originals-cotton-39.99",
+      "name": "Cargo Jeans (100% Cotton)",
+      "tier": "originals",
+      "type": "jeans",
+      "material": "100% Cotton",
+      "price": 39.99,
+      "gender": "unisex",
+      "fit": "relaxed",
+      "description": "Lightweight bomber jacket in cotton finish",
+      "colors": [
+        {
+          "colorName": "blue",
+          "hex": "#0000FF",
+          "variantId": "OBMR004",
+          "images": [
+            "OBMR004-back.png",
+            "OBMR004-front.png"
+          ],
+          "slug": "cargo-originals-cotton-39.99"
+        },
+        {
+          "colorName": "cream",
+          "hex": "#f6ddcc",
+          "variantId": "OBMR005",
+          "images": [
+            "OBMR005-front.png"
+          ],
+          "slug": "cargo-originals-cotton-39.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    }
+  ],
+  "designer": [
+    {
+      "id": "G-JACKET-DESIGNER-100%COTTON-79.99",
+      "slug": "jacket-designer-100cotton-79.99",
+      "name": "Jacket (100% Cotton)",
+      "tier": "designer",
+      "type": "jacket",
+      "material": "100% Cotton",
+      "price": 79.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Streetwear premium cotton jacket",
+      "colors": [
+        {
+          "colorName": "ghostgreen",
+          "hex": "#278c72",
+          "variantId": "DUJK001",
+          "images": [
+            "DUJK001-back.png",
+            "DUJK001-front.png"
+          ],
+          "slug": "jacket-designer-100cotton-79.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    },
+    {
+      "id": "G-JACKET-DESIGNER-100%COTTON-59.99",
+      "slug": "hoodie-designer-100cotton-59.99",
+      "name": "Jacket (100% Cotton)",
+      "tier": "designer",
+      "type": "jacket",
+      "material": "100% Cotton",
+      "price": 59.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Streetwear premium cotton jacket",
+      "colors": [
+        {
+          "colorName": "nightOrange",
+          "hex": "#dcc693",
+          "variantId": "DUJK002",
+          "images": [
+            "DUJK002-front.png"
+          ],
+          "slug": "hoodie-designer-100cotton-59.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    },
+    {
+      "id": "G-JACKET-DESIGNER-100%COTTON-39.99",
+      "slug": "hoodie-designer-100cotton-39.99",
+      "name": "Jacket (100% Cotton)",
+      "tier": "designer",
+      "type": "jacket",
+      "material": "100% Cotton",
+      "price": 39.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Streetwear premium cotton jacket",
+      "colors": [
+        {
+          "colorName": "shadeLime",
+          "hex": "#98deb4",
+          "variantId": "DUJK003",
+          "images": [
+            "DUJK003-back.png"
+          ],
+          "slug": "hoodie-designer-100cotton-39.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    },
+    {
+      "id": "G-JACKET-DESIGNER-100%COTTON-29.99",
+      "slug": "hoodie-designer-100cotton-29.99",
+      "name": "Jacket (100% Cotton)",
+      "tier": "designer",
+      "type": "jacket",
+      "material": "100% Cotton",
+      "price": 29.99,
+      "gender": "unisex",
+      "fit": "regular",
+      "description": "Streetwear premium cotton jacket",
+      "colors": [
+        {
+          "colorName": "hotpink",
+          "hex": "#d0b7bd",
+          "variantId": "DUJK004",
+          "images": [
+            "DUJK004-back.png",
+            "DUJK004-front.png"
+          ],
+          "slug": "hoodie-designer-100cotton-29.99"
+        }
+      ],
+      "sizes": {
+        "S": 20,
+        "M": 20,
+        "L": 20,
+        "XL": 20
+      }
+    }
+  ]
+}
