@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="tester-frame"> <NavbarController /> <main>{children}</main> </div>
 
               <ModalHost />
-              <ScrollHUD devOnly />
+              {/* <ScrollHUD devOnly /> */}
             </ModalProvider>
           </ThemeProvider>
 

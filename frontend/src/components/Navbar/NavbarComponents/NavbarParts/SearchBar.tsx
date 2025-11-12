@@ -9,104 +9,27 @@ import {
   type ChangeEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import SearchDropdownPortal, { type AnchorMode } from "@/src/components/NavbarComponents/SearchDropdownPortal";
 
-/* ---------- Animated SVG grain overlay (visible on dark) ---------- */
-/* Works everywhere without external assets; uses blend + isolation.  */
-function GrainOverlay({ opacity = 0.22 }: { opacity?: number }) {
-  return (
-    <div className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-[var(--grain-o)]">
-      <style
-        // keep this scoped
-        dangerouslySetInnerHTML={{
-          __html: `
-          @keyframes cove-grain-wobble {
-            0%   { transform: translate3d(0,0,0) }
-            25%  { transform: translate3d(-4px, 3px, 0) }
-            50%  { transform: translate3d(3px, -5px, 0) }
-            75%  { transform: translate3d(-2px, 4px, 0) }
-            100% { transform: translate3d(0,0,0) }
-          }
-        `,
-        }}
-      />
-      <svg
-        className="absolute inset-0 h-full w-full"
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="none"
-        style={
-          {
-            animation: "cove-grain-wobble 3.2s steps(2,end) infinite",
-            // pass opacity value through CSS var so Tailwind doesn't strip it
-            ["--grain-o" as any]: opacity.toString(),
-          } as React.CSSProperties
-        }
-      >
-        <filter id="cove-grain-filter">
-          {/* fractal noise; animate baseFrequency slightly for life */}
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.95"
-            numOctaves="2"
-            stitchTiles="stitch"
-          >
-            <animate
-              attributeName="baseFrequency"
-              dur="5s"
-              values="0.85;0.95;0.9;0.96;0.88;0.85"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
-          {/* desaturate */}
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#cove-grain-filter)" />
-      </svg>
-      {/* tiny dot layer to add “texture” regardless of SVG impl quirks */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            `radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,.25) 50%, transparent 51%),
-             radial-gradient(1px 1px at 72% 18%, rgba(255,255,255,.18) 50%, transparent 51%),
-             radial-gradient(1px 1px at 40% 76%, rgba(255,255,255,.20) 50%, transparent 51%),
-             radial-gradient(1px 1px at 88% 64%, rgba(255,255,255,.16) 50%, transparent 51%)`,
-          backgroundSize: "240px 240px, 220px 220px, 260px 260px, 200px 200px",
-          opacity: 0.35,
-        }}
-      />
-    </div>
-  );
-}
+// ✅ import the portal + its AnchorMode type
+import SearchDropdownPortal, {
+  AnchorMode,
+} from "@/src/components/NavbarComponents/SearchDropdownPortal";
 
-/* Spinner for loading */
+// ---------------- Small helpers (same as before) ----------------
 function Spinner() {
   return (
     <span
-      className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/35"
-      style={{ borderTopColor: "rgba(255,255,255,0.95)" }}
+      className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-black/25"
+      style={{ borderTopColor: "rgba(0,0,0,0.75)" }}
       aria-label="Loading"
     />
   );
 }
 
-/* one-time keyframes for mic pulse */
-if (typeof document !== "undefined") {
-  const id = "cove-pulse-kf";
-  if (!document.getElementById(id)) {
-    const style = document.createElement("style");
-    style.id = id;
-    style.innerHTML = `
-      @keyframes cove-pulse {
-        0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,.26); }
-        55%     { box-shadow: 0 0 0 14px rgba(255,255,255,0); }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-}
-
-type Props = { island?: boolean };
+type Props = {
+  /** when true, behaves as the pill used inside Island navbar */
+  island?: boolean;
+};
 
 export default function SearchBar({ island = false }: Props) {
   const [open, setOpen] = useState(false);
@@ -117,14 +40,14 @@ export default function SearchBar({ island = false }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // focus on open
+  // focus when opened
   useEffect(() => {
     if (!open) return;
     const t = setTimeout(() => inputRef.current?.focus(), 80);
     return () => clearTimeout(t);
   }, [open]);
 
-  // shortcuts
+  // keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -138,12 +61,17 @@ export default function SearchBar({ island = false }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // anchor element
+  // anchor: in island mode we want the pill shell; otherwise our wrapper
   const anchorEl: HTMLElement | null = island
-    ? (typeof document !== "undefined" ? document.getElementById("cove-navbar-shell") : null)
+    ? (typeof document !== "undefined"
+        ? document.getElementById("cove-navbar-shell")
+        : null)
     : wrapRef.current;
 
-  const RECENT = useMemo(() => ["black hoodie", "380 GSM tee", "bomber jacket", "straight-fit pants"], []);
+  const RECENT = useMemo(
+    () => ["black hoodie", "380 GSM tee", "bomber jacket", "straight-fit pants"],
+    []
+  );
   const EXPERT = useMemo(
     () => [
       "Layering guide for winter fits",
@@ -159,9 +87,8 @@ export default function SearchBar({ island = false }: Props) {
     return RECENT.filter((s) => s.toLowerCase().includes(lower)).slice(0, 6);
   }, [q, RECENT]);
 
-  // search pill width
   const wrapperClass = island
-    ? "w-[70%]" // pill = 70% of island shell
+    ? "w-[70%]"
     : "w-full max-w-[min(96vw,36rem)] md:max-w-[min(92vw,40rem)]";
 
   const handleStartListening = () => {
@@ -182,14 +109,13 @@ export default function SearchBar({ island = false }: Props) {
     handleStartListening();
   };
 
-  // dropdown body with grainy right pane
   const DropdownBody = (
-    <div className="origin-top rounded-2xl border border-white/10 bg-black/82 backdrop-blur-xl shadow-2xl overflow-hidden">
+    <div className="origin-top rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-2xl overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-10">
         {/* LEFT 70% */}
         <div className="md:col-span-7 p-3 md:p-4">
           <div className="mb-3">
-            <div className="text-[12px] uppercase tracking-wide text-white/60 mb-2">
+            <div className="text-[12px] uppercase tracking-wide text-black/60 mb-2">
               Recent Searches
             </div>
             <ul className="space-y-1.5">
@@ -197,7 +123,7 @@ export default function SearchBar({ island = false }: Props) {
                 <li key={s}>
                   <a
                     href={`/catalog?search=${encodeURIComponent(s)}`}
-                    className="block rounded-lg px-2 py-1.5 hover:bg-white/5 text-sm text-white/90"
+                    className="block rounded-lg px-2 py-1.5 hover:bg-black/5 text-sm text-black/90"
                   >
                     {s}
                   </a>
@@ -207,7 +133,7 @@ export default function SearchBar({ island = false }: Props) {
           </div>
 
           <div>
-            <div className="text-[12px] uppercase tracking-wide text-white/60 mb-2">
+            <div className="text-[12px] uppercase tracking-wide text-black/60 mb-2">
               Cove AI – Expert Suggestions
             </div>
             <ul className="space-y-1.5">
@@ -215,7 +141,7 @@ export default function SearchBar({ island = false }: Props) {
                 <li key={s}>
                   <button
                     onClick={() => setQ(s)}
-                    className="w-full text-left rounded-lg px-2 py-1.5 hover:bg-white/5 text-sm text-white/85"
+                    className="w-full text-left rounded-lg px-2 py-1.5 hover:bg-black/5 text-sm text-black/85"
                   >
                     {s}
                   </button>
@@ -225,54 +151,52 @@ export default function SearchBar({ island = false }: Props) {
           </div>
         </div>
 
-        {/* RIGHT 30% — grain overlay lives here */}
-        <div className="relative isolate md:col-span-3 border-t md:border-t-0 md:border-l border-white/10 p-4 flex flex-col items-center justify-center gap-3">
-          {/* Grain layer (under content but above background) */}
-          <GrainOverlay opacity={0.26} />
+        {/* RIGHT 30% */}
+        <div className="md:col-span-3 border-t md:border-t-0 md:border-l border-black/10 p-4 flex flex-col items-center justify-center gap-3">
+          <button
+            onClick={handleMicClick}
+            className={[
+              "relative flex h-12 w-12 items-center justify-center rounded-full",
+              "bg-black/5 border border-black/15 hover:bg-black/10 transition",
+              isListening ? "animate-[pulse_1.6s_ease-out_infinite]" : "",
+            ].join(" ")}
+            aria-pressed={isListening}
+            aria-label={isListening ? "Stop listening" : "Start listening"}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <Mic className="h-5 w-5 text-black/70" />
+            )}
+          </button>
 
-          {/* Content */}
-          <div className="relative z-10 flex flex-col items-center gap-2">
-            <button
-              onClick={handleMicClick}
-              className={[
-                "relative flex h-12 w-12 items-center justify-center rounded-full",
-                "bg-white/10 border border-white/20 hover:bg-white/15 transition",
-                isListening ? "animate-[cove-pulse_1.6s_ease-out_infinite]" : "",
-              ].join(" ")}
-              aria-pressed={isListening}
-              aria-label={isListening ? "Stop listening" : "Start listening"}
-              disabled={isLoading}
-            >
-              {isLoading ? <Spinner /> : <Mic className="h-5 w-5 text-white/90" />}
-            </button>
-
-            <div className="text-sm text-white/90">Cove AI</div>
-            <div className="text-xs text-white/60">
-              {isLoading ? "Starting…" : isListening ? "Listening" : "Listening mode"}
-            </div>
-
-            <button
-              onClick={handleStartListening}
-              disabled={isLoading}
-              className="mt-1 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white/90 hover:bg-white/15 disabled:opacity-60 transition"
-            >
-              {isListening ? "Restart" : "Start"}
-            </button>
+          <div className="text-sm text-black/80">Cove AI</div>
+          <div className="text-xs text-black/60">
+            {isLoading ? "Starting…" : isListening ? "Listening" : "Listening mode"}
           </div>
+
+          <button
+            onClick={handleStartListening}
+            disabled={isLoading}
+            className="mt-1 rounded-full border border-black/15 bg-black/5 px-3 py-1.5 text-xs text-black/80 hover:bg-black/10 disabled:opacity-60 transition"
+          >
+            {isListening ? "Restart" : "Start"}
+          </button>
         </div>
       </div>
 
-      <div className="pointer-events-none h-4 w-full rounded-b-2xl bg-gradient-to-b from-transparent to-black/40" />
+      <div className="pointer-events-none h-4 w-full rounded-b-2xl bg-gradient-to-b from-transparent to-black/10" />
     </div>
   );
 
   return (
     <div ref={wrapRef} className={`relative ${wrapperClass}`}>
-      {/* single input pill */}
+      {/* pill */}
       <div className="group relative w-full">
-        <div className="pointer-events-none absolute inset-0 rounded-full bg-white/5 blur-sm opacity-0 group-hover:opacity-100 transition" />
-        <div className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 sm:px-4 py-2 shadow-sm backdrop-blur-md hover:bg-white/15 transition">
-          <Search className="h-4 w-4 text-white/70" />
+        <div className="pointer-events-none absolute inset-0 rounded-full bg-black/5 blur-sm opacity-0 group-hover:opacity-100 transition" />
+        <div className="flex items-center gap-2 rounded-full border border-black/15 bg-white/85 px-3 sm:px-4 py-2 shadow-sm backdrop-blur-md hover:bg-white/95 transition">
+          <Search className="h-4 w-4 text-black/70" />
           <input
             ref={inputRef}
             value={q}
@@ -285,29 +209,29 @@ export default function SearchBar({ island = false }: Props) {
                 window.location.href = `/catalog?search=${encodeURIComponent(q)}`;
               }
             }}
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/60 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-black placeholder:text-black/50 focus:outline-none"
           />
-          <kbd className="ml-1 hidden md:inline-flex h-5 items-center rounded-md border border-white/20 bg-black/40 px-1.5 text-[10px] text-white/60">
+          <kbd className="ml-1 hidden md:inline-flex h-5 items-center rounded-md border border-black/20 bg-black/5 px-1.5 text-[10px] text-black/60">
             /
           </kbd>
           <button
             aria-label="Close search"
-            className="rounded-md p-1 hover:bg-white/5"
+            className="rounded-md p-1 hover:bg-black/5"
             onClick={() => setOpen(false)}
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-black/70" />
           </button>
         </div>
       </div>
 
-      {/* Dropdown via portal */}
+      {/* dropdown via portal */}
       <SearchDropdownPortal
         open={open}
         onClose={() => setOpen(false)}
         anchorEl={anchorEl}
-        mode={island ? ("island" as AnchorMode) : ("full" as AnchorMode)}
-        zIndex={80}
-        gap={8}
+        zIndex={260}
+        gap={10}
+        mode={(island ? "island" : "full") as AnchorMode}
       >
         {DropdownBody}
       </SearchDropdownPortal>

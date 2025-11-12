@@ -1,3 +1,4 @@
+
 // "use client";
 
 // import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -8,11 +9,11 @@
 
 // type Props = {
 //   open: boolean;
-//   anchorEl: HTMLElement | null;   // search wrapper (full) or island shell
+//   anchorEl: HTMLElement | null; // search wrapper (full) or island shell
 //   onClose: () => void;
-//   zIndex?: number;                // default 70
-//   gap?: number;                   // px below anchor; default 8
-//   mode: AnchorMode;               // not used in layout now, but kept for clarity
+//   zIndex?: number; // default 70
+//   gap?: number; // px below anchor; default 8
+//   mode: AnchorMode; // kept for clarity
 //   children: React.ReactNode;
 // };
 
@@ -20,7 +21,7 @@
 //   open,
 //   anchorEl,
 //   onClose,
-//   zIndex = 70,
+//   zIndex = 90,
 //   gap = 8,
 //   mode, // eslint-disable-line @typescript-eslint/no-unused-vars
 //   children,
@@ -57,7 +58,7 @@
 //     return {
 //       position: "fixed" as const,
 //       width: rect.width,
-//       left: rect.left,               // ← anchor by left edge
+//       left: rect.left, // anchor by left edge
 //       top: rect.bottom + gap,
 //       zIndex,
 //     };
@@ -65,15 +66,21 @@
 
 //   if (!open || !anchorEl || !rect || typeof document === "undefined") return null;
 
+//   // IMPORTANT: Portal into #__next (the scaled root),
+//   // so the dropdown stays visually inside the shrunken frame.
+//   // const portalRoot = document.getElementById("__next");
+//   const portalRoot = document.body;
+//   if (!portalRoot) return null;
+
 //   return createPortal(
 //     <AnimatePresence>
-//       {/* Backdrop to catch outside clicks (closes anywhere outside the panel) */}
+//       {/* Backdrop to catch outside clicks (transparent) */}
 //       <motion.div
 //         key="cove-search-backdrop"
 //         className="fixed inset-0"
 //         style={{ zIndex: zIndex - 1 }}
 //         initial={{ opacity: 0 }}
-//         animate={{ opacity: 0 }}   // keep transparent
+//         animate={{ opacity: 0 }}
 //         exit={{ opacity: 0 }}
 //         onMouseDown={onClose}
 //       />
@@ -92,14 +99,11 @@
 //         {children}
 //       </motion.div>
 //     </AnimatePresence>,
-//     document.body
+//     portalRoot
 //   );
 // }
 
 
-
-
-// src/components/NavbarComponents/SearchDropdownPortal.tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -110,11 +114,11 @@ export type AnchorMode = "full" | "island";
 
 type Props = {
   open: boolean;
-  anchorEl: HTMLElement | null; // search wrapper (full) or island shell
+  anchorEl: HTMLElement | null;      // search wrapper (full) or island shell
   onClose: () => void;
-  zIndex?: number; // default 70
-  gap?: number; // px below anchor; default 8
-  mode: AnchorMode; // kept for clarity
+  zIndex?: number;                   // default 260 (above page content)
+  gap?: number;                      // px below anchor; default 8
+  mode: AnchorMode;                  // reserved for future sizing tweaks
   children: React.ReactNode;
 };
 
@@ -122,9 +126,9 @@ export default function SearchDropdownPortal({
   open,
   anchorEl,
   onClose,
-  zIndex = 90,
+  zIndex = 260,                      // ↑ keep above tester-frame content
   gap = 8,
-  mode, // eslint-disable-line @typescript-eslint/no-unused-vars
+  mode,                              // eslint-disable-line @typescript-eslint/no-unused-vars
   children,
 }: Props) {
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -136,30 +140,32 @@ export default function SearchDropdownPortal({
       setRect(null);
       return;
     }
+
     const measure = () => setRect(anchorEl.getBoundingClientRect());
     measure();
 
     const ro = new ResizeObserver(measure);
     ro.observe(anchorEl);
 
-    // Re-measure on resize/scroll
+    // listen to frame scroll as well as window resize
+    const frameEl = document.querySelector(".tester-frame") as HTMLElement | null;
+    frameEl?.addEventListener("scroll", measure, { passive: true });
     window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, { passive: true });
 
     return () => {
       ro.disconnect();
+      frameEl?.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure);
     };
   }, [open, anchorEl]);
 
-  // Style: LEFT-EDGE anchored (no centering), fixed positioning
+  // Fixed positioning with left-edge anchoring
   const style = useMemo(() => {
     if (!rect) return undefined;
     return {
       position: "fixed" as const,
       width: rect.width,
-      left: rect.left, // anchor by left edge
+      left: rect.left,               // anchor left edge
       top: rect.bottom + gap,
       zIndex,
     };
@@ -167,15 +173,16 @@ export default function SearchDropdownPortal({
 
   if (!open || !anchorEl || !rect || typeof document === "undefined") return null;
 
-  // IMPORTANT: Portal into #__next (the scaled root),
-  // so the dropdown stays visually inside the shrunken frame.
-  // const portalRoot = document.getElementById("__next");
-  const portalRoot = document.body;
+  // IMPORTANT: portal inside the tester frame so the dropdown
+  // is clipped together with the page during menu mode.
+  const portalRoot =
+    (document.querySelector(".tester-frame") as HTMLElement | null) ??
+    document.body;
   if (!portalRoot) return null;
 
   return createPortal(
     <AnimatePresence>
-      {/* Backdrop to catch outside clicks (transparent) */}
+      {/* Transparent backdrop to close on outside click */}
       <motion.div
         key="cove-search-backdrop"
         className="fixed inset-0"
