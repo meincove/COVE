@@ -1,124 +1,131 @@
+
 // "use client";
 
-// import { useEffect, useRef, useState } from "react";
+// import { useEffect, useState } from "react";
+// import type React from "react";
 // import { useScrollContainer } from "./useScrollContainer";
 
 // /**
-//  * 0..1 progress for an element inside the scroll container:
-//  *  - 0 when the element's top aligns with the container's top (entering),
-//  *  - 1 when the element's bottom aligns with the container's bottom (leaving).
-//  * Good for parallax/section fades.
+//  * Returns a 0–1 "local scroll progress" for a given element
+//  * inside the `.tester-frame` scroll container.
+//  *
+//  * 0  => section is just entering from the bottom
+//  * 1  => section has just left at the top
 //  */
 // export function useElementScrollProgress(
-//   targetRef: React.RefObject<HTMLElement>,
-//   selector = ".tester-frame"
-// ) {
+//   ref: React.RefObject<HTMLElement | null>,
+//   selector: string = ".tester-frame"
+// ): number {
 //   const container = useScrollContainer(selector);
-//   const [progress, setProgress] = useState(0);
-//   const raf = useRef(0);
+//   const [value, setValue] = useState(0);
 
 //   useEffect(() => {
-//     if (!container || !targetRef.current) return;
-//     const el = targetRef.current;
+//     if (!container || !ref.current) return;
 
-//     const update = () => {
-//       cancelAnimationFrame(raf.current);
-//       raf.current = requestAnimationFrame(() => {
-//         // Compute positions relative to container scroll offsets—
-//         // robust to transforms and avoids window metrics.
-//         const containerTop = container.scrollTop;
-//         const containerHeight = container.clientHeight;
+//     const el = ref.current;
 
-//         // Absolute distance from container's content start:
-//         const elTop = el.offsetTop;
-//         const elHeight = el.offsetHeight;
+//     const handle = () => {
+//       if (!el) return;
 
-//         // when elTop == containerTop + containerHeight  -> just fully below
-//         // Map so that progress 0 when top meets top, 1 when bottom meets bottom:
-//         const start = elTop - containerTop;                 // px from container top to element top (visible top)
-//         const end   = elTop + elHeight - (containerTop + containerHeight); // px beyond bottom
+//       const crect = container.getBoundingClientRect();
+//       const rect = el.getBoundingClientRect();
 
-//         // Normalize:
-//         const total = (elHeight + containerHeight);
-//         const raw = 1 - (start / total); // a smooth 0..1-ish sweep
-//         const clamped = Math.max(0, Math.min(1, raw));
-//         setProgress(clamped);
-//       });
+//       const viewportHeight = crect.height;
+
+//       // position of section relative to container viewport
+//       const sectionTop = rect.top - crect.top;
+
+//       // when sectionBottom == viewportBottom -> start
+//       const start = viewportHeight;
+//       // when sectionTop == top - sectionHeight -> end
+//       const end = -rect.height;
+
+//       const t = (sectionTop - start) / (end - start);
+//       const clamped = Math.max(0, Math.min(1, t));
+
+//       setValue(clamped);
 //     };
 
-//     update();
-//     const onScroll = () => update();
-//     container.addEventListener("scroll", onScroll, { passive: true });
-//     window.addEventListener("resize", update);
+//     handle(); // initial
+//     container.addEventListener("scroll", handle);
+//     window.addEventListener("resize", handle);
+
 //     return () => {
-//       cancelAnimationFrame(raf.current);
-//       container.removeEventListener("scroll", onScroll);
-//       window.removeEventListener("resize", update);
+//       container.removeEventListener("scroll", handle);
+//       window.removeEventListener("resize", handle);
 //     };
-//   }, [container, targetRef]);
+//   }, [container, ref]);
 
-//   return progress;
+//   return value;
 // }
 
 
+
+
+// src/hooks/useElementScrollProgress.ts
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import type React from "react";
 import { useScrollContainer } from "./useScrollContainer";
 
 /**
- * 0..1 progress of target inside scroll *container* (default ".tester-frame")
- * - 0 when element top aligns with container top
- * - 1 when element bottom aligns with container bottom
+ * Returns a 0–1 "local scroll progress" for a given element
+ * inside the `.tester-frame` scroll container.
+ *
+ * 0 => viewport top just reaches section top
+ * 1 => viewport top has reached the point where section bottom
+ *      aligns with viewport bottom
  */
 export function useElementScrollProgress(
-  targetRef: React.RefObject<HTMLElement | null>,
-  selector = ".tester-frame"
-) {
+  ref: React.RefObject<HTMLElement | null>,
+  selector: string = ".tester-frame"
+): number {
   const container = useScrollContainer(selector);
-  const [progress, setProgress] = useState(0);
-  const raf = useRef<number | null>(null);
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (!container || !targetRef.current) return;
-    const el = targetRef.current;
+    if (!container || !ref.current) return;
+    const el = ref.current;
 
-    const compute = () => {
-      if (!container || !el) return;
+    const handle = () => {
+      if (!el) return;
 
-      const c = container.getBoundingClientRect();
-      const r = el.getBoundingClientRect();
+      const scrollTop = container.scrollTop;
+      const viewH = container.clientHeight;
 
-      // Distance “scrolled through” the section in the container’s viewport
-      // Map: top meet top -> 0 ; bottom meet bottom -> 1
-      const total = c.height + r.height;
-      const start = c.bottom - r.top; // increases as you scroll down
-      const raw = start / total;
-      const clamped = Math.max(0, Math.min(1, raw));
-      setProgress(clamped);
+      const sectionTop = el.offsetTop;          // relative to container
+      const sectionHeight = el.offsetHeight;
+
+      // When viewport top is before section top → 0
+      if (scrollTop <= sectionTop) {
+        setValue(0);
+        return;
+      }
+
+      // When viewport top has gone far enough that
+      // the bottom of the section is at the bottom of the viewport
+      const endScroll = sectionTop + sectionHeight - viewH;
+      if (scrollTop >= endScroll) {
+        setValue(1);
+        return;
+      }
+
+      // Linear interpolation between these two points
+      const t = (scrollTop - sectionTop) / (endScroll - sectionTop);
+      const clamped = Math.max(0, Math.min(1, t));
+      setValue(clamped);
     };
 
-    const onScroll = () => {
-      if (raf.current) cancelAnimationFrame(raf.current);
-      raf.current = requestAnimationFrame(compute);
-    };
-
-    compute();
-    container.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", compute);
-
-    // Keep in sync with layout changes
-    const ro = new ResizeObserver(compute);
-    ro.observe(container);
-    ro.observe(el);
+    handle(); // initial
+    container.addEventListener("scroll", handle);
+    window.addEventListener("resize", handle);
 
     return () => {
-      if (raf.current) cancelAnimationFrame(raf.current);
-      container.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", compute);
-      ro.disconnect();
+      container.removeEventListener("scroll", handle);
+      window.removeEventListener("resize", handle);
     };
-  }, [container, targetRef]);
+  }, [container, ref]);
 
-  return progress;
+  return value;
 }
