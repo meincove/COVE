@@ -31,6 +31,7 @@ CREATE TRIGGER ai_core_docs_tsv_update_t
 UPDATE ai_core.docs SET title = title;
 
 -- Indexes for speed
+CREATE INDEX IF NOT EXISTS idx_docs_slug ON ai_core.docs ((meta->>'slug')) WHERE kind='product';
 CREATE INDEX IF NOT EXISTS idx_ai_docs_tsv  ON ai_core.docs USING GIN (tsv);
 CREATE INDEX IF NOT EXISTS idx_ai_docs_trgm ON ai_core.docs USING GIN (search_text gin_trgm_ops);
 

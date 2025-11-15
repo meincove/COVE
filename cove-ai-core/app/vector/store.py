@@ -205,3 +205,61 @@ def catalog_vocab(conn, ttl_sec: int = 60):
 
     _vocab_cache.update({"t": now, "colors": colors, "types": types})
     return _vocab_cache
+
+def catalog_vocab(conn) -> dict:
+    """Return lowercased distinct colors and types from product docs."""
+    colors, types = set(), set()
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT DISTINCT lower(c->>'colorName')
+            FROM ai_core.docs, jsonb_array_elements(meta->'colors') c
+            WHERE kind='product'
+        """)
+        colors |= {r[0] for r in cur.fetchall() if r[0]}
+        cur.execute("""
+            SELECT DISTINCT lower(COALESCE(meta->>'type', split_part(lower(title),' ',1)))
+            FROM ai_core.docs
+            WHERE kind='product'
+        """)
+        types |= {r[0] for r in cur.fetchall() if r[0]}
+    return {"colors": colors, "types": types}
+
+# at bottom of file (or near search_hybrid)
+def search_keyword(conn, *, query: str, kind: str = "product", top_k: int = 6):
+    """
+    Pure Postgres FTS keyword search; never calls embeddings.
+    Returns rows shaped like search_hybrid: [{title, text, url, score}, ...]
+    """
+    q = (query or "").strip()
+    if not q:
+        return []
+
+    with conn.cursor() as cur:
+        # to_tsvector over title + text; adjust columns per your schema
+        cur.execute("""
+            SELECT
+                title,
+                text,
+                COALESCE(url, meta->>'url', '') AS url,
+                ts_rank(
+                    setweight(to_tsvector('simple', COALESCE(title,'')), 'A') ||
+                    setweight(to_tsvector('simple', COALESCE(text,'')),  'B'),
+                    plainto_tsquery('simple', %s)
+                ) AS score
+            FROM ai_core.docs
+            WHERE kind = %s
+            ORDER BY score DESC
+            LIMIT %s
+        """, (q, kind, top_k))
+        rows = cur.fetchall()
+
+    out = []
+    for r in rows:
+        title, text, url, score = r
+        out.append({
+            "title": title or "",
+            "text": text or "",
+            "url": url or "",
+            "score": float(score) if score is not None else 0.0,
+        })
+    return out

@@ -1,0 +1,4 @@
+{"q":"hoodie in black available? sizes?","expect":["Black in stock"],"allowed":["hoodie-casual-fleece-59.99"]}
+{"q":"Do your hoodies shrink?","expect":["Shrinkage"],"allowed":["hoodie-casual-fleece-59.99","hoodie-casual-fleece-99.99"]}
+{"q":"green hoodie stock?","expect":["Green in stock"],"allowed":["hoodie-casual-fleece-99.99","hoodie-casual-fleece-59.99"]}
+{"q":"hoodie in purple available?","expect":["not found"],"allowed":["hoodie-casual-fleece-59.99","hoodie-casual-fleece-99.99"]}
