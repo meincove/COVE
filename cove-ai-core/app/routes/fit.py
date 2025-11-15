@@ -13,7 +13,10 @@ class FitIn(BaseModel):
     gender: Optional[str] = Field(default=None, pattern="^(male|female|unisex)?$")
     height_cm: float
     weight_kg: float
-    fit_preference: Optional[str] = Field(default="regular", pattern="^(tight|regular|loose)$")
+    fit_preference: Optional[str] = Field(
+    default="regular",
+    pattern="^(tight|regular|loose|slim|oversized)$")
+
     product_type: Optional[str] = None
     slug: Optional[str] = None  # when present, we intersect with available sizes
 
@@ -63,11 +66,13 @@ def _nearest_size(chest: float, product_type: Optional[str]) -> str:
 
 def _adjust_by_pref(size: str, pref: str) -> str:
     idx = _SIZE_ORDER.index(size)
-    if pref == "tight":
+    p = (pref or "regular").lower()
+    if p in ("tight", "slim"):
         idx = max(0, idx - 1)
-    elif pref == "loose":
+    elif p in ("loose", "oversized"):
         idx = min(len(_SIZE_ORDER)-1, idx + 1)
     return _SIZE_ORDER[idx]
+
 
 async def _fetch_product(slug: str) -> Optional[dict]:
     try:
