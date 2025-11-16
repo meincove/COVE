@@ -20,7 +20,7 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
-  overflow: hidden;                /* window never scrolls; our frame does */
+  overflow: hidden;               
 }
 
 html { overflow-x: clip; }         /* no accidental horizontal scrollbars */

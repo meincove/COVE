@@ -62,7 +62,7 @@ export default function SectionTwo({ containerSel = ".tester-frame" }: Props) {
           >
             <div className="overflow-hidden rounded-3xl bg-[#f8f0e4] shadow-[0_40px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
               <Image
-                src="/clothing-images/originals/CUHD002-front.png"
+                src="/clothing-images/CUHD002-front.png"
                 alt="CUHD002-front"
                 width={420}
                 height={540}
@@ -70,7 +70,7 @@ export default function SectionTwo({ containerSel = ".tester-frame" }: Props) {
             </div>
             <div className="overflow-hidden rounded-3xl bg-[#f8f0e4] shadow-[0_40px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
               <Image
-                src="/clothing-images/originals/OBMR004-front.png"
+                src="/clothing-images/OBMR004-front.png"
                 alt="OBMR004-front"
                 width={420}
                 height={540}

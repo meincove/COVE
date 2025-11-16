@@ -1,47 +1,38 @@
-// 'use client'
 
-// import { useEffect, useState } from 'react'
+// "use client";
 
-// export function useLocalScrollProgress(ref: React.RefObject<HTMLDivElement>, id: string) {
-//   const [progress, setProgress] = useState(0)
+// import { useElementScrollProgress } from "./useElementScrollProgress";
 
-//   useEffect(() => {
-//     const updateScrollProgress = () => {
-//       if (!ref.current) return
-//       const rect = ref.current.getBoundingClientRect()
-//       const windowHeight = window.innerHeight
-
-//       const start = windowHeight
-//       const end = -rect.height
-
-//       const distanceScrolled = start - rect.top
-//       const totalDistance = start - end
-//       const rawProgress = distanceScrolled / totalDistance
-//       const clampedProgress = Math.max(0, Math.min(1, rawProgress))
-
-//       setProgress(clampedProgress)
-
-//       console.log(`📦 Scroll for [${id}]: top=${rect.top.toFixed(1)} → progress=${clampedProgress.toFixed(2)}`)
-//     }
-
-//     window.addEventListener('scroll', updateScrollProgress)
-//     updateScrollProgress()
-
-//     return () => window.removeEventListener('scroll', updateScrollProgress)
-//   }, [ref, id])
-
-//   return progress
+// export function useLocalScrollProgress(
+//   ref: React.RefObject<HTMLDivElement | null>,
+//   containerSelector: string = ".tester-frame",
+//   _id?: string
+// ) {
+//   return useElementScrollProgress(ref, containerSelector);
 // }
 
 
+// src/hooks/useLocalScrollProgress.ts
 "use client";
 
+import type React from "react";
 import { useElementScrollProgress } from "./useElementScrollProgress";
 
+/**
+ * Thin wrapper so sections can keep using the same API.
+ *
+ * We accept either <HTMLDivElement> or generic <HTMLElement> refs
+ * and forward them into the main hook.
+ */
 export function useLocalScrollProgress(
-  ref: React.RefObject<HTMLDivElement | null>,
+  ref:
+    | React.RefObject<HTMLElement | null>
+    | React.RefObject<HTMLDivElement | null>,
   containerSelector: string = ".tester-frame",
   _id?: string
 ) {
-  return useElementScrollProgress(ref, containerSelector);
+  return useElementScrollProgress(
+    ref as React.RefObject<HTMLElement | null>,
+    containerSelector
+  );
 }

@@ -54,7 +54,7 @@ export default function SectionOne({ containerSel = ".tester-frame" }: Props) {
             className="overflow-hidden rounded-2xl ring-1 ring-white/10"
           >
             <Image
-              src="/clothing-images/originals/OBMR003-front.png"
+              src="/clothing-images/OBMR003-front.png"
               alt="OBMR003-front"
               width={440}
               height={560}
@@ -66,7 +66,7 @@ export default function SectionOne({ containerSel = ".tester-frame" }: Props) {
             className="overflow-hidden rounded-2xl ring-1 ring-white/10"
           >
             <Image
-              src="/clothing-images/originals/CUHD001-front.png"
+              src="/clothing-images/CUHD001-front.png"
               alt="CUHD001-front"
               width={420}
               height={540}
