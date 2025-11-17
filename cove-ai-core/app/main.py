@@ -6,6 +6,7 @@ from app.routes import tools as tools_routes
 from app.routes.fit import router as fit_router
 from app.routes.health import router as health_router
 from app.routes import recs
+from app.routes import rag, recs, agent
 
 
 
@@ -20,6 +21,9 @@ app.include_router(rag_router)
 app.include_router(fit_router)
 app.include_router(health_router)
 app.include_router(recs.router)
+app.include_router(rag.router)
+app.include_router(recs.router)
+app.include_router(agent.router)
 
 @app.get("/healthz")
 async def health():
