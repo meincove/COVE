@@ -10,35 +10,132 @@
     "price": 19.99,
     "color": { "name": "black", "hex": "#000000" },
     "sizes": { "S": 10, "M": 7, "L": 3, "XL": 20 },
-    "description": "Premium hoodie made from Brushed Fleece"
+    "description": "Premium hoodie made from brushed fleece with a clean, minimal streetwear look.",
+    "fabric": {
+      "materialMain": "Brushed Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 360,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "minimal", "logo-front", "everyday"],
+      "useCases": ["daily wear", "travel", "chilly evenings"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
+    },
+    "styleNotes": "Pairs well with slim jeans or cargo pants; the black color keeps the look minimal and versatile.",
+    "fitNotes": "Order your usual size for a regular fit; size up for a relaxed, slightly oversized look."
   },
-  
+
   "CUHD002": {
-  "groupKey": "hoodie-casual-fleece-59.99",
-  "name": "Hoodie (Brushed Fleece)",
-  "tier": "casual",
-  "type": "hoodie",
-  "gender": "unisex",
-  "fit": "regular",
-  "material": "Brushed Fleece",
-  "price": 19.99,
-  "color": { "name": "green", "hex": "#228B22" },
-  "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-  "description": "Premium hoodie made from Brushed Fleece"
-},
-"CUHD003": {
-  "groupKey": "hoodie-casual-fleece-99.99",
-  "name": "Hoodie (Brushed Fleece)",
-  "tier": "casual",
-  "type": "hoodie",
-  "gender": "unisex",
-  "fit": "regular",
-  "material": "Brushed Fleece",
-  "price": 99.99,
-  "color": { "name": "green", "hex": "#228B22" },
-  "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-  "description": "Premium hoodie made from Brushed Fleece"
-},
+    "groupKey": "hoodie-casual-fleece-59.99",
+    "name": "Hoodie (Brushed Fleece)",
+    "tier": "casual",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Brushed Fleece",
+    "price": 19.99,
+    "color": { "name": "green", "hex": "#228B22" },
+    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
+    "description": "Premium brushed fleece hoodie in a deep forest green for a subtle streetwear pop.",
+    "fabric": {
+      "materialMain": "Brushed Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 360,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "minimal", "forest-green", "logo-front"],
+      "useCases": ["daily wear", "campus", "evening walks"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out to preserve color. Do not bleach."
+    },
+    "styleNotes": "The green tone works well with black or cream bottoms; easy everyday color without feeling loud.",
+    "fitNotes": "True-to-size regular fit; if you want an oversized streetwear silhouette, go one size up."
+  },
+
+  "CUHD003": {
+    "groupKey": "hoodie-casual-fleece-99.99",
+    "name": "Hoodie (Brushed Fleece)",
+    "tier": "casual",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Brushed Fleece",
+    "price": 99.99,
+    "color": { "name": "green", "hex": "#228B22" },
+    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
+    "description": "Elevated brushed fleece hoodie with premium finishing and heavier construction for colder days.",
+    "fabric": {
+      "materialMain": "Brushed Fleece",
+      "materialBlend": "85% cotton / 15% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "winter",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "premium", "heavyweight", "minimal"],
+      "useCases": ["cold weather", "layering", "evening outings"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "low",
+      "iron": "low",
+      "careNotes": "Turn inside out, use mild detergent, and avoid over-drying to preserve the fleece brushing."
+    },
+    "styleNotes": "Feels more structured and premium than a standard hoodie; works well over base layers in winter.",
+    "fitNotes": "Designed as a regular fit but slightly heavier on body; your usual size should still work."
+  },
 
   "OBMR001": {
     "groupKey": "bomber-originals-cotton-69.99",
@@ -51,8 +148,41 @@
     "price": 69.99,
     "color": { "name": "blue", "hex": "#0000FF" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Lightweight bomber jacket in cotton finish"
+    "description": "Lightweight cotton bomber with a clean silhouette, ideal for everyday layering.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 320,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "zip-front", "minimal", "layering"],
+      "useCases": ["daily wear", "light layering", "city commute"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Close zipper before washing. Shape on a hanger while drying."
+    },
+    "styleNotes": "Blue color adds a sharp highlight to neutral outfits; easy to layer over hoodies or tees.",
+    "fitNotes": "Regular bomber fit; size up if you plan to layer thicker hoodies underneath."
   },
+
   "OBMR002": {
     "groupKey": "bomber-originals-cotton-69.99",
     "name": "Bomber (100% Cotton)",
@@ -64,8 +194,41 @@
     "price": 69.99,
     "color": { "name": "green", "hex": "#228B22" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Lightweight bomber jacket in cotton finish"
+    "description": "Cotton bomber in a subtle green tone, balancing clean design with streetwear edge.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 320,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "minimal", "green", "layering"],
+      "useCases": ["daily wear", "casual hangouts", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; avoid over-drying to prevent stiffness."
+    },
+    "styleNotes": "Green works well with black joggers or denim; feels more muted than a black bomber.",
+    "fitNotes": "Regular fit; choose your usual bomber size unless you want a very roomy look."
   },
+
   "OBMR003": {
     "groupKey": "bomber-originals-cotton-89.99",
     "name": "Bomber (100% Cotton)",
@@ -77,8 +240,41 @@
     "price": 89.99,
     "color": { "name": "green", "hex": "#228B22" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Lightweight bomber jacket in cotton finish"
+    "description": "Premium cotton bomber with upgraded trims and a slightly more structured feel.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 340,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "premium", "structured", "minimal"],
+      "useCases": ["evening outings", "city wear", "layering"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "low",
+      "iron": "medium",
+      "careNotes": "Close zipper and wash inside out. Reshape cuffs and hem while damp."
+    },
+    "styleNotes": "Feels more elevated than the basic bomber; good if you want a cleaner, sharper look.",
+    "fitNotes": "Fits true to size with a bit more structure; stick to your usual size."
   },
+
   "OBMR004": {
     "groupKey": "cargo-originals-cotton-39.99",
     "name": "Cargo Jeans (100% Cotton)",
@@ -90,8 +286,41 @@
     "price": 39.99,
     "color": { "name": "blue", "hex": "#0000FF" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Lightweight bomber jacket in cotton finish"
+    "description": "Relaxed-fit cargo jeans in blue denim with utility pockets and a straight leg.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton denim",
+      "gsm": 400,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["cargo", "denim", "utility", "relaxed"],
+      "useCases": ["daily wear", "casual work", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["athletic", "broad-hip"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C",
+      "dryer": "low",
+      "iron": "medium",
+      "careNotes": "Wash inside out to preserve color and reduce fading. Avoid heavy bleach."
+    },
+    "styleNotes": "Works with oversized hoodies and bombers; classic blue denim that fits most wardrobes.",
+    "fitNotes": "Relaxed fit through thigh and leg; if between sizes, size down for a slightly cleaner fit."
   },
+
   "OBMR005": {
     "groupKey": "cargo-originals-cotton-39.99",
     "name": "Cargo Jeans (100% Cotton)",
@@ -103,8 +332,41 @@
     "price": 39.99,
     "color": { "name": "cream", "hex": "#f6ddcc" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Lightweight bomber jacket in cotton finish"
+    "description": "Cream-colored relaxed cargo jeans that give a softer, elevated street look.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton denim",
+      "gsm": 400,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["cargo", "denim", "cream", "relaxed"],
+      "useCases": ["daily wear", "summer outfits", "city strolls"],
+      "pattern": "solid",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["athletic", "broad-hip"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C",
+      "dryer": "low",
+      "iron": "medium",
+      "careNotes": "Wash separately or with light colors; avoid dark items that can transfer dye."
+    },
+    "styleNotes": "Cream tone makes fits feel more premium; works well with dark hoodies and bombers.",
+    "fitNotes": "Same relaxed pattern as the blue cargo; size choice follows your usual relaxed jeans size."
   },
+
   "DUJK001": {
     "groupKey": "jacket-designer-100cotton-79.99",
     "name": "Jacket (100% Cotton)",
@@ -116,8 +378,41 @@
     "price": 79.99,
     "color": { "name": "ghostgreen", "hex": "#278c72" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Streetwear premium cotton jacket"
+    "description": "Streetwear designer jacket in ghost green with a clean, tailored-inspired cut.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 330,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["designer", "jacket", "ghostgreen", "minimal"],
+      "useCases": ["evenings out", "dinners", "events"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Hang to dry on a wide hanger to maintain shoulder shape."
+    },
+    "styleNotes": "Ghost green feels unique but still wearable; pairs well with black or cream bottoms.",
+    "fitNotes": "Regular tailored-style fit; choose your usual jacket size."
   },
+
   "DUJK002": {
     "groupKey": "hoodie-designer-100cotton-59.99",
     "name": "Jacket (100% Cotton)",
@@ -129,8 +424,41 @@
     "price": 59.99,
     "color": { "name": "nightOrange", "hex": "#dcc693" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Streetwear premium cotton jacket"
+    "description": "Designer cotton jacket in a night-orange inspired neutral with subtle streetwear details.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 320,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["designer", "jacket", "neutral", "streetwear"],
+      "useCases": ["casual dinners", "meetings", "city wear"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Turn inside out and wash with similar light colors."
+    },
+    "styleNotes": "Feels more refined than a bomber but still very wearable; neutral tone makes it easy to style.",
+    "fitNotes": "Regular fit with enough room for a tee or light knit underneath."
   },
+
   "DUJK003": {
     "groupKey": "hoodie-designer-100cotton-39.99",
     "name": "Jacket (100% Cotton)",
@@ -142,8 +470,41 @@
     "price": 39.99,
     "color": { "name": "shadeLime", "hex": "#98deb4" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Streetwear premium cotton jacket"
+    "description": "Designer jacket in a soft shade-lime tone for a bolder, playful streetwear look.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 320,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["designer", "jacket", "pastel", "statement"],
+      "useCases": ["events", "daytime outings", "social meetups"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out and avoid darker garments that can bleed color."
+    },
+    "styleNotes": "Shade-lime adds a soft color pop; good for people who want something different but not neon.",
+    "fitNotes": "Regular fit; sizing aligns with the rest of the designer jackets."
   },
+
   "DUJK004": {
     "groupKey": "hoodie-designer-100cotton-29.99",
     "name": "Jacket (100% Cotton)",
@@ -155,8 +516,268 @@
     "price": 29.99,
     "color": { "name": "hotpink", "hex": "#d0b7bd" },
     "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Streetwear premium cotton jacket"
+    "description": "Playful designer jacket in a muted hot-pink tone, balanced to feel elevated not childish.",
+    "fabric": {
+      "materialMain": "100% Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 320,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["designer", "jacket", "pink", "statement"],
+      "useCases": ["events", "parties", "day trips"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash with similar light colors; avoid heavy abrasion to keep color clean."
+    },
+    "styleNotes": "Muted hotpink that feels modern rather than neon; good centerpiece piece in a fit.",
+    "fitNotes": "Same block as other designer jackets; pick your usual size."
+  },
+
+  "CUTE001": {
+    "groupKey": "tshirt-casual-cotton-24.99",
+    "name": "T-Shirt (Soft Cotton)",
+    "tier": "casual",
+    "type": "tshirt",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Soft Cotton",
+    "price": 24.99,
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 15, "M": 20, "L": 18, "XL": 12 },
+    "description": "Everyday black t-shirt in soft combed cotton with a clean minimal chest logo.",
+    "fabric": {
+      "materialMain": "Soft Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "summer",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tshirt", "minimal", "logo-front", "everyday"],
+      "useCases": ["daily wear", "campus", "layering"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "average"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "low",
+      "iron": "low",
+      "careNotes": "Wash inside out to protect the print. Do not bleach."
+    },
+    "styleNotes": "Works with jeans, cargos or shorts; a safe base layer for any all-black fit.",
+    "fitNotes": "True-to-size regular tee; size up if you prefer a relaxed streetwear silhouette."
+  },
+
+  "CUTE002": {
+    "groupKey": "tshirt-casual-cotton-24.99",
+    "name": "T-Shirt (Soft Cotton)",
+    "tier": "casual",
+    "type": "tshirt",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Soft Cotton",
+    "price": 24.99,
+    "color": { "name": "white", "hex": "#FFFFFF" },
+    "sizes": { "S": 20, "M": 25, "L": 20, "XL": 15 },
+    "description": "Soft white cotton t-shirt with a subtle Cove logo for clean, bright outfits.",
+    "fabric": {
+      "materialMain": "Soft Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "summer",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tshirt", "minimal", "clean", "logo-front"],
+      "useCases": ["summer outfits", "layering", "office-casual"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "average"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "low",
+      "iron": "low",
+      "careNotes": "Wash with similar colors. Avoid strong detergents to keep white bright."
+    },
+    "styleNotes": "Pairs well with blue denim or darker bottoms; great base for layering under jackets.",
+    "fitNotes": "If you are between sizes, go up for more comfort around shoulders and chest."
+  },
+
+  "CUTE003": {
+    "groupKey": "tshirt-casual-cotton-24.99",
+    "name": "T-Shirt (Soft Cotton)",
+    "tier": "casual",
+    "type": "tshirt",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Soft Cotton",
+    "price": 24.99,
+    "color": { "name": "cream", "hex": "#F5F5DC" },
+    "sizes": { "S": 10, "M": 15, "L": 15, "XL": 10 },
+    "description": "Relaxed-fit cream t-shirt with a slightly dropped shoulder for a softer streetwear look.",
+    "fabric": {
+      "materialMain": "Soft Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 190,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "summer",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["tshirt", "relaxed", "cream", "drop-shoulder"],
+      "useCases": ["daily wear", "coffee runs", "city walks"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["athletic", "broad-shoulder", "average"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "low",
+      "iron": "low",
+      "careNotes": "Wash inside out. Avoid high heat to preserve the relaxed drape."
+    },
+    "styleNotes": "Looks great with cargos or joggers; the cream tone softens full-black outfits.",
+    "fitNotes": "Choose your usual size for an intentionally relaxed fit; size down if you want it closer to body."
+  },
+
+  "CUJG001": {
+    "groupKey": "jogger-casual-frenchterry-39.99",
+    "name": "Jogger (French Terry)",
+    "tier": "casual",
+    "type": "jogger",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "French Terry",
+    "price": 39.99,
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 12, "M": 18, "L": 18, "XL": 12 },
+    "description": "Relaxed-fit black jogger in mid-weight French terry with elastic cuffs and a clean logo.",
+    "fabric": {
+      "materialMain": "French Terry",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 280,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "athleisure",
+      "styleTags": ["jogger", "relaxed", "minimal", "elastic-cuff"],
+      "useCases": ["travel", "gym commute", "lounging"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "average"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "low",
+      "iron": "low",
+      "careNotes": "Wash inside out to protect the surface. Avoid fabric softeners for better moisture management."
+    },
+    "styleNotes": "Pairs perfectly with hoodies and oversized tees for a full athleisure set.",
+    "fitNotes": "If you are between sizes, choose the larger one for a more relaxed stacked look at the ankle."
+  },
+
+  "CUJG002": {
+    "groupKey": "jogger-casual-frenchterry-39.99",
+    "name": "Jogger (French Terry)",
+    "tier": "casual",
+    "type": "jogger",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "French Terry",
+    "price": 39.99,
+    "color": { "name": "grey", "hex": "#B0B0B0" },
+    "sizes": { "S": 10, "M": 15, "L": 15, "XL": 10 },
+    "description": "Grey French terry jogger with a soft handfeel and subtle logo on the pocket.",
+    "fabric": {
+      "materialMain": "French Terry",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 280,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "athleisure",
+      "styleTags": ["jogger", "relaxed", "grey-marl", "minimal"],
+      "useCases": ["daily wear", "campus", "loungewear"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "average"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "low",
+      "iron": "low",
+      "careNotes": "Turn inside out before washing. Do not bleach."
+    },
+    "styleNotes": "Easy neutral bottom that works with both bright and muted tops.",
+    "fitNotes": "Elastic waistband gives some flexibility; pick your usual waist size."
   }
 }
-
-
