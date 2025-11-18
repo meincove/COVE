@@ -6,6 +6,7 @@ import type { CatalogCard } from '@/types/product'
 import type { TierFilterState, TierKey } from '@/types/filters'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
+import CarouselStage from './CarouselStage'
 
 
 // same union as in page.tsx, just local
@@ -49,6 +50,9 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
   const activeType = filtersForTier.type ?? null
   const activeFit = filtersForTier.fit ?? null
   const activeMaterial = filtersForTier.material ?? null
+
+    const tierLabel = formatTierLabel(tierKey)
+
 
     const { onInView, sectionRef } = props
 
@@ -362,14 +366,27 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
         )}
 
         {/* Carousel for this tier (debug: yellow box) */}
-        <div className="w-full rounded-xl px-2 py-6 mt-2 flex-1 bg-yellow-200">
-          <CatalogCarousel
-            cards={filteredCards}
-            sectionKey={`carousel-${index}-${tierKey}-${activeType ?? 'ALL'}-${
-              activeFit ?? 'ALL'
-            }-${activeMaterial ?? 'ALL'}`}
-          />
-        </div>
+    {/* Carousel stage for this tier (debug: yellow outer, staged inner) */}
+{/* Carousel stage for this tier (debug: yellow outer, staged inner) */}
+<div className="w-full rounded-xl px-2 py-6 mt-2 flex-1 bg-yellow-200">
+  <CarouselStage
+    cards={filteredCards}
+    sectionKey={`carousel-${index}-${tierKey}-${activeType ?? 'ALL'}-${
+      activeFit ?? 'ALL'
+    }-${activeMaterial ?? 'ALL'}`}
+    tierLabel={tierLabel}
+    filtersForTier={filtersForTier}
+    availableTypes={availableTypes}
+    availableFits={availableFits}
+    availableMaterials={availableMaterials}
+    onTypeChange={handleAdvancedTypeClick}
+    onFitChange={handleAdvancedFitClick}
+    onMaterialChange={handleAdvancedMaterialClick}
+  />
+</div>
+
+
+
       </div>
     </section>
   )
