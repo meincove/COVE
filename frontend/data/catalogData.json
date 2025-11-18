@@ -206,7 +206,133 @@
         "L": 33,
         "XL": 22
       }
+    },
+
+      {
+    "id": "hoodie-casual-fleece-earth-59.99",
+    "groupId": "PG_HOODIE_CASUAL_FLEECE_EARTH",
+    "slug": "hoodie-casual-fleece-earth-59.99",
+    "sizingKey": "hoodie_unisex_regular",
+    "name": "Hoodie (Earth Tone)",
+    "tier": "casual",
+    "type": "hoodie",
+    "material": "Brushed Fleece",
+    "price": 59.99,
+    "basePrice": 59.99,
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Earth-tone brushed fleece hoodie for everyday Cove fits.",
+    "colors": [
+      {
+        "variantId": "CUHD010",
+        "colorName": "Earth Green",
+        "hex": "#334833",
+        "images": ["/clothing-images/hoodie-fleece-earth-1.png"],
+        "sizes": { "S": 8, "M": 12, "L": 10, "XL": 6 },
+        "slug": "hoodie-casual-fleece-earth-green"
+      }
+    ],
+    "sizes": { "S": 8, "M": 12, "L": 10, "XL": 6 }
+  },
+  {
+    "id": "hoodie-casual-fleece-ocean-59.99",
+    "groupId": "PG_HOODIE_CASUAL_FLEECE_OCEAN",
+    "slug": "hoodie-casual-fleece-ocean-59.99",
+    "sizingKey": "hoodie_unisex_regular",
+    "name": "Hoodie (Ocean Fade)",
+    "tier": "casual",
+    "type": "hoodie",
+    "material": "Brushed Fleece",
+    "price": 59.99,
+    "basePrice": 59.99,
+    "gender": "unisex",
+    "fit": "regular",
+    "description": "Ocean-fade hoodie with clean Cove branding.",
+    "colors": [
+      {
+        "variantId": "CUHD011",
+        "colorName": "Ocean Fade",
+        "hex": "#1b6fae",
+        "images": ["/clothing-images/hoodie-fleece-ocean-1.png"],
+        "sizes": { "S": 10, "M": 10, "L": 8, "XL": 6 },
+        "slug": "hoodie-casual-fleece-ocean-fade"
+      }
+    ],
+    "sizes": { "S": 10, "M": 10, "L": 8, "XL": 6 }
+  },
+
+  {
+  "id": "tee-casual-softcotton-24.99",
+  "groupId": "PG_TEE_CASUAL_SOFTCOTTON",
+  "slug": "tee-casual-softcotton-24.99",
+  "sizingKey": "tee_unisex_regular",
+  "name": "T-Shirt (Soft Cotton)",
+  "tier": "casual",
+  "type": "tshirt",
+  "material": "Soft Cotton",
+  "price": 24.99,
+  "basePrice": 24.99,
+  "gender": "unisex",
+  "fit": "regular",
+  "description": "Everyday soft-cotton tee with minimal Cove branding.",
+  "colors": [
+    {
+      "variantId": "CUTS010",
+      "colorName": "Cloud White",
+      "hex": "#f5f5f7",
+      "images": ["/clothing-images/tee-softcotton-white-1.png"],
+      "sizes": { "S": 12, "M": 16, "L": 14, "XL": 8 },
+      "slug": "tee-casual-softcotton-cloud-white"
+    },
+    {
+      "variantId": "CUTS011",
+      "colorName": "Ink Black",
+      "hex": "#090909",
+      "images": ["/clothing-images/tee-softcotton-black-1.png"],
+      "sizes": { "S": 10, "M": 14, "L": 12, "XL": 6 },
+      "slug": "tee-casual-softcotton-ink-black"
     }
+  ],
+  "sizes": { "S": 22, "M": 30, "L": 26, "XL": 14 }
+},
+
+{
+  "id": "jogger-casual-techfleece-49.99",
+  "groupId": "PG_JOGGER_CASUAL_TECHFLEECE",
+  "slug": "jogger-casual-techfleece-49.99",
+  "sizingKey": "jogger_unisex_tapered",
+  "name": "Jogger (Tech Fleece)",
+  "tier": "casual",
+  "type": "jogger",
+  "material": "Tech Fleece",
+  "price": 49.99,
+  "basePrice": 49.99,
+  "gender": "unisex",
+  "fit": "regular",
+  "description": "Lightweight tech-fleece joggers with a clean tapered fit.",
+  "colors": [
+    {
+      "variantId": "CUJG020",
+      "colorName": "Night Navy",
+      "hex": "#101827",
+      "images": ["/clothing-images/jogger-techfleece-navy-1.png"],
+      "sizes": { "S": 8, "M": 12, "L": 10, "XL": 6 },
+      "slug": "jogger-casual-techfleece-night-navy"
+    },
+    {
+      "variantId": "CUJG021",
+      "colorName": "Stone Grey",
+      "hex": "#c7c9ce",
+      "images": ["/clothing-images/jogger-techfleece-grey-1.png"],
+      "sizes": { "S": 6, "M": 10, "L": 10, "XL": 4 },
+      "slug": "jogger-casual-techfleece-stone-grey"
+    }
+  ],
+  "sizes": { "S": 14, "M": 22, "L": 20, "XL": 10 }
+}
+
+
+
   ],
   "originals": [
     {
