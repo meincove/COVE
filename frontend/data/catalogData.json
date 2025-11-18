@@ -510,5 +510,71 @@
         "XL": 20
       }
     }
-  ]
+  ],
+
+  "streetwear": [
+  {
+    "id": "hoodie-streetwear-heavy-79.99",
+    "groupId": "PG_HOODIE_STREETWEAR_HEAVY",
+    "slug": "hoodie-streetwear-heavy-79.99",
+    "sizingKey": "hoodie_unisex_regular",
+
+    "name": "Hoodie (Streetwear Heavyweight)",
+    "tier": "streetwear",                   
+    "type": "hoodie",
+    "material": "Heavy Brushed Fleece",
+
+    "price": 79.99,
+    "basePrice": 79.99,
+
+    "gender": "unisex",
+    "fit": "relaxed",
+    "description": "Oversized heavyweight hoodie with a clean streetwear silhouette and dropped shoulders.",
+
+    "colors": [
+      {
+        "variantId": "SWHF001",             
+        "colorName": "black",
+        "hex": "#000000",
+        "images": [
+          "CUHD001-back.png",
+          "CUHD001-front.png",
+          "CUHD001-left.png",
+          "CUHD001-right.png"
+        ],
+        "sizes": {
+          "S": 8,
+          "M": 10,
+          "L": 6,
+          "XL": 4
+        },
+        "slug": "hoodie-streetwear-heavy-79.99"
+      },
+      {
+        "variantId": "SWHF002",             
+        "colorName": "forest-green",
+        "hex": "#228B22",
+        "images": [
+          "CUHD002-back.png",
+          "CUHD002-front.png"
+        ],
+        "sizes": {
+          "S": 5,
+          "M": 7,
+          "L": 5,
+          "XL": 3
+        },
+        "slug": "hoodie-streetwear-heavy-79.99"
+      }
+    ],
+
+    "sizes": {
+      "S": 13,
+      "M": 17,
+      "L": 11,
+      "XL": 7
+    }
+  }
+]
+
 }

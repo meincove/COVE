@@ -74,34 +74,19 @@
 
 
 
-
-
-
 'use client'
 
 import { useState } from 'react'
 import CatalogCardBase from './CatalogCardBase'
 import { useModal } from '@/src/context/ModalContext'
 import { colorThemes, colorNameToThemeKey } from '@/utils/colorThemes'
+import type { CatalogCard as CatalogCardModel } from '@/types/product'
 
-interface CatalogCardProps {
+// 👇 Props = canonical CatalogCard + our local extras
+interface CatalogCardProps extends CatalogCardModel {
   layoutKey: string | number
-  id: string
-  name: string
-  tier: string
-  type: string
-  material: string
-  description: string
-  price: number
-  colors: {
-    colorName: string
-    hex: string
-    variantId: string
-    images: string[]
-  }[]
-  sizes: Record<string, number>
-  selectedVariantId: string
   isActive?: boolean
+  selectedVariantId?: string
 }
 
 export default function CatalogCard({
@@ -115,15 +100,20 @@ export default function CatalogCard({
   price,
   colors,
   sizes,
+  gender,
+  fit,
   selectedVariantId,
   isActive = true,
 }: CatalogCardProps) {
   const { openModal } = useModal()
+
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
 
-  const selectedColor = colors[selectedColorIndex]
+  const selectedColor = colors[selectedColorIndex] ?? colors[0]
 
-  const themeKey = colorNameToThemeKey[selectedColor.colorName] || 'cosmic'
+  // 🔹 colorName can be null in ProductColor → use a safe key
+  const themeKeyKey = selectedColor.colorName ?? 'default'
+  const themeKey = colorNameToThemeKey[themeKeyKey] || 'cosmic'
   const theme = colorThemes[themeKey]
 
   return (
@@ -135,10 +125,12 @@ export default function CatalogCard({
       isActive={isActive}
       price={price}
       colorSwatches={colors.map((c, i) => ({
-        hex: c.hex,
+        // 🔹 hex can be null → fallback to a default color
+        hex: c.hex ?? '#000000',
         isSelected: i === selectedColorIndex,
         onClick: () => setSelectedColorIndex(i),
-        colorName: c.colorName,
+        // 🔹 colorName can be null, but the prop is string | undefined
+        colorName: c.colorName ?? undefined,
       }))}
       theme={theme}
       selectedVariantId={selectedColor.variantId}
@@ -148,17 +140,18 @@ export default function CatalogCard({
           layoutKey: layoutKey.toString(),
           id,
           name,
-          tier,
-          type,
-          material,
           description,
+          tier,
+          material,
+          type,
           price,
           colors,
           sizes,
           selectedVariantId: selectedColor.variantId,
+          gender,
+          fit,
         })
       }
     />
   )
 }
-

@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,30 +7,79 @@ import ProductInfo from '@/src/components/product/ProductInfo'
 import ProductConfigurator from '@/src/components/product/ProductConfigurator'
 import ImageOrbit from '@/src/components/product/ImageOrbit'
 import catalogData from '@/data/catalogData.json'
+import { useProductStore } from '@/src/store/productStore'
 
 export default function ProductPage() {
   const { slug } = useParams()
   const [product, setProduct] = useState<any>(null)
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [defaultSelectedSize, setDefaultSelectedSize] = useState<string | null>(null)
 
-  // Load product by slug
+  // 🔹 Snapshot coming from the catalog modal (if user came via "Go to Store")
+  const storedProduct = useProductStore((state) => state.product) as any
+
+  // Load product by slug, optionally respecting stored variant + size
   useEffect(() => {
     if (!slug) return
 
-    const allProducts = Object.values(catalogData).flat()
+    const slugStr = Array.isArray(slug) ? slug[0] : slug
+
+    const allProducts = Object.values(catalogData as any).flat() as any[]
+
     for (const prod of allProducts) {
-      const colorIndex = prod.colors.findIndex((c: any) => c.slug === slug)
-      if (colorIndex !== -1) {
-        setProduct(prod)
-        setSelectedColorIndex(colorIndex)
-        return
+      // Does this product belong to this slug?
+      const belongsToSlug =
+        prod.slug === slugStr ||
+        prod.colors?.some((c: any) => c.slug === slugStr)
+
+      if (!belongsToSlug) continue
+
+      // --- Decide which color index to use ---
+      let colorIndex = 0
+
+      if (storedProduct?.selectedVariantId) {
+        // Prefer variant chosen in the catalog modal
+        const idxByVariant = prod.colors.findIndex(
+          (c: any) => c.variantId === storedProduct.selectedVariantId
+        )
+
+        if (idxByVariant !== -1) {
+          colorIndex = idxByVariant
+        } else {
+          // Fallback: try to match by slug for this product
+          const idxBySlug = prod.colors.findIndex(
+            (c: any) => c.slug === slugStr
+          )
+          if (idxBySlug !== -1) colorIndex = idxBySlug
+        }
+      } else {
+        // No store info → fall back to slug-based color resolution
+        const idxBySlug = prod.colors.findIndex(
+          (c: any) => c.slug === slugStr
+        )
+        if (idxBySlug !== -1) colorIndex = idxBySlug
       }
+
+      setProduct(prod)
+      setSelectedColorIndex(colorIndex)
+
+      // --- Decide default selected size ---
+      if (storedProduct?.selectedSize) {
+        setDefaultSelectedSize(storedProduct.selectedSize)
+      } else {
+        setDefaultSelectedSize(null)
+      }
+
+      return
     }
 
+    // If we reach here: no matching product
     setProduct(null)
-  }, [slug])
+    setDefaultSelectedSize(null)
+  }, [slug, storedProduct])
 
+  // When product or color changes, reset main image to first one
   useEffect(() => {
     if (product) {
       setCurrentImageIndex(0)
@@ -55,9 +103,8 @@ export default function ProductPage() {
 
       {/* Page Content */}
       <div className="relative z-10 w-full max-w-[1800px] mx-auto flex flex-col lg:flex-row flex-grow gap-4 px-4 py-6">
-
         {/* LEFT COLUMN */}
-        <div className="w-full lg:w-1/4 rounded-xl overflow-hidden ">
+        <div className="w-full lg:w-1/4 rounded-xl overflow-hidden">
           <ProductInfo
             name={product.name}
             price={product.price}
@@ -99,7 +146,7 @@ export default function ProductPage() {
             type={product.type}
             fit={product.fit}
             price={product.price}
-
+            defaultSelectedSize={defaultSelectedSize} 
           />
         </div>
       </div>

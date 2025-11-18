@@ -3,6 +3,7 @@
 'use client'
 
 import { createContext, useContext, useState } from 'react'
+import type { CatalogColor } from '@/types/catalog'
 
 export interface CatalogCardData {
   layoutKey: string
@@ -13,15 +14,14 @@ export interface CatalogCardData {
   material: string
   type: string
   price: number
-  colors: {
-    colorName: string
-    hex: string
-    variantId: string
-    images: string[]
-  }[]
+  colors: CatalogColor[]              // 🔹 unified type
   sizes: Record<string, number>
   selectedVariantId: string
+   gender: string
+  fit: string
 }
+
+
 
 interface ModalContextType {
   isModalOpen: boolean
