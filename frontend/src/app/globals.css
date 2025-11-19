@@ -150,6 +150,12 @@ html.menu-open .tester-frame {
   backdrop-filter: blur(12px);
 }
 
+/* Baikal-style island navbar shape: flatter on top, extra round on bottom */
+ #cove-navbar-shell {
+  /* TL    TR    BR     BL  */
+  border-radius: 0px 0px 25px 25px;
+} 
+
 /* Body surface holding page sections (demo) */
 .content-surface { background: #9ca3af; min-height: 100%; }
 
