@@ -1,7 +1,7 @@
 // src/components/Catalog/CatalogCarousel.tsx
 'use client'
 
-import { useRef, useState } from 'react'
+import { CSSProperties, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import CatalogCard from './CatalogCard'
 import { useModal } from '@/src/context/ModalContext'
@@ -138,6 +138,11 @@ export default function CatalogCarousel({
     return initialMap
   })
 
+  const cardSizingVars= {
+    '--card-width': 'clamp(240px, 26vw, 380px)',
+    '--card-height': 'clamp(320px, 52vh, 540px)',
+  }
+
   const handleColorChange = (cardId: string, newVariantId: string) => {
     setVariantMap((prev) => ({
       ...prev,
@@ -176,6 +181,7 @@ export default function CatalogCarousel({
     <div
       className="relative w-full h-full flex flex-col items-center justify-center z-0"
       ref={inViewRef}
+      style={cardSizingVars as CSSProperties}
     >
       {/* Dim backdrop feel when expanded */}
              {hasExpanded && (
@@ -245,7 +251,7 @@ export default function CatalogCarousel({
     ...layout,
     // shift the center card to the LEFT instead of right,
     // and keep the scale from the base layout
-    x: layout.x - 420,
+    x: layout.x - 320,
     opacity: 1,
     blur: 0,
     zIndex: 120,
@@ -311,13 +317,55 @@ export default function CatalogCarousel({
         })}
       </motion.div>
 
-      {hasExpanded && expandedCard && (
+      {/* {hasExpanded && expandedCard && (
         <CatalogDetailPanel
           card={expandedCard}
           selectedVariantId={expandedVariantId}
           onClose={() => setExpandedCardId(null)}
         />
-      )}
+      )} */}
+
+      {hasExpanded && expandedCard && (
+  <div
+    className="
+      absolute inset-4 md:inset-6 lg:inset-8
+      flex items-center justify-end
+      pointer-events-none
+      z-30
+    "
+  >
+    {/* Inner row that actually lays out the panel */}
+    <div
+      className="
+        h-full w-full max-w-6xl
+        flex flex-col lg:flex-row
+        items-center lg:items-stretch
+        justify-end
+        px-4 md:px-8 lg:px-10
+        pointer-events-auto
+      "
+    >
+      {/* ONLY the detail panel lives here – NO extra CatalogCard */}
+      <div
+        className="flex-1 h-full"
+        style={{
+          // panel width is responsive but never crushes the card:
+          // between 260px and 720px, prefers about 58% of overlay width
+          flexBasis: 'clamp(260px, 58%, 720px)',
+        }}
+      >
+        <CatalogDetailPanel
+          card={expandedCard}
+          selectedVariantId={variantMap[expandedCard.id]}
+          onClose={() => setExpandedCardId(null)}
+        />
+      </div>
+    </div>
+  </div>
+)}
+
+
+
 
     </div>
   )

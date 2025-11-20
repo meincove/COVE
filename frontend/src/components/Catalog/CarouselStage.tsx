@@ -40,27 +40,28 @@ export default function CarouselStage({
 }: CarouselStageProps) {
 
    const cardLayoutVars = {
-    '--card-width': '340px',
-    '--card-height': '420px',
-  }
+  // Card width scales with viewport, but stays within a nice range
+  '--card-width': 'clamp(220px, 40vw, 380px)',
+  // Height keeps a fixed aspect ratio to width
+  '--card-height': 'calc(var(--card-width) * 1.25)',
+}
+
 
 
   
   return (
-    
-    // <div
-    //   className="
-    //     relative w-full
-    //     h-[360px] sm:h-[400px] md:h-[460px] lg:h-[520px] xl:h-[560px]
-    //     overflow-hidden
-    //   "
-    //   style={cardLayoutVars as CSSProperties}
-    // >
     <div
-    className="relative w-full overflow-visible"
+    className="
+      relative
+      w-full
+      h-auto
+      flex items-center justify-center
+      overflow-x-visible  /* Stage itself can be bigger; yellow clips it */
+      overflow-y-visible
+    "
     style={{
       ...(cardLayoutVars as CSSProperties),
-      // height ≈ 1.4x card height to give breathing room
+      // Give the carousel some breathing space around the card
       height: 'calc(var(--card-height, 420px) * 1.4)',
     }}
   >
@@ -105,74 +106,3 @@ export default function CarouselStage({
 
 
 
-
-// 'use client'
-
-// import CatalogCarousel from '@/src/components/Catalog/CatalogCarousel'
-// import CatalogFilterPanel from '@/src/components/Catalog/CatalogFilterPanel'
-// import type { CatalogCard } from '@/types/product'
-// import type { TierFilterState } from '@/types/filters'
-
-// interface CarouselStageProps {
-//   cards: CatalogCard[]
-//   sectionKey: string
-//   tierLabel: string
-
-//   filtersForTier: TierFilterState
-//   availableTypes: string[]
-//   availableFits: string[]
-//   availableMaterials: string[]
-//   onTypeChange: (value: string | null) => void
-//   onFitChange: (value: string | null) => void
-//   onMaterialChange: (value: string | null) => void
-// }
-
-// export default function CarouselStage({
-//   cards,
-//   sectionKey,
-//   tierLabel,
-//   filtersForTier,
-//   availableTypes,
-//   availableFits,
-//   availableMaterials,
-//   onTypeChange,
-//   onFitChange,
-//   onMaterialChange,
-// }: CarouselStageProps) {
-//   return (
-//     <div
-//       className="
-//         relative w-full
-//         h-[360px] sm:h-[400px] md:h-[460px] lg:h-[520px] xl:h-[560px]
-//         overflow-hidden
-//       "
-//     >
-//       {/* BACK LAYER: 3D carousel "machine" */}
-//       <div className="absolute inset-0 z-0 flex items-center justify-center">
-//         <CatalogCarousel cards={cards} sectionKey={sectionKey} />
-//       </div>
-
-//       {/* FRONT LAYER: Filtering AI panel on the left */}
-//       <div
-//         className="
-//           absolute left-0 top-1/2 -translate-y-1/2
-//           z-10
-//           w-[70%] xs:w-[60%] sm:w-[45%] md:w-[35%] lg:w-[30%]
-//           max-w-md h-[72%]
-//           px-1
-//         "
-//       >
-//         <CatalogFilterPanel
-//           tierLabel={tierLabel}
-//           filtersForTier={filtersForTier}
-//           availableTypes={availableTypes}
-//           availableFits={availableFits}
-//           availableMaterials={availableMaterials}
-//           onTypeChange={onTypeChange}
-//           onFitChange={onFitChange}
-//           onMaterialChange={onMaterialChange}
-//         />
-//       </div>
-//     </div>
-//   )
-// }

@@ -23,34 +23,35 @@ export default function CatalogDetailPanel({
     : []
 
   return (
+
     <motion.div
-      // 👇 Animation: start “behind” the card (shifted left), slide out to the right
-      initial={{ opacity: 0, x: -100 }}
-      animate={{ opacity: 1, x: -50 }}
-      exit={{ opacity: 0, x: -120 }}
-      transition={{
-        duration: 0.5,
-        ease: [0.16, 1, 0.3, 1], // smooth ease-out
-      }}
-      className="
-    absolute right-6 top-1/2 -translate-y-1/2
-    z-40
-    rounded-3xl
-    bg-white/95
-    border border-slate-200
-    shadow-[0_24px_60px_rgba(0,0,0,0.45)]
-    px-7 py-6
-    flex flex-col
-    text-slate-900
-    overflow-hidden
-  "
-  style={{
-    // Width ≈ 1.7x the card width, but never more than 80% of yellow area
-    width: 'min(calc(var(--card-width, 340px) * 3), 80%)',
-    // Height slightly taller than the card for breathing room
-    height: 'calc(var(--card-height, 420px) * 1.13)',
-  }}
-    >
+    initial={{ opacity: 0, x: -100 }}
+    animate={{ opacity: 1, x: -50 }}
+    exit={{ opacity: 0, x: -120 }}
+    transition={{
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1],
+    }}
+    className="
+      absolute
+      top-1/2 -translate-y-1/2
+      right-[0%]              /* how far from right edge of yellow area */
+      z-20
+
+      w-[52.5%]   
+      h-[86%]               
+
+      rounded-[24px]
+      bg-white
+      border border-slate-100
+      shadow-[0_28px_60px_rgba(15,23,42,0.38)]
+      px-6 md:px-8 lg:px-10
+      py-4 md:py-6 lg:py-8
+      flex flex-col
+      gap-6
+      text-slate-900
+    "
+  >
       {/* SECTION 1 — Info header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex flex-col gap-1">
