@@ -1,0 +1,138 @@
+[
+  {
+    "key": "hoodie_unisex_regular",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "notes": "Standard unisex hoodie with regular length and slightly relaxed chest.",
+    "sizes": {
+      "S": {
+        "chest_garment_cm": 52,
+        "length_cm": 66,
+        "shoulder_cm": 44,
+        "sleeve_cm": 62
+      },
+      "M": {
+        "chest_garment_cm": 55,
+        "length_cm": 68,
+        "shoulder_cm": 46,
+        "sleeve_cm": 63
+      },
+      "L": {
+        "chest_garment_cm": 58,
+        "length_cm": 70,
+        "shoulder_cm": 48,
+        "sleeve_cm": 64
+      },
+      "XL": {
+        "chest_garment_cm": 61,
+        "length_cm": 72,
+        "shoulder_cm": 50,
+        "sleeve_cm": 65
+      }
+    }
+  },
+  {
+    "key": "bomber_unisex_regular",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "notes": "Lightweight bomber with regular body length and slightly cropped feel.",
+    "sizes": {
+      "S": {
+        "chest_garment_cm": 53,
+        "length_cm": 64,
+        "shoulder_cm": 43,
+        "sleeve_cm": 63
+      },
+      "M": {
+        "chest_garment_cm": 56,
+        "length_cm": 66,
+        "shoulder_cm": 45,
+        "sleeve_cm": 64
+      },
+      "L": {
+        "chest_garment_cm": 59,
+        "length_cm": 68,
+        "shoulder_cm": 47,
+        "sleeve_cm": 65
+      },
+      "XL": {
+        "chest_garment_cm": 62,
+        "length_cm": 70,
+        "shoulder_cm": 49,
+        "sleeve_cm": 66
+      }
+    }
+  },
+  {
+    "key": "jeans_unisex_relaxed",
+    "type": "jeans",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "notes": "Relaxed fit cargo jeans with straight leg and extra room around thighs.",
+    "sizes": {
+      "S": {
+        "waist_garment_cm": 76,
+        "hip_garment_cm": 96,
+        "thigh_cm": 58,
+        "inseam_cm": 74,
+        "outseam_cm": 100
+      },
+      "M": {
+        "waist_garment_cm": 82,
+        "hip_garment_cm": 102,
+        "thigh_cm": 61,
+        "inseam_cm": 76,
+        "outseam_cm": 102
+      },
+      "L": {
+        "waist_garment_cm": 88,
+        "hip_garment_cm": 108,
+        "thigh_cm": 64,
+        "inseam_cm": 78,
+        "outseam_cm": 104
+      },
+      "XL": {
+        "waist_garment_cm": 94,
+        "hip_garment_cm": 114,
+        "thigh_cm": 67,
+        "inseam_cm": 80,
+        "outseam_cm": 106
+      }
+    }
+  },
+  {
+    "key": "jacket_unisex_regular",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "notes": "Straight-cut streetwear jacket with room for a light layer underneath.",
+    "sizes": {
+      "S": {
+        "chest_garment_cm": 52,
+        "length_cm": 64,
+        "shoulder_cm": 42,
+        "sleeve_cm": 62
+      },
+      "M": {
+        "chest_garment_cm": 55,
+        "length_cm": 66,
+        "shoulder_cm": 44,
+        "sleeve_cm": 63
+      },
+      "L": {
+        "chest_garment_cm": 58,
+        "length_cm": 68,
+        "shoulder_cm": 46,
+        "sleeve_cm": 64
+      },
+      "XL": {
+        "chest_garment_cm": 61,
+        "length_cm": 70,
+        "shoulder_cm": 48,
+        "sleeve_cm": 65
+      }
+    }
+  }
+]

@@ -24,9 +24,15 @@ def _first_image_name(variant: ColorGroup) -> str:
 
 def _sizes_for_variant(variant: ColorGroup) -> List[Dict[str, Any]]:
     return [
-        {"size": s.size, "quantity": s.quantity, "price": str(s.price), "stripe_price_id": s.stripe_price_id}
+        {
+            "size": s.size,
+            "quantity": s.quantity,
+            "price": str(s.price),
+            "stripe_price_id": s.stripe_price_id,
+        }
         for s in variant.sizes.all()
     ]
+
 
 def _variant_summary(v: ColorGroup) -> Dict[str, Any]:
     return {
@@ -52,15 +58,22 @@ def _prefetch_bundle():
     )
 
 def _variant_payload(v: ColorGroup):
+    sizes = _sizes_for_variant(v)
+    total_stock = sum((s.get("quantity") or 0) for s in sizes)
+
+    # keep first_size for a simple price anchor
     first_size = v.sizes.first()
+
     return {
         "variantId": v.variant_id,
         "color_name": v.color_name,
         "color_hex": v.hex,
         "images": [pi.image_name for pi in v.images.all()],
         "price": float(first_size.price) if first_size else None,
-        "stock": int(first_size.quantity) if first_size else 0,
+        "stock": int(total_stock),
+        "sizes": sizes,  # <--- NEW: full size breakdown
     }
+
 
 # --- /tools/catalog.search ----------------------------------------------------
 

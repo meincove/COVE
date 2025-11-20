@@ -7,7 +7,7 @@ import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
 import ModalHost from "@/src/components/ModalHost";
 import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
-import ChatWidget from "@/src/components/cove-ai/ChatWidget";
+
 import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
 import NavbarController from "@/src/components/Navbar/NavbarController";
 import ScrollHUD from "@/src/components/dev/ScrollHUD";
@@ -36,9 +36,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ScrollHUD />
             </ModalProvider>
           </ThemeProvider>
-
-          <ChatWidget />
-          {process.env.NODE_ENV === "development" && <IslandDevToggle />}
         </body>
       </html>
     </ClerkProvider>

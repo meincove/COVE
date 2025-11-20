@@ -1,0 +1,265 @@
+[
+  {
+    "key": "hoodie_unisex_regular",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "notes": "Approximate rules for unisex regular hoodies based on height, weight and fit preference.",
+    "rules": [
+      {
+        "size": "S",
+        "height_cm_min": 160,
+        "height_cm_max": 170,
+        "weight_kg_min": 50,
+        "weight_kg_max": 65,
+        "recommendedForBuild": ["slim", "average"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "S",
+          "relaxed": "M",
+          "oversized": "M"
+        }
+      },
+      {
+        "size": "M",
+        "height_cm_min": 168,
+        "height_cm_max": 178,
+        "weight_kg_min": 60,
+        "weight_kg_max": 78,
+        "recommendedForBuild": ["slim", "average", "athletic"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "M",
+          "relaxed": "L",
+          "oversized": "L"
+        }
+      },
+      {
+        "size": "L",
+        "height_cm_min": 175,
+        "height_cm_max": 185,
+        "weight_kg_min": 72,
+        "weight_kg_max": 92,
+        "recommendedForBuild": ["average", "athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "M",
+          "regular": "L",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      },
+      {
+        "size": "XL",
+        "height_cm_min": 182,
+        "height_cm_max": 195,
+        "weight_kg_min": 88,
+        "weight_kg_max": 110,
+        "recommendedForBuild": ["athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "L",
+          "regular": "XL",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      }
+    ]
+  },
+
+  {
+    "key": "bomber_unisex_regular",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "notes": "Bomber jackets have a slightly cropped length; prioritize chest and shoulder.",
+    "rules": [
+      {
+        "size": "S",
+        "height_cm_min": 160,
+        "height_cm_max": 170,
+        "weight_kg_min": 50,
+        "weight_kg_max": 65,
+        "recommendedForBuild": ["slim", "average"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "S",
+          "relaxed": "M",
+          "oversized": "M"
+        }
+      },
+      {
+        "size": "M",
+        "height_cm_min": 168,
+        "height_cm_max": 178,
+        "weight_kg_min": 60,
+        "weight_kg_max": 78,
+        "recommendedForBuild": ["slim", "average", "athletic"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "M",
+          "relaxed": "L",
+          "oversized": "L"
+        }
+      },
+      {
+        "size": "L",
+        "height_cm_min": 175,
+        "height_cm_max": 185,
+        "weight_kg_min": 72,
+        "weight_kg_max": 92,
+        "recommendedForBuild": ["average", "athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "M",
+          "regular": "L",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      },
+      {
+        "size": "XL",
+        "height_cm_min": 182,
+        "height_cm_max": 195,
+        "weight_kg_min": 88,
+        "weight_kg_max": 110,
+        "recommendedForBuild": ["athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "L",
+          "regular": "XL",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      }
+    ]
+  },
+
+  {
+    "key": "jeans_unisex_relaxed",
+    "type": "jeans",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "notes": "Relaxed jeans focus on waist and hip; inseam mainly depends on height.",
+    "rules": [
+      {
+        "size": "S",
+        "height_cm_min": 160,
+        "height_cm_max": 170,
+        "weight_kg_min": 50,
+        "weight_kg_max": 65,
+        "recommendedForBuild": ["slim", "average"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "S",
+          "relaxed": "M",
+          "oversized": "M"
+        }
+      },
+      {
+        "size": "M",
+        "height_cm_min": 168,
+        "height_cm_max": 178,
+        "weight_kg_min": 60,
+        "weight_kg_max": 78,
+        "recommendedForBuild": ["slim", "average", "athletic"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "M",
+          "relaxed": "L",
+          "oversized": "L"
+        }
+      },
+      {
+        "size": "L",
+        "height_cm_min": 175,
+        "height_cm_max": 185,
+        "weight_kg_min": 72,
+        "weight_kg_max": 92,
+        "recommendedForBuild": ["average", "athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "M",
+          "regular": "L",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      },
+      {
+        "size": "XL",
+        "height_cm_min": 182,
+        "height_cm_max": 195,
+        "weight_kg_min": 88,
+        "weight_kg_max": 110,
+        "recommendedForBuild": ["athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "L",
+          "regular": "XL",
+        "relaxed": "XL",
+        "oversized": "XL"
+        }
+      }
+    ]
+  },
+
+  {
+    "key": "jacket_unisex_regular",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "notes": "Straight-cut jacket suitable for layering over a tee or light hoodie.",
+    "rules": [
+      {
+        "size": "S",
+        "height_cm_min": 160,
+        "height_cm_max": 170,
+        "weight_kg_min": 50,
+        "weight_kg_max": 65,
+        "recommendedForBuild": ["slim", "average"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "S",
+          "relaxed": "M",
+          "oversized": "M"
+        }
+      },
+      {
+        "size": "M",
+        "height_cm_min": 168,
+        "height_cm_max": 178,
+        "weight_kg_min": 60,
+        "weight_kg_max": 78,
+        "recommendedForBuild": ["slim", "average", "athletic"],
+        "fitPreferenceAdjust": {
+          "tight": "S",
+          "regular": "M",
+          "relaxed": "L",
+          "oversized": "L"
+        }
+      },
+      {
+        "size": "L",
+        "height_cm_min": 175,
+        "height_cm_max": 185,
+        "weight_kg_min": 72,
+        "weight_kg_max": 92,
+        "recommendedForBuild": ["average", "athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "M",
+          "regular": "L",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      },
+      {
+        "size": "XL",
+        "height_cm_min": 182,
+        "height_cm_max": 195,
+        "weight_kg_min": 88,
+        "weight_kg_max": 110,
+        "recommendedForBuild": ["athletic", "broad-shoulder"],
+        "fitPreferenceAdjust": {
+          "tight": "L",
+          "regular": "XL",
+          "relaxed": "XL",
+          "oversized": "XL"
+        }
+      }
+    ]
+  }
+]

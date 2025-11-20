@@ -231,10 +231,18 @@ def _build_suggestions_for_unknown(
 
         # Collect color names (if any)
         colors: List[str] = []
-        for c in (meta.get("colors") or []):
-            name = (c.get("colorName") or "").strip()
-            if name:
-                colors.append(name.title())
+        if meta.get("colors"):
+            # legacy group-style meta with multiple colors
+            for c in (meta.get("colors") or []):
+                name = (c.get("colorName") or "").strip()
+                if name:
+                    colors.append(name.title())
+        else:
+            # flat variant-style meta with single colorName
+            cname = (meta.get("colorName") or "").strip()
+            if cname:
+                colors.append(cname.title())
+
 
         title_raw = meta.get("name") or d.get("title", "Product")
         title = _clean_title(title_raw)
@@ -303,24 +311,42 @@ def _strip_code_fences(s: str) -> str:
     return s
 
 def _get_product_meta(conn, slug: str) -> Optional[dict]:
-    """Fetch product title+meta by slug directly from ai_core.docs to avoid loopback HTTP."""
+    """
+    Fetch product metadata by slug/groupSlug directly from ai_core.docs.
+
+    Supports:
+      - legacy group docs with meta.slug
+      - variant docs with meta.groupSlug
+    """
     with conn.cursor() as cur:
-        cur.execute("""
-            SELECT title, meta
+        cur.execute(
+            """
+            SELECT title, meta, url
             FROM ai_core.docs
-            WHERE kind='product' AND meta->>'slug' = %s
+            WHERE kind = 'product'
+              AND (
+                meta->>'groupSlug' = %s
+                OR meta->>'slug' = %s
+              )
             LIMIT 1
-        """, (slug,))
+            """,
+            (slug, slug),
+        )
         row = cur.fetchone()
+
     if not row:
         return None
-    title, meta = row
+
+    title, meta, url = row
+    meta = meta or {}
+
     return {
         "title": title or (meta.get("name") if isinstance(meta, dict) else ""),
-        "url": f"/product/{slug}",
+        "url": url or f"/product/{slug}",
         "price": (meta.get("price") if isinstance(meta, dict) else None),
-        "meta": meta or {}
+        "meta": meta,
     }
+
 
 _TITLE_PAREN_RE = re.compile(r"\s*\([^)]*\)\s*$")
 

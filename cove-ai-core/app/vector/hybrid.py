@@ -62,52 +62,6 @@ def _mmr(items: List[Hit], k: int, lambda_diversity: float = 0.75) -> List[Hit]:
         candidates.remove(best)
     return selected
 
-def _attr_overlap(
-    meta: Dict[str, Any],
-    attrs: Optional[Dict[str, List[str]]]
-) -> float:
-    """
-    Compute a soft 0..1 boost based on overlap between requested attrs and product meta.
-    - colors: meta['colors'] is a list of {colorName, ...}
-    - sizes:  meta['sizes'] is a dict of {size: stock}
-    Scoring:
-      color_hit = (#requested_colors_matched / #requested_colors)  (or 0 if none requested)
-      size_hit  = (#requested_sizes_matched  / #requested_sizes)   (or 0 if none requested)
-      return mean of non-empty parts, else 0.
-    """
-    if not attrs:
-        return 0.0
-
-    req_colors = [c.lower() for c in (attrs.get("colors") or [])]
-    req_sizes  = [s.upper() for s in (attrs.get("sizes")  or [])]
-
-    scores: List[float] = []
-
-    # colors
-    if req_colors:
-        meta_colors = []
-        for c in (meta.get("colors") or []):
-            name = (c.get("colorName") or "").lower()
-            if name:
-                meta_colors.append(name)
-        if meta_colors:
-            hits = sum(1 for rc in req_colors if rc in meta_colors)
-            scores.append(hits / max(1, len(req_colors)))
-        else:
-            scores.append(0.0)
-
-    # sizes
-    if req_sizes:
-        meta_sizes = {k.upper() for k in (meta.get("sizes") or {}).keys()}
-        if meta_sizes:
-            hits = sum(1 for rs in req_sizes if rs in meta_sizes)
-            scores.append(hits / max(1, len(req_sizes)))
-        else:
-            scores.append(0.0)
-
-    if not scores:
-        return 0.0
-    return sum(scores) / len(scores)
 
 def hybrid_search(
     conn: psycopg.Connection,
@@ -211,30 +165,45 @@ def hybrid_search(
 # app/vector/hybrid.py
 W_ATTR = 0.20
 
-def _attr_overlap(meta: Dict[str, Any], attrs: Optional[Dict[str, List[str]]]) -> float:
-    if not attrs: return 0.0
+
+def _attr_overlap(
+    meta: Dict[str, Any],
+    attrs: Optional[Dict[str, List[str]]]
+) -> float:
+    """
+    Compute a soft 0..1 boost based on overlap between requested attrs and product meta.
+
+    Variant-level semantics:
+      - color:   meta['colorName'] is a single color string
+      - sizes:   meta['sizes'] is a dict {size -> stock}
+      - types:   meta['type'] is a single string ("hoodie", "bomber", ...)
+    """
+    if not attrs:
+        return 0.0
+
     want_colors = [c.lower() for c in (attrs.get("colors") or [])]
     want_sizes  = [s.upper() for s in (attrs.get("sizes")  or [])]
-    want_types  = [t.lower() for t in (attrs.get("types")  or [])]  # NEW
+    want_types  = [t.lower() for t in (attrs.get("types")  or [])]
 
-    parts = []
+    parts: List[float] = []
 
-    # colors
+    # --- Color (single colorName) ---
     if want_colors:
-        have = {(c.get("colorName") or "").lower() for c in (meta.get("colors") or [])}
-        hit = sum(1 for wc in want_colors if wc in have)
-        parts.append(hit / max(1, len(want_colors)))
+        meta_color = (meta.get("colorName") or "").lower()
+        if meta_color:
+            parts.append(1.0 if meta_color in want_colors else 0.0)
 
-    # sizes
+    # --- Sizes (keys of sizes dict) ---
     if want_sizes:
-        have = {k.upper() for k in (meta.get("sizes") or {}).keys()}
-        hit = sum(1 for ws in want_sizes if ws in have)
-        parts.append(hit / max(1, len(want_sizes)))
+        meta_sizes = {k.upper() for k in (meta.get("sizes") or {}).keys()}
+        if meta_sizes:
+            hits = sum(1 for ws in want_sizes if ws in meta_sizes)
+            parts.append(hits / max(1, len(want_sizes)))
 
-    # types (exact match on meta.type)
+    # --- Type ---
     if want_types:
         mtype = (meta.get("type") or "").lower()
-        hit = 1.0 if mtype and mtype in want_types else 0.0
-        parts.append(hit)
+        if mtype:
+            parts.append(1.0 if mtype in want_types else 0.0)
 
-    return sum(parts)/len(parts) if parts else 0.0
+    return sum(parts) / len(parts) if parts else 0.0

@@ -207,22 +207,37 @@ def catalog_vocab(conn, ttl_sec: int = 60):
     return _vocab_cache
 
 def catalog_vocab(conn) -> dict:
-    """Return lowercased distinct colors and types from product docs."""
+    """
+    Return lowercased distinct colors and types from *variant-level* product docs.
+
+    - colors: meta.colorName
+    - types:  meta.type (fallback to first word of title)
+    """
     colors, types = set(), set()
     with conn.cursor() as cur:
-        cur.execute("""
-            SELECT DISTINCT lower(c->>'colorName')
-            FROM ai_core.docs, jsonb_array_elements(meta->'colors') c
-            WHERE kind='product'
-        """)
+        # Colors from meta.colorName
+        cur.execute(
+            """
+            SELECT DISTINCT lower(meta->>'colorName')
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND COALESCE(meta->>'colorName','') <> ''
+            """
+        )
         colors |= {r[0] for r in cur.fetchall() if r[0]}
-        cur.execute("""
+
+        # Types from meta.type (fallback to first word of title)
+        cur.execute(
+            """
             SELECT DISTINCT lower(COALESCE(meta->>'type', split_part(lower(title),' ',1)))
             FROM ai_core.docs
-            WHERE kind='product'
-        """)
+            WHERE kind = 'product'
+            """
+        )
         types |= {r[0] for r in cur.fetchall() if r[0]}
+
     return {"colors": colors, "types": types}
+
 
 # at bottom of file (or near search_hybrid)
 def search_keyword(conn, *, query: str, kind: str = "product", top_k: int = 6):
