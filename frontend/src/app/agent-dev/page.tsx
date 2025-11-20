@@ -1,19 +1,25 @@
-// frontend/src/app/agent-dev/page.tsx
 "use client";
 
-import CoveChatWidget from "@/components/cove-ai/CoveChatWidget";
+import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
+import CartButton from "@/src/components/NavbarComponents/Actions/CartButton";
 
 export default function AgentDevPage() {
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="px-6 py-4 flex items-center justify-between">
-        <div className="text-sm font-semibold tracking-wide">FULL · COVE</div>
-        <div className="text-[11px] text-white/50">
-          Agent dev playground (local)
+      {/* Top dev header with real cart button */}
+      <div className="px-6 py-4 flex items-center justify-between gap-4 border-b border-white/10">
+        <div>
+          <div className="text-sm font-semibold tracking-wide">
+            FULL · COVE
+          </div>
+          <div className="text-[11px] text-white/50">
+            Agent dev playground (local)
+          </div>
         </div>
-      </div>
 
-      <div className="h-[1px] bg-white/10" />
+        {/* 👇 replace TEST CART with this */}
+        <CartButton />
+      </div>
 
       <div className="p-6 text-sm text-white/60 max-w-xl">
         <p>This is the internal playground for Cove AI. Try things like:</p>
@@ -24,8 +30,9 @@ export default function AgentDevPage() {
         </ul>
       </div>
 
-      {/* Floating chat widget */}
-      <CoveChatWidget />
+      <div className="px-6 pb-8">
+        <CoveChatWidget />
+      </div>
     </main>
   );
 }
