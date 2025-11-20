@@ -388,10 +388,22 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
           </div>
         )}
 
-        {/* Carousel for this tier (debug: yellow box) */}
-    {/* Carousel stage for this tier (debug: yellow outer, staged inner) */}
+       
 {/* Carousel stage for this tier (debug: yellow outer, staged inner) */}
-<div className="w-full rounded-xl px-2 py-6 mt-2 flex-1 bg-yellow-200">
+{/* <div className="w-full rounded-xl px-2 py-6 mt-2 flex-1 bg-yellow-200"> */}
+
+<div
+  className="
+    w-full
+    rounded-xl
+    px-2 py-6 mt-2
+    flex-1
+    bg-yellow-200
+    relative
+    overflow-x-hidden   /* ✅ nothing can bleed out sideways */
+    overflow-y-visible  /* but allow vertical growth */
+  "
+>
   <CarouselStage
     cards={filteredCards}
     sectionKey={`carousel-${index}-${tierKey}-${activeType ?? 'ALL'}-${
