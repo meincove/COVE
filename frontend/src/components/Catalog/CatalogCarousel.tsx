@@ -178,28 +178,10 @@ export default function CatalogCarousel({
       ref={inViewRef}
     >
       {/* Dim backdrop feel when expanded */}
-          {hasExpanded && (
-      <>
-        {/* overlay covering the whole yellow area */}
-        <div className="absolute inset-0 rounded-xl bg-slate-900/35 pointer-events-none" />
-
-        {/* temporary close button – later we can move this onto the detail panel */}
-        <button
-          type="button"
-          onClick={() => setExpandedCardId(null)}
-          className="
-            absolute top-4 right-6 z-30
-            h-8 w-8 rounded-full
-            bg-black/65 text-slate-100
-            flex items-center justify-center
-            text-sm
-            hover:bg-black/85 transition
-          "
-        >
-          ✕
-        </button>
-      </>
+             {hasExpanded && (
+      <div className="absolute inset-0 rounded-xl bg-slate-900/35 pointer-events-none" />
     )}
+
 
 
       {/* ARROWS */}
@@ -303,9 +285,10 @@ export default function CatalogCarousel({
 
                 exit={{ opacity: 0, scale: 0.7, x: 0, filter: 'blur(10px)' }}
                 transition={{
-                  duration: 0.9,
-                  ease: 'easeInOut',
-                }}
+  duration: 0.8,
+  ease: [0.16, 1, 0.3, 1], // similar curve as panel
+}}
+
               >
                 <CatalogCard
                   {...card}
@@ -327,6 +310,15 @@ export default function CatalogCarousel({
           )
         })}
       </motion.div>
+
+      {hasExpanded && expandedCard && (
+        <CatalogDetailPanel
+          card={expandedCard}
+          selectedVariantId={expandedVariantId}
+          onClose={() => setExpandedCardId(null)}
+        />
+      )}
+
     </div>
   )
 }

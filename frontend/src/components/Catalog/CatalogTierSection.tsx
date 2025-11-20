@@ -168,7 +168,14 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
     <section
       key={tierKey}
       ref={combinedRef}
-      className="relative w-full h-screen overflow-hidden flex flex-col gap-6 py-10 px-4 bg-slate-800"
+      // className="relative w-full h-screen overflow-hidden flex flex-col gap-6 py-10 px-4 bg-slate-800"
+      className="
+    relative w-full
+    min-h-screen        /* ✅ allow taller than viewport */
+    flex flex-col gap-6
+    py-10 px-4
+    bg-slate-800
+  "
     >
       {/* Section Title (debug: green box) */}
       <div className="max-w-5xl">

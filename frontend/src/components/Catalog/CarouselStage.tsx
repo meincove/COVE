@@ -6,6 +6,7 @@ import CatalogCarousel from '@/src/components/Catalog/CatalogCarousel'
 import CatalogFilterPanel from '@/src/components/Catalog/CatalogFilterPanel'
 import type { CatalogCard } from '@/types/product'
 import type { TierFilterState } from '@/types/filters'
+import { CSSProperties } from 'react'
 
 interface CarouselStageProps {
   cards: CatalogCard[]
@@ -37,14 +38,32 @@ export default function CarouselStage({
   onMaterialChange,
   isFilterOpen,
 }: CarouselStageProps) {
+
+   const cardLayoutVars = {
+    '--card-width': '340px',
+    '--card-height': '420px',
+  }
+
+
+  
   return (
+    
+    // <div
+    //   className="
+    //     relative w-full
+    //     h-[360px] sm:h-[400px] md:h-[460px] lg:h-[520px] xl:h-[560px]
+    //     overflow-hidden
+    //   "
+    //   style={cardLayoutVars as CSSProperties}
+    // >
     <div
-      className="
-        relative w-full
-        h-[360px] sm:h-[400px] md:h-[460px] lg:h-[520px] xl:h-[560px]
-        overflow-hidden
-      "
-    >
+    className="relative w-full overflow-visible"
+    style={{
+      ...(cardLayoutVars as CSSProperties),
+      // height ≈ 1.4x card height to give breathing room
+      height: 'calc(var(--card-height, 420px) * 1.4)',
+    }}
+  >
       {/* BACK LAYER: 3D carousel "machine" */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
         <CatalogCarousel cards={cards} sectionKey={sectionKey} />

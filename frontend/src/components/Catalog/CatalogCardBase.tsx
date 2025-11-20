@@ -63,10 +63,10 @@ export default function CatalogCardBase({
       className={`relative flex flex-col items-center justify-between rounded-2xl shadow-xl overflow-hidden ${
         !isActive ? 'pointer-events-none opacity-60 z-10' : 'z-50'
       }`}
-      style={{
-        width: 340,
-        height: 420,
-      }}
+       style={{
+    width: 'var(--card-width, 340px)',
+    height: 'var(--card-height, 420px)',
+  }}
     >
       {/* 🔮 Background */}
       <motion.div

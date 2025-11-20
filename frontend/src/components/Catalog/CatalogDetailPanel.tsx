@@ -18,86 +18,193 @@ export default function CatalogDetailPanel({
     card.colors.find((c) => c.variantId === selectedVariantId) ??
     card.colors[0]
 
+  const sizeEntries = card.sizes
+    ? Object.entries(card.sizes) as [string, number][]
+    : []
+
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 40 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+      // 👇 Animation: start “behind” the card (shifted left), slide out to the right
+      initial={{ opacity: 0, x: -100 }}
+      animate={{ opacity: 1, x: -50 }}
+      exit={{ opacity: 0, x: -120 }}
+      transition={{
+        duration: 0.5,
+        ease: [0.16, 1, 0.3, 1], // smooth ease-out
+      }}
       className="
-        absolute right-6 top-1/2 -translate-y-1/2
-        z-40
-        w-[46%] max-w-xl
-        h-[74%]
-        rounded-3xl
-        bg-slate-950/90
-        border border-white/12
-        shadow-[0_18px_45px_rgba(0,0,0,0.6)]
-        px-6 py-5
-        flex flex-col
-        overflow-hidden
-      "
+    absolute right-6 top-1/2 -translate-y-1/2
+    z-40
+    rounded-3xl
+    bg-white/95
+    border border-slate-200
+    shadow-[0_24px_60px_rgba(0,0,0,0.45)]
+    px-7 py-6
+    flex flex-col
+    text-slate-900
+    overflow-hidden
+  "
+  style={{
+    // Width ≈ 1.7x the card width, but never more than 80% of yellow area
+    width: 'min(calc(var(--card-width, 340px) * 3), 80%)',
+    // Height slightly taller than the card for breathing room
+    height: 'calc(var(--card-height, 420px) * 1.13)',
+  }}
     >
-      {/* Header row: breadcrumb + close */}
+      {/* SECTION 1 — Info header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-[0.26em] text-slate-400">
+          <span className="text-[10px] uppercase tracking-[0.26em] text-slate-500">
             {card.tier.toUpperCase()} · {card.type.toUpperCase()}
           </span>
-          <h3 className="text-lg font-semibold text-slate-50 leading-snug">
+          <h3 className="text-lg font-semibold leading-snug">
             {card.name}
           </h3>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-slate-500">
             {card.material} · {card.gender} · {card.fit}
           </span>
         </div>
 
+        {/* Close */}
         <button
           type="button"
           onClick={onClose}
           className="
             h-8 w-8 rounded-full
-            bg-slate-900/70
-            text-slate-100
+            bg-slate-900 text-white
             flex items-center justify-center
             text-sm
-            hover:bg-slate-800 transition
+            hover:bg-black transition
           "
         >
           ✕
         </button>
       </div>
 
-      {/* Price + color chip */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Price + color pill */}
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-baseline gap-2">
-          <span className="text-base font-semibold text-slate-50">
+          <span className="text-xl font-semibold">
             €{card.price.toFixed(2)}
           </span>
-          <span className="text-[11px] text-slate-400">incl. VAT</span>
+          <span className="text-[11px] text-slate-500">incl. VAT</span>
         </div>
 
         {activeColor && (
-          <div className="flex items-center gap-2 text-[11px] text-slate-300">
+          <div className="flex items-center gap-2 text-[11px] text-slate-700">
             <div
-              className="h-5 w-5 rounded-full border border-white/30"
+              className="h-5 w-5 rounded-full border border-slate-300"
               style={{ backgroundColor: activeColor.hex ?? '#000000' }}
             />
-            <span>{activeColor.colorName ?? 'Selected color'}</span>
+            <span>{activeColor.colorName ?? 'Selected colour'}</span>
           </div>
         )}
       </div>
 
-      {/* Placeholder body – we’ll replace with real controls later */}
-      <div className="flex-1 overflow-y-auto pr-1 text-[12px] leading-relaxed text-slate-300 space-y-3">
-        <p>
-          (Placeholder layout) – this panel will show size selector, color
-          options, quantity, main actions, and a compact description. For now
-          it&apos;s only here so we can perfect the layout and motion.
-        </p>
-        <p className="text-slate-400">
-          Product group: <span className="font-medium text-slate-200">{card.groupId}</span>
-        </p>
+      <div className="border-t border-slate-200 pt-4 flex-1 flex flex-col gap-5 overflow-y-auto pr-1">
+        {/* SECTION 2 — Sizes + Colours */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Sizes & Colours
+          </h4>
+
+          {/* Sizes */}
+          {sizeEntries.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {sizeEntries.map(([size, stock]) => (
+                <div
+                  key={size}
+                  className={`
+                    px-3 py-1.5 rounded-full border text-[11px]
+                    ${stock > 0
+                      ? 'border-slate-300 text-slate-800 bg-slate-50'
+                      : 'border-slate-200 text-slate-400 bg-slate-100/70 line-through'
+                    }
+                  `}
+                >
+                  {size}
+                  {stock > 0 && (
+                    <span className="ml-1 text-[10px] text-slate-400">
+                      ({stock})
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Colours */}
+          {card.colors.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3">
+              {card.colors.map((color) => {
+                const isActive = color.variantId === selectedVariantId
+                return (
+                  <button
+                    key={color.variantId}
+                    type="button"
+                    className={`
+                      flex items-center gap-2 px-2.5 py-1.5 rounded-full border text-[11px]
+                      ${isActive
+                        ? 'border-slate-900 bg-slate-900 text-white'
+                        : 'border-slate-300 bg-white text-slate-800 hover:border-slate-500'
+                      }
+                    `}
+                  >
+                    <span
+                      className="h-4 w-4 rounded-full border border-slate-200"
+                      style={{ backgroundColor: color.hex ?? '#000000' }}
+                    />
+                    <span>{color.colorName ?? 'Colour'}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* SECTION 3 — Actions */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Actions
+          </h4>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-medium hover:bg-black transition"
+            >
+              Go to store
+            </button>
+
+            <button
+              type="button"
+              className="px-4 py-2 rounded-full border border-slate-900 text-xs font-medium hover:bg-slate-900 hover:text-white transition"
+            >
+              Add to cart
+            </button>
+
+            <button
+              type="button"
+              className="px-4 py-2 rounded-full border border-slate-400 text-xs text-slate-800 hover:border-slate-900 transition"
+            >
+              Buy on
+            </button>
+
+            <button
+              type="button"
+              className="px-4 py-2 rounded-full border border-slate-300 text-xs text-slate-800 hover:border-slate-900 transition"
+            >
+              Add to wishlist
+            </button>
+
+            <button
+              type="button"
+              className="px-4 py-2 rounded-full border border-slate-300 text-xs text-slate-800 hover:border-slate-900 transition"
+            >
+              Ask Cove
+            </button>
+          </div>
+        </div>
       </div>
     </motion.div>
   )

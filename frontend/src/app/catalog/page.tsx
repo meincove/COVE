@@ -100,7 +100,7 @@ export default function CatalogPage() {
         )
       })}
 
-      <OverlaySectionHud
+      {/* <OverlaySectionHud
         sections={hudSections}
         activeId={activeTierKey ?? 'casual'}
         onSelect={(id) => {
@@ -110,7 +110,7 @@ export default function CatalogPage() {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' })
           }
         }}
-      />
+      /> */}
 
       <CatalogModalRoot />
     </main>
