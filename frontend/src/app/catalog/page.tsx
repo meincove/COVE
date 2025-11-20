@@ -3,16 +3,12 @@
 'use client'
 
 import { useState,useRef} from 'react'
-// import { useRouter } from 'next/navigation'  // ⬅ can be removed if unused later
-
 import CatalogModalRoot from '@/src/components/Catalog/CatalogModalRoot'
 import CatalogTierSection from '@/src/components/Catalog/CatalogTierSection'
 import OverlaySectionHud from '@/src/components/common/OverlaySectionHud'
-
 import rawCatalogData from '@/data/catalogData.json'
 import type { CatalogData, CatalogCard } from '@/types/product'
 import type { TierFilters, TierFilterState, TierKey } from '@/types/filters'
-
 import { Shirt, Sparkles, Crown, Flame } from 'lucide-react'
 
 
@@ -103,22 +99,6 @@ export default function CatalogPage() {
           />
         )
       })}
-
-      {/* HUD: bottom pill navigation */}
-      {/* <OverlaySectionHud
-        sections={tierEntries.map(([tierKey]) => ({
-          id: tierKey,
-          label: formatTierLabel(tierKey),
-        }))}
-        activeId={activeTierKey}
-        onSelect={(id) => {
-          const tierId = id as TierKey
-          const el = sectionRefs.current[tierId]
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }
-        }}
-      /> */}
 
       <OverlaySectionHud
         sections={hudSections}

@@ -150,6 +150,8 @@ html.menu-open .tester-frame {
   backdrop-filter: blur(12px);
 }
 
+
+
 /* Baikal-style island navbar shape: flatter on top, extra round on bottom */
  #cove-navbar-shell {
   /* TL    TR    BR     BL  */

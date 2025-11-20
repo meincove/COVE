@@ -1,5 +1,4 @@
-
-
+// src/components/Catalog/CatalogCarousel.tsx
 'use client'
 
 import { useRef, useState } from 'react'
@@ -8,15 +7,24 @@ import CatalogCard from './CatalogCard'
 import { useModal } from '@/src/context/ModalContext'
 import { useInView } from 'react-intersection-observer'
 import type { CatalogCardDTO } from '@/types/catalog'
+import CatalogDetailPanel from './CatalogDetailPanel'
+
 
 interface CatalogCarouselProps {
   cards: CatalogCardDTO[]
   sectionKey: string
 }
 
-// ---------- 3D layout helpers (Lightswind-style roles) ----------
-
-type CardRole = 'center' | 'left1' | 'right1' | 'left2' | 'right2' | 'left3' | 'right3'| 'hidden'
+// ---------- 3D layout helpers ----------
+type CardRole =
+  | 'center'
+  | 'left1'
+  | 'right1'
+  | 'left2'
+  | 'right2'
+  | 'left3'
+  | 'right3'
+  | 'hidden'
 
 function getCardRole(relativeOffset: number): CardRole {
   switch (relativeOffset) {
@@ -39,27 +47,24 @@ function getCardRole(relativeOffset: number): CardRole {
   }
 }
 
-
 function getCardLayout(role: CardRole) {
   switch (role) {
     case 'center':
       return {
         x: 0,
-        scale: 1.15,   // hero card
+        scale: 1.15,
         opacity: 1,
         blur: 0,
         zIndex: 100,
       }
-
     case 'left1':
       return {
-        x: -420,       // immediate neighbor
+        x: -420,
         scale: 0.9,
         opacity: 1,
         blur: 1.6,
         zIndex: 80,
       }
-
     case 'right1':
       return {
         x: 420,
@@ -68,16 +73,14 @@ function getCardLayout(role: CardRole) {
         blur: 1.6,
         zIndex: 80,
       }
-
     case 'left2':
       return {
-        x: -760,       // second ring
+        x: -760,
         scale: 0.75,
         opacity: 0.7,
         blur: 3.0,
         zIndex: 60,
       }
-
     case 'right2':
       return {
         x: 760,
@@ -86,16 +89,14 @@ function getCardLayout(role: CardRole) {
         blur: 3.0,
         zIndex: 60,
       }
-
     case 'left3':
       return {
-        x: -1040,      // third ring, mostly a hint on the side
+        x: -1040,
         scale: 0.6,
         opacity: 0.45,
         blur: 4.2,
         zIndex: 40,
       }
-
     case 'right3':
       return {
         x: 1040,
@@ -104,7 +105,6 @@ function getCardLayout(role: CardRole) {
         blur: 4.2,
         zIndex: 40,
       }
-
     case 'hidden':
     default:
       return {
@@ -117,9 +117,13 @@ function getCardLayout(role: CardRole) {
   }
 }
 
-
-export default function CatalogCarousel({ cards, sectionKey }: CatalogCarouselProps) {
+export default function CatalogCarousel({
+  cards,
+  sectionKey,
+}: CatalogCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const { isModalOpen } = useModal()
 
@@ -142,26 +146,64 @@ export default function CatalogCarousel({ cards, sectionKey }: CatalogCarouselPr
   }
 
   const handleNext = () => setCurrentIndex((prev) => (prev + 1) % cards.length)
-  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length)
+  const handlePrev = () =>
+    setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length)
 
   const handleDragEnd = (_: any, info: any) => {
+    if (expandedCardId) return
     if (info.offset.x < -100) handleNext()
     else if (info.offset.x > 100) handlePrev()
   }
 
-  // 👁️ Watch if carousel is in view (for initial entrance)
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.4,
     triggerOnce: false,
   })
+
+  const hasExpanded = Boolean(expandedCardId)
+  const carouselInteractive = !isModalOpen && !hasExpanded
+
+    const expandedCard = hasExpanded
+    ? cards.find((c) => c.id === expandedCardId)
+    : null
+
+  const expandedVariantId = expandedCard
+    ? variantMap[expandedCard.id]
+    : undefined
+
 
   return (
     <div
       className="relative w-full h-full flex flex-col items-center justify-center z-0"
       ref={inViewRef}
     >
+      {/* Dim backdrop feel when expanded */}
+          {hasExpanded && (
+      <>
+        {/* overlay covering the whole yellow area */}
+        <div className="absolute inset-0 rounded-xl bg-slate-900/35 pointer-events-none" />
+
+        {/* temporary close button – later we can move this onto the detail panel */}
+        <button
+          type="button"
+          onClick={() => setExpandedCardId(null)}
+          className="
+            absolute top-4 right-6 z-30
+            h-8 w-8 rounded-full
+            bg-black/65 text-slate-100
+            flex items-center justify-center
+            text-sm
+            hover:bg-black/85 transition
+          "
+        >
+          ✕
+        </button>
+      </>
+    )}
+
+
       {/* ARROWS */}
-      {!isModalOpen && (
+      {carouselInteractive && (
         <>
           <div className="absolute top-1/2 left-4 z-10 -translate-y-1/2">
             <button
@@ -185,42 +227,59 @@ export default function CatalogCarousel({ cards, sectionKey }: CatalogCarouselPr
       {/* CAROUSEL */}
       <motion.div
         className="relative w-full h-full flex items-center justify-center"
-        drag={isModalOpen ? false : 'x'}
+        drag={carouselInteractive ? 'x' : false}
         dragConstraints={{ left: 0, right: 0 }}
         onDragEnd={handleDragEnd}
         ref={containerRef}
         style={{
-          pointerEvents: isModalOpen ? 'none' : 'auto',
-          perspective: 1400, // subtle 3D feel
+          pointerEvents: carouselInteractive ? 'auto' : 'auto',
+          perspective: 1400,
         }}
       >
         {cards.map((card, i) => {
-          // --- compute wrapped relative offset ---
           const offset = i - currentIndex
           const half = Math.floor(cards.length / 2)
           let relativeOffset = offset
           if (offset > half) relativeOffset -= cards.length
           if (offset < -half) relativeOffset += cards.length
 
-          // Only care about center ±2 (like itemCount=5)
           if (Math.abs(relativeOffset) > 3) return null
 
           const role = getCardRole(relativeOffset)
-          const layout = getCardLayout(role)
+          let layout = getCardLayout(role)
           const isCenter = role === 'center'
+          const isExpanded = hasExpanded && expandedCardId === card.id
 
           const selectedVariantId = variantMap[card.id]
           const selectedColor =
-            card.colors.find((color) => color.variantId === selectedVariantId) || card.colors[0]
+            card.colors.find(
+              (color: CatalogCardDTO['colors'][number]) =>
+                color.variantId === selectedVariantId
+            ) || card.colors[0]
 
-          const selectedImage =
-            selectedColor?.images?.[0] ?? card.colors[0]?.images?.[0] ?? ''
+          // Shift hero card slightly to the right + keep others dim
+          if (isExpanded) {
+  layout = {
+    ...layout,
+    // shift the center card to the LEFT instead of right,
+    // and keep the scale from the base layout
+    x: layout.x - 420,
+    opacity: 1,
+    blur: 0,
+    zIndex: 120,
+  }
+} else if (hasExpanded) {
+  layout = {
+    ...layout,
+    opacity: layout.opacity * 0.35,
+    blur: layout.blur + 1.5,
+  }
+}
 
-          const colorSwatches = card.colors.map((color) => ({
-            hex: color.hex,
-            isSelected: selectedVariantId === color.variantId,
-            onClick: () => handleColorChange(card.id, color.variantId),
-          }))
+
+          const mode = isExpanded ? 'hero' : 'normal'
+          const shouldShow = hasExpanded || inView
+
 
           return (
             <AnimatePresence key={`${sectionKey}-${i}`}>
@@ -233,28 +292,35 @@ export default function CatalogCarousel({ cards, sectionKey }: CatalogCarouselPr
                   y: 20,
                   filter: 'blur(10px)',
                 }}
-                animate={{
-                  opacity: inView ? layout.opacity : 0,
-                  scale: inView ? layout.scale : 0.7,
-                  x: inView ? layout.x : 0,
-                  y: 0,
-                  filter: inView ? `blur(${layout.blur}px)` : 'blur(10px)',
-                  zIndex: layout.zIndex,
-                }}
+                    animate={{
+      opacity: shouldShow ? layout.opacity : 0,
+      scale: shouldShow ? layout.scale : 0.7,
+      x: shouldShow ? layout.x : 0,
+      y: 0,
+      filter: shouldShow ? `blur(${layout.blur}px)` : 'blur(10px)',
+      zIndex: layout.zIndex,
+    }}
+
                 exit={{ opacity: 0, scale: 0.7, x: 0, filter: 'blur(10px)' }}
                 transition={{
-                  duration: 0.9, // slightly longer for that smooth glide
+                  duration: 0.9,
                   ease: 'easeInOut',
                 }}
               >
                 <CatalogCard
                   {...card}
                   layoutKey={`${sectionKey}-${i}`}
-                  isActive={isCenter && !isModalOpen}
-                  // @ts-expect-error: CatalogCard doesn't explicitly accept `image` yet
-                  image={selectedImage}
-                  colorSwatches={colorSwatches}
+                  isActive={isCenter}
                   selectedVariantId={selectedVariantId}
+                  mode={mode}
+                  onToggleExpand={
+                    isCenter
+                      ? () =>
+                          setExpandedCardId((prev) =>
+                            prev === card.id ? null : card.id
+                          )
+                      : undefined
+                  }
                 />
               </motion.div>
             </AnimatePresence>
@@ -264,3 +330,6 @@ export default function CatalogCarousel({ cards, sectionKey }: CatalogCarouselPr
     </div>
   )
 }
+
+
+

@@ -20,7 +20,7 @@ export default function IslandNavbar({ isMenu = false }: IslandNavbarProps) {
         {/* the actual pill; restore interactivity */}
         <div
           id="cove-navbar-shell"
-          className="nav-shell pointer-events-auto px-3 py-2  shadow flex items-center gap-3"
+          className="nav-shell  pointer-events-auto px-3 py-2  shadow flex items-center gap-3"
         >
           <span className="text-sm font-medium tracking-wide">
             {isMenu ? "MENU" : "ISLAND"}

@@ -4,7 +4,7 @@ import CatalogCarousel from '@/src/components/Catalog/CatalogCarousel'
 import { applyTierFilters, getAvailableValuesForDimension } from '@/src/lib/catalogFilterBrain'
 import type { CatalogCard } from '@/types/product'
 import type { TierFilterState, TierKey } from '@/types/filters'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 import CarouselStage from './CarouselStage'
 
@@ -50,6 +50,8 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
   const activeType = filtersForTier.type ?? null
   const activeFit = filtersForTier.fit ?? null
   const activeMaterial = filtersForTier.material ?? null
+  const [isFilterOpen, setIsFilterOpen] = useState(true)
+
 
     const tierLabel = formatTierLabel(tierKey)
 
@@ -248,17 +250,31 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
         </div>
 
         {/* Advanced combinations toggle */}
-        <div className="flex items-center justify-between px-2 pt-4">
-          <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gray-300">
-            Advanced combinations
-          </span>
-          <button
-            onClick={onAdvancedToggle}
-            className="text-xs px-3 py-1 rounded-full border border-gray-500 text-gray-100 hover:border-white transition bg-slate-900/60"
-          >
-            {isAdvancedOpen ? 'Close panel' : 'Open panel'}
-          </button>
-        </div>
+       <div className="flex items-center justify-between px-2 pt-4">
+  <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gray-300">
+    Advanced combinations
+  </span>
+
+  <div className="flex items-center gap-2">
+    {/* NEW: Filtering AI toggle */}
+    <button
+      type="button"
+      onClick={() => setIsFilterOpen((prev) => !prev)}
+      className="text-xs px-3 py-1 rounded-full border border-gray-500 text-gray-100 hover:border-white transition bg-slate-900/60"
+    >
+      {isFilterOpen ? 'Hide filtering AI' : 'Show filtering AI'}
+    </button>
+
+    {/* Existing advanced panel toggle */}
+    <button
+      onClick={onAdvancedToggle}
+      className="text-xs px-3 py-1 rounded-full border border-gray-500 text-gray-100 hover:border-white transition bg-slate-900/60"
+    >
+      {isAdvancedOpen ? 'Close panel' : 'Open panel'}
+    </button>
+  </div>
+</div>
+
 
         {/* Advanced combinations panel */}
         {isAdvancedOpen && (
@@ -382,6 +398,7 @@ export default function CatalogTierSection(props: CatalogTierSectionProps) {
     onTypeChange={handleAdvancedTypeClick}
     onFitChange={handleAdvancedFitClick}
     onMaterialChange={handleAdvancedMaterialClick}
+    isFilterOpen={isFilterOpen}
   />
 </div>
 
