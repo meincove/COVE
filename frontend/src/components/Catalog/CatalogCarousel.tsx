@@ -1,7 +1,7 @@
 // src/components/Catalog/CatalogCarousel.tsx
 'use client'
 
-import { CSSProperties, useRef, useState } from 'react'
+import { CSSProperties, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import CatalogCard from './CatalogCard'
@@ -13,6 +13,7 @@ import CatalogDetailPanel from './CatalogDetailPanel'
 interface CatalogCarouselProps {
   cards: CatalogCardDTO[]
   sectionKey: string
+  onReady?: () => void
 }
 
 /* ... CardRole, getCardRole, getCardLayout stay exactly as you have them ... */
@@ -73,7 +74,14 @@ function getCardLayout(role: CardRole) {
 export default function CatalogCarousel({
   cards,
   sectionKey,
+  onReady,
 }: CatalogCarouselProps) {
+
+   // 🔔 Tell parent "I’m ready" as soon as we’ve mounted on the client
+  useEffect(() => {
+    if (onReady) onReady()
+  }, [onReady])
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
@@ -169,6 +177,8 @@ export default function CatalogCarousel({
     router.push(href)
   }
 
+  
+
   return (
     <div
       className="relative w-full h-full flex flex-col items-center justify-center z-0"
@@ -212,6 +222,7 @@ export default function CatalogCarousel({
         style={{
           pointerEvents: carouselInteractive ? 'auto' : 'auto',
           perspective: 1400,
+          willChange: 'transform',
         }}
       >
         {cards.map((card, i) => {
