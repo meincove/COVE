@@ -88,11 +88,11 @@ export default function CatalogDetailPanel({
       className="
         absolute
         top-1/2 -translate-y-1/2
-        right-[0%]
+        right-[6%]
         z-20
 
-        w-[52.5%]
-        h-[86%]
+        w-[46%]
+        h-[78%]
 
         rounded-[24px]
         bg-white
@@ -101,7 +101,7 @@ export default function CatalogDetailPanel({
         px-6 md:px-8 lg:px-10
         py-4 md:py-6 lg:py-8
         flex flex-col
-        gap-6
+        gap-5
         text-slate-900
       "
     >

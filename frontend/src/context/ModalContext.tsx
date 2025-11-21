@@ -19,6 +19,10 @@ export interface CatalogCardData {
   selectedVariantId: string
    gender: string
   fit: string
+
+  // NEW: pre-selection info coming from the card
+  selectedSize?: string | null
+  initialQuantity?: number
 }
 
 
