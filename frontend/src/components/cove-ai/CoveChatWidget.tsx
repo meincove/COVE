@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useCartSessionStore } from "@/src/store/cartSessionStore";
 import { useCartStore } from "@/src/store/cartStore";
+import type { CartItem } from "@/types/cart";
 
 type AgentItem = {
   title: string;
@@ -62,13 +63,13 @@ export default function CoveChatWidget() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Session (guest) state
+  // Small session store only for AI-core tracing (no UI cartId any more)
   const { guestSessionId, ensureGuestSessionId } = useCartSessionStore();
 
-  // Cart state shared with Navbar CartButton
-  const { cartId, setCartId } = useCartStore();
+  // Main cart store – drives navbar badge + cart modal + backend sync
+  const addItem = useCartStore((s) => s.addItem);
 
-  // Ensure we always have a guestSessionId
+  // Make sure guestSessionId exists as soon as widget mounts
   useEffect(() => {
     ensureGuestSessionId();
   }, [ensureGuestSessionId]);
@@ -97,7 +98,6 @@ export default function CoveChatWidget() {
           message: userMsg.content,
           top_k: 4,
           guestSessionId: sessionId,
-          cartId: cartId,
         }),
       });
 
@@ -174,18 +174,24 @@ export default function CoveChatWidget() {
 
     const { agentResponse } = target.meta;
     const cp = agentResponse.cart_payload;
-    if (!cp) return;
+    const firstItem = agentResponse.items?.[0];
+
+    if (!cp || !firstItem) {
+      console.warn("Cart proposal missing cart_payload or items");
+      return;
+    }
 
     const sessionId = guestSessionId ?? ensureGuestSessionId();
 
     const payload: AgentCartPayload = {
       ...cp,
       guestSessionId: sessionId,
-      cartId: cartId ?? cp.cartId ?? null,
+      // we don't track cartId on the frontend – let AI-core/backend handle it
+      cartId: cp.cartId ?? null,
     };
 
     try {
-      // Show "adding..." in that bubble
+      // Show a small "adding..." hint in the bubble
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
@@ -194,41 +200,42 @@ export default function CoveChatWidget() {
         )
       );
 
-      const res = await fetch("/api/agent-dev/cart-add", {
+      // Fire-and-forget call so AI-core can log / update its own view of the cart
+      fetch("/api/agent-dev/cart-add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+      }).catch((err) => {
+        console.warn("Background cart-add call failed:", err);
       });
 
-      if (!res.ok) {
-        throw new Error(`cart-add failed: ${res.status}`);
-      }
+      // Build a CartItem for our real cart store from agent info
+      const cartItem: CartItem = {
+        productId: firstItem.slug ?? cp.variantId,
+        variantId: cp.variantId,
+        name: firstItem.title,
+        type: firstItem.type,
+        tier: firstItem.tier,
+        size: cp.size,
+        color: firstItem.color ?? "",
+        colorName: firstItem.color ?? "",
+        quantity: cp.quantity,
+        // TODO: wire real values from catalog / backend
+        price: 0,
+        imageUrl: "/clothing-images/placeholder.png",
+        material: "",
+      };
 
-      const data = await res.json();
-      console.log("cart-add response from agent-dev:", data);
+      // Update the global cart (navbar badge + modal + backend sync for logged-in users)
+      await addItem(cartItem);
 
-      // Try several possible shapes from backend
-      const newCartId: string | null =
-        data?.cartId ??
-        data?.cart_id ??
-        data?.id ??
-        data?.cart?.id ??
-        null;
-
-      if (newCartId) {
-        setCartId(newCartId);
-      } else {
-        console.warn("No cartId found in cart-add response payload");
-      }
-
+      // Update this message: mark confirmed + remove buttons
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId && m.meta?.kind === "cart_proposal"
             ? {
                 ...m,
-                content: newCartId
-                  ? `Added to your cart (cartId: ${newCartId}). You can open it from the navbar.`
-                  : "Added to your cart. You can open it from the navbar.",
+                content: "Added to your cart. You can open it from the navbar.",
                 meta: {
                   ...m.meta,
                   confirmed: true,
@@ -238,7 +245,7 @@ export default function CoveChatWidget() {
         )
       );
     } catch (err) {
-      console.error("Error in cart-add:", err);
+      console.error("Error in cart-add flow:", err);
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId && m.meta?.kind === "cart_proposal"

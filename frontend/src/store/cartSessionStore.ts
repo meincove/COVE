@@ -1,8 +1,6 @@
-// frontend/src/store/cartSessionStore.ts
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 type CartSessionState = {
   cartId: string | null;
@@ -12,30 +10,28 @@ type CartSessionState = {
   ensureGuestSessionId: () => string;
 };
 
-function generateGuestSessionId() {
+function makeGuestId() {
+  // simple stable guest id generator
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+    return `guest_${crypto.randomUUID()}`;
   }
-  return `guest-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+  return `guest_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
 }
 
-export const useCartSessionStore = create<CartSessionState>()(
-  persist(
-    (set, get) => ({
-      cartId: null,
-      guestSessionId: null,
-      setCartId: (id) => set({ cartId: id }),
-      setGuestSessionId: (id) => set({ guestSessionId: id }),
-      ensureGuestSessionId: () => {
-        const current = get().guestSessionId;
-        if (current) return current;
-        const fresh = generateGuestSessionId();
-        set({ guestSessionId: fresh });
-        return fresh;
-      },
-    }),
-    {
-      name: "cove-cart-session", // key in localStorage
-    }
-  )
-);
+export const useCartSessionStore = create<CartSessionState>((set, get) => ({
+  cartId: null,
+  guestSessionId: null,
+
+  setCartId: (id) => set({ cartId: id }),
+
+  setGuestSessionId: (id) => set({ guestSessionId: id }),
+
+  ensureGuestSessionId: () => {
+    const existing = get().guestSessionId;
+    if (existing) return existing;
+
+    const newId = makeGuestId();
+    set({ guestSessionId: newId });
+    return newId;
+  },
+}));

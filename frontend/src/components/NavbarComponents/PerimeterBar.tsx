@@ -1,7 +1,7 @@
 "use client";
 
 import { useIslandMenu } from "@/src/components/NavbarComponents/islandMenuStore";
-import CartButton from "@/src/components/NavbarComponents/Actions/CartButton";
+//import CartButton from "@/src/components/NavbarComponents/Actions/CartButton";
 
 export default function PerimeterBar() {
   const { isOpen } = useIslandMenu();
