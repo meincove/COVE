@@ -497,17 +497,17 @@ async def agent_query(body: AgentIn) -> AgentOut:
     has_price_filter = getattr(intent, "has_price_filter", False)
 
     # 3) Decide if user wants cart vs recs vs plain RAG / chat
+    # 3) Decide if user wants cart vs recs vs plain RAG / chat
     wants_cart = _looks_like_cart_add(q)  # keep this very conservative
+
+    # Only discovery intent should go to recommendations.
+    # All other intents (lookup_product, policy, care, unknown, history_meta)
+    # should be answered via RAG or LLM, not recs.
     wants_recs = (
         not wants_cart
-        # never force recs for history/meta questions or pure size_fit
-        and intent_kind not in ("history_meta", "size_fit")
-        and (
-            intent_kind == "discover"
-            or is_structured_product_query(rec_filters)
-            or has_price_filter
-        )
+        and intent_kind == "discover"
     )
+
 
     debug_plan: Dict[str, Any] = {
         "intent_kind": intent_kind,
@@ -517,7 +517,9 @@ async def agent_query(body: AgentIn) -> AgentOut:
         "attrs": attrs,
         "numeric_filters": numeric_filters or None,
         "rec_filters": rec_filters or None,
+        "llm_used": False,  # default; flipped to True only in LLM branch
     }
+
 
     if ai_profile:
         debug_plan["ai_profile_used"] = True

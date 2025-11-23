@@ -1,0 +1,280 @@
+version: 2
+meta:
+  name: "Cove AI – agent canary suite (v2)"
+  description: >
+    Smoke tests for /ai/agent/query across discovery, size/fit, cart proposals,
+    unknown/hallucination guard, policy, and history-aware chat.
+
+defaults:
+  base_url: "http://127.0.0.1:8000"          # cove-ai-core
+  endpoint: "/ai/agent/query"
+  method: "POST"
+  top_k: 6
+  # Optional: if set, some cases will seed history via Django
+  django_base_url: "http://127.0.0.1:8001"   # Django backend with /ai_profiles
+
+cases:
+  # ---------- 1. Discovery / recommendations (no cart) ----------
+
+  - id: casual_tees_discovery
+    label: "Casual tees – discovery"
+    payload:
+      message: "What everyday black tees do you have for summer?"
+      top_k: 6
+    expect:
+      kind: "recommendations"
+      min_items: 1
+      answer_contains:
+        - "options"
+    assert_plan:
+      wants_recs: true
+
+  - id: cotton_outerwear_mixed
+    label: "Cotton outerwear – bombers / jackets"
+    payload:
+      message: "Show me cotton outerwear in blue or green, something I can wear in the evening."
+      top_k: 6
+    expect:
+      kind: "recommendations"
+      min_items: 1
+      answer_contains:
+        - "options"
+    assert_plan:
+      wants_recs: true
+
+  - id: cargo_jeans_price_filtered
+    label: "Cargo jeans – price filtered"
+    payload:
+      message: "I want cream cargo jeans under 50 euros for everyday city outfits."
+      top_k: 6
+    expect:
+      kind: "recommendations"
+      min_items: 1
+      answer_contains:
+        - "options"
+    assert_plan:
+      wants_recs: true
+
+  - id: joggers_travel
+    label: "Joggers – travel use"
+    payload:
+      message: "Show me relaxed joggers for travel, preferably black, around 40 euros."
+      top_k: 6
+    expect:
+      kind: "recommendations"
+      min_items: 1
+    assert_plan:
+      wants_recs: true
+
+  # ---------- 2. Structured filters / numeric parsing ----------
+
+  - id: green_bombers_60_80
+    label: "Green bombers – mid price band"
+    payload:
+      message: "Show me green cotton bombers between 60 and 80 euros."
+      top_k: 6
+    expect:
+      kind: "recommendations"
+      min_items: 1
+    assert_plan:
+      wants_recs: true
+      has_price_filter: true
+
+  - id: cotton_jackets_overview
+    label: "Cotton jackets – overview query"
+    payload:
+      message: "What cotton jackets do you have right now?"
+      top_k: 6
+    expect:
+      kind: "recommendations"
+      min_items: 1
+    assert_plan:
+      wants_recs: true
+
+  # ---------- 3. Size & fit advisor (no cart) ----------
+
+  - id: size_fit_cargo_jeans
+    label: "Size & fit – cargo jeans"
+    payload:
+      message: "I am 175 cm and 70 kg, I like a relaxed fit. Which size should I pick for your cargo jeans?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "recommend size"
+      min_citations: 0
+    assert_plan:
+      intent_kind: "size_fit"
+      fit_used: true
+
+  - id: size_fit_tees
+    label: "Size & fit – tees"
+    payload:
+      message: "I am 160 cm and 52 kg, prefer regular fit tees. What size would you suggest?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "recommend size"
+      min_citations: 0
+    assert_plan:
+      intent_kind: "size_fit"
+      fit_used: true
+
+  - id: size_fit_bomber
+    label: "Size & fit – bomber"
+    payload:
+      message: "I am 183 cm and 82 kg, want a not too tight cotton bomber. What size do you recommend?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "recommend size"
+      min_citations: 0
+    assert_plan:
+      intent_kind: "size_fit"
+      fit_used: true
+
+  # ---------- 4. Cart proposals (no auto-add) ----------
+
+  - id: cart_add_bomber_proposal
+    label: "Cart proposal – bomber"
+    payload:
+      message: "Nice, add that blue cotton bomber in size M to my cart."
+      top_k: 4
+    expect:
+      kind: "cart_proposal"
+      min_items: 1
+      answer_contains:
+        - "Do you want me to add"
+    assert_plan:
+      wants_cart: true
+
+  - id: cart_add_jeans_proposal
+    label: "Cart proposal – cargo jeans"
+    payload:
+      message: "Can you add a pair of cream cargo jeans in L to my cart?"
+      top_k: 4
+    expect:
+      kind: "cart_proposal"
+      min_items: 1
+      answer_contains:
+        - "Do you want me to add"
+    assert_plan:
+      wants_cart: true
+
+  - id: cart_add_joggers_proposal
+    label: "Cart proposal – joggers"
+    payload:
+      message: "Add those black joggers in size M to my cart."
+      top_k: 4
+    expect:
+      kind: "cart_proposal"
+      min_items: 1
+      answer_contains:
+        - "Do you want me to add"
+    assert_plan:
+      wants_cart: true
+
+  # ---------- 5. Unknown / hallucination guard ----------
+
+  - id: unknown_smart_feature
+    label: "Unknown – smart heating pockets"
+    payload:
+      message: "Do any of your cargo jeans have smart heating or hidden RFID-protected pockets?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      # you can tune this text as your RAG answer stabilises
+      answer_contains:
+        - "don’t have that information"
+      forbid_substrings:
+        - "yes"
+        - "smart heating"
+        - "RFID-protected"
+      min_citations: 1
+    assert_plan:
+      llm_used: false   # should go through RAG, not chat LLM
+
+  # ---------- 6. Care & shrinkage ----------
+
+  - id: care_tees
+    label: "Care – tees washing"
+    payload:
+      message: "How should I wash your soft cotton tees? Can I put them in the dryer?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "wash"
+      min_citations: 1
+
+  - id: shrinkage_bombers
+    label: "Care – bombers shrinkage"
+    payload:
+      message: "Will your cotton bombers shrink heavily in the dryer?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "shrink"
+      min_citations: 1
+
+  # ---------- 7. Policy ----------
+
+  - id: policy_delivery
+    label: "Policy – delivery & returns"
+    payload:
+      message: "How long does delivery take and can I return a bomber if it doesn’t fit?"
+      top_k: 6
+    expect:
+      kind: "answer"
+      # just sanity-check it talks about delivery/returns;
+      # we don't enforce citations anymore because this may be LLM chat.
+      answer_contains:
+        - "delivery"
+        - "return"
+      min_citations: 0
+    assert_plan:
+      intent_kind: "policy"
+
+  # ---------- 8. History-aware & generic chat ----------
+
+  - id: history_bomber_recall
+    label: "History – recall bomber query"
+    # seed a tiny history into Django; requires defaults.django_base_url
+    history_seed:
+      guestSessionId: "canary-history-001"
+      turns:
+        - role: "user"
+          content: "Show me a black bomber in size M"
+        - role: "assistant"
+          content: "Here are some bombers that match your size."
+    payload:
+      message: "By the way, what did I ask you earlier about bombers?"
+      top_k: 3
+      guestSessionId: "canary-history-001"
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "black bomber"
+      min_citations: 0
+      min_history_len: 2
+    assert_plan:
+      intent_kind: "history_meta"
+      llm_used: true
+
+  - id: generic_brand_chat
+    label: "Generic chat – brand story"
+    payload:
+      message: "Tell me about Cove as a brand."
+      top_k: 3
+    expect:
+      kind: "answer"
+      answer_contains:
+        - "Cove"
+        - "brand"
+      min_citations: 0
+    assert_plan:
+      intent_kind: "generic"
+      llm_used: true
