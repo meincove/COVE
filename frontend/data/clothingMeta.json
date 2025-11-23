@@ -1,16 +1,26 @@
 {
-  "CUHD001": {
-    "groupKey": "hoodie-casual-fleece-59.99",
-    "name": "Hoodie (Brushed Fleece)",
+  "CCH001": {
+    "groupKey": "hoodie-casual-fleece-19.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Hoodie",
     "tier": "casual",
     "type": "hoodie",
     "gender": "unisex",
     "fit": "regular",
     "material": "Brushed Fleece",
     "price": 19.99,
+
     "color": { "name": "black", "hex": "#000000" },
-    "sizes": { "S": 10, "M": 7, "L": 3, "XL": 20 },
-    "description": "Premium hoodie made from brushed fleece with a clean, minimal streetwear look.",
+    "sizes": { "S": 10, "M": 12, "L": 8, "XL": 6 },
+
+    "description": "Casual brushed-fleece hoodie in black with a regular, easy everyday fit.",
+
     "fabric": {
       "materialMain": "Brushed Fleece",
       "materialBlend": "80% cotton / 20% polyester",
@@ -41,22 +51,32 @@
       "iron": "low",
       "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
     },
-    "styleNotes": "Pairs well with slim jeans or cargo pants; the black color keeps the look minimal and versatile.",
+    "styleNotes": "Pairs well with slim jeans or cargo pants; black keeps the look minimal and versatile.",
     "fitNotes": "Order your usual size for a regular fit; size up for a relaxed, slightly oversized look."
   },
 
-  "CUHD002": {
-    "groupKey": "hoodie-casual-fleece-59.99",
-    "name": "Hoodie (Brushed Fleece)",
+  "CCH002": {
+    "groupKey": "hoodie-casual-fleece-19.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Hoodie",
     "tier": "casual",
     "type": "hoodie",
     "gender": "unisex",
     "fit": "regular",
     "material": "Brushed Fleece",
     "price": 19.99,
-    "color": { "name": "green", "hex": "#228B22" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Premium brushed fleece hoodie in a deep forest green for a subtle streetwear pop.",
+
+    "color": { "name": "forest green", "hex": "#228B22" },
+    "sizes": { "S": 8, "M": 10, "L": 8, "XL": 6 },
+
+    "description": "Forest green casual hoodie that adds soft color without feeling loud.",
+
     "fabric": {
       "materialMain": "Brushed Fleece",
       "materialBlend": "80% cotton / 20% polyester",
@@ -69,8 +89,8 @@
     },
     "style": {
       "dressCode": "streetwear",
-      "styleTags": ["hoodie", "minimal", "forest-green", "logo-front"],
-      "useCases": ["daily wear", "campus", "evening walks"],
+      "styleTags": ["hoodie", "minimal", "everyday", "green-accent"],
+      "useCases": ["daily wear", "campus days", "weekend walks"],
       "pattern": "solid",
       "logoPlacement": "front-small"
     },
@@ -85,699 +105,4832 @@
       "washTemp": "30°C gentle wash",
       "dryer": "no",
       "iron": "low",
-      "careNotes": "Wash inside out to preserve color. Do not bleach."
+      "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
     },
-    "styleNotes": "The green tone works well with black or cream bottoms; easy everyday color without feeling loud.",
-    "fitNotes": "True-to-size regular fit; if you want an oversized streetwear silhouette, go one size up."
+    "styleNotes": "Works nicely with black denim or light cargos for a muted contrast.",
+    "fitNotes": "Same block as CCH001; pick your usual size unless you want a very relaxed drape."
   },
 
-  "CUHD003": {
-    "groupKey": "hoodie-casual-fleece-99.99",
-    "name": "Hoodie (Brushed Fleece)",
+  "CCH003": {
+    "groupKey": "hoodie-casual-fleece-19.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Hoodie",
     "tier": "casual",
     "type": "hoodie",
     "gender": "unisex",
     "fit": "regular",
     "material": "Brushed Fleece",
-    "price": 99.99,
-    "color": { "name": "green", "hex": "#228B22" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Elevated brushed fleece hoodie with premium finishing and heavier construction for colder days.",
+    "price": 19.99,
+
+    "color": { "name": "light grey", "hex": "#D3D3D3" },
+    "sizes": { "S": 12, "M": 12, "L": 8, "XL": 6 },
+
+    "description": "Light grey hoodie built as an easy throw-on layer for most outfits.",
+
     "fabric": {
       "materialMain": "Brushed Fleece",
-      "materialBlend": "85% cotton / 15% polyester",
-      "gsm": 380,
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 360,
       "stretchLevel": "medium",
-      "thickness": "heavy",
-      "warmth": "winter",
+      "thickness": "medium",
+      "warmth": "all-season",
       "breathability": "medium",
       "softness": "high"
     },
     "style": {
       "dressCode": "streetwear",
-      "styleTags": ["hoodie", "premium", "heavyweight", "minimal"],
-      "useCases": ["cold weather", "layering", "evening outings"],
+      "styleTags": ["hoodie", "minimal", "grey-basic"],
+      "useCases": ["daily wear", "commute", "study sessions"],
       "pattern": "solid",
       "logoPlacement": "front-small"
     },
     "fitProfile": {
       "fit": "regular",
       "length": "regular",
-      "bodyShapes": ["athletic", "broad-shoulder"],
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
       "recommendedGender": "unisex",
       "stretchHelpsFit": true
     },
     "care": {
       "washTemp": "30°C gentle wash",
-      "dryer": "low",
+      "dryer": "no",
       "iron": "low",
-      "careNotes": "Turn inside out, use mild detergent, and avoid over-drying to preserve the fleece brushing."
+      "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
     },
-    "styleNotes": "Feels more structured and premium than a standard hoodie; works well over base layers in winter.",
-    "fitNotes": "Designed as a regular fit but slightly heavier on body; your usual size should still work."
+    "styleNotes": "Neutral tone that layers under darker jackets without clashing.",
+    "fitNotes": "Regular fit through body; size up if you prefer extra room for layering."
   },
 
-  "OBMR001": {
-    "groupKey": "bomber-originals-cotton-69.99",
-    "name": "Bomber (100% Cotton)",
-    "tier": "originals",
-    "type": "bomber",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 69.99,
-    "color": { "name": "blue", "hex": "#0000FF" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Lightweight cotton bomber with a clean silhouette, ideal for everyday layering.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 320,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["bomber", "zip-front", "minimal", "layering"],
-      "useCases": ["daily wear", "light layering", "city commute"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "no",
-      "iron": "medium",
-      "careNotes": "Close zipper before washing. Shape on a hanger while drying."
-    },
-    "styleNotes": "Blue color adds a sharp highlight to neutral outfits; easy to layer over hoodies or tees.",
-    "fitNotes": "Regular bomber fit; size up if you plan to layer thicker hoodies underneath."
-  },
+  "CCH004": {
+    "groupKey": "hoodie-casual-fleece-19.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
 
-  "OBMR002": {
-    "groupKey": "bomber-originals-cotton-69.99",
-    "name": "Bomber (100% Cotton)",
-    "tier": "originals",
-    "type": "bomber",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 69.99,
-    "color": { "name": "green", "hex": "#228B22" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Cotton bomber in a subtle green tone, balancing clean design with streetwear edge.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 320,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["bomber", "minimal", "green", "layering"],
-      "useCases": ["daily wear", "casual hangouts", "travel"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "no",
-      "iron": "medium",
-      "careNotes": "Wash with similar colors; avoid over-drying to prevent stiffness."
-    },
-    "styleNotes": "Green works well with black joggers or denim; feels more muted than a black bomber.",
-    "fitNotes": "Regular fit; choose your usual bomber size unless you want a very roomy look."
-  },
-
-  "OBMR003": {
-    "groupKey": "bomber-originals-cotton-89.99",
-    "name": "Bomber (100% Cotton)",
-    "tier": "originals",
-    "type": "bomber",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 89.99,
-    "color": { "name": "green", "hex": "#228B22" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Premium cotton bomber with upgraded trims and a slightly more structured feel.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 340,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["bomber", "premium", "structured", "minimal"],
-      "useCases": ["evening outings", "city wear", "layering"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["athletic", "broad-shoulder"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "low",
-      "iron": "medium",
-      "careNotes": "Close zipper and wash inside out. Reshape cuffs and hem while damp."
-    },
-    "styleNotes": "Feels more elevated than the basic bomber; good if you want a cleaner, sharper look.",
-    "fitNotes": "Fits true to size with a bit more structure; stick to your usual size."
-  },
-
-  "OBMR004": {
-    "groupKey": "cargo-originals-cotton-39.99",
-    "name": "Cargo Jeans (100% Cotton)",
-    "tier": "originals",
-    "type": "jeans",
-    "gender": "unisex",
-    "fit": "relaxed",
-    "material": "100% Cotton",
-    "price": 39.99,
-    "color": { "name": "blue", "hex": "#0000FF" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Relaxed-fit cargo jeans in blue denim with utility pockets and a straight leg.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton denim",
-      "gsm": 400,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "medium",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["cargo", "denim", "utility", "relaxed"],
-      "useCases": ["daily wear", "casual work", "travel"],
-      "pattern": "solid",
-      "logoPlacement": "none"
-    },
-    "fitProfile": {
-      "fit": "relaxed",
-      "length": "regular",
-      "bodyShapes": ["athletic", "broad-hip"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C",
-      "dryer": "low",
-      "iron": "medium",
-      "careNotes": "Wash inside out to preserve color and reduce fading. Avoid heavy bleach."
-    },
-    "styleNotes": "Works with oversized hoodies and bombers; classic blue denim that fits most wardrobes.",
-    "fitNotes": "Relaxed fit through thigh and leg; if between sizes, size down for a slightly cleaner fit."
-  },
-
-  "OBMR005": {
-    "groupKey": "cargo-originals-cotton-39.99",
-    "name": "Cargo Jeans (100% Cotton)",
-    "tier": "originals",
-    "type": "jeans",
-    "gender": "unisex",
-    "fit": "relaxed",
-    "material": "100% Cotton",
-    "price": 39.99,
-    "color": { "name": "cream", "hex": "#f6ddcc" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Cream-colored relaxed cargo jeans that give a softer, elevated street look.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton denim",
-      "gsm": 400,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "medium",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["cargo", "denim", "cream", "relaxed"],
-      "useCases": ["daily wear", "summer outfits", "city strolls"],
-      "pattern": "solid",
-      "logoPlacement": "none"
-    },
-    "fitProfile": {
-      "fit": "relaxed",
-      "length": "regular",
-      "bodyShapes": ["athletic", "broad-hip"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C",
-      "dryer": "low",
-      "iron": "medium",
-      "careNotes": "Wash separately or with light colors; avoid dark items that can transfer dye."
-    },
-    "styleNotes": "Cream tone makes fits feel more premium; works well with dark hoodies and bombers.",
-    "fitNotes": "Same relaxed pattern as the blue cargo; size choice follows your usual relaxed jeans size."
-  },
-
-  "DUJK001": {
-    "groupKey": "jacket-designer-100cotton-79.99",
-    "name": "Jacket (100% Cotton)",
-    "tier": "designer",
-    "type": "jacket",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 79.99,
-    "color": { "name": "ghostgreen", "hex": "#278c72" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Streetwear designer jacket in ghost green with a clean, tailored-inspired cut.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 330,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "smart-casual",
-      "styleTags": ["designer", "jacket", "ghostgreen", "minimal"],
-      "useCases": ["evenings out", "dinners", "events"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "no",
-      "iron": "medium",
-      "careNotes": "Hang to dry on a wide hanger to maintain shoulder shape."
-    },
-    "styleNotes": "Ghost green feels unique but still wearable; pairs well with black or cream bottoms.",
-    "fitNotes": "Regular tailored-style fit; choose your usual jacket size."
-  },
-
-  "DUJK002": {
-    "groupKey": "hoodie-designer-100cotton-59.99",
-    "name": "Jacket (100% Cotton)",
-    "tier": "designer",
-    "type": "jacket",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 59.99,
-    "color": { "name": "nightOrange", "hex": "#dcc693" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Designer cotton jacket in a night-orange inspired neutral with subtle streetwear details.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 320,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "smart-casual",
-      "styleTags": ["designer", "jacket", "neutral", "streetwear"],
-      "useCases": ["casual dinners", "meetings", "city wear"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "no",
-      "iron": "medium",
-      "careNotes": "Turn inside out and wash with similar light colors."
-    },
-    "styleNotes": "Feels more refined than a bomber but still very wearable; neutral tone makes it easy to style.",
-    "fitNotes": "Regular fit with enough room for a tee or light knit underneath."
-  },
-
-  "DUJK003": {
-    "groupKey": "hoodie-designer-100cotton-39.99",
-    "name": "Jacket (100% Cotton)",
-    "tier": "designer",
-    "type": "jacket",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 39.99,
-    "color": { "name": "shadeLime", "hex": "#98deb4" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Designer jacket in a soft shade-lime tone for a bolder, playful streetwear look.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 320,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["designer", "jacket", "pastel", "statement"],
-      "useCases": ["events", "daytime outings", "social meetups"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "no",
-      "iron": "medium",
-      "careNotes": "Wash inside out and avoid darker garments that can bleed color."
-    },
-    "styleNotes": "Shade-lime adds a soft color pop; good for people who want something different but not neon.",
-    "fitNotes": "Regular fit; sizing aligns with the rest of the designer jackets."
-  },
-
-  "DUJK004": {
-    "groupKey": "hoodie-designer-100cotton-29.99",
-    "name": "Jacket (100% Cotton)",
-    "tier": "designer",
-    "type": "jacket",
-    "gender": "unisex",
-    "fit": "regular",
-    "material": "100% Cotton",
-    "price": 29.99,
-    "color": { "name": "hotpink", "hex": "#d0b7bd" },
-    "sizes": { "S": 20, "M": 20, "L": 20, "XL": 20 },
-    "description": "Playful designer jacket in a muted hot-pink tone, balanced to feel elevated not childish.",
-    "fabric": {
-      "materialMain": "100% Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 320,
-      "stretchLevel": "low",
-      "thickness": "medium",
-      "warmth": "all-season",
-      "breathability": "high",
-      "softness": "medium"
-    },
-    "style": {
-      "dressCode": "streetwear",
-      "styleTags": ["designer", "jacket", "pink", "statement"],
-      "useCases": ["events", "parties", "day trips"],
-      "pattern": "solid",
-      "logoPlacement": "front-small"
-    },
-    "fitProfile": {
-      "fit": "regular",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic"],
-      "recommendedGender": "unisex",
-      "stretchHelpsFit": false
-    },
-    "care": {
-      "washTemp": "30°C gentle",
-      "dryer": "no",
-      "iron": "medium",
-      "careNotes": "Wash with similar light colors; avoid heavy abrasion to keep color clean."
-    },
-    "styleNotes": "Muted hotpink that feels modern rather than neon; good centerpiece piece in a fit.",
-    "fitNotes": "Same block as other designer jackets; pick your usual size."
-  },
-
-  "CUTE001": {
-    "groupKey": "tshirt-casual-cotton-24.99",
-    "name": "T-Shirt (Soft Cotton)",
+    "name": "Cove Casual Hoodie",
     "tier": "casual",
-    "type": "tshirt",
+    "type": "hoodie",
     "gender": "unisex",
     "fit": "regular",
-    "material": "Soft Cotton",
-    "price": 24.99,
-    "color": { "name": "black", "hex": "#000000" },
-    "sizes": { "S": 15, "M": 20, "L": 18, "XL": 12 },
-    "description": "Everyday black t-shirt in soft combed cotton with a clean minimal chest logo.",
+    "material": "Brushed Fleece",
+    "price": 19.99,
+
+    "color": { "name": "deep navy", "hex": "#000080" },
+    "sizes": { "S": 6, "M": 10, "L": 10, "XL": 6 },
+
+    "description": "Deep navy hoodie that feels slightly more dressed-up than pure black.",
+
     "fabric": {
-      "materialMain": "Soft Cotton",
-      "materialBlend": "100% cotton",
-      "gsm": 180,
-      "stretchLevel": "low",
-      "thickness": "light",
-      "warmth": "summer",
-      "breathability": "high",
+      "materialMain": "Brushed Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 360,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
       "softness": "high"
     },
     "style": {
-      "dressCode": "casual",
-      "styleTags": ["tshirt", "minimal", "logo-front", "everyday"],
-      "useCases": ["daily wear", "campus", "layering"],
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "minimal", "navy-core"],
+      "useCases": ["daily wear", "office-casual", "dinners"],
       "pattern": "solid",
       "logoPlacement": "front-small"
     },
     "fitProfile": {
       "fit": "regular",
       "length": "regular",
-      "bodyShapes": ["slim", "athletic", "average"],
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
       "recommendedGender": "unisex",
-      "stretchHelpsFit": false
+      "stretchHelpsFit": true
     },
     "care": {
       "washTemp": "30°C gentle wash",
-      "dryer": "low",
+      "dryer": "no",
       "iron": "low",
-      "careNotes": "Wash inside out to protect the print. Do not bleach."
+      "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
     },
-    "styleNotes": "Works with jeans, cargos or shorts; a safe base layer for any all-black fit.",
-    "fitNotes": "True-to-size regular tee; size up if you prefer a relaxed streetwear silhouette."
+    "styleNotes": "Looks clean with grey or stone trousers when you want low-effort polish.",
+    "fitNotes": "Relaxed enough at the shoulders to sit comfortably over a tee."
   },
 
-  "CUTE002": {
-    "groupKey": "tshirt-casual-cotton-24.99",
-    "name": "T-Shirt (Soft Cotton)",
+  "CCH005": {
+    "groupKey": "hoodie-casual-fleece-19.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Hoodie",
     "tier": "casual",
-    "type": "tshirt",
+    "type": "hoodie",
     "gender": "unisex",
     "fit": "regular",
-    "material": "Soft Cotton",
-    "price": 24.99,
+    "material": "Brushed Fleece",
+    "price": 19.99,
+
+    "color": { "name": "burgundy", "hex": "#58151C" },
+    "sizes": { "S": 5, "M": 9, "L": 9, "XL": 5 },
+
+    "description": "Burgundy casual hoodie for when you want a bit more color in a simple outfit.",
+
+    "fabric": {
+      "materialMain": "Brushed Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 360,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "minimal", "color-pop"],
+      "useCases": ["daily wear", "evenings out", "concerts"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
+    },
+    "styleNotes": "Pop of color that still feels muted enough for everyday wear.",
+    "fitNotes": "True-to-size body; go one size up if you want a draped, street fit."
+  },
+
+  "CCH006": {
+    "groupKey": "hoodie-casual-fleece-19.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Hoodie",
+    "tier": "casual",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Brushed Fleece",
+    "price": 19.99,
+
+    "color": { "name": "sand", "hex": "#E4D1B9" },
+    "sizes": { "S": 7, "M": 9, "L": 9, "XL": 5 },
+
+    "description": "Sand-toned hoodie that leans into softer, lifestyle streetwear.",
+
+    "fabric": {
+      "materialMain": "Brushed Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 360,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "minimal", "earth-tone"],
+      "useCases": ["daily wear", "coffee runs", "weekend travel"],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out with similar colors. Do not bleach. Avoid high-heat tumble dry."
+    },
+    "styleNotes": "Works especially well with light denim and chunky sneakers.",
+    "fitNotes": "Same pattern as CCH001 with a bit more room through the waist."
+  },
+
+  "CCT007": {
+    "groupKey": "tee-casual-cotton-14.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Tee",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Cotton Jersey",
+    "price": 14.99,
+
     "color": { "name": "white", "hex": "#FFFFFF" },
-    "sizes": { "S": 20, "M": 25, "L": 20, "XL": 15 },
-    "description": "Soft white cotton t-shirt with a subtle Cove logo for clean, bright outfits.",
+    "sizes": { "S": 15, "M": 18, "L": 14, "XL": 10 },
+
+    "description": "Everyday white tee in soft cotton jersey, built as a clean base layer.",
+
     "fabric": {
-      "materialMain": "Soft Cotton",
+      "materialMain": "Cotton Jersey",
       "materialBlend": "100% cotton",
       "gsm": 180,
       "stretchLevel": "low",
       "thickness": "light",
-      "warmth": "summer",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "minimal", "base-layer", "white-core"],
+      "useCases": ["daily wear", "layering", "gym"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors. Tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Works under any hoodie or jacket; keep as a wardrobe basic.",
+    "fitNotes": "Regular fit; if you like oversized tees, consider going one size up."
+  },
+
+  "CCT008": {
+    "groupKey": "tee-casual-cotton-14.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Tee",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Cotton Jersey",
+    "price": 14.99,
+
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 14, "M": 18, "L": 15, "XL": 10 },
+
+    "description": "Black cotton tee that slots into almost any casual outfit.",
+
+    "fabric": {
+      "materialMain": "Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "minimal", "base-layer", "black-core"],
+      "useCases": ["daily wear", "night looks"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors. Tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Pairs nicely with light denim or technical pants.",
+    "fitNotes": "Straight body; sleeves hit mid-bicep on most heights."
+  },
+
+  "CCT009": {
+    "groupKey": "tee-casual-cotton-14.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Tee",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Cotton Jersey",
+    "price": 14.99,
+
+    "color": { "name": "sand", "hex": "#E4D1B9" },
+    "sizes": { "S": 12, "M": 16, "L": 14, "XL": 10 },
+
+    "description": "Sand casual tee that softens the overall look of jeans or cargos.",
+
+    "fabric": {
+      "materialMain": "Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "minimal", "base-layer", "earth-tone"],
+      "useCases": ["daily wear", "city walks", "coffee runs"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors. Tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Good match for white sneakers and neutral outerwear.",
+    "fitNotes": "Relaxed through waist without feeling boxy."
+  },
+
+  "CCT010": {
+    "groupKey": "tee-casual-cotton-14.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Tee",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Cotton Jersey",
+    "price": 14.99,
+
+    "color": { "name": "olive", "hex": "#556B2F" },
+    "sizes": { "S": 10, "M": 14, "L": 12, "XL": 8 },
+
+    "description": "Olive tee that adds subtle color but stays easy to style.",
+
+    "fabric": {
+      "materialMain": "Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "minimal", "base-layer", "green-accent"],
+      "useCases": ["daily wear", "weekend outings"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors. Tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Works well with black cargos and a black hoodie on top.",
+    "fitNotes": "Standard tee fit; order usual size."
+  },
+
+  "CCT011": {
+    "groupKey": "tee-casual-cotton-14.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Tee",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Cotton Jersey",
+    "price": 14.99,
+
+    "color": { "name": "slate grey", "hex": "#708090" },
+    "sizes": { "S": 11, "M": 15, "L": 13, "XL": 9 },
+
+    "description": "Slate grey tee with a slightly cooler tone for casual outfits.",
+
+    "fabric": {
+      "materialMain": "Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "minimal", "base-layer", "grey-core"],
+      "useCases": ["daily wear", "office-casual", "commute"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors. Tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Neutral enough for layering under blazers or overshirts.",
+    "fitNotes": "Regular fit with a straight hem that hits at hip."
+  },
+
+  "CCT012": {
+    "groupKey": "tee-casual-cotton-14.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Tee",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Cotton Jersey",
+    "price": 14.99,
+
+    "color": { "name": "dusty pink", "hex": "#D8A7B1" },
+    "sizes": { "S": 9, "M": 12, "L": 11, "XL": 7 },
+
+    "description": "Dusty pink tee for softer, more playful casual looks.",
+
+    "fabric": {
+      "materialMain": "Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 180,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "minimal", "base-layer", "color-pop"],
+      "useCases": ["daily wear", "weekend meetups"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors. Tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Stands out nicely under darker outerwear without feeling too bright.",
+    "fitNotes": "Same base pattern as CCT007; size choice can mirror that tee."
+  },
+
+  "CCB013": {
+    "groupKey": "bomber-casual-nylon-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Bomber Jacket",
+    "tier": "casual",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Nylon Shell",
+    "price": 39.99,
+
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 6, "M": 9, "L": 9, "XL": 5 },
+
+    "description": "Black nylon bomber built as an easy everyday outer layer.",
+
+    "fabric": {
+      "materialMain": "Nylon",
+      "materialBlend": "100% nylon shell / polyester lining",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "casual-outerwear", "black-core"],
+      "useCases": ["transitional weather", "commute", "evenings"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Zip up before washing. Do not tumble dry to preserve shape."
+    },
+    "styleNotes": "Pairs with almost anything; think of it as your default outer layer.",
+    "fitNotes": "Waist-length fit with light room through the chest for a hoodie underneath."
+  },
+
+  "CCB014": {
+    "groupKey": "bomber-casual-nylon-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Bomber Jacket",
+    "tier": "casual",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Nylon Shell",
+    "price": 39.99,
+
+    "color": { "name": "olive", "hex": "#556B2F" },
+    "sizes": { "S": 5, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Olive casual bomber for simple, low-effort outfits.",
+
+    "fabric": {
+      "materialMain": "Nylon",
+      "materialBlend": "100% nylon shell / polyester lining",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "casual-outerwear", "earth-tone"],
+      "useCases": ["transitional weather", "weekend wear"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Zip up before washing. Do not tumble dry to preserve shape."
+    },
+    "styleNotes": "Looks good with black jeans and neutral tees.",
+    "fitNotes": "True to size; ribbed hem sits at waist without riding up."
+  },
+
+  "CCB015": {
+    "groupKey": "bomber-casual-nylon-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Bomber Jacket",
+    "tier": "casual",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Nylon Shell",
+    "price": 39.99,
+
+    "color": { "name": "navy", "hex": "#000080" },
+    "sizes": { "S": 5, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Navy bomber that shifts slightly smarter than the classic black.",
+
+    "fabric": {
+      "materialMain": "Nylon",
+      "materialBlend": "100% nylon shell / polyester lining",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "casual-outerwear", "navy-core"],
+      "useCases": ["transitional weather", "office-casual"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Zip up before washing. Do not tumble dry to preserve shape."
+    },
+    "styleNotes": "Pairs nicely with chinos or tapered trousers.",
+    "fitNotes": "Regular fit; allows layering without feeling bulky."
+  },
+
+  "CCB016": {
+    "groupKey": "bomber-casual-nylon-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Bomber Jacket",
+    "tier": "casual",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Nylon Shell",
+    "price": 39.99,
+
+    "color": { "name": "steel grey", "hex": "#4B5057" },
+    "sizes": { "S": 4, "M": 7, "L": 7, "XL": 3 },
+
+    "description": "Steel grey bomber that feels more technical and modern.",
+
+    "fabric": {
+      "materialMain": "Nylon",
+      "materialBlend": "100% nylon shell / polyester lining",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "casual-outerwear", "tech-core"],
+      "useCases": ["transitional weather", "city commutes"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Zip up before washing. Do not tumble dry to preserve shape."
+    },
+    "styleNotes": "Works with technical pants and trainers for a techwear-lite look.",
+    "fitNotes": "Slightly neater through shoulders for a sharper outline."
+  },
+
+  "CCJ017": {
+    "groupKey": "jacket-casual-denim-49.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Denim Jacket",
+    "tier": "casual",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Denim",
+    "price": 49.99,
+
+    "color": { "name": "mid blue", "hex": "#336699" },
+    "sizes": { "S": 6, "M": 9, "L": 9, "XL": 5 },
+
+    "description": "Mid-blue denim jacket with a classic casual cut.",
+
+    "fabric": {
+      "materialMain": "Denim",
+      "materialBlend": "100% cotton",
+      "gsm": 400,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["denim-jacket", "casual-outerwear", "classic-denim"],
+      "useCases": ["spring days", "summer evenings", "weekend outfits"],
+      "pattern": "solid",
+      "logoPlacement": "back-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "cold",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash sparingly inside out to preserve color; hang dry."
+    },
+    "styleNotes": "Works with almost any tee and neutral trousers.",
+    "fitNotes": "Regular fit through shoulders; sits just at the hip."
+  },
+
+  "CCJ018": {
+    "groupKey": "jacket-casual-denim-49.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Denim Jacket",
+    "tier": "casual",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Denim",
+    "price": 49.99,
+
+    "color": { "name": "washed black", "hex": "#2F2F2F" },
+    "sizes": { "S": 5, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Washed black denim jacket with a slightly worn-in look.",
+
+    "fabric": {
+      "materialMain": "Denim",
+      "materialBlend": "100% cotton",
+      "gsm": 400,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["denim-jacket", "casual-outerwear", "washed-denim"],
+      "useCases": ["spring days", "summer evenings", "daily wear"],
+      "pattern": "solid",
+      "logoPlacement": "back-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "cold",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash sparingly inside out to preserve color; hang dry."
+    },
+    "styleNotes": "Great with white or sand tees underneath.",
+    "fitNotes": "Same block as CCJ017 but reads a touch slimmer due to darker wash."
+  },
+
+  "CCJ019": {
+    "groupKey": "jacket-casual-denim-49.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Denim Jacket",
+    "tier": "casual",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Denim",
+    "price": 49.99,
+
+    "color": { "name": "ecru", "hex": "#F2E9E4" },
+    "sizes": { "S": 4, "M": 7, "L": 7, "XL": 3 },
+
+    "description": "Ecru denim jacket for lighter, spring-ready outfits.",
+
+    "fabric": {
+      "materialMain": "Denim",
+      "materialBlend": "100% cotton",
+      "gsm": 400,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["denim-jacket", "casual-outerwear", "light-denim"],
+      "useCases": ["spring days", "summer evenings", "weekend outfits"],
+      "pattern": "solid",
+      "logoPlacement": "back-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "cold",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash sparingly inside out to preserve color; hang dry."
+    },
+    "styleNotes": "Works nicely with light blue denim or darker cargos.",
+    "fitNotes": "Body fit mirrors CCJ017; consider usual size."
+  },
+
+  "CCJ020": {
+    "groupKey": "jacket-casual-denim-49.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Denim Jacket",
+    "tier": "casual",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Denim",
+    "price": 49.99,
+
+    "color": { "name": "dark indigo", "hex": "#102542" },
+    "sizes": { "S": 4, "M": 7, "L": 7, "XL": 3 },
+
+    "description": "Dark indigo denim jacket that can pass for smart-casual settings.",
+
+    "fabric": {
+      "materialMain": "Denim",
+      "materialBlend": "100% cotton",
+      "gsm": 400,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": ["denim-jacket", "casual-outerwear", "indigo-core"],
+      "useCases": ["spring days", "summer evenings", "evenings out"],
+      "pattern": "solid",
+      "logoPlacement": "back-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "cold",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash sparingly inside out to preserve color; hang dry."
+    },
+    "styleNotes": "Pairs well with chinos and leather sneakers.",
+    "fitNotes": "Structured enough to hold shape but still comfortable for daily wear."
+  },
+
+    "CCH101": {
+    "groupKey": "hoodie-casual-loopback-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Loopback Hoodie",
+    "tier": "casual",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Loopback Fleece",
+    "price": 24.99,
+
+    "color": { "name": "stone grey", "hex": "#B0B0B0" },
+    "sizes": { "S": 8, "M": 10, "L": 8, "XL": 4 },
+
+    "description": "Casual loopback hoodie in stone grey with a lighter, spring-ready weight.",
+
+    "fabric": {
+      "materialMain": "Loopback Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 300,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
       "breathability": "high",
       "softness": "high"
     },
     "style": {
-      "dressCode": "casual",
-      "styleTags": ["tshirt", "minimal", "clean", "logo-front"],
-      "useCases": ["summer outfits", "layering", "office-casual"],
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "casual", "loopback", "minimal"],
+      "useCases": ["daily wear", "campus", "travel"],
       "pattern": "solid",
       "logoPlacement": "front-small"
     },
     "fitProfile": {
       "fit": "regular",
       "length": "regular",
-      "bodyShapes": ["slim", "athletic", "average"],
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
       "recommendedGender": "unisex",
-      "stretchHelpsFit": false
+      "stretchHelpsFit": true
     },
     "care": {
       "washTemp": "30°C gentle wash",
-      "dryer": "low",
+      "dryer": "no",
       "iron": "low",
-      "careNotes": "Wash with similar colors. Avoid strong detergents to keep white bright."
+      "careNotes": "Wash inside out; line dry to preserve loopback texture."
     },
-    "styleNotes": "Pairs well with blue denim or darker bottoms; great base for layering under jackets.",
-    "fitNotes": "If you are between sizes, go up for more comfort around shoulders and chest."
+    "styleNotes": "Lighter loopback fabric makes this feel more spring/summer-friendly than the heavier fleece hoodie.",
+    "fitNotes": "Same regular casual hoodie block; the lighter fabric drapes a bit softer."
   },
 
-  "CUTE003": {
-    "groupKey": "tshirt-casual-cotton-24.99",
-    "name": "T-Shirt (Soft Cotton)",
+  "CCT102": {
+    "groupKey": "tee-casual-graphic-21.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Casual Graphic Tee",
     "tier": "casual",
-    "type": "tshirt",
+    "type": "tee",
     "gender": "unisex",
-    "fit": "relaxed",
+    "fit": "regular",
     "material": "Soft Cotton",
-    "price": 24.99,
-    "color": { "name": "cream", "hex": "#F5F5DC" },
-    "sizes": { "S": 10, "M": 15, "L": 15, "XL": 10 },
-    "description": "Relaxed-fit cream t-shirt with a slightly dropped shoulder for a softer streetwear look.",
+    "price": 21.99,
+
+    "color": { "name": "black with print", "hex": "#000000" },
+    "sizes": { "S": 12, "M": 14, "L": 10, "XL": 6 },
+
+    "description": "Casual graphic tee in soft cotton with a clean front print designed for daily wear.",
+
     "fabric": {
       "materialMain": "Soft Cotton",
       "materialBlend": "100% cotton",
       "gsm": 190,
       "stretchLevel": "low",
-      "thickness": "light",
-      "warmth": "summer",
+      "thickness": "medium",
+      "warmth": "all-season",
       "breathability": "high",
       "softness": "high"
     },
     "style": {
+      "dressCode": "casual",
+      "styleTags": ["tee", "casual", "graphic"],
+      "useCases": ["daily wear", "campus", "weekend"],
+      "pattern": "graphic-front",
+      "logoPlacement": "front-print"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "low",
+      "careNotes": "Wash inside out to protect the print; avoid high heat on the graphic."
+    },
+    "styleNotes": "Designed as an entry graphic piece for the casual tier; pairs with jeans or cargos.",
+    "fitNotes": "Regular tee block; order your usual size."
+  },
+
+
+    "COH001": {
+    "groupKey": "hoodie-originals-fleece-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Hoodie",
+    "tier": "originals",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Heavyweight Fleece",
+    "price": 39.99,
+
+    "color": { "name": "jet black", "hex": "#050505" },
+    "sizes": { "S": 5, "M": 10, "L": 10, "XL": 5 },
+
+    "description": "Heavyweight black hoodie with a relaxed Originals fit and thicker fleece for colder days.",
+
+    "fabric": {
+      "materialMain": "Heavyweight Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
       "dressCode": "streetwear",
-      "styleTags": ["tshirt", "relaxed", "cream", "drop-shoulder"],
-      "useCases": ["daily wear", "coffee runs", "city walks"],
+      "styleTags": ["hoodie", "originals", "minimal", "logo-front"],
+      "useCases": ["chilly evenings", "city nights", "campus days"],
       "pattern": "solid",
-      "logoPlacement": "front-small"
+      "logoPlacement": "front-centered"
     },
     "fitProfile": {
       "fit": "relaxed",
       "length": "regular",
-      "bodyShapes": ["athletic", "broad-shoulder", "average"],
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on a gentle cycle. Avoid high heat in dryer to protect fleece."
+    },
+    "styleNotes": "Jet black reads cleaner and more premium than a basic hoodie, especially with dark denim.",
+    "fitNotes": "Relaxed through shoulders and chest; pick your usual size for laid-back street fit."
+  },
+
+  "COH002": {
+    "groupKey": "hoodie-originals-fleece-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Hoodie",
+    "tier": "originals",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Heavyweight Fleece",
+    "price": 39.99,
+
+    "color": { "name": "ink blue", "hex": "#1D3557" },
+    "sizes": { "S": 4, "M": 8, "L": 9, "XL": 4 },
+
+    "description": "Ink blue Originals hoodie with a deeper tone that still feels easy to wear daily.",
+
+    "fabric": {
+      "materialMain": "Heavyweight Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "originals", "navy-core"],
+      "useCases": ["daily wear", "office-casual", "evenings"],
+      "pattern": "solid",
+      "logoPlacement": "front-centered"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on a gentle cycle. Avoid high heat in dryer to protect fleece."
+    },
+    "styleNotes": "Ink blue feels a bit more dressed-up than pure black but stays easy to style.",
+    "fitNotes": "Same relaxed pattern as COH001; choose based on color preference."
+  },
+
+  "COH003": {
+    "groupKey": "hoodie-originals-fleece-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Hoodie",
+    "tier": "originals",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Heavyweight Fleece",
+    "price": 39.99,
+
+    "color": { "name": "stone beige", "hex": "#D5C4A1" },
+    "sizes": { "S": 6, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Stone beige Originals hoodie with a softer, lifestyle-driven color.",
+
+    "fabric": {
+      "materialMain": "Heavyweight Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "originals", "earth-tone"],
+      "useCases": ["daily wear", "coffee runs", "weekend travel"],
+      "pattern": "solid",
+      "logoPlacement": "front-centered"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on a gentle cycle. Avoid high heat in dryer to protect fleece."
+    },
+    "styleNotes": "Pairs nicely with light denim and neutral sneakers for a softer palette.",
+    "fitNotes": "Relaxed in body without being huge; size up only if you want a very oversized look."
+  },
+
+  "COH004": {
+    "groupKey": "hoodie-originals-fleece-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Hoodie",
+    "tier": "originals",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Heavyweight Fleece",
+    "price": 39.99,
+
+    "color": { "name": "charcoal", "hex": "#333333" },
+    "sizes": { "S": 5, "M": 9, "L": 9, "XL": 4 },
+
+    "description": "Charcoal Originals hoodie that feels slightly sharper than pure black.",
+
+    "fabric": {
+      "materialMain": "Heavyweight Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "originals", "grey-core"],
+      "useCases": ["daily wear", "office-casual", "evenings"],
+      "pattern": "solid",
+      "logoPlacement": "front-centered"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on a gentle cycle. Avoid high heat in dryer to protect fleece."
+    },
+    "styleNotes": "Charcoal is easy to pair with both black and blue denim.",
+    "fitNotes": "Relaxed shoulders; room for a tee or light knit underneath."
+  },
+
+  "COH005": {
+    "groupKey": "hoodie-originals-fleece-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Hoodie",
+    "tier": "originals",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Heavyweight Fleece",
+    "price": 39.99,
+
+    "color": { "name": "forest green", "hex": "#228B22" },
+    "sizes": { "S": 4, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Forest green Originals hoodie with a deeper, woods-inspired tone.",
+
+    "fabric": {
+      "materialMain": "Heavyweight Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "originals", "green-accent"],
+      "useCases": ["daily wear", "weekend trips", "outdoor walks"],
+      "pattern": "solid",
+      "logoPlacement": "front-centered"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on a gentle cycle. Avoid high heat in dryer to protect fleece."
+    },
+    "styleNotes": "Looks strong with black cargo pants and neutral sneakers.",
+    "fitNotes": "Same relaxed block as other Originals hoodies; size choice is mostly about length preference."
+  },
+
+  "COH006": {
+    "groupKey": "hoodie-originals-fleece-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Hoodie",
+    "tier": "originals",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Heavyweight Fleece",
+    "price": 39.99,
+
+    "color": { "name": "burgundy", "hex": "#58151C" },
+    "sizes": { "S": 4, "M": 7, "L": 7, "XL": 3 },
+
+    "description": "Burgundy Originals hoodie for a richer color that still feels wearable.",
+
+    "fabric": {
+      "materialMain": "Heavyweight Fleece",
+      "materialBlend": "80% cotton / 20% polyester",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": ["hoodie", "originals", "color-pop"],
+      "useCases": ["city nights", "casual dinners", "weekend wear"],
+      "pattern": "solid",
+      "logoPlacement": "front-centered"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on a gentle cycle. Avoid high heat in dryer to protect fleece."
+    },
+    "styleNotes": "Pairs well with black or grey bottoms when you want something slightly bolder.",
+    "fitNotes": "Relaxed fit; if between sizes, shorter people can size down for a neater length."
+  },
+
+  "COT007": {
+    "groupKey": "tee-originals-heavycotton-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Tee",
+    "tier": "originals",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Heavy Cotton Jersey",
+    "price": 24.99,
+
+    "color": { "name": "off-white", "hex": "#F7F3E8" },
+    "sizes": { "S": 10, "M": 14, "L": 12, "XL": 8 },
+
+    "description": "Off-white Originals tee in a heavier cotton jersey with a cleaner drape.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 220,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "originals", "minimal", "off-white"],
+      "useCases": ["daily wear", "office-casual", "evenings"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Heavier cotton means the tee holds shape and feels more elevated than a basic tee.",
+    "fitNotes": "True-to-size for a neat regular fit; size up for relaxed tee silhouettes."
+  },
+
+  "COT008": {
+    "groupKey": "tee-originals-heavycotton-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Tee",
+    "tier": "originals",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Heavy Cotton Jersey",
+    "price": 24.99,
+
+    "color": { "name": "charcoal", "hex": "#333333" },
+    "sizes": { "S": 9, "M": 13, "L": 11, "XL": 7 },
+
+    "description": "Charcoal Originals tee that feels more structured than a thin everyday shirt.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 220,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "originals", "grey-core"],
+      "useCases": ["daily wear", "office-casual", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Charcoal goes well under blazers or overshirts when you want a smarter edge.",
+    "fitNotes": "Straight through the body; sleeves cover upper bicep."
+  },
+
+  "COT009": {
+    "groupKey": "tee-originals-heavycotton-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Tee",
+    "tier": "originals",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Heavy Cotton Jersey",
+    "price": 24.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 9, "M": 13, "L": 11, "XL": 7 },
+
+    "description": "Ink navy tee that pairs well with denim and tailored trousers.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 220,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "originals", "navy-core"],
+      "useCases": ["daily wear", "dinners", "evenings out"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "A good option when you want color but still want it to read almost neutral.",
+    "fitNotes": "Standard length; sits at hip on most heights."
+  },
+
+  "COT010": {
+    "groupKey": "tee-originals-heavycotton-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Tee",
+    "tier": "originals",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Heavy Cotton Jersey",
+    "price": 24.99,
+
+    "color": { "name": "stone beige", "hex": "#D5C4A1" },
+    "sizes": { "S": 8, "M": 12, "L": 11, "XL": 7 },
+
+    "description": "Stone beige Originals tee that leans softly into lifestyle streetwear.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 220,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "originals", "earth-tone"],
+      "useCases": ["daily wear", "coffee runs", "weekend city"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Pairs well with dark trousers or black denim when you want contrast.",
+    "fitNotes": "Same block as COT007; use size for desired drape."
+  },
+
+  "COT011": {
+    "groupKey": "tee-originals-heavycotton-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Tee",
+    "tier": "originals",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Heavy Cotton Jersey",
+    "price": 24.99,
+
+    "color": { "name": "deep burgundy", "hex": "#58151C" },
+    "sizes": { "S": 7, "M": 11, "L": 10, "XL": 6 },
+
+    "description": "Deep burgundy Originals tee when you want a richer color in a premium fabric.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 220,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "originals", "color-pop"],
+      "useCases": ["evenings out", "events", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Works nicely under a black overshirt or bomber for depth.",
+    "fitNotes": "Regular block; if you want a tucked-in smart look, stay true to size."
+  },
+
+  "COT012": {
+    "groupKey": "tee-originals-heavycotton-24.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Tee",
+    "tier": "originals",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Heavy Cotton Jersey",
+    "price": 24.99,
+
+    "color": { "name": "slate blue", "hex": "#4A6FA5" },
+    "sizes": { "S": 8, "M": 12, "L": 10, "XL": 6 },
+
+    "description": "Slate blue Originals tee that sits between neutral and accent color.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 220,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "originals", "blue-core"],
+      "useCases": ["daily wear", "city walks", "weekend meetups"],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to limit shrinkage."
+    },
+    "styleNotes": "Looks strong with stone or grey trousers for a subtle color contrast.",
+    "fitNotes": "Same pattern as other Originals tees; choose based on color story."
+  },
+
+  "COB013": {
+    "groupKey": "bomber-originals-satin-69.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Satin Bomber",
+    "tier": "originals",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Satin",
+    "price": 69.99,
+
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 4, "M": 7, "L": 7, "XL": 4 },
+
+    "description": "Black satin Originals bomber with a subtle sheen for night and city looks.",
+
+    "fabric": {
+      "materialMain": "Satin",
+      "materialBlend": "100% polyester",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "originals", "satin", "night-out"],
+      "useCases": ["evenings out", "events", "city nights"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
       "recommendedGender": "unisex",
       "stretchHelpsFit": false
     },
     "care": {
       "washTemp": "30°C gentle wash",
-      "dryer": "low",
+      "dryer": "no",
       "iron": "low",
-      "careNotes": "Wash inside out. Avoid high heat to preserve the relaxed drape."
+      "careNotes": "Wash inside out on gentle; do not tumble dry to protect the satin surface."
     },
-    "styleNotes": "Looks great with cargos or joggers; the cream tone softens full-black outfits.",
-    "fitNotes": "Choose your usual size for an intentionally relaxed fit; size down if you want it closer to body."
+    "styleNotes": "Perfect with black jeans and a heavier tee for evening outfits.",
+    "fitNotes": "Regular bomber length with room for a hoodie underneath if needed."
   },
 
-  "CUJG001": {
-    "groupKey": "jogger-casual-frenchterry-39.99",
-    "name": "Jogger (French Terry)",
-    "tier": "casual",
-    "type": "jogger",
+  "COB014": {
+    "groupKey": "bomber-originals-satin-69.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Satin Bomber",
+    "tier": "originals",
+    "type": "bomber",
     "gender": "unisex",
-    "fit": "relaxed",
-    "material": "French Terry",
-    "price": 39.99,
+    "fit": "regular",
+    "material": "Satin",
+    "price": 69.99,
+
+    "color": { "name": "deep burgundy", "hex": "#58151C" },
+    "sizes": { "S": 3, "M": 6, "L": 6, "XL": 3 },
+
+    "description": "Deep burgundy satin bomber that reads more premium and event-ready.",
+
+    "fabric": {
+      "materialMain": "Satin",
+      "materialBlend": "100% polyester",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "originals", "satin", "color-pop"],
+      "useCases": ["events", "dinners", "night out"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on gentle; do not tumble dry to protect the satin surface."
+    },
+    "styleNotes": "Strong piece for nights out when you want color without big logos.",
+    "fitNotes": "Same cut as COB013; mainly a color decision."
+  },
+
+  "COB015": {
+    "groupKey": "bomber-originals-satin-69.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Satin Bomber",
+    "tier": "originals",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Satin",
+    "price": 69.99,
+
+    "color": { "name": "deep green", "hex": "#0B3D2E" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Deep green satin bomber for slightly more subtle evening outfits.",
+
+    "fabric": {
+      "materialMain": "Satin",
+      "materialBlend": "100% polyester",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "originals", "satin", "green-accent"],
+      "useCases": ["evenings out", "city nights", "events"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on gentle; do not tumble dry to protect the satin surface."
+    },
+    "styleNotes": "Deep green works especially well with black or charcoal trousers.",
+    "fitNotes": "Neat through shoulder; if layering heavy hoodies, consider sizing up."
+  },
+
+  "COB016": {
+    "groupKey": "bomber-originals-satin-69.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Satin Bomber",
+    "tier": "originals",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Satin",
+    "price": 69.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Ink navy Originals bomber that feels a step up from basic nylon jackets.",
+
+    "fabric": {
+      "materialMain": "Satin",
+      "materialBlend": "100% polyester",
+      "gsm": 220,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "originals", "satin", "navy-core"],
+      "useCases": ["evenings out", "casual events", "city nights"],
+      "pattern": "solid",
+      "logoPlacement": "sleeve-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on gentle; do not tumble dry to protect the satin surface."
+    },
+    "styleNotes": "Navy satin feels a bit more subtle than black while still looking premium.",
+    "fitNotes": "Same cut as other Originals bombers; choose based on layering needs."
+  },
+
+  "COJ017": {
+    "groupKey": "jacket-originals-woolblend-89.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Wool Jacket",
+    "tier": "originals",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Blend",
+    "price": 89.99,
+
+    "color": { "name": "charcoal", "hex": "#3A3A3A" },
+    "sizes": { "S": 4, "M": 6, "L": 6, "XL": 3 },
+
+    "description": "Charcoal Originals wool-blend jacket for colder days and smarter street looks.",
+
+    "fabric": {
+      "materialMain": "Wool Blend",
+      "materialBlend": "60% wool / 40% polyester",
+      "gsm": 450,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "originals", "outerwear", "charcoal"],
+      "useCases": ["commute", "office", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only for best longevity and to preserve shape."
+    },
+    "styleNotes": "Charcoal wool works with everything from tees to knitwear underneath.",
+    "fitNotes": "Room for a mid-layer; if you prefer a very sharp, close fit, consider sizing down."
+  },
+
+  "COJ018": {
+    "groupKey": "jacket-originals-woolblend-89.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Wool Jacket",
+    "tier": "originals",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Blend",
+    "price": 89.99,
+
+    "color": { "name": "camel", "hex": "#C2A074" },
+    "sizes": { "S": 4, "M": 6, "L": 6, "XL": 3 },
+
+    "description": "Camel Originals wool-blend jacket that leans more dressed-up but still feels modern.",
+
+    "fabric": {
+      "materialMain": "Wool Blend",
+      "materialBlend": "60% wool / 40% polyester",
+      "gsm": 450,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "originals", "outerwear", "camel"],
+      "useCases": ["office", "events", "evenings out"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only for best longevity and to preserve shape."
+    },
+    "styleNotes": "Camel reads more statement; pair with darker trousers for balance.",
+    "fitNotes": "Same cut as COJ017; color choice drives the mood."
+  },
+
+  "COJ019": {
+    "groupKey": "jacket-originals-woolblend-89.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Wool Jacket",
+    "tier": "originals",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Blend",
+    "price": 89.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Ink navy wool-blend Originals jacket for colder days and smarter streetwear.",
+
+    "fabric": {
+      "materialMain": "Wool Blend",
+      "materialBlend": "60% wool / 40% polyester",
+      "gsm": 450,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "originals", "outerwear", "navy-core"],
+      "useCases": ["office", "dinners", "city nights"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only for best longevity and to preserve shape."
+    },
+    "styleNotes": "Navy works great with mid-grey trousers and white sneakers.",
+    "fitNotes": "Room for a knit; select usual size for balanced proportion."
+  },
+
+  "COJ020": {
+    "groupKey": "jacket-originals-woolblend-89.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Wool Jacket",
+    "tier": "originals",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Blend",
+    "price": 89.99,
+
+    "color": { "name": "soft grey", "hex": "#B0B0B0" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Soft grey Originals wool-blend jacket for clean, minimal winter outfits.",
+
+    "fabric": {
+      "materialMain": "Wool Blend",
+      "materialBlend": "60% wool / 40% polyester",
+      "gsm": 450,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "originals", "outerwear", "grey-core"],
+      "useCases": ["commute", "office", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only for best longevity and to preserve shape."
+    },
+    "styleNotes": "Soft grey reads very clean and modern; works with black, navy or stone trousers.",
+    "fitNotes": "Same cut as other Originals jackets; choose based on color and intended layering."
+  },
+
+    "COB101": {
+    "groupKey": "bomber-originals-nylon-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Nylon Bomber",
+    "tier": "originals",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Matte Nylon",
+    "price": 79.99,
+
     "color": { "name": "black", "hex": "#000000" },
-    "sizes": { "S": 12, "M": 18, "L": 18, "XL": 12 },
-    "description": "Relaxed-fit black jogger in mid-weight French terry with elastic cuffs and a clean logo.",
+    "sizes": { "S": 6, "M": 8, "L": 6, "XL": 4 },
+
+    "description": "Originals matte nylon bomber with light padding and a clean, city-ready finish.",
+
     "fabric": {
-      "materialMain": "French Terry",
-      "materialBlend": "80% cotton / 20% polyester",
-      "gsm": 280,
-      "stretchLevel": "medium",
+      "materialMain": "Matte Nylon",
+      "materialBlend": "100% nylon shell, polyester lining",
+      "gsm": 180,
+      "stretchLevel": "none",
       "thickness": "medium",
-      "warmth": "all-season",
+      "warmth": "cool-weather",
       "breathability": "medium",
-      "softness": "high"
+      "softness": "medium"
     },
     "style": {
-      "dressCode": "athleisure",
-      "styleTags": ["jogger", "relaxed", "minimal", "elastic-cuff"],
-      "useCases": ["travel", "gym commute", "lounging"],
+      "dressCode": "streetwear",
+      "styleTags": ["bomber", "originals", "nylon"],
+      "useCases": ["city evenings", "commute", "travel"],
       "pattern": "solid",
-      "logoPlacement": "front-small"
+      "logoPlacement": "sleeve-patch"
     },
     "fitProfile": {
-      "fit": "relaxed",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic", "average"],
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
       "recommendedGender": "unisex",
-      "stretchHelpsFit": true
+      "stretchHelpsFit": false
     },
     "care": {
       "washTemp": "30°C gentle wash",
-      "dryer": "low",
+      "dryer": "no",
       "iron": "low",
-      "careNotes": "Wash inside out to protect the surface. Avoid fabric softeners for better moisture management."
+      "careNotes": "Close zips before washing; line dry to keep the shell smooth."
     },
-    "styleNotes": "Pairs perfectly with hoodies and oversized tees for a full athleisure set.",
-    "fitNotes": "If you are between sizes, choose the larger one for a more relaxed stacked look at the ankle."
+    "styleNotes": "Matte nylon gives an Originals bomber that works both with jeans and tailored trousers.",
+    "fitNotes": "Regular bomber block; choose size based on layering preference."
   },
 
-  "CUJG002": {
-    "groupKey": "jogger-casual-frenchterry-39.99",
-    "name": "Jogger (French Terry)",
-    "tier": "casual",
-    "type": "jogger",
+  "COT102": {
+    "groupKey": "tee-originals-oversized-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Originals Oversized Tee",
+    "tier": "originals",
+    "type": "tee",
     "gender": "unisex",
-    "fit": "relaxed",
-    "material": "French Terry",
-    "price": 39.99,
-    "color": { "name": "grey", "hex": "#B0B0B0" },
-    "sizes": { "S": 10, "M": 15, "L": 15, "XL": 10 },
-    "description": "Grey French terry jogger with a soft handfeel and subtle logo on the pocket.",
+    "fit": "oversized",
+    "material": "Heavy Cotton",
+    "price": 34.99,
+
+    "color": { "name": "optical white", "hex": "#FFFFFF" },
+    "sizes": { "S": 5, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Originals oversized tee in heavy cotton for a more premium drape and silhouette.",
+
     "fabric": {
-      "materialMain": "French Terry",
-      "materialBlend": "80% cotton / 20% polyester",
-      "gsm": 280,
-      "stretchLevel": "medium",
-      "thickness": "medium",
+      "materialMain": "Heavy Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium-heavy",
       "warmth": "all-season",
       "breathability": "medium",
       "softness": "high"
     },
     "style": {
-      "dressCode": "athleisure",
-      "styleTags": ["jogger", "relaxed", "grey-marl", "minimal"],
-      "useCases": ["daily wear", "campus", "loungewear"],
+      "dressCode": "streetwear",
+      "styleTags": ["tee", "originals", "oversized"],
+      "useCases": ["daily wear", "city", "events"],
       "pattern": "solid",
       "logoPlacement": "front-small"
     },
     "fitProfile": {
+      "fit": "oversized",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out; avoid high heat to prevent shrinking."
+    },
+    "styleNotes": "Heavier tee weight and oversized cut push this more into Originals streetwear territory.",
+    "fitNotes": "Expect dropped shoulder and extra room; size down if between sizes."
+  },
+
+
+    "CDH001": {
+    "groupKey": "hoodie-designer-fleece-59.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Premium Brushed Fleece",
+    "price": 59.99,
+
+    "color": { "name": "jet black", "hex": "#050505" },
+    "sizes": { "S": 4, "M": 8, "L": 8, "XL": 4 },
+
+    "description": "Jet black designer hoodie with upgraded fleece, heavier drape, and a more sculpted hood.",
+
+    "fabric": {
+      "materialMain": "Premium Brushed Fleece",
+      "materialBlend": "82% cotton / 18% recycled polyester",
+      "gsm": 400,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "designer", "minimal", "logo-front", "tonal"],
+      "useCases": ["city nights", "casual meetings", "airport travel"],
+      "pattern": "solid",
+      "logoPlacement": "front-embossed"
+    },
+    "fitProfile": {
       "fit": "relaxed",
-      "length": "regular",
-      "bodyShapes": ["slim", "athletic", "average"],
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
       "recommendedGender": "unisex",
       "stretchHelpsFit": true
     },
     "care": {
       "washTemp": "30°C gentle wash",
-      "dryer": "low",
+      "dryer": "no",
       "iron": "low",
-      "careNotes": "Turn inside out before washing. Do not bleach."
+      "careNotes": "Wash inside out on gentle cycle, reshape while damp, and avoid high-heat drying."
     },
-    "styleNotes": "Easy neutral bottom that works with both bright and muted tops.",
-    "fitNotes": "Elastic waistband gives some flexibility; pick your usual waist size."
+    "styleNotes": "The jet black with embossed logo reads premium and works with tailored joggers or cargos.",
+    "fitNotes": "Relaxed through shoulders with slightly longer body; size down if you want a neater designer fit."
+  },
+
+  "CDH002": {
+    "groupKey": "hoodie-designer-fleece-59.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Premium Brushed Fleece",
+    "price": 59.99,
+
+    "color": { "name": "deep charcoal", "hex": "#2B2B2B" },
+    "sizes": { "S": 4, "M": 7, "L": 7, "XL": 3 },
+
+    "description": "Deep charcoal designer hoodie that feels more polished than a basic grey sweatshirt.",
+
+    "fabric": {
+      "materialMain": "Premium Brushed Fleece",
+      "materialBlend": "82% cotton / 18% recycled polyester",
+      "gsm": 400,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "designer", "grey-core"],
+      "useCases": ["office-casual", "city walks", "evenings"],
+      "pattern": "solid",
+      "logoPlacement": "front-embossed"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out, avoid fabric softeners, and line dry to preserve structure."
+    },
+    "styleNotes": "Charcoal tone is ideal with black denim or technical trousers.",
+    "fitNotes": "Same block as CDH001; choose based on color and how oversized you prefer your hoodies."
+  },
+
+  "CDH003": {
+    "groupKey": "hoodie-designer-fleece-59.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Premium Brushed Fleece",
+    "price": 59.99,
+
+    "color": { "name": "stone beige", "hex": "#D5C4A1" },
+    "sizes": { "S": 3, "M": 6, "L": 6, "XL": 3 },
+
+    "description": "Stone beige designer hoodie for softer, elevated lifestyle streetwear fits.",
+
+    "fabric": {
+      "materialMain": "Premium Brushed Fleece",
+      "materialBlend": "82% cotton / 18% recycled polyester",
+      "gsm": 400,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "designer", "earth-tone"],
+      "useCases": ["coffee runs", "travel days", "weekend wear"],
+      "pattern": "solid",
+      "logoPlacement": "front-embossed"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out; avoid drying in direct sunlight to preserve color."
+    },
+    "styleNotes": "Works well with off-white sneakers and tonal bottoms.",
+    "fitNotes": "Longer body works nicely for layering over structured tees."
+  },
+
+  "CDH004": {
+    "groupKey": "hoodie-designer-fleece-59.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Premium Brushed Fleece",
+    "price": 59.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 3, "M": 6, "L": 6, "XL": 3 },
+
+    "description": "Ink navy designer hoodie that balances between neutral and elevated color.",
+
+    "fabric": {
+      "materialMain": "Premium Brushed Fleece",
+      "materialBlend": "82% cotton / 18% recycled polyester",
+      "gsm": 400,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "designer", "navy-core"],
+      "useCases": ["office-casual", "city nights", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "front-embossed"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash with similar colors and line dry."
+    },
+    "styleNotes": "Navy plays well with both denim and tailored trousers.",
+    "fitNotes": "Relaxed upper block; if you layer heavy knits underneath, keep to your usual size."
+  },
+
+  "CDH005": {
+    "groupKey": "hoodie-designer-fleece-59.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Premium Brushed Fleece",
+    "price": 59.99,
+
+    "color": { "name": "forest green", "hex": "#228B22" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Forest green designer hoodie with a deeper, richer tone for statement fits.",
+
+    "fabric": {
+      "materialMain": "Premium Brushed Fleece",
+      "materialBlend": "82% cotton / 18% recycled polyester",
+      "gsm": 400,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "designer", "green-accent"],
+      "useCases": ["evenings", "weekend city", "casual events"],
+      "pattern": "solid",
+      "logoPlacement": "front-embossed"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out; reshape while damp for best drape."
+    },
+    "styleNotes": "Pairs well with black cargos and minimal sneakers.",
+    "fitNotes": "Cut like other Designer hoodies; pick size based on desired drape and layering."
+  },
+
+  "CDH006": {
+    "groupKey": "hoodie-designer-fleece-59.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Premium Brushed Fleece",
+    "price": 59.99,
+
+    "color": { "name": "burgundy", "hex": "#58151C" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Burgundy designer hoodie that leans into richer, more evening-ready color.",
+
+    "fabric": {
+      "materialMain": "Premium Brushed Fleece",
+      "materialBlend": "82% cotton / 18% recycled polyester",
+      "gsm": 400,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "designer", "color-pop"],
+      "useCases": ["dinners", "events", "night out"],
+      "pattern": "solid",
+      "logoPlacement": "front-embossed"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out with dark colors; avoid long sun exposure when drying."
+    },
+    "styleNotes": "Looks strong with dark denim or black tapered trousers.",
+    "fitNotes": "Relaxed fit with enough structure to still feel premium, not sloppy."
+  },
+
+  "CDT007": {
+    "groupKey": "tee-designer-structuredcotton-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Structured Tee",
+    "tier": "designer",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Structured Cotton Jersey",
+    "price": 34.99,
+
+    "color": { "name": "optical white", "hex": "#FFFFFF" },
+    "sizes": { "S": 8, "M": 12, "L": 10, "XL": 6 },
+
+    "description": "Optical white designer tee in a boxy cut with heavier cotton and clean neckline.",
+
+    "fabric": {
+      "materialMain": "Structured Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 230,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "designer", "minimal", "white-core"],
+      "useCases": ["daily wear", "office-casual", "layering"],
+      "pattern": "solid",
+      "logoPlacement": "hem-small"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; avoid bleach to keep white crisp."
+    },
+    "styleNotes": "Boxy cut and heavier fabric give a premium silhouette even with simple jeans.",
+    "fitNotes": "Designed to sit just at the hip; if you want more length, size up."
+  },
+
+  "CDT008": {
+    "groupKey": "tee-designer-structuredcotton-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Structured Tee",
+    "tier": "designer",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Structured Cotton Jersey",
+    "price": 34.99,
+
+    "color": { "name": "jet black", "hex": "#050505" },
+    "sizes": { "S": 7, "M": 11, "L": 9, "XL": 6 },
+
+    "description": "Jet black designer tee with a boxy drape and subtle hem branding.",
+
+    "fabric": {
+      "materialMain": "Structured Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 230,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "designer", "black-core"],
+      "useCases": ["evenings", "events", "daily wear"],
+      "pattern": "solid",
+      "logoPlacement": "hem-small"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out with dark colors; tumble dry low."
+    },
+    "styleNotes": "Jet black and boxy cut read very minimal and modern with tailored trousers.",
+    "fitNotes": "Boxy through body; size down if you want a sharper, closer fit."
+  },
+
+  "CDT009": {
+    "groupKey": "tee-designer-structuredcotton-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Structured Tee",
+    "tier": "designer",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Structured Cotton Jersey",
+    "price": 34.99,
+
+    "color": { "name": "stone grey", "hex": "#7C7C7C" },
+    "sizes": { "S": 7, "M": 11, "L": 9, "XL": 5 },
+
+    "description": "Stone grey designer tee with a boxy cut that works as a standalone or layering piece.",
+
+    "fabric": {
+      "materialMain": "Structured Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 230,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "designer", "grey-core"],
+      "useCases": ["office-casual", "coffee runs", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "hem-small"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low to keep the structure."
+    },
+    "styleNotes": "Stone grey is easy to match with black, navy, or cream trousers.",
+    "fitNotes": "Boxy fit; shorter length makes it feel more intentional and styled."
+  },
+
+  "CDT010": {
+    "groupKey": "tee-designer-structuredcotton-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Structured Tee",
+    "tier": "designer",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Structured Cotton Jersey",
+    "price": 34.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 6, "M": 10, "L": 9, "XL": 5 },
+
+    "description": "Ink navy designer tee that can sit under blazers or be worn solo with denim.",
+
+    "fabric": {
+      "materialMain": "Structured Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 230,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "designer", "navy-core"],
+      "useCases": ["office-casual", "evenings", "events"],
+      "pattern": "solid",
+      "logoPlacement": "hem-small"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low."
+    },
+    "styleNotes": "Navy tee is a good alternative to plain black when you still want a dark core.",
+    "fitNotes": "Works well half-tucked into tailored pants due to structured hem."
+  },
+
+  "CDT011": {
+    "groupKey": "tee-designer-structuredcotton-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Structured Tee",
+    "tier": "designer",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Structured Cotton Jersey",
+    "price": 34.99,
+
+    "color": { "name": "stone beige", "hex": "#D5C4A1" },
+    "sizes": { "S": 6, "M": 10, "L": 9, "XL": 5 },
+
+    "description": "Stone beige structured tee that reads premium and soft in outfits.",
+
+    "fabric": {
+      "materialMain": "Structured Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 230,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "designer", "earth-tone"],
+      "useCases": ["daily wear", "coffee runs", "weekend city"],
+      "pattern": "solid",
+      "logoPlacement": "hem-small"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; tumble dry low."
+    },
+    "styleNotes": "Great with dark outerwear where you want a soft color peeking out.",
+    "fitNotes": "Shorter length and boxy body make it feel styled out of the box."
+  },
+
+  "CDT012": {
+    "groupKey": "tee-designer-structuredcotton-34.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Structured Tee",
+    "tier": "designer",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Structured Cotton Jersey",
+    "price": 34.99,
+
+    "color": { "name": "deep burgundy", "hex": "#58151C" },
+    "sizes": { "S": 6, "M": 9, "L": 8, "XL": 4 },
+
+    "description": "Deep burgundy structured tee when you want a richer designer color story.",
+
+    "fabric": {
+      "materialMain": "Structured Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 230,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "designer", "color-pop"],
+      "useCases": ["evenings", "dinners", "events"],
+      "pattern": "solid",
+      "logoPlacement": "hem-small"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out with dark colors; tumble dry low."
+    },
+    "styleNotes": "Works as the color focus of an otherwise neutral outfit.",
+    "fitNotes": "Boxy fit complements tapered or cropped trousers well."
+  },
+
+  "CDB013": {
+    "groupKey": "bomber-designer-fauxleather-99.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Faux Leather Bomber",
+    "tier": "designer",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Faux Leather",
+    "price": 99.99,
+
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Black faux leather bomber with a clean panel design and minimal branding.",
+
+    "fabric": {
+      "materialMain": "Faux Leather",
+      "materialBlend": "Polyurethane face / polyester backing",
+      "gsm": 260,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "designer", "faux-leather", "night-out"],
+      "useCases": ["events", "night out", "city evenings"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "wipe-clean",
+      "dryer": "no",
+      "iron": "no",
+      "careNotes": "Spot clean with a damp cloth; avoid heat sources and direct sun for long periods."
+    },
+    "styleNotes": "Black faux leather instantly elevates simple tee-and-jeans outfits.",
+    "fitNotes": "Regular bomber fit; if you want a more tailored look, consider sizing down."
+  },
+
+  "CDB014": {
+    "groupKey": "bomber-designer-fauxleather-99.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Faux Leather Bomber",
+    "tier": "designer",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Faux Leather",
+    "price": 99.99,
+
+    "color": { "name": "dark chocolate", "hex": "#3B1F1A" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 3 },
+
+    "description": "Dark chocolate faux leather bomber that feels softer than black but still premium.",
+
+    "fabric": {
+      "materialMain": "Faux Leather",
+      "materialBlend": "Polyurethane face / polyester backing",
+      "gsm": 260,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "designer", "faux-leather", "brown-core"],
+      "useCases": ["dinners", "events", "evenings"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "wipe-clean",
+      "dryer": "no",
+      "iron": "no",
+      "careNotes": "Spot clean with a damp cloth; avoid harsh detergents."
+    },
+    "styleNotes": "Brown faux leather pairs well with off-white tees and black trousers.",
+    "fitNotes": "Standard bomber block; ribbed hem sits at waist."
+  },
+
+  "CDB015": {
+    "groupKey": "bomber-designer-fauxleather-99.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Faux Leather Bomber",
+    "tier": "designer",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Faux Leather",
+    "price": 99.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Ink navy faux leather bomber that feels modern and less expected than black.",
+
+    "fabric": {
+      "materialMain": "Faux Leather",
+      "materialBlend": "Polyurethane face / polyester backing",
+      "gsm": 260,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "designer", "faux-leather", "navy-core"],
+      "useCases": ["city nights", "events", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "wipe-clean",
+      "dryer": "no",
+      "iron": "no",
+      "careNotes": "Spot clean only; store on a wide hanger to avoid creasing."
+    },
+    "styleNotes": "Navy faux leather works nicely with grey or stone trousers.",
+    "fitNotes": "Same fit as other Designer bombers; color drives the mood of the outfit."
+  },
+
+  "CDB016": {
+    "groupKey": "bomber-designer-fauxleather-99.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Faux Leather Bomber",
+    "tier": "designer",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Faux Leather",
+    "price": 99.99,
+
+    "color": { "name": "smoke grey", "hex": "#4A4A4A" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Smoke grey faux leather bomber with a slightly softer, technical look.",
+
+    "fabric": {
+      "materialMain": "Faux Leather",
+      "materialBlend": "Polyurethane face / polyester backing",
+      "gsm": 260,
+      "stretchLevel": "none",
+      "thickness": "medium",
+      "warmth": "transitional",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "designer", "faux-leather", "grey-core"],
+      "useCases": ["city evenings", "casual events", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "wipe-clean",
+      "dryer": "no",
+      "iron": "no",
+      "careNotes": "Wipe with a soft damp cloth; avoid harsh chemicals."
+    },
+    "styleNotes": "Smoke grey looks especially good with black cargos or technical pants.",
+    "fitNotes": "Ribbed cuffs and hem keep shape; regular fit allows a tee or light hoodie underneath."
+  },
+
+  "CDJ017": {
+    "groupKey": "jacket-designer-woolcashmere-129.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Wool-Cashmere Jacket",
+    "tier": "designer",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 129.99,
+
+    "color": { "name": "charcoal", "hex": "#3A3A3A" },
+    "sizes": { "S": 3, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Charcoal wool-cashmere designer jacket with a clean, minimal front and hidden pockets.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 10% cashmere / 20% polyester",
+      "gsm": 480,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "designer", "outerwear", "charcoal"],
+      "useCases": ["office", "dinners", "events"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; store on a shaped hanger to maintain the shoulders."
+    },
+    "styleNotes": "Charcoal wool-cashmere works with tailoring or elevated streetwear underneath.",
+    "fitNotes": "Regular fit with enough room for a knit; stay true to size for intended silhouette."
+  },
+
+  "CDJ018": {
+    "groupKey": "jacket-designer-woolcashmere-129.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Wool-Cashmere Jacket",
+    "tier": "designer",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 129.99,
+
+    "color": { "name": "camel", "hex": "#C2A074" },
+    "sizes": { "S": 3, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Camel wool-cashmere designer jacket for sharper, more statement winter outfits.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 10% cashmere / 20% polyester",
+      "gsm": 480,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "designer", "outerwear", "camel"],
+      "useCases": ["events", "office", "city nights"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; avoid rough bags rubbing against the fabric."
+    },
+    "styleNotes": "Camel tone reads more luxury and works best with darker trousers.",
+    "fitNotes": "Same cut as CDJ017; only color and styling context differ."
+  },
+
+  "CDJ019": {
+    "groupKey": "jacket-designer-woolcashmere-129.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Wool-Cashmere Jacket",
+    "tier": "designer",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 129.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Ink navy wool-cashmere jacket bridging tailoring and streetwear.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 10% cashmere / 20% polyester",
+      "gsm": 480,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "designer", "outerwear", "navy-core"],
+      "useCases": ["commute", "office", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; store in a breathable garment bag in off-season."
+    },
+    "styleNotes": "Navy outerwear is an easy upgrade from black when you want a softer outline.",
+    "fitNotes": "Designed to layer over a knit or hoodie without feeling tight."
+  },
+
+  "CDJ020": {
+    "groupKey": "jacket-designer-woolcashmere-129.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Wool-Cashmere Jacket",
+    "tier": "designer",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 129.99,
+
+    "color": { "name": "soft grey", "hex": "#B0B0B0" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Soft grey wool-cashmere designer jacket for very clean, minimal winter outfits.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 10% cashmere / 20% polyester",
+      "gsm": 480,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["wool-jacket", "designer", "outerwear", "grey-core"],
+      "useCases": ["commute", "office", "events"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "hip-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; avoid carrying rough backpacks that can pill the fabric."
+    },
+    "styleNotes": "Soft grey outerwear reads very modern, especially with monochrome outfits.",
+    "fitNotes": "Same block as other Designer jackets; pick based on how much layering you plan underneath."
+  },
+
+    "CDH101": {
+    "groupKey": "hoodie-designer-silkblend-129.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Silk-Blend Hoodie",
+    "tier": "designer",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Silk-Blend Fleece",
+    "price": 129.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 3, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Designer silk-blend hoodie with a smoother surface and subtle sheen.",
+
+    "fabric": {
+      "materialMain": "Silk-Blend Fleece",
+      "materialBlend": "80% cotton / 15% modal / 5% silk",
+      "gsm": 380,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["hoodie", "designer", "silk-blend"],
+      "useCases": ["dinners", "events", "city evenings"],
+      "pattern": "solid",
+      "logoPlacement": "front-embroidered"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "regular",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "handwash or delicate 30°C",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Use a delicate detergent; dry flat and avoid wringing."
+    },
+    "styleNotes": "The silk blend pushes this hoodie clearly into designer territory; sits well under long coats.",
+    "fitNotes": "Regular body and shoulder; fabric is heavier but still drapes softly."
+  },
+
+  "CDB102": {
+    "groupKey": "bomber-designer-embroidery-189.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Designer Embroidered Bomber",
+    "tier": "designer",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Satin & Embroidery",
+    "price": 189.99,
+
+    "color": { "name": "black with tonal embroidery", "hex": "#000000" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Designer satin bomber with tonal all-over embroidery and minimal branding.",
+
+    "fabric": {
+      "materialMain": "Satin with Embroidery",
+      "materialBlend": "100% polyester satin with embroidery thread",
+      "gsm": 260,
+      "stretchLevel": "none",
+      "thickness": "medium-heavy",
+      "warmth": "cool-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "designer", "embroidery"],
+      "useCases": ["events", "night out", "shows"],
+      "pattern": "tonal-embroidery",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; treat embroidery as delicate."
+    },
+    "styleNotes": "Tonal embroidery turns this into a proper statement piece while staying monochrome.",
+    "fitNotes": "Regular bomber block; sits best with a tee or light knit underneath."
+  },
+
+
+    "CLH001": {
+    "groupKey": "hoodie-limited-fleece-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Hoodie",
+    "tier": "limited",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Ultra Heavy Fleece",
+    "price": 79.99,
+
+    "color": { "name": "jet black", "hex": "#050505" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 2 },
+
+    "description": "Jet black Limited hoodie with ultra-heavy fleece, tonal embroidery and limited-run detailing.",
+
+    "fabric": {
+      "materialMain": "Ultra Heavy Fleece",
+      "materialBlend": "85% cotton / 15% recycled polyester",
+      "gsm": 430,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "limited", "tonal-embroidery", "drop-shoulder"],
+      "useCases": ["city nights", "limited drops", "events"],
+      "pattern": "solid",
+      "logoPlacement": "front-embroidery"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out; avoid tumble drying to protect embroidery and fleece loft."
+    },
+    "styleNotes": "Tonal embroidery and ultra-heavy fleece make this feel like a proper drop piece, not a basic hoodie.",
+    "fitNotes": "Relaxed shoulders and longer body for stacked hems; size down if you want a sharper fit."
+  },
+
+  "CLH002": {
+    "groupKey": "hoodie-limited-fleece-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Hoodie",
+    "tier": "limited",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Ultra Heavy Fleece",
+    "price": 79.99,
+
+    "color": { "name": "deep charcoal", "hex": "#2B2B2B" },
+    "sizes": { "S": 3, "M": 5, "L": 5, "XL": 2 },
+
+    "description": "Deep charcoal Limited hoodie with contrast neckline tape and minimal chest embroidery.",
+
+    "fabric": {
+      "materialMain": "Ultra Heavy Fleece",
+      "materialBlend": "85% cotton / 15% recycled polyester",
+      "gsm": 430,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "limited", "contrast-detail"],
+      "useCases": ["evenings", "office-casual", "city wear"],
+      "pattern": "solid",
+      "logoPlacement": "chest-embroidery"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out on gentle; dry flat to maintain shape."
+    },
+    "styleNotes": "Charcoal is easier to style than jet black when you want visible texture and depth.",
+    "fitNotes": "Same block as CLH001; mostly a color detail decision."
+  },
+
+  "CLH003": {
+    "groupKey": "hoodie-limited-fleece-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Hoodie",
+    "tier": "limited",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Ultra Heavy Fleece",
+    "price": 79.99,
+
+    "color": { "name": "stone beige", "hex": "#D5C4A1" },
+    "sizes": { "S": 3, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Stone beige Limited hoodie with subtle 3D logo embroidery and drop shoulder cut.",
+
+    "fabric": {
+      "materialMain": "Ultra Heavy Fleece",
+      "materialBlend": "85% cotton / 15% recycled polyester",
+      "gsm": 430,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "limited", "earth-tone", "3D-logo"],
+      "useCases": ["weekend city", "coffee runs", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "front-3d-embroidery"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Turn inside out to protect 3D embroidery; reshape while damp."
+    },
+    "styleNotes": "Stone beige with 3D logo looks like a limited capsule drop rather than a core line piece.",
+    "fitNotes": "Relaxed through body; ideal for stacking over structured tees."
+  },
+
+  "CLH004": {
+    "groupKey": "hoodie-limited-fleece-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Hoodie",
+    "tier": "limited",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Ultra Heavy Fleece",
+    "price": 79.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Ink navy Limited hoodie with contrast drawcord tips and minimal front embroidery.",
+
+    "fabric": {
+      "materialMain": "Ultra Heavy Fleece",
+      "materialBlend": "85% cotton / 15% recycled polyester",
+      "gsm": 430,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "limited", "navy-core", "contrast-detail"],
+      "useCases": ["evenings", "office-casual", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "chest-embroidery"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash with similar dark colors; line dry."
+    },
+    "styleNotes": "Navy with minimal branding feels premium but low-key, good for repeat wear.",
+    "fitNotes": "Same Limited block; pick size based on layering needs."
+  },
+
+  "CLH005": {
+    "groupKey": "hoodie-limited-fleece-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Hoodie",
+    "tier": "limited",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Ultra Heavy Fleece",
+    "price": 79.99,
+
+    "color": { "name": "forest green", "hex": "#228B22" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Forest green Limited hoodie with tonal chest logo and contrast inner hood lining.",
+
+    "fabric": {
+      "materialMain": "Ultra Heavy Fleece",
+      "materialBlend": "85% cotton / 15% recycled polyester",
+      "gsm": 430,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "limited", "green-accent"],
+      "useCases": ["weekend city", "events", "travel"],
+      "pattern": "solid",
+      "logoPlacement": "chest-embroidery"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out; avoid high spin speeds to protect fleece."
+    },
+    "styleNotes": "Forest green feels like a proper drop color and works well with black cargos.",
+    "fitNotes": "Drapes heavier because of gsm; stays structured in photos and on body."
+  },
+
+  "CLH006": {
+    "groupKey": "hoodie-limited-fleece-79.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Hoodie",
+    "tier": "limited",
+    "type": "hoodie",
+    "gender": "unisex",
+    "fit": "relaxed",
+    "material": "Ultra Heavy Fleece",
+    "price": 79.99,
+
+    "color": { "name": "deep burgundy", "hex": "#58151C" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Deep burgundy Limited hoodie with tonal embroidery and subtle sleeve branding.",
+
+    "fabric": {
+      "materialMain": "Ultra Heavy Fleece",
+      "materialBlend": "85% cotton / 15% recycled polyester",
+      "gsm": 430,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["hoodie", "limited", "color-pop"],
+      "useCases": ["night out", "events", "city evenings"],
+      "pattern": "solid",
+      "logoPlacement": "chest-embroidery"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "slightly-long",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30°C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out with dark items; line dry."
+    },
+    "styleNotes": "Rich burgundy is strong for limited drops; pairs well with black or grey bottoms.",
+    "fitNotes": "Same Limited block; check shoulder and length for your usual size."
+  },
+
+  "CLT007": {
+    "groupKey": "tee-limited-mercercotton-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Mercerized Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Mercerized Cotton",
+    "price": 39.99,
+
+    "color": { "name": "optical white", "hex": "#FFFFFF" },
+    "sizes": { "S": 6, "M": 9, "L": 8, "XL": 4 },
+
+    "description": "Optical white Limited tee in mercerized cotton with a clean sheen and boxy silhouette.",
+
+    "fabric": {
+      "materialMain": "Mercerized Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "limited", "mercerized", "white-core"],
+      "useCases": ["office-casual", "dinners", "events"],
+      "pattern": "solid",
+      "logoPlacement": "hem-embroidered"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash with similar colors; avoid bleach to protect mercerized finish."
+    },
+    "styleNotes": "Slight sheen from mercerized cotton reads more premium than a standard tee.",
+    "fitNotes": "Boxy through body with shorter length; ideal for cropped or half-tucked looks."
+  },
+
+  "CLT008": {
+    "groupKey": "tee-limited-mercercotton-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Mercerized Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Mercerized Cotton",
+    "price": 39.99,
+
+    "color": { "name": "jet black", "hex": "#050505" },
+    "sizes": { "S": 6, "M": 9, "L": 8, "XL": 4 },
+
+    "description": "Jet black mercerized tee with boxy fit and tonal hem embroidery.",
+
+    "fabric": {
+      "materialMain": "Mercerized Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "limited", "black-core"],
+      "useCases": ["night out", "events", "daily wear"],
+      "pattern": "solid",
+      "logoPlacement": "hem-embroidered"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out with dark colors; tumble dry low."
+    },
+    "styleNotes": "Black mercerized cotton reads almost like a light knit under jackets.",
+    "fitNotes": "Boxy cut; if you prefer longer tees, consider sizing up."
+  },
+
+  "CLT009": {
+    "groupKey": "tee-limited-mercercotton-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Mercerized Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Mercerized Cotton",
+    "price": 39.99,
+
+    "color": { "name": "stone grey", "hex": "#7C7C7C" },
+    "sizes": { "S": 5, "M": 8, "L": 7, "XL": 4 },
+
+    "description": "Stone grey mercerized tee with subtle sheen and minimal branding.",
+
+    "fabric": {
+      "materialMain": "Mercerized Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "limited", "grey-core"],
+      "useCases": ["office-casual", "dinners", "city wear"],
+      "pattern": "solid",
+      "logoPlacement": "hem-embroidered"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash similar colors together; avoid over-drying."
+    },
+    "styleNotes": "Grey mercerized tee works perfectly under bombers and light jackets.",
+    "fitNotes": "Structured hem helps it sit clean over tailored pants."
+  },
+
+  "CLT010": {
+    "groupKey": "tee-limited-mercercotton-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Mercerized Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Mercerized Cotton",
+    "price": 39.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 5, "M": 8, "L": 7, "XL": 4 },
+
+    "description": "Ink navy Limited tee in mercerized cotton with boxy block and clean neckline.",
+
+    "fabric": {
+      "materialMain": "Mercerized Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "limited", "navy-core"],
+      "useCases": ["office-casual", "events", "city nights"],
+      "pattern": "solid",
+      "logoPlacement": "hem-embroidered"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out with dark colors; tumble dry low."
+    },
+    "styleNotes": "Navy with sheen feels like a tailored tee; ideal with wool trousers.",
+    "fitNotes": "Boxy and cropped enough to show waistband details."
+  },
+
+  "CLT011": {
+    "groupKey": "tee-limited-mercercotton-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Mercerized Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Mercerized Cotton",
+    "price": 39.99,
+
+    "color": { "name": "stone beige", "hex": "#D5C4A1" },
+    "sizes": { "S": 5, "M": 8, "L": 7, "XL": 4 },
+
+    "description": "Stone beige mercerized tee with a softer lifestyle tone and limited hem branding.",
+
+    "fabric": {
+      "materialMain": "Mercerized Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "limited", "earth-tone"],
+      "useCases": ["coffee runs", "weekend city", "office-casual"],
+      "pattern": "solid",
+      "logoPlacement": "hem-embroidered"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash similar colors together; avoid harsh detergents."
+    },
+    "styleNotes": "Earth tone and sheen make it easy to build tonal outfits.",
+    "fitNotes": "Same Limited tee block; choose based on color palette."
+  },
+
+  "CLT012": {
+    "groupKey": "tee-limited-mercercotton-39.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Mercerized Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Mercerized Cotton",
+    "price": 39.99,
+
+    "color": { "name": "deep burgundy", "hex": "#58151C" },
+    "sizes": { "S": 4, "M": 7, "L": 6, "XL": 3 },
+
+    "description": "Deep burgundy Limited tee when you want a richer, drop-feeling color story.",
+
+    "fabric": {
+      "materialMain": "Mercerized Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["tee", "limited", "color-pop"],
+      "useCases": ["evenings", "events", "night out"],
+      "pattern": "solid",
+      "logoPlacement": "hem-embroidered"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out with dark colors; tumble dry low."
+    },
+    "styleNotes": "Deep burgundy becomes the focal point in otherwise neutral outfits.",
+    "fitNotes": "Boxy, cropped; looks good with wide or tapered trousers."
+  },
+
+  "CLB013": {
+    "groupKey": "bomber-limited-woolleather-149.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Leather Bomber",
+    "tier": "limited",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool & Faux Leather",
+    "price": 149.99,
+
+    "color": { "name": "black with black sleeves", "hex": "#000000" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Black Limited bomber with wool body and faux leather sleeves, designed as a statement piece.",
+
+    "fabric": {
+      "materialMain": "Wool & Faux Leather",
+      "materialBlend": "60% wool / 40% polyester body, PU sleeves",
+      "gsm": 320,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "limited", "wool-body", "leather-sleeve"],
+      "useCases": ["events", "night out", "city evenings"],
+      "pattern": "color-block subtle",
+      "logoPlacement": "chest-embroidered"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; avoid folding sleeves sharply to preserve faux leather."
+    },
+    "styleNotes": "Classic varsity-inspired shape but in a cleaner, monochrome execution.",
+    "fitNotes": "Regular bomber block; designed to sit at waist with ribbed hem."
+  },
+
+  "CLB014": {
+    "groupKey": "bomber-limited-woolleather-149.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Leather Bomber",
+    "tier": "limited",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool & Faux Leather",
+    "price": 149.99,
+
+    "color": { "name": "charcoal with black sleeves", "hex": "#333333" },
+    "sizes": { "S": 2, "M": 4, "L": 4, "XL": 2 },
+
+    "description": "Charcoal Limited bomber with contrast black faux leather sleeves and tonal embroidery.",
+
+    "fabric": {
+      "materialMain": "Wool & Faux Leather",
+      "materialBlend": "60% wool / 40% polyester body, PU sleeves",
+      "gsm": 320,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "limited", "contrast-sleeve"],
+      "useCases": ["events", "evenings", "city wear"],
+      "pattern": "color-block subtle",
+      "logoPlacement": "chest-embroidered"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; store on a broad hanger to maintain shoulders."
+    },
+    "styleNotes": "Feels like a limited varsity piece but executed in a minimal COVE way.",
+    "fitNotes": "Regular bomber fit, room for a hoodie or tee underneath."
+  },
+
+  "CLB015": {
+    "groupKey": "bomber-limited-woolleather-149.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Leather Bomber",
+    "tier": "limited",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool & Faux Leather",
+    "price": 149.99,
+
+    "color": { "name": "ink navy with navy sleeves", "hex": "#1D3557" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Ink navy Limited bomber with tonal faux leather sleeves and minimal chest logo.",
+
+    "fabric": {
+      "materialMain": "Wool & Faux Leather",
+      "materialBlend": "60% wool / 40% polyester body, PU sleeves",
+      "gsm": 320,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "limited", "navy-core"],
+      "useCases": ["night out", "events", "city evenings"],
+      "pattern": "solid",
+      "logoPlacement": "chest-embroidered"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; avoid crushing sleeves under heavy items."
+    },
+    "styleNotes": "Navy wool and tonal leather feel slightly softer than full black but still premium.",
+    "fitNotes": "Same Limited bomber block; choose by color story."
+  },
+
+  "CLB016": {
+    "groupKey": "bomber-limited-woolleather-149.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Leather Bomber",
+    "tier": "limited",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool & Faux Leather",
+    "price": 149.99,
+
+    "color": { "name": "stone grey with black sleeves", "hex": "#7C7C7C" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Stone grey Limited bomber with black faux leather sleeves and tonal embroidery.",
+
+    "fabric": {
+      "materialMain": "Wool & Faux Leather",
+      "materialBlend": "60% wool / 40% polyester body, PU sleeves",
+      "gsm": 320,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "limited", "contrast-sleeve"],
+      "useCases": ["events", "city evenings", "dinners"],
+      "pattern": "color-block subtle",
+      "logoPlacement": "chest-embroidered"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; store in breathable garment bag."
+    },
+    "styleNotes": "Stone grey body with black sleeves gives a more modern varsity look.",
+    "fitNotes": "Regular bomber fit; ribbed hem and cuffs keep it neat."
+  },
+
+  "CLJ017": {
+    "groupKey": "jacket-limited-woolcashmere-179.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Cashmere Coat",
+    "tier": "limited",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 179.99,
+
+    "color": { "name": "charcoal", "hex": "#3A3A3A" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Charcoal Limited wool-cashmere coat with clean front, hidden buttons and minimal branding.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 15% cashmere / 15% polyester",
+      "gsm": 500,
+      "stretchLevel": "none",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["coat", "limited", "outerwear", "charcoal"],
+      "useCases": ["office", "events", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "mid-thigh",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; hang on a broad hanger and avoid overstuffing closets."
+    },
+    "styleNotes": "Minimal detailing keeps the coat timeless and lets the fabric speak.",
+    "fitNotes": "Regular coat block; room for a knit or hoodie underneath."
+  },
+
+  "CLJ018": {
+    "groupKey": "jacket-limited-woolcashmere-179.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Cashmere Coat",
+    "tier": "limited",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 179.99,
+
+    "color": { "name": "camel", "hex": "#C2A074" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Camel Limited wool-cashmere coat for sharper, more statement winter looks.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 15% cashmere / 15% polyester",
+      "gsm": 500,
+      "stretchLevel": "none",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["coat", "limited", "outerwear", "camel"],
+      "useCases": ["events", "office", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "mid-thigh",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; protect from friction of rough bags to avoid pilling."
+    },
+    "styleNotes": "Camel reads very luxury; pairs well with dark trousers and clean sneakers or boots.",
+    "fitNotes": "Same cut as CLJ017; choose based on color and how loud you want the coat to feel."
+  },
+
+  "CLJ019": {
+    "groupKey": "jacket-limited-woolcashmere-179.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Cashmere Coat",
+    "tier": "limited",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 179.99,
+
+    "color": { "name": "ink navy", "hex": "#1D3557" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Ink navy Limited wool-cashmere coat bridging tailoring and modern streetwear.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 15% cashmere / 15% polyester",
+      "gsm": 500,
+      "stretchLevel": "none",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["coat", "limited", "outerwear", "navy-core"],
+      "useCases": ["commute", "office", "dinners"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "mid-thigh",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; hang to air out between wears instead of over-washing."
+    },
+    "styleNotes": "Navy outerwear is easier to wear daily than black but still sharp.",
+    "fitNotes": "Regular block; sits clean over hoodies, knitwear or tees."
+  },
+
+  "CLJ020": {
+    "groupKey": "jacket-limited-woolcashmere-179.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Wool-Cashmere Coat",
+    "tier": "limited",
+    "type": "jacket",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Wool Cashmere Blend",
+    "price": 179.99,
+
+    "color": { "name": "soft grey", "hex": "#B0B0B0" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Soft grey Limited wool-cashmere coat for very clean, minimal winter outfits.",
+
+    "fabric": {
+      "materialMain": "Wool Cashmere Blend",
+      "materialBlend": "70% wool / 15% cashmere / 15% polyester",
+      "gsm": 500,
+      "stretchLevel": "none",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": ["coat", "limited", "outerwear", "grey-core"],
+      "useCases": ["commute", "office", "events"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "mid-thigh",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "dry-clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Dry-clean only; avoid rough backpack straps that can damage the surface."
+    },
+    "styleNotes": "Soft grey outerwear photographs and reads very modern, perfect for a Limited drop.",
+    "fitNotes": "Same coat block as other Limited coats; sizing is primarily about layering preference."
+  },
+
+    "CLT101": {
+    "groupKey": "tee-limited-graphic-49.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Graphic Tee",
+    "tier": "limited",
+    "type": "tee",
+    "gender": "unisex",
+    "fit": "boxy",
+    "material": "Heavy Cotton",
+    "price": 49.99,
+
+    "color": { "name": "black", "hex": "#000000" },
+    "sizes": { "S": 4, "M": 6, "L": 6, "XL": 3 },
+
+    "description": "Limited tee with a numbered graphic print and boxy block.",
+
+    "fabric": {
+      "materialMain": "Heavy Cotton",
+      "materialBlend": "100% cotton",
+      "gsm": 240,
+      "stretchLevel": "low",
+      "thickness": "medium-heavy",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["tee", "limited", "graphic"],
+      "useCases": ["events", "night out", "drops"],
+      "pattern": "graphic-front",
+      "logoPlacement": "front-print"
+    },
+    "fitProfile": {
+      "fit": "boxy",
+      "length": "slightly-short",
+      "bodyShapes": ["slim", "athletic"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30°C gentle",
+      "dryer": "yes-low",
+      "iron": "low",
+      "careNotes": "Wash inside out; avoid direct iron on the print."
+    },
+    "styleNotes": "Limited print and heavier weight clearly communicate a drop piece.",
+    "fitNotes": "Boxy; designed to sit above the hips."
+  },
+
+  "CLB102": {
+    "groupKey": "bomber-limited-leather-199.99",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-default",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+
+    "name": "Cove Limited Leather Bomber",
+    "tier": "limited",
+    "type": "bomber",
+    "gender": "unisex",
+    "fit": "regular",
+    "material": "Faux Leather",
+    "price": 199.99,
+
+    "color": { "name": "jet black", "hex": "#050505" },
+    "sizes": { "S": 2, "M": 3, "L": 3, "XL": 2 },
+
+    "description": "Limited faux leather bomber with a minimal, luxury-leaning execution.",
+
+    "fabric": {
+      "materialMain": "Faux Leather",
+      "materialBlend": "PU outer, polyester lining",
+      "gsm": 310,
+      "stretchLevel": "none",
+      "thickness": "heavy",
+      "warmth": "cool-weather",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-street",
+      "styleTags": ["bomber", "limited", "leather-look"],
+      "useCases": ["night out", "events", "city evenings"],
+      "pattern": "solid",
+      "logoPlacement": "interior-label"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "waist-length",
+      "bodyShapes": ["slim", "athletic", "broad-shoulder"],
+      "recommendedGender": "unisex",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "wipe-clean or specialist clean",
+      "dryer": "no",
+      "iron": "no",
+      "careNotes": "Avoid heat and strong solvents; wipe with a damp cloth."
+    },
+    "styleNotes": "Reads as a proper Limited drop leather piece but keeps the faux-leather ethics.",
+    "fitNotes": "Regular bomber block; works well over tees and knits."
   }
+
+
+
+
 }

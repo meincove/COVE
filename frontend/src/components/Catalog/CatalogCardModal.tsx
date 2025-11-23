@@ -56,8 +56,12 @@ export default function CatalogCardModal({
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const selectedColor = colors[selectedColorIndex]
-  const images = selectedColor.images
-  const currentImage = images[currentImageIndex]
+  // Normalize images: always an array of non-empty strings
+const images = (selectedColor?.images ?? []).filter(
+  (img) => typeof img === 'string' && img.trim().length > 0
+)
+const hasImages = images.length > 0
+const currentImage = hasImages ? images[currentImageIndex] : null
 
     const sizeKeys = Object.keys(sizes)
   const [selectedSize, setSelectedSize] = useState(
@@ -66,18 +70,21 @@ export default function CatalogCardModal({
 
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length)
-  }
+  if (!hasImages) return
+  setCurrentImageIndex((prev) => (prev + 1) % images.length)
+}
 
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
-  }
+const handlePrevImage = () => {
+  if (!hasImages) return
+  setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+}
+
 
   return (
     <>
       {/* Backdrop */}
       <motion.div
-        className="fixed inset-0 z-[98] backdrop-blur-sm bg-black/10"
+        className="fixed inset-0 z-[98]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -87,34 +94,45 @@ export default function CatalogCardModal({
       {/* Modal card */}
       <motion.div
         className="fixed top-1/2 left-1/2 z-[99] rounded-2xl shadow-2xl overflow-hidden transform -translate-x-1/2 -translate-y-1/2"
-        style={{ width: '50vw', height: '50vh', backgroundColor: '#e5e7eb' }}
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        style={{ width: '50vw', height: '40vh', backgroundColor: '#e5e7eb' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1,  y: 0 }}
+        exit={{ opacity: 0,  y: 20 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-full h-full flex">
+          
           {/* Image section */}
-          <div className="w-1/2 flex flex-col items-center justify-center p-4 relative bg-gray-100">
-            <img
-              src={`/clothing-images/${currentImage}`}
-              alt="Product"
-              className="max-h-full max-w-full object-contain"
-            />
-            <button
-              onClick={handlePrevImage}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white text-black rounded-full p-2 shadow"
-            >
-              ⬅️
-            </button>
-            <button
-              onClick={handleNextImage}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white text-black rounded-full p-2 shadow"
-            >
-              ➡️
-            </button>
-          </div>
+          <div className="w-1/2 flex flex-col items-center justify-center p-4 relative ">
+  {hasImages ? (
+    <>
+      <img
+        src={`/clothing-images/${currentImage}`}
+        alt="Product"
+        className="max-h-full max-w-full object-contain"
+      />
+      <button
+        onClick={handlePrevImage}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2  text-black rounded-full p-2 "
+      >
+        ⬅️
+      </button>
+      <button
+        onClick={handleNextImage}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2  text-black rounded-full p-2 "
+      >
+        ➡️
+      </button>
+    </>
+  ) : (
+    <div className="flex items-center justify-center w-full h-full text-base font-semibold text-gray-500">
+      No images available
+    </div>
+  )}
+</div>
+
+
 
           {/* Info */}
           <motion.div
