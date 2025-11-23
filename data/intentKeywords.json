@@ -1,0 +1,12 @@
+{
+    "policy": [
+      "return", "refund", "shipping", "delivery", "tax", "customs",
+      "vat", "duty", "warranty", "privacy", "gdpr", "cancel"
+    ],
+    "size_fit": [
+      "size", "fit", "tight", "loose", "regular", "height", "weight",
+      "cm", "kg", "inches", "lbs"
+    ],
+    "multi_joiners": [" and ", "&"]
+  }
+  

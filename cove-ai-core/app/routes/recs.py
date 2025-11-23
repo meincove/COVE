@@ -518,6 +518,10 @@ class RecsFilters(BaseModel):
     color: Optional[str] = None   # black, green, etc.
     size: Optional[str] = None    # S, M, L, ...
 
+    # NEW: generic numeric price filters (in euros)
+    price_min: Optional[float] = None
+    price_max: Optional[float] = None
+
 
 class RecsIn(BaseModel):
     anchor_slug: Optional[str] = None  # "hoodie-casual-fleece-59.99"
@@ -614,7 +618,6 @@ def _get_product_meta(conn, slug: str, preferred_color: Optional[str] = None) ->
         "url": url,
         "meta": meta,
     }
-
 
 
 def _clean_title(t: str) -> str:
@@ -744,7 +747,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     Recommend product VARIANTS given:
       - an anchor product slug (similar-to-this)
       - and/or a free-text query
-      - plus optional filters (type/tier/color/size).
+      - plus optional filters (type/tier/color/size/price_min/price_max).
 
     final_score = 0.5 * sim_score
                 + 0.3 * pop_score
@@ -756,6 +759,15 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
 
     filters = body.filters or RecsFilters()
     top_k = max(1, min(body.top_k or 8, 24))
+
+    has_price_filters = filters.price_min is not None or filters.price_max is not None
+    had_filters = any([
+        filters.type,
+        filters.tier,
+        filters.color,
+        filters.size,
+        has_price_filters,
+    ])
 
     # 1) Anchor lookup (optional)
     anchor_meta: Optional[dict] = None
@@ -813,9 +825,11 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
 
     # 4) Filter + score
     candidates: List[Tuple[dict, dict]] = []  # (doc, meta)
-    had_filters = any([filters.type, filters.tier, filters.color, filters.size])
 
     def _matches_filters(meta: dict) -> bool:
+        """
+        Apply type/tier/color/size and price_min/price_max to meta.
+        """
         ptype = (meta.get("type") or "").lower().strip()
         if filters.type and ptype and ptype != filters.type.lower().strip():
             return False
@@ -837,6 +851,25 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 size_keys = {k.upper().strip() for k in sizes.keys()}
                 if requested not in size_keys:
                     return False
+
+        # --- Price filter (meta.price or meta.basePrice) ---
+        if filters.price_min is not None or filters.price_max is not None:
+            raw_price = meta.get("price", None)
+            if raw_price is None:
+                raw_price = meta.get("basePrice", None)
+
+            if raw_price is None:
+                return False
+
+            try:
+                price_val = float(raw_price)
+            except Exception:
+                return False
+
+            if filters.price_min is not None and price_val < filters.price_min - 1e-6:
+                return False
+            if filters.price_max is not None and price_val > filters.price_max + 1e-6:
+                return False
 
         return True
 
@@ -862,14 +895,17 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
 
         slug = meta.get("groupSlug") or _extract_slug(d.get("url", "") or "") or ""
 
-        # Apply filters
+        # Apply filters (including price)
         if not _matches_filters(meta):
             continue
 
         candidates.append((d, meta))
 
-    # If filters killed everything but base search had docs, relax filters
-    if not candidates and docs and had_filters:
+    # If filters killed everything but base search had docs, we may relax
+    # NON-price filters. For now, we NEVER relax price filters:
+    # if user asks "between 15 and 20 euros" and nothing matches, we prefer
+    # returning no items over lying.
+    if not candidates and docs and had_filters and not has_price_filters:
         emit(
             "recs_relax_filters",
             trace_id,
@@ -891,6 +927,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 continue
 
             slug = meta.get("groupSlug") or _extract_slug(d.get("url", "") or "") or ""
+            # NOTE: we skip _matches_filters() here → all non-price filters relaxed
             candidates.append((d, meta))
 
     if not candidates:
@@ -973,4 +1010,3 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     )
 
     return RecsOut(items=top_items)
-

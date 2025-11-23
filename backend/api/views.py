@@ -1,5 +1,3 @@
-
-
 import os
 import json
 import jwt
@@ -15,8 +13,11 @@ from django.core.files.base import ContentFile
 from django.db import connections
 from django.db.utils import OperationalError
 
+# ✅ NEW: import your AI profile model
+from ai_profiles.models import AiUserProfile
 
 User = get_user_model()
+
 
 @csrf_exempt
 def sync_user(request):
@@ -66,6 +67,14 @@ def sync_user(request):
     username = clerk_data.get("username") or None
     image_url = clerk_data.get("image_url", "")
 
+    # (optional) phone number if you want to store it on AiUserProfile later
+    phone_number = None
+    for p in clerk_data.get("phone_numbers", []):
+        pn = p.get("phone_number")
+        if pn:
+            phone_number = pn
+            break
+
     # 💡 Check if user with this email exists but no user_id
     try:
         existing = User.objects.get(email=email)
@@ -100,6 +109,35 @@ def sync_user(request):
         )
         created = True
 
+    # ✅ NEW: ensure AiUserProfile exists and is linked
+    try:
+        # Clerk ID is the natural key, but we also make sure it is linked to this Django user
+        ai_profile, profile_created = AiUserProfile.objects.get_or_create(
+            clerk_id=clerk_user_id,
+            defaults={
+                "user": user,
+                "phone_number": phone_number,
+            },
+        )
+
+        # If profile existed but user/phone changed, keep it in sync
+        updated_fields = []
+
+        if ai_profile.user_id != user.id:
+            ai_profile.user = user
+            updated_fields.append("user")
+
+        if phone_number and getattr(ai_profile, "phone_number", None) != phone_number:
+            ai_profile.phone_number = phone_number
+            updated_fields.append("phone_number")
+
+        if updated_fields:
+            ai_profile.save(update_fields=updated_fields)
+
+    except Exception as e:
+        # This MUST NOT break login – just log and continue
+        print("⚠️ Failed to sync AiUserProfile:", e)
+
     return JsonResponse({
         'status': 'success',
         'user_id': user.user_id,
@@ -125,7 +163,6 @@ def send_invoice_email(request):
     if not email or not invoice_file:
         return JsonResponse({'error': 'Missing email or order_id'}, status=400)
 
-
     subject = "🎉 Your Cove Invoice"
     body = f"""
 Dear {name},
@@ -144,18 +181,13 @@ Style with pride,
         to=[email]
     )
 
-   
     email_msg.attach(invoice_file.name, invoice_file.read(), 'application/pdf')
-    
+
     try:
         email_msg.send(fail_silently=False)
         return JsonResponse({'status': 'Invoice email sent successfully'})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-    # email_msg.send(fail_silently=False)
-
-    # return JsonResponse({'status': 'Invoice email sent successfully'})
 
 
 @csrf_exempt
@@ -178,6 +210,7 @@ def save_invoice_file(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=405)
 
+
 def download_invoice_pdf(request):
     order_id = request.GET.get("order_id")
     if not order_id:
@@ -198,6 +231,7 @@ def download_invoice_pdf(request):
 def healthz(request):
     # Liveness: app can serve requests
     return JsonResponse({"ok": True})
+
 
 def readiness(request):
     # Readiness: DB reachable

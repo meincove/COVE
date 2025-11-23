@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "tools",       # existing catalog app
+    "ai_profiles"
 ]
 
 # --- middleware (cors at the top) ---
