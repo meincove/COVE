@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import { useUser } from "@clerk/nextjs";
+
 import { useCartSessionStore } from "@/src/store/cartSessionStore";
 import { useCartStore } from "@/src/store/cartStore";
 import type { CartItem } from "@/types/cart";
@@ -63,7 +65,10 @@ export default function CoveChatWidget() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Small session store only for AI-core tracing (no UI cartId any more)
+  // Clerk auth
+  const { user, isSignedIn } = useUser();
+
+  // Small session store only for AI-core tracing
   const { guestSessionId, ensureGuestSessionId } = useCartSessionStore();
 
   // Main cart store – drives navbar badge + cart modal + backend sync
@@ -91,14 +96,23 @@ export default function CoveChatWidget() {
     try {
       const sessionId = guestSessionId ?? ensureGuestSessionId();
 
+      const payload: any = {
+        message: userMsg.content,
+        top_k: 4,
+        guestSessionId: sessionId,
+      };
+
+      if (isSignedIn && user) {
+        payload.clerkUserId = user.id;
+        const emailObj = user.primaryEmailAddress;
+        payload.email = emailObj ? emailObj.emailAddress : null;
+      }
+
+      // ✅ Correct route (no "/query")
       const res = await fetch("/api/agent-dev/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMsg.content,
-          top_k: 4,
-          guestSessionId: sessionId,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -186,12 +200,10 @@ export default function CoveChatWidget() {
     const payload: AgentCartPayload = {
       ...cp,
       guestSessionId: sessionId,
-      // we don't track cartId on the frontend – let AI-core/backend handle it
       cartId: cp.cartId ?? null,
     };
 
     try {
-      // Show a small "adding..." hint in the bubble
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
@@ -200,7 +212,7 @@ export default function CoveChatWidget() {
         )
       );
 
-      // Fire-and-forget call so AI-core can log / update its own view of the cart
+      // Fire-and-forget to AI core
       fetch("/api/agent-dev/cart-add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -209,7 +221,6 @@ export default function CoveChatWidget() {
         console.warn("Background cart-add call failed:", err);
       });
 
-      // Build a CartItem for our real cart store from agent info
       const cartItem: CartItem = {
         productId: firstItem.slug ?? cp.variantId,
         variantId: cp.variantId,
@@ -220,16 +231,13 @@ export default function CoveChatWidget() {
         color: firstItem.color ?? "",
         colorName: firstItem.color ?? "",
         quantity: cp.quantity,
-        // TODO: wire real values from catalog / backend
-        price: 0,
+        price: 0, // TODO: wire real prices
         imageUrl: "/clothing-images/placeholder.png",
         material: "",
       };
 
-      // Update the global cart (navbar badge + modal + backend sync for logged-in users)
       await addItem(cartItem);
 
-      // Update this message: mark confirmed + remove buttons
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId && m.meta?.kind === "cart_proposal"

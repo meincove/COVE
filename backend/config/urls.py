@@ -35,6 +35,8 @@ urlpatterns = [
     path("tools/", include("tools.urls")),
     path("tools/", include("tools.cart.urls")),
     path("tools/", include("tools.orders.urls")),  
+    
+    path("ai_profiles/", include("ai_profiles.urls"))
 ]
 from django.urls import re_path
 from tools.cart import views as cart_views

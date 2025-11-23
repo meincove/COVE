@@ -124,25 +124,12 @@ from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 import httpx
 import os
-import re
 import logging
 import json
 from pathlib import Path
+
 router = APIRouter()
 
-# ---- Config loading: size charts + fit rules ----
-
-def _load_json_list(path: Path) -> list[dict]:
-    try:
-        if path.is_file():
-            return json.loads(path.read_text())
-    except Exception:
-        pass
-    return []
-
-
-# You can override this with env var if you move the files:
-#   export COVE_CONFIG_DIR=/abs/path/to/config
 log = logging.getLogger("cove.fit")
 
 # ---------------- JSON config loading ----------------
@@ -166,9 +153,6 @@ try:
 except FileNotFoundError:
     log.warning("fitRules.json not found in %s; falling back to BMI bands only", _DATA_DIR)
     _FITRULES_RAW = []
-
-
-
 
 
 def _canonical_gender(g: Optional[str]) -> str:
@@ -213,28 +197,24 @@ def _build_fit_rules_index(raw: List[Dict[str, Any]]) -> Dict[tuple, List[Dict[s
 # FINAL INDEX USED EVERYWHERE
 _FITRULES = _build_fit_rules_index(_FITRULES_RAW)
 log.warning("Fit rules loaded: %d entries", sum(len(v) for v in _FITRULES.values()))
-# Index by key ("hoodie_unisex_regular") for potential future use
+
+# Optional helper index if you ever want to use "key": "hoodie_unisex_regular"
 _SIZECHARTS_BY_KEY = {
     (e.get("key") or ""): e
     for e in _SIZECHARTS_RAW
     if isinstance(e, dict) and e.get("key")
 }
 
-# We’ll search _FITRULES_RAW by type/gender; no heavy indexing needed yet
-
-
 # Use the same base URL convention as agent/cart_add
 DJANGO_BASE_URL = os.getenv("DJANGO_BASE_URL", "http://127.0.0.1:8001").rstrip("/")
 
 
 class FitIn(BaseModel):
-    gender: Optional[str] = Field(default=None, pattern="^(male|female|unisex)?$")
+    # NOTE: we removed strict regex patterns to avoid hardcoding and allow synonyms.
+    gender: Optional[str] = Field(default=None)
     height_cm: float
     weight_kg: float
-    fit_preference: Optional[str] = Field(
-        default="regular",
-        pattern="^(tight|regular|loose|slim|oversized)$",
-    )
+    fit_preference: Optional[str] = Field(default="regular")
 
     # Optional product context
     product_type: Optional[str] = None  # hoodie, jacket, jeans etc.
@@ -269,6 +249,7 @@ def _estimate_chest_from_bmi(height_cm: float, weight_kg: float) -> float:
 
 # Static garment bands (cm) per category.
 # These are garment chest widths, not body measurements.
+# They now serve ONLY as a fallback when sizecharts.json doesn't define bands.
 _BANDS = {
     "hoodie": {
         "XS": (0, 90),
@@ -297,6 +278,58 @@ _BANDS = {
     },
 }
 
+
+def _get_band_table(product_type: Optional[str]) -> Dict[str, tuple]:
+    """
+    Prefer band ranges from sizecharts.json; fall back to _BANDS.
+    Expected sizecharts.json shape (example):
+
+    [
+      {
+        "type": "hoodie",
+        "gender": "unisex",
+        "bands": {
+          "S": { "chest_min": 88, "chest_max": 94 },
+          "M": { "chest_min": 93, "chest_max": 100 },
+          ...
+        }
+      },
+      ...
+    ]
+
+    If your real JSON differs, you only need to adapt this function
+    – the rest of the code stays generic.
+    """
+    t = (product_type or "hoodie").lower().strip()
+
+    # Try to find a bands entry in sizecharts.json
+    for entry in _SIZECHARTS_RAW:
+        if not isinstance(entry, dict):
+            continue
+        etype = (entry.get("type") or "").lower().strip()
+        if etype != t:
+            continue
+
+        bands_conf = entry.get("bands") or {}
+        table: Dict[str, tuple] = {}
+        if isinstance(bands_conf, dict):
+            for size_key, v in bands_conf.items():
+                if not isinstance(v, dict):
+                    continue
+                try:
+                    lo = float(v.get("chest_min"))
+                    hi = float(v.get("chest_max"))
+                except (TypeError, ValueError):
+                    continue
+                table[size_key.upper().strip()] = (lo, hi)
+
+        if table:
+            return table
+
+    # Fallback: hard-coded bands
+    return _BANDS.get(t, _BANDS["hoodie"])
+
+
 def _normalize_pref_key(pref: Optional[str]) -> str:
     """
     Map various natural-language fit preferences to the keys used in fitRules.json.
@@ -312,10 +345,6 @@ def _normalize_pref_key(pref: Optional[str]) -> str:
     if p in ("oversized", "oversize", "overs"):
         return "oversized"
     return "regular"
-
-
-def _norm(s: Optional[str]) -> str:
-    return (s or "").strip().lower()
 
 
 def _find_rules_entry(
@@ -350,6 +379,7 @@ def _find_rules_entry(
 
     return None
 
+
 def _pick_size_from_rules(
     entry: Dict[str, Any],
     height_cm: float,
@@ -377,179 +407,22 @@ def _pick_size_from_rules(
     return None
 
 
-def _choose_size_from_rules(entry: dict, height_cm: float, weight_kg: float) -> str:
-    """
-    Pick a base size from a fitRules entry based on height/weight ranges.
-    If multiple rules match, choose the one whose box center is closest.
-    """
-    rules = entry.get("rules") or []
-    best_size = None
-    best_score = None
-
-    for r in rules:
-        try:
-            hmin = float(r.get("height_cm_min"))
-            hmax = float(r.get("height_cm_max"))
-            wmin = float(r.get("weight_kg_min"))
-            wmax = float(r.get("weight_kg_max"))
-        except (TypeError, ValueError):
-            continue
-
-        if not (hmin <= height_cm <= hmax and wmin <= weight_kg <= wmax):
-            continue
-
-        mid_h = 0.5 * (hmin + hmax)
-        mid_w = 0.5 * (wmin + wmax)
-        score = abs(mid_h - height_cm) + abs(mid_w - weight_kg)
-
-        if best_score is None or score < best_score:
-            best_score = score
-            best_size = (r.get("size") or "").upper()
-
-    # If nothing matched ranges, fall back to nearest rule by distance
-    if best_size is None and rules:
-        best_rule = None
-        best_score = None
-        for r in rules:
-            try:
-                hmin = float(r.get("height_cm_min", 0))
-                hmax = float(r.get("height_cm_max", 0))
-                wmin = float(r.get("weight_kg_min", 0))
-                wmax = float(r.get("weight_kg_max", 0))
-            except (TypeError, ValueError):
-                continue
-            mid_h = 0.5 * (hmin + hmax)
-            mid_w = 0.5 * (wmin + wmax)
-            score = abs(mid_h - height_cm) + abs(mid_w - weight_kg)
-            if best_score is None or score < best_score:
-                best_score = score
-                best_rule = r
-        if best_rule is not None:
-            best_size = (best_rule.get("size") or "M").upper()
-
-    return best_size or "M"
-
-
-def _apply_fit_pref_from_rules(entry: dict, base_size: str, fit_pref: str) -> str:
-    """
-    Use fitPreferenceAdjust from fitRules for the chosen base size.
-    If mapping is missing, fall back to _adjust_by_pref.
-    """
-    pref = (fit_pref or "regular").lower()
-    base = (base_size or "M").upper()
-
-    mapping = None
-    for r in (entry.get("rules") or []):
-        if (r.get("size") or "").upper() == base:
-            mapping = r.get("fitPreferenceAdjust") or {}
-            break
-
-    if not mapping:
-        # No per-size mapping → use generic adjustment
-        return _adjust_by_pref(base, pref)
-
-    target = mapping.get(pref) or mapping.get("regular") or base
-    return (target or base).upper()
-
-def _size_from_rules(
-    *,
-    height_cm: float,
-    weight_kg: float,
-    gender: Optional[str],
-    fit_pref: Optional[str],
-    product_type: Optional[str],
-) -> tuple[str, str, list[str]]:
-    """
-    Core rules-based size selection.
-
-    Returns:
-      (recommended_size, base_size, notes)
-    """
-    notes: list[str] = []
-    entry = _find_rules_entry(product_type, gender)
-
-    # Fallback: no rules available → use old BMI bands
-    if not entry or not isinstance(entry.get("rules"), list) or not entry["rules"]:
-        chest = _estimate_chest_from_bmi(height_cm, weight_kg)
-        base = _nearest_size(chest, product_type)
-        # old-style pref adjust as backup
-        pref = (fit_pref or "regular").lower()
-        idx = _SIZE_ORDER.index(base)
-        if pref in ("tight", "slim"):
-            idx = max(0, idx - 1)
-        elif pref in ("loose", "oversized", "relaxed", "baggy"):
-            idx = min(len(_SIZE_ORDER) - 1, idx + 1)
-        rec = _SIZE_ORDER[idx]
-        notes.append("Used fallback BMI bands (no fitRules entry found).")
-        return rec, base, notes
-
-    rules = entry["rules"]
-    pref_key = _normalize_pref_key(fit_pref)
-
-    # Pick the best rule by:
-    #  - strongly preferring rules where (height, weight) are inside the box
-    #  - among them, pick the one whose center is closest in (height,weight)
-    best_rule = None
-    best_score = None
-
-    for r in rules:
-        try:
-            hmin = float(r.get("height_cm_min", 0))
-            hmax = float(r.get("height_cm_max", 999))
-            wmin = float(r.get("weight_kg_min", 0))
-            wmax = float(r.get("weight_kg_max", 999))
-        except Exception:
-            continue
-
-        h_center = 0.5 * (hmin + hmax)
-        w_center = 0.5 * (wmin + wmax)
-        dh = height_cm - h_center
-        dw = weight_kg - w_center
-        dist = (dh * dh + dw * dw) ** 0.5
-
-        in_box = (hmin <= height_cm <= hmax) and (wmin <= weight_kg <= wmax)
-        # in-range rules get a strong bonus (smaller score)
-        score = dist * (0.1 if in_box else 1.0)
-
-        if best_rule is None or best_score is None or score < best_score:
-            best_rule = r
-            best_score = score
-
-    if not best_rule:
-        # Should not happen, but keep fallback safe
-        chest = _estimate_chest_from_bmi(height_cm, weight_kg)
-        base = _nearest_size(chest, product_type)
-        rec = base
-        notes.append("Fit rules malformed; fell back to BMI bands.")
-        return rec, base, notes
-
-    base_size = (best_rule.get("size") or "M").upper()
-    adjust_map = best_rule.get("fitPreferenceAdjust") or {}
-
-    # if fitPreferenceAdjust doesn’t know this pref → keep base_size
-    rec_size = (adjust_map.get(pref_key) or base_size).upper()
-
-    notes.append(
-        f"Base size {base_size} from rules for type='{product_type or 'unknown'}', gender='{gender or 'unisex'}'."
-    )
-    if rec_size != base_size:
-        notes.append(f"Adjusted to {rec_size} for '{pref_key}' fit preference.")
-
-    return rec_size, base_size, notes
-
-
 def _nearest_size(chest: float, product_type: Optional[str]) -> str:
     """
-    Map estimated chest to a size in _SIZE_ORDER using the appropriate band table.
+    Map estimated chest to a size in _SIZE_ORDER using band table
+    from sizecharts.json (preferred) or fallback _BANDS.
     """
-    t = (product_type or "hoodie").lower()
-    table = _BANDS.get(t, _BANDS["hoodie"])
+    table = _get_band_table(product_type)
     for s in _SIZE_ORDER:
+        if s not in table:
+            continue
         lo, hi = table[s]
         if lo <= chest <= hi:
             return s
     # fallback: mid/large bias
-    return "L" if chest >= table["L"][0] else "M"
+    if "L" in table:
+        return "L" if chest >= table["L"][0] else "M"
+    return "M"
 
 
 def _adjust_by_pref(size: str, pref: Optional[str]) -> str:
@@ -563,7 +436,7 @@ def _adjust_by_pref(size: str, pref: Optional[str]) -> str:
     idx = _SIZE_ORDER.index(size)
     if p in ("tight", "slim"):
         idx = max(0, idx - 1)
-    elif p in ("loose", "oversized"):
+    elif p in ("loose", "oversized", "relaxed", "baggy"):
         idx = min(len(_SIZE_ORDER) - 1, idx + 1)
     return _SIZE_ORDER[idx]
 
@@ -621,7 +494,7 @@ async def fit_recommend(body: FitIn) -> FitOut:
 
     1. Estimate chest from height/weight (for BMI fallback).
     2. Try fitRules.json (height/weight blocks) for base size.
-    3. If no rules match, fall back to BMI bands.
+    3. If no rules match, fall back to BMI bands from sizecharts.json or _BANDS.
     4. Adjust for fit_preference.
     5. If slug is provided, intersect with real stock and nudge.
     """

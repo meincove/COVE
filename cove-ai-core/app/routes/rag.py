@@ -14,7 +14,6 @@ from app.agent.verify import cross_check, apply_guardrails
 from app.telemetry.trace import new_trace_id, emit
 from app.vector.store import search_keyword
 from app.core.rerank import mmr_rerank_from_vectors
-from app.core.fit import recommend_size
 # Optional: dynamic vocab (colors/types) from DB; we fallback if not present
 try:
     from app.vector.store import catalog_vocab  # optional helper
@@ -401,6 +400,24 @@ def _get_vocab(conn) -> Dict[str, set]:
 def _ask_shrinkage(q: str) -> bool:
     ql = q.lower()
     return any(w in ql for w in ("shrink", "shrinkage", "wash", "washing", "dryer", "drying"))
+
+def _looks_discovery_question(q: str, attrs: Dict[str, List[str]]) -> bool:
+    """
+    Generic detector for 'what do you have / show me options' type queries.
+
+    Signals:
+      - question-y wording (what/which/show/see/any)
+      - and either:
+          * we detected a product type (hoodie, jacket, jeans, etc.), or
+          * the user is explicitly talking about colors.
+    """
+    ql = (q or "").lower()
+    has_q_word = any(w in ql for w in ("what", "which", "show", "see", "any"))
+    mentions_type = bool(attrs.get("types"))
+    asks_color_word = any(w in ql for w in ("color", "colour", "colourway"))
+
+    return asks_color_word or (has_q_word and mentions_type)
+
 
 from difflib import get_close_matches
 
@@ -982,24 +999,8 @@ async def rag_query(body: RAGIn):
                     debug_notes.append(f"{c}:sizes={size_names},fewLeft={bool(note)}")
     else:
         # No color specified → only build a colors overview when the question
-        # looks like a product discovery / "what do you have" query.
-        ql = (body.query or "").lower()
-        wants_overview = any(
-            kw in ql
-            for kw in (
-                "what hoodies",
-                "what bomber",
-                "what bombers",
-                "what jackets",
-                "what jeans",
-                "what colors",
-                "what colours",
-                "color options",
-                "colour options",
-                "available colors",
-                "available colours",
-            )
-        )
+        # looks like a product discovery / "what do you have / what colors" query.
+        wants_overview = _looks_discovery_question(body.query, attrs)
 
         listed: List[str] = []
 
@@ -1046,6 +1047,7 @@ async def rag_query(body: RAGIn):
 
         if listed:
             lines.append("Available colors — " + " ".join(listed))
+
 
     # If nothing special requested, keep model’s sentence
     if not lines:
