@@ -49,3 +49,75 @@ import type { CatalogCard, ProductColor } from './product'
 // For frontend pages / carousels
 export type CatalogCardDTO = CatalogCard
 export type CatalogColor = ProductColor
+
+// --- Flat per-variant record (productVariantsFlat.json) ---
+
+export interface FlatVariantRecord {
+    variantId: string;
+    groupId: string;
+    groupSlug: string;
+  
+    brandId: string;
+    merchantId: string;
+    tenantId: string;
+    currency: string;
+    taxCategory: string;
+    status: string;
+  
+    sizingKey: string;
+    tier: string;
+    type: string;
+    gender: string;
+    fit: string;
+    material: string;
+  
+    price: number;
+    colorName: string;
+    hex: string;
+  
+    // size key -> quantity
+    sizes: Record<string, number>;
+  
+    images: string[];
+  
+    name: string;
+    description?: string;
+  
+    fabric?: {
+      materialMain?: string;
+      materialBlend?: string;
+      gsm?: number;
+      stretchLevel?: string;
+      thickness?: string;
+      warmth?: string;
+      breathability?: string;
+      softness?: string;
+    };
+  
+    style?: {
+      dressCode?: string;
+      styleTags?: string[];
+      useCases?: string[];
+      pattern?: string;
+      logoPlacement?: string;
+    };
+  
+    fitProfile?: {
+      fit?: string;
+      length?: string;
+      bodyShapes?: string[];
+      recommendedGender?: string;
+      stretchHelpsFit?: boolean;
+    };
+  
+    care?: {
+      washTemp?: string;
+      dryer?: string;
+      iron?: string;
+      careNotes?: string;
+    };
+  
+    styleNotes?: string;
+    fitNotes?: string;
+    tags?: string[];
+  }

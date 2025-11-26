@@ -26,7 +26,7 @@ export default function PerimeterBar() {
       {/* RIGHT */}
       <div className="flex items-center gap-4">
         {/* 👇 cart icon (shared Zustand state, opens modal) */}
-        <CartButton />
+    {/* //<CartButton /> */}
 
         <button className="opacity-80 hover:opacity-100">Sign in</button>
         <button className="opacity-80 hover:opacity-100">Sign out</button>
