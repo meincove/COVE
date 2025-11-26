@@ -1,11 +1,11 @@
-// src/app/api/agent-dev/route.ts
+// frontend/src/app/api/cove-ai/turn/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const AI_CORE_BASE_URL =
-  process.env.NEXT_PUBLIC_AI_CORE_BASE_URL ?? "http://127.0.0.1:8000";
+const AI_CORE_URL =
+  process.env.AI_CORE_URL ?? "http://127.0.0.1:8000"; // cove-ai-core
 
-const DJANGO_BACKEND_URL =
-  process.env.DJANGO_BACKEND_URL ?? "http://127.0.0.1:8001";
+const DJANGO_URL =
+  process.env.DJANGO_BACKEND_URL ?? "http://127.0.0.1:8001"; // Django
 
 type LogMeta = Record<string, unknown>;
 
@@ -29,7 +29,7 @@ async function logChatTurn(params: {
   } = params;
 
   try {
-    await fetch(`${DJANGO_BACKEND_URL}/ai_profiles/log_chat/`, {
+    await fetch(`${DJANGO_URL}/ai_profiles/log_chat/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -43,61 +43,55 @@ async function logChatTurn(params: {
       }),
     });
   } catch (err) {
-    // Don't break dev chat if logging fails
-    console.error("agent-dev log_chat failed:", err);
+    // Don't break the chat if logging fails
+    console.error("log_chat failed:", err);
   }
 }
 
 export async function POST(req: NextRequest) {
-  let body: any;
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
+    const body = await req.json();
 
-  const {
-    message,
-    topK = 6,
-    cartId,
-    clerkUserId,
-    guestSessionId,
-    email,
-  } = body || {};
-
-  if (!message || typeof message !== "string") {
-    return NextResponse.json(
-      { error: "Field 'message' (string) is required." },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const payload: any = {
+    const {
       message,
-      top_k: topK,
+      top_k = 6,
       cartId,
       clerkUserId,
       guestSessionId,
       email,
-    };
+    } = body ?? {};
 
-    const res = await fetch(`${AI_CORE_BASE_URL}/ai/agent/query`, {
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { error: "Field `message` is required." },
+        { status: 400 },
+      );
+    }
+
+    const payload: any = { message, top_k };
+    if (cartId) payload.cartId = cartId;
+    if (clerkUserId) payload.clerkUserId = clerkUserId;
+    if (guestSessionId) payload.guestSessionId = guestSessionId;
+    if (email) payload.email = email;
+
+    // 1) Call cove-ai-core agent
+    const res = await fetch(`${AI_CORE_URL}/ai/agent/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const data: any = await res.json().catch(() => ({}));
+    const data = await res.json().catch(() => ({} as any));
 
-    // Build a small meta payload for analytics/debug
+    // 2) Fire-and-forget logging into Django
     const metaBase: LogMeta = {
-      source: "agent-dev",
-      intent: data?.debug_plan?.intent_kind ?? null,
+      source: "frontend",
+      // useful extras for later analytics
+      debug_intent: data?.debug_plan?.intent_kind ?? null,
       kind: data?.kind ?? null,
     };
 
-    // Fire-and-forget logging of user turn
+    // user turn
     void logChatTurn({
       guestSessionId,
       clerkUserId,
@@ -107,7 +101,7 @@ export async function POST(req: NextRequest) {
       meta: metaBase,
     });
 
-    // Fire-and-forget logging of assistant turn
+    // assistant turn
     const answerText: string =
       typeof data?.answer === "string" ? data.answer : "";
 
@@ -122,10 +116,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data, { status: res.status });
   } catch (err) {
-    console.error("agent-dev proxy error:", err);
+    console.error("Error in /api/cove-ai/turn:", err);
     return NextResponse.json(
-      { error: "Failed to reach AI core" },
-      { status: 502 }
+      { error: "Internal error talking to Cove AI." },
+      { status: 500 },
     );
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
-import CartButton from "@/src/components/NavbarComponents/Actions/CartButton";
+//import CartButton from "@/src/components/NavbarComponents/Actions/CartButton";
 
 export default function AgentDevPage() {
   return (
@@ -18,7 +18,7 @@ export default function AgentDevPage() {
         </div>
 
         {/* 👇 replace TEST CART with this */}
-        <CartButton />
+        {/* <CartButton /> */}
       </div>
 
       <div className="p-6 text-sm text-white/60 max-w-xl">

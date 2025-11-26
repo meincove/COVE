@@ -1,160 +1,3 @@
-// 'use client'
-
-// import { useEffect, useState } from 'react'
-// import { useParams } from 'next/navigation'
-// import ProductGallery from '@/src/components/product/ProductGallery'
-// import ProductInfo from '@/src/components/product/ProductInfo'
-// import ProductConfigurator from '@/src/components/product/ProductConfigurator'
-// import ImageOrbit from '@/src/components/product/ImageOrbit'
-// import catalogData from '@/data/catalogData.json'
-// import { useProductStore } from '@/src/store/productStore'
-
-// export default function ProductPage() {
-//   const { slug } = useParams()
-//   const [product, setProduct] = useState<any>(null)
-//   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
-//   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-//   const [defaultSelectedSize, setDefaultSelectedSize] = useState<string | null>(null)
-
-//   // 🔹 Snapshot coming from the catalog modal (if user came via "Go to Store")
-//   const storedProduct = useProductStore((state) => state.product) as any
-
-//   // Load product by slug, optionally respecting stored variant + size
-//   useEffect(() => {
-//     if (!slug) return
-
-//     const slugStr = Array.isArray(slug) ? slug[0] : slug
-
-//     const allProducts = Object.values(catalogData as any).flat() as any[]
-
-//     for (const prod of allProducts) {
-//       // Does this product belong to this slug?
-//       const belongsToSlug =
-//         prod.slug === slugStr ||
-//         prod.colors?.some((c: any) => c.slug === slugStr)
-
-//       if (!belongsToSlug) continue
-
-//       // --- Decide which color index to use ---
-//       let colorIndex = 0
-
-//       if (storedProduct?.selectedVariantId) {
-//         // Prefer variant chosen in the catalog modal
-//         const idxByVariant = prod.colors.findIndex(
-//           (c: any) => c.variantId === storedProduct.selectedVariantId
-//         )
-
-//         if (idxByVariant !== -1) {
-//           colorIndex = idxByVariant
-//         } else {
-//           // Fallback: try to match by slug for this product
-//           const idxBySlug = prod.colors.findIndex(
-//             (c: any) => c.slug === slugStr
-//           )
-//           if (idxBySlug !== -1) colorIndex = idxBySlug
-//         }
-//       } else {
-//         // No store info → fall back to slug-based color resolution
-//         const idxBySlug = prod.colors.findIndex(
-//           (c: any) => c.slug === slugStr
-//         )
-//         if (idxBySlug !== -1) colorIndex = idxBySlug
-//       }
-
-//       setProduct(prod)
-//       setSelectedColorIndex(colorIndex)
-
-//       // --- Decide default selected size ---
-//       if (storedProduct?.selectedSize) {
-//         setDefaultSelectedSize(storedProduct.selectedSize)
-//       } else {
-//         setDefaultSelectedSize(null)
-//       }
-
-//       return
-//     }
-
-//     // If we reach here: no matching product
-//     setProduct(null)
-//     setDefaultSelectedSize(null)
-//   }, [slug, storedProduct])
-
-//   // When product or color changes, reset main image to first one
-//   useEffect(() => {
-//     if (product) {
-//       setCurrentImageIndex(0)
-//     }
-//   }, [product, selectedColorIndex])
-
-//   if (!product) {
-//     return (
-//       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-//         <p className="text-lg text-gray-400">Invalid or missing product</p>
-//       </div>
-//     )
-//   }
-
-//   const selectedColor = product.colors[selectedColorIndex]
-
-//   return (
-//     <div className="relative min-h-[calc(100vh-64px)] text-white overflow-hidden bg-[#2e4053]">
-//       {/* Grainy Overlay */}
-//       <div className="grainy" />
-
-//       {/* Page Content */}
-//       <div className="relative z-10 w-full max-w-[1800px] mx-auto flex flex-col lg:flex-row flex-grow gap-4 px-4 py-6">
-//         {/* LEFT COLUMN */}
-//         <div className="w-full lg:w-1/4 rounded-xl overflow-hidden">
-//           <ProductInfo
-//             name={product.name}
-//             price={product.price}
-//             material={product.material}
-//             description={product.description}
-//             tier={product.tier}
-//             type={product.type}
-//             fit={product.fit}
-//           />
-//           <ProductGallery
-//             images={selectedColor.images}
-//             selectedIndex={currentImageIndex}
-//             onSelect={setCurrentImageIndex}
-//           />
-//         </div>
-
-//         {/* MIDDLE VIEWER */}
-//         <div className="w-full lg:w-1/2 flex items-center justify-center rounded-xl overflow-hidden">
-//           <ImageOrbit
-//             images={selectedColor.images}
-//             currentIndex={currentImageIndex}
-//             setCurrentIndex={setCurrentImageIndex}
-//           />
-//         </div>
-
-//         {/* RIGHT CONFIGURATOR */}
-//         <div className="w-full lg:w-1/3 rounded-xl overflow-hidden flex flex-col justify-end">
-//           <ProductConfigurator
-//             sizes={product.sizes}
-//             colors={product.colors}
-//             defaultColor={selectedColor}
-//             variantId={selectedColor.variantId}
-//             selectedColorIndex={selectedColorIndex}
-//             setSelectedColorIndex={setSelectedColorIndex}
-//             name={product.name}
-//             description={product.description}
-//             material={product.material}
-//             tier={product.tier}
-//             type={product.type}
-//             fit={product.fit}
-//             price={product.price}
-//             defaultSelectedSize={defaultSelectedSize} 
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-
 // src/app/product/[slug]/page.tsx
 'use client'
 
@@ -165,125 +8,168 @@ import ProductGallery from '@/src/components/product/ProductGallery'
 import ProductInfo from '@/src/components/product/ProductInfo'
 import ProductConfigurator from '@/src/components/product/ProductConfigurator'
 import ImageOrbit from '@/src/components/product/ImageOrbit'
-import catalogData from '@/data/catalogData.json'
 import { useProductStore } from '@/src/store/productStore'
 
+// --- Types matching the UI shape we already use -----------------------------
+
+type UiSizeMap = Record<string, number>
+
+type UiColor = {
+  variantId: string
+  colorName: string
+  hex: string
+  images: string[]
+  slug: string
+  sizes: UiSizeMap
+}
+
+type UiProduct = {
+  productId: string
+  slug: string
+  name: string
+  tier: string
+  type: string
+  gender?: string
+  fit?: string | null
+  material: string
+  price: number
+  basePrice: number
+  description: string
+  // aggregated total stock per size (across variants) for the configurator
+  sizes: UiSizeMap
+  colors: UiColor[]
+}
+
 export default function ProductPage() {
-  const { slug } = useParams()
+  const params = useParams()
+  const slugParam = params?.slug as string | string[] | undefined
+
   const searchParams = useSearchParams()
 
-  // 🔹 query params (from catalog modal URL)
+  // query params (from catalog modal URL)
   const urlVariantId = searchParams.get('variantId')
   const urlSize = searchParams.get('size')
   const urlQty = searchParams.get('qty')
 
-  const [product, setProduct] = useState<any>(null)
+  const [product, setProduct] = useState<UiProduct | null>(null)
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [defaultSelectedSize, setDefaultSelectedSize] = useState<string | null>(null)
   const [defaultQuantity, setDefaultQuantity] = useState<number>(0)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // 🔹 Snapshot coming from the catalog modal (if user came via "Go to Store")
+  // Snapshot coming from the catalog modal (if user came via "Go to Store")
   const storedProduct = useProductStore((state) => state.product) as any
 
   useEffect(() => {
-    if (!slug) return
+    if (!slugParam) return
 
-    const slugStr = Array.isArray(slug) ? slug[0] : slug
-    const allProducts = Object.values(catalogData as any).flat() as any[]
+    const slugStr = Array.isArray(slugParam) ? slugParam[0] : slugParam
 
-    // preferred values: URL > store > nothing
-    const preferredVariantId =
-      urlVariantId || storedProduct?.selectedVariantId || null
-    const preferredSize = urlSize || storedProduct?.selectedSize || null
-    const preferredQtyRaw =
-      urlQty ??
-      storedProduct?.quantity ??
-      storedProduct?.qty ??
-      null
+    async function fetchProduct() {
+      try {
+        setIsLoading(true)
 
-    for (const prod of allProducts) {
-      const belongsToSlug =
-        prod.slug === slugStr ||
-        prod.colors?.some((c: any) => c.slug === slugStr)
-
-      if (!belongsToSlug) continue
-
-      // ---------- resolve color index ----------
-      let colorIndex = 0
-
-      if (preferredVariantId) {
-        const idxByVariant = prod.colors.findIndex(
-          (c: any) => c.variantId === preferredVariantId
+        // hit our Next.js proxy, which already returns UiProduct shape
+        const res = await fetch(
+          `/api/catalog/product?slug=${encodeURIComponent(slugStr)}`,
+          { cache: 'no-store' }
         )
-        if (idxByVariant !== -1) {
-          colorIndex = idxByVariant
-        } else {
-          const idxBySlug = prod.colors.findIndex(
-            (c: any) => c.slug === slugStr
+
+        if (!res.ok) {
+          console.error('Failed to fetch product', res.status)
+          setProduct(null)
+          setDefaultSelectedSize(null)
+          setDefaultQuantity(0)
+          return
+        }
+
+        const data = await res.json()
+        const uiProduct: UiProduct | undefined = data.product
+
+        if (!uiProduct) {
+          setProduct(null)
+          setDefaultSelectedSize(null)
+          setDefaultQuantity(0)
+          return
+        }
+
+        // ---------- resolve preferred variant / size / qty ----------
+        const preferredVariantId =
+          urlVariantId || storedProduct?.selectedVariantId || null
+        const preferredSize = urlSize || storedProduct?.selectedSize || null
+        const preferredQtyRaw =
+          urlQty ?? storedProduct?.quantity ?? storedProduct?.qty ?? null
+
+        // resolve color index
+        let colorIndex = 0
+        if (preferredVariantId) {
+          const idxByVariant = uiProduct.colors.findIndex(
+            (c) => c.variantId === preferredVariantId
           )
-          if (idxBySlug !== -1) colorIndex = idxBySlug
+          if (idxByVariant !== -1) {
+            colorIndex = idxByVariant
+          }
         }
-      } else {
-        const idxBySlug = prod.colors.findIndex(
-          (c: any) => c.slug === slugStr
-        )
-        if (idxBySlug !== -1) colorIndex = idxBySlug
-      }
 
-      // ---------- resolve default size ----------
-      const sizeMap: Record<string, number> = prod.sizes ?? {}
-      let resolvedSize: string | null = null
-
-      if (preferredSize && sizeMap[preferredSize] !== undefined) {
-        resolvedSize = preferredSize
-      } else {
-        const sizeKeys = Object.keys(sizeMap)
-        resolvedSize = sizeKeys.length > 0 ? sizeKeys[0] : null
-      }
-
-      // ---------- resolve default quantity (0 ≤ qty ≤ stock) ----------
-      const maxStock =
-        resolvedSize && sizeMap[resolvedSize] != null
-          ? sizeMap[resolvedSize]
-          : 0
-
-      let resolvedQty = 0
-      if (preferredQtyRaw != null) {
-        const parsed = Number(preferredQtyRaw)
-        if (!Number.isNaN(parsed)) {
-          resolvedQty = Math.max(0, parsed)
+        // resolve default size
+        const sizeMap = uiProduct.sizes
+        let resolvedSize: string | null = null
+        if (preferredSize && sizeMap[preferredSize] !== undefined) {
+          resolvedSize = preferredSize
+        } else {
+          const sizeKeys = Object.keys(sizeMap)
+          resolvedSize = sizeKeys.length > 0 ? sizeKeys[0] : null
         }
-      }
-      if (maxStock > 0) {
-        resolvedQty = Math.min(resolvedQty, maxStock)
-      } else {
-        resolvedQty = 0
-      }
 
-      setProduct(prod)
-      setSelectedColorIndex(colorIndex)
-      setDefaultSelectedSize(resolvedSize)
-      setDefaultQuantity(resolvedQty)
-      return
+        // resolve default quantity
+        const maxStock =
+          resolvedSize && sizeMap[resolvedSize] != null ? sizeMap[resolvedSize] : 0
+
+        let resolvedQty = 0
+        if (preferredQtyRaw != null) {
+          const parsed = Number(preferredQtyRaw)
+          if (!Number.isNaN(parsed)) {
+            resolvedQty = Math.max(0, parsed)
+          }
+        }
+        if (maxStock > 0) {
+          resolvedQty = Math.min(resolvedQty, maxStock)
+        } else {
+          resolvedQty = 0
+        }
+
+        setProduct(uiProduct)
+        setSelectedColorIndex(colorIndex)
+        setDefaultSelectedSize(resolvedSize)
+        setDefaultQuantity(resolvedQty)
+      } catch (err) {
+        console.error('Error fetching product', err)
+        setProduct(null)
+        setDefaultSelectedSize(null)
+        setDefaultQuantity(0)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    // no match
-    setProduct(null)
-    setDefaultSelectedSize(null)
-    setDefaultQuantity(0)
-  }, [
-    slug,
-    storedProduct,
-    urlVariantId,
-    urlSize,
-    urlQty,
-  ])
+    fetchProduct()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slugParam, storedProduct, urlVariantId, urlSize, urlQty])
 
   // reset main image on product / color change
   useEffect(() => {
     if (product) setCurrentImageIndex(0)
   }, [product, selectedColorIndex])
+
+  // ---- RENDER ----------------------------------------------------------------
+
+  // don’t show the error while we’re still loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center" />
+    )
+  }
 
   if (!product) {
     return (
@@ -296,61 +182,57 @@ export default function ProductPage() {
   const selectedColor = product.colors[selectedColorIndex]
 
   return (
-  <div className="relative min-h-screen text-white bg-[#2e4053] flex flex-col overflow-hidden">
-    {/* Grain overlay across full height */}
-    {/* <div className="grainy" /> */}
+    <div className="relative min-h-screen text-white bg-[#2e4053] flex flex-col overflow-hidden">
+      {/* Page Content */}
+      <div className="relative z-10 flex-1 w-full max-w-[1800px] mx-auto flex flex-col lg:flex-row gap-4 px-4 py-6">
+        {/* LEFT COLUMN */}
+        <div className="w-full lg:w-1/4 rounded-xl overflow-hidden">
+          <ProductInfo
+            name={product.name}
+            price={product.price}
+            material={product.material}
+            description={product.description || ''}
+            tier={product.tier}
+            type={product.type}
+            fit={product.fit || ''}
+          />
+          <ProductGallery
+            images={selectedColor.images}
+            selectedIndex={currentImageIndex}
+            onSelect={setCurrentImageIndex}
+          />
+        </div>
 
-    {/* Page Content */}
-    <div className="relative z-10 flex-1 w-full max-w-[1800px] mx-auto flex flex-col lg:flex-row gap-4 px-4 py-6">
-      {/* LEFT COLUMN */}
-      <div className="w-full lg:w-1/4 rounded-xl overflow-hidden">
-        <ProductInfo
-          name={product.name}
-          price={product.price}
-          material={product.material}
-          description={product.description}
-          tier={product.tier}
-          type={product.type}
-          fit={product.fit}
-        />
-        <ProductGallery
-          images={selectedColor.images}
-          selectedIndex={currentImageIndex}
-          onSelect={setCurrentImageIndex}
-        />
-      </div>
+        {/* MIDDLE VIEWER */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center rounded-xl overflow-hidden">
+          <ImageOrbit
+            images={selectedColor.images}
+            currentIndex={currentImageIndex}
+            setCurrentIndex={setCurrentImageIndex}
+          />
+        </div>
 
-      {/* MIDDLE VIEWER */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center rounded-xl overflow-hidden">
-        <ImageOrbit
-          images={selectedColor.images}
-          currentIndex={currentImageIndex}
-          setCurrentIndex={setCurrentImageIndex}
-        />
-      </div>
-
-      {/* RIGHT CONFIGURATOR */}
-      <div className="w-full lg:w-1/3 rounded-xl overflow-hidden flex flex-col justify-end">
-        <ProductConfigurator
-          sizes={product.sizes}
-          colors={product.colors}
-          defaultColor={selectedColor}
-          variantId={selectedColor.variantId}
-          selectedColorIndex={selectedColorIndex}
-          setSelectedColorIndex={setSelectedColorIndex}
-          name={product.name}
-          description={product.description}
-          material={product.material}
-          tier={product.tier}
-          type={product.type}
-          fit={product.fit}
-          price={product.price}
-          defaultSelectedSize={defaultSelectedSize}
-          initialQuantity={defaultQuantity}
-        />
+        {/* RIGHT CONFIGURATOR */}
+        <div className="w-full lg:w-1/3 rounded-xl overflow-hidden flex flex-col justify-end">
+          <ProductConfigurator
+            sizes={product.sizes}
+            colors={product.colors}
+            defaultColor={selectedColor}
+            variantId={selectedColor.variantId}
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            name={product.name}
+            description={product.description || ''}
+            material={product.material}
+            tier={product.tier}
+            type={product.type}
+            fit={product.fit || ''}
+            price={product.price}
+            defaultSelectedSize={defaultSelectedSize}
+            initialQuantity={defaultQuantity}
+          />
+        </div>
       </div>
     </div>
-  </div>
-)
-
+  )
 }

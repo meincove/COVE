@@ -6,38 +6,12 @@ import { useUser } from "@clerk/nextjs";
 import { useCartSessionStore } from "@/src/store/cartSessionStore";
 import { useCartStore } from "@/src/store/cartStore";
 import type { CartItem } from "@/types/cart";
-
-type AgentItem = {
-  title: string;
-  url: string;
-  slug: string;
-  score: number;
-  reason?: string;
-  type: string;
-  tier: string;
-  color?: string;
-  size?: string;
-  variantId: string;
-};
-
-type AgentCartPayload = {
-  variantId: string;
-  size: string;
-  quantity: number;
-  cartId: string | null;
-  clerkUserId: string | null;
-  guestSessionId: string | null;
-  email: string | null;
-};
-
-type AgentResponse = {
-  kind: "answer" | "recommendations" | "cart_proposal";
-  answer: string;
-  citations?: any[];
-  items?: AgentItem[];
-  cart_payload?: AgentCartPayload;
-  debug_plan?: any;
-};
+import type {
+  AgentItem,
+  AgentCartPayload,
+  AgentResponse,
+} from "@/types/agent";
+import ChatProductCard from "@/src/components/cove-ai/ChatProductCard";
 
 type BaseMessage = {
   id: string;
@@ -52,12 +26,33 @@ type CartProposalMeta = {
   cancelled?: boolean;
 };
 
+type RecommendationsMeta = {
+  kind: "recommendations";
+  items: AgentItem[];
+};
+
+type AssistantMeta = CartProposalMeta | RecommendationsMeta;
+
 type ChatMessage =
   | (BaseMessage & { meta?: undefined })
-  | (BaseMessage & { meta: CartProposalMeta });
+  | (BaseMessage & { meta: AssistantMeta });
 
 function makeId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+// ---------- TYPE GUARDS ----------
+
+function isCartProposalMeta(
+  meta: AssistantMeta | undefined,
+): meta is CartProposalMeta {
+  return meta?.kind === "cart_proposal";
+}
+
+function isRecommendationsMeta(
+  meta: AssistantMeta | undefined,
+): meta is RecommendationsMeta {
+  return meta?.kind === "recommendations";
 }
 
 export default function CoveChatWidget() {
@@ -65,16 +60,11 @@ export default function CoveChatWidget() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Clerk auth
   const { user, isSignedIn } = useUser();
 
-  // Small session store only for AI-core tracing
   const { guestSessionId, ensureGuestSessionId } = useCartSessionStore();
-
-  // Main cart store – drives navbar badge + cart modal + backend sync
   const addItem = useCartStore((s) => s.addItem);
 
-  // Make sure guestSessionId exists as soon as widget mounts
   useEffect(() => {
     ensureGuestSessionId();
   }, [ensureGuestSessionId]);
@@ -108,7 +98,6 @@ export default function CoveChatWidget() {
         payload.email = emailObj ? emailObj.emailAddress : null;
       }
 
-      // ✅ Correct route (no "/query")
       const res = await fetch("/api/agent-dev/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -170,23 +159,40 @@ export default function CoveChatWidget() {
     }
 
     if (data.kind === "recommendations") {
+      const items = data.items ?? [];
+
       const msg: ChatMessage = {
         id: makeId(),
         role: "assistant",
-        content: data.answer || "Here are some recommendations.",
+        content: data.answer || "Here are some options that match what you asked for.",
+        meta: items.length
+          ? ({
+              kind: "recommendations",
+              items,
+            } as RecommendationsMeta)
+          : undefined,
       };
+
       setMessages((prev) => [...prev, msg]);
       return;
     }
+
+    const msg: ChatMessage = {
+      id: makeId(),
+      role: "assistant",
+      content: data.answer,
+    };
+    setMessages((prev) => [...prev, msg]);
   }
 
   async function handleConfirmCartProposal(messageId: string) {
     const target = messages.find(
-      (m) => m.id === messageId && m.meta?.kind === "cart_proposal"
+      (m) => m.id === messageId && isCartProposalMeta(m.meta),
     );
     if (!target || !target.meta) return;
 
-    const { agentResponse } = target.meta;
+    const meta = target.meta as CartProposalMeta;
+    const { agentResponse } = meta;
     const cp = agentResponse.cart_payload;
     const firstItem = agentResponse.items?.[0];
 
@@ -208,11 +214,10 @@ export default function CoveChatWidget() {
         prev.map((m) =>
           m.id === messageId
             ? { ...m, content: m.content + " (adding...)" }
-            : m
-        )
+            : m,
+        ),
       );
 
-      // Fire-and-forget to AI core
       fetch("/api/agent-dev/cart-add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,8 +230,8 @@ export default function CoveChatWidget() {
         productId: firstItem.slug ?? cp.variantId,
         variantId: cp.variantId,
         name: firstItem.title,
-        type: firstItem.type,
-        tier: firstItem.tier,
+        type: firstItem.type ?? "",
+        tier: firstItem.tier ?? "",
         size: cp.size,
         color: firstItem.color ?? "",
         colorName: firstItem.color ?? "",
@@ -240,23 +245,23 @@ export default function CoveChatWidget() {
 
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === messageId && m.meta?.kind === "cart_proposal"
+          m.id === messageId && isCartProposalMeta(m.meta)
             ? {
                 ...m,
                 content: "Added to your cart. You can open it from the navbar.",
                 meta: {
                   ...m.meta,
                   confirmed: true,
-                },
+                } as CartProposalMeta,
               }
-            : m
-        )
+            : m,
+        ),
       );
     } catch (err) {
       console.error("Error in cart-add flow:", err);
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === messageId && m.meta?.kind === "cart_proposal"
+          m.id === messageId && isCartProposalMeta(m.meta)
             ? {
                 ...m,
                 content:
@@ -264,10 +269,10 @@ export default function CoveChatWidget() {
                 meta: {
                   ...m.meta,
                   confirmed: false,
-                },
+                } as CartProposalMeta,
               }
-            : m
-        )
+            : m,
+        ),
       );
     }
   }
@@ -275,17 +280,17 @@ export default function CoveChatWidget() {
   function handleCancelCartProposal(messageId: string) {
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === messageId && m.meta?.kind === "cart_proposal"
+        m.id === messageId && isCartProposalMeta(m.meta)
           ? {
               ...m,
               content: "Okay, I won’t add that item to your cart.",
               meta: {
                 ...m.meta,
                 cancelled: true,
-              },
+              } as CartProposalMeta,
             }
-          : m
-      )
+          : m,
+      ),
     );
   }
 
@@ -295,7 +300,13 @@ export default function CoveChatWidget() {
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {messages.map((m) => {
           const isUser = m.role === "user";
-          const isCartProposal = m.meta?.kind === "cart_proposal";
+
+          const cartMeta = isCartProposalMeta(m.meta)
+            ? (m.meta as CartProposalMeta)
+            : undefined;
+          const recMeta = isRecommendationsMeta(m.meta)
+            ? (m.meta as RecommendationsMeta)
+            : undefined;
 
           return (
             <div
@@ -311,7 +322,23 @@ export default function CoveChatWidget() {
               >
                 <p className="whitespace-pre-wrap">{m.content}</p>
 
-                {isCartProposal && !m.meta?.confirmed && !m.meta?.cancelled && (
+                {/* vertical list of product cards */}
+                {!isUser &&
+                  recMeta &&
+                  recMeta.items &&
+                  recMeta.items.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {recMeta.items.map((item, idx) => (
+                        <ChatProductCard
+                          key={`${item.variantId ?? item.slug ?? item.url}-${idx}`}
+                          item={item}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                {/* cart proposal confirm / cancel */}
+                {cartMeta && !cartMeta.confirmed && !cartMeta.cancelled && (
                   <div className="mt-2 flex gap-2">
                     <button
                       className="px-3 py-1 text-xs rounded-full bg-emerald-500 text-black hover:bg-emerald-400 transition"

@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config
 
-
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -228,15 +228,15 @@ USE_RDS = os.getenv("USE_RDS", "0") in ("1", "true", "True")
 
 if USE_RDS:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("DB_NAME", "postgres"),
-            "USER": os.getenv("DB_USER"),
-            "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": os.getenv("DB_HOST"),
-            "PORT": os.getenv("DB_PORT", "5432"),
-            "OPTIONS": {"sslmode": os.getenv("DB_SSLMODE", "require")},
-        }
+        "default": dj_database_url.config(
+            env="DATABASE_URL",
+            default=os.environ.get(
+                "DATABASE_URL",
+                "postgresql://neondb_owner:npg_L5mXATyRf6nF@ep-mute-dream-ag0ojpws-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require",
+            ),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
     DATABASES = {
