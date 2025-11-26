@@ -443,26 +443,5 @@ html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in d
   margin: 0 auto;
 }
 
-/* Equal thirds (md+) and containment; allow 3D lift to breathe */
-.overlay-card.overlay-card--thirds {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-@media (min-width: 768px) {
-  .overlay-card.overlay-card--thirds { grid-template-columns: 1fr 1fr 1fr; }
-}
 
-/* Slots */
-.overlay-slot-left,
-.overlay-slot-center,
-.overlay-slot-right {
-  min-width: 0;
-  padding: 6px 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  /* Let the 3D hover peek a couple of px so it doesn’t look “cut off”.
-     If you want strict containment, keep overflow:hidden and reduce rotateX/Y above. */
-  overflow: visible;
-}
+
