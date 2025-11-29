@@ -1,4 +1,147 @@
 
+// "use client";
+
+// import {
+//   useState,
+//   useRef,
+//   useEffect,
+//   createContext,
+//   useContext,
+//   PropsWithChildren,
+// } from "react";
+// import FullNavbar from "./NavbarComponents/FullModeNavbar/FullNavbar";
+// import IslandNavbar from "./NavbarComponents/IslandModeNavbar/IslandNavbar";
+// import MenuNavbar from "./NavbarComponents/MenuModeNavbar/MenuNavbar";
+
+// export type NavbarMode = "full" | "island" | "menu";
+
+// const ENTER_ISLAND = 620; // go island when scrolling down past this
+// const EXIT_ISLAND  = 560; // go back to full when scrolling up above this
+
+// const NavbarModeCtx = createContext<{
+//   mode: NavbarMode;
+//   setMode: (m: NavbarMode) => void;
+// } | null>(null);
+
+// export function useNavbarMode() {
+//   const ctx = useContext(NavbarModeCtx);
+//   if (!ctx) throw new Error("useNavbarMode must be used inside NavbarController");
+//   return ctx;
+// }
+
+// export default function NavbarController({ children }: PropsWithChildren<{}>) {
+//   const [mode, setModeState] = useState<NavbarMode>("full");
+
+//   // keep last non-menu mode so we can restore after closing menu
+//   const lastNonMenuModeRef = useRef<Exclude<NavbarMode, "menu">>("full");
+
+//   // live mode ref so scroll handler never sees stale state
+//   const modeRef = useRef<NavbarMode>("full");
+//   useEffect(() => { modeRef.current = mode; }, [mode]);
+
+//   const setMode = (m: NavbarMode) => {
+//     if (m === "menu") {
+//       const currentNonMenu =
+//         modeRef.current === "menu" ? lastNonMenuModeRef.current : modeRef.current;
+//       lastNonMenuModeRef.current = currentNonMenu as Exclude<NavbarMode, "menu">;
+//       window.dispatchEvent(new Event("cove:menu:open"));
+//       setModeState("menu");
+//       modeRef.current = "menu";
+//       return;
+//     }
+
+//     if (modeRef.current === "menu") {
+//       window.dispatchEvent(new Event("cove:menu:close"));
+//     }
+//     setModeState(m);
+//     modeRef.current = m;
+//     lastNonMenuModeRef.current = m;
+//   };
+
+//   // Auto-toggle full <-> island based on .tester-frame scroll
+//   useEffect(() => {
+//     const frame = document.querySelector(".tester-frame") as HTMLElement | null;
+//     if (!frame) return;
+
+//     let ticking = false;
+
+//     const onScroll = () => {
+//       if (ticking) return;
+//       ticking = true;
+//       requestAnimationFrame(() => {
+//         ticking = false;
+
+//         if (modeRef.current === "menu") return; // freeze while menu open
+
+//         const y = frame.scrollTop;
+//         let next: Exclude<NavbarMode, "menu"> = modeRef.current as Exclude<
+//           NavbarMode,
+//           "menu"
+//         >;
+
+//         if (next !== "island" && y > ENTER_ISLAND) next = "island";
+//         if (next !== "full"   && y < EXIT_ISLAND)  next = "full";
+
+//         if (next !== modeRef.current) {
+//           setModeState(next);
+//           modeRef.current = next;
+//           lastNonMenuModeRef.current = next;
+//         }
+//       });
+//     };
+
+//     // Initialize from current scroll
+//     const y0 = frame.scrollTop;
+//     const initial: Exclude<NavbarMode, "menu"> = y0 > ENTER_ISLAND ? "island" : "full";
+//     setModeState(initial);
+//     modeRef.current = initial;
+//     lastNonMenuModeRef.current = initial;
+
+//     frame.addEventListener("scroll", onScroll, { passive: true });
+//     return () => frame.removeEventListener("scroll", onScroll);
+//   }, []);
+
+//   // Respect external open/close menu events (overlay close on outside click)
+//   useEffect(() => {
+//     const onOpen = () => {
+//       const currentNonMenu =
+//         modeRef.current === "menu" ? lastNonMenuModeRef.current : modeRef.current;
+//       lastNonMenuModeRef.current = currentNonMenu as Exclude<NavbarMode, "menu">;
+//       setModeState("menu");
+//       modeRef.current = "menu";
+//     };
+//     const onClose = () => {
+//       const restore = lastNonMenuModeRef.current;
+//       setModeState(restore);
+//       modeRef.current = restore;
+//     };
+
+//     window.addEventListener("cove:menu:open", onOpen);
+//     window.addEventListener("cove:menu:close", onClose);
+//     return () => {
+//       window.removeEventListener("cove:menu:open", onOpen);
+//       window.removeEventListener("cove:menu:close", onClose);
+//     };
+//   }, []);
+
+//   return (
+
+
+//     <NavbarModeCtx.Provider value={{ mode, setMode }}>
+//     {mode === "full" && <FullNavbar />}
+//     {(mode === "island" || mode === "menu") && (
+//       <IslandNavbar isMenu={mode === "menu"} />
+//     )}
+//     {children}
+//   </NavbarModeCtx.Provider>
+
+//   );
+// }
+
+
+
+
+// src/components/Navbar/NavbarController.tsx
 "use client";
 
 import {
@@ -9,14 +152,15 @@ import {
   useContext,
   PropsWithChildren,
 } from "react";
+import { AnimatePresence } from "framer-motion";
 import FullNavbar from "./NavbarComponents/FullModeNavbar/FullNavbar";
 import IslandNavbar from "./NavbarComponents/IslandModeNavbar/IslandNavbar";
 import MenuNavbar from "./NavbarComponents/MenuModeNavbar/MenuNavbar";
 
 export type NavbarMode = "full" | "island" | "menu";
 
-const ENTER_ISLAND = 620; // go island when scrolling down past this
-const EXIT_ISLAND  = 560; // go back to full when scrolling up above this
+const ENTER_ISLAND = 620;
+const EXIT_ISLAND = 560;
 
 const NavbarModeCtx = createContext<{
   mode: NavbarMode;
@@ -32,18 +176,22 @@ export function useNavbarMode() {
 export default function NavbarController({ children }: PropsWithChildren<{}>) {
   const [mode, setModeState] = useState<NavbarMode>("full");
 
-  // keep last non-menu mode so we can restore after closing menu
   const lastNonMenuModeRef = useRef<Exclude<NavbarMode, "menu">>("full");
-
-  // live mode ref so scroll handler never sees stale state
   const modeRef = useRef<NavbarMode>("full");
-  useEffect(() => { modeRef.current = mode; }, [mode]);
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
+  // lock so users can't interrupt the full <-> island animation
+  const transitionLockRef = useRef(false);
+  const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setMode = (m: NavbarMode) => {
     if (m === "menu") {
       const currentNonMenu =
         modeRef.current === "menu" ? lastNonMenuModeRef.current : modeRef.current;
-      lastNonMenuModeRef.current = currentNonMenu as Exclude<NavbarMode, "menu">;
+      lastNonMenuModeRef.current =
+        currentNonMenu as Exclude<NavbarMode, "menu">;
       window.dispatchEvent(new Event("cove:menu:open"));
       setModeState("menu");
       modeRef.current = "menu";
@@ -66,23 +214,28 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
     let ticking = false;
 
     const onScroll = () => {
-      if (ticking) return;
+      if (ticking || transitionLockRef.current) return;
       ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
 
-        if (modeRef.current === "menu") return; // freeze while menu open
+        if (modeRef.current === "menu") return;
 
         const y = frame.scrollTop;
-        let next: Exclude<NavbarMode, "menu"> = modeRef.current as Exclude<
-          NavbarMode,
-          "menu"
-        >;
+        let next: Exclude<NavbarMode, "menu"> =
+          modeRef.current as Exclude<NavbarMode, "menu">;
 
         if (next !== "island" && y > ENTER_ISLAND) next = "island";
-        if (next !== "full"   && y < EXIT_ISLAND)  next = "full";
+        if (next !== "full" && y < EXIT_ISLAND) next = "full";
 
         if (next !== modeRef.current) {
+          // lock transitions for the duration of the fade
+          transitionLockRef.current = true;
+          if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
+          lockTimeoutRef.current = setTimeout(() => {
+            transitionLockRef.current = false;
+          }, 400); // a bit longer than motion duration
+
           setModeState(next);
           modeRef.current = next;
           lastNonMenuModeRef.current = next;
@@ -90,9 +243,9 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
       });
     };
 
-    // Initialize from current scroll
     const y0 = frame.scrollTop;
-    const initial: Exclude<NavbarMode, "menu"> = y0 > ENTER_ISLAND ? "island" : "full";
+    const initial: Exclude<NavbarMode, "menu"> =
+      y0 > ENTER_ISLAND ? "island" : "full";
     setModeState(initial);
     modeRef.current = initial;
     lastNonMenuModeRef.current = initial;
@@ -101,12 +254,13 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
     return () => frame.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Respect external open/close menu events (overlay close on outside click)
+  // Respect external open/close menu events
   useEffect(() => {
     const onOpen = () => {
       const currentNonMenu =
         modeRef.current === "menu" ? lastNonMenuModeRef.current : modeRef.current;
-      lastNonMenuModeRef.current = currentNonMenu as Exclude<NavbarMode, "menu">;
+      lastNonMenuModeRef.current =
+        currentNonMenu as Exclude<NavbarMode, "menu">;
       setModeState("menu");
       modeRef.current = "menu";
     };
@@ -124,18 +278,36 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
     };
   }, []);
 
-  return (
 
+  // inside NavbarController return
 
-    <NavbarModeCtx.Provider value={{ mode, setMode }}>
-    {mode === "full" && <FullNavbar />}
-    {(mode === "island" || mode === "menu") && (
-      <IslandNavbar isMenu={mode === "menu"} />
-    )}
+return (
+  <NavbarModeCtx.Provider value={{ mode, setMode }}>
+    <AnimatePresence mode="wait" initial={false}>
+      {mode === "full" && <FullNavbar key="full" />}
+
+      {/* ONE shared IslandNavbar instance for both island + menu */}
+      {mode !== "full" && (
+        <IslandNavbar key="island" isMenu={mode === "menu"} />
+      )}
+    </AnimatePresence>
+
     {children}
   </NavbarModeCtx.Provider>
+);
 
-  );
+
+  // return (
+  //   <NavbarModeCtx.Provider value={{ mode, setMode }}>
+  //     <AnimatePresence mode="wait" initial={false}>
+  //       {mode === "full" && <FullNavbar key="full" />}
+
+  //       {(mode === "island" || mode === "menu") && (
+  //         <IslandNavbar key={mode} isMenu={mode === "menu"} />
+  //       )}
+  //     </AnimatePresence>
+
+  //     {children}
+  //   </NavbarModeCtx.Provider>
+  // );
 }
-
-
