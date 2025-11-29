@@ -1,9 +1,9 @@
-# app/routes/agent.py
 from __future__ import annotations
 
 import logging
 import os
 import re
+import json
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
 from app.vector.store import connect
+from app.vector.store import get_conn
 from app.agent.orchestrator import classify
 from app.routes.rag import _parse_query_attrs  # reuse the same attrs logic as RAG
 from app.agent.filters import (
@@ -20,17 +21,20 @@ from app.agent.filters import (
     is_structured_product_query,
     build_rec_query,
 )
-from app.providers.llm import LLMClient  # 👈 NEW: history-aware chat LLM
+from app.providers.llm import LLMClient  # history-aware chat LLM
 
 DJANGO_BASE_URL = os.getenv("DJANGO_BASE_URL", "http://127.0.0.1:8001")
 log = logging.getLogger("cove.agent")
 router = APIRouter()
 
-_conn = None  # shared read-only connection
+#_conn = None  # shared read-only connection
 
 
 # ---------- I/O models ----------
 
+
+from typing_extensions import Literal
+# ...
 
 class AgentIn(BaseModel):
     message: str
@@ -41,6 +45,49 @@ class AgentIn(BaseModel):
     clerkUserId: Optional[str] = None
     guestSessionId: Optional[str] = None
     email: Optional[str] = None
+
+    # NEW: how much per-user history to use in the LLM fallback
+    # "user" = normal behavior, "none" = treat as fresh chat turn
+    historyScope: Literal["user", "none"] = "user"
+
+
+import re  # already imported at top, just make sure it's there
+
+
+def _is_short_smalltalk(msg: str, intent_kind: str) -> bool:
+    """
+    Detect very short, non-question messages that are likely just casual smalltalk.
+
+    Heuristics (no hard-coded greeting words):
+    - only for generic/unknown intents
+    - message length is short
+    - no question mark
+    - few tokens
+    """
+    q = (msg or "").strip()
+    if not q:
+        return False
+
+    # only consider for generic/unknown intents
+    if intent_kind not in ("generic", "unknown"):
+        return False
+
+    # very short text only
+    if len(q) > 40:
+        return False
+
+    # if it's a question, treat normally
+    if "?" in q:
+        return False
+
+    # token count heuristic: very few words → likely greeting / smalltalk
+    tokens = re.findall(r"\w+", q.lower())
+    if len(tokens) == 0:
+        return False
+    if len(tokens) > 4:
+        return False
+
+    return True
 
 
 class AgentItem(BaseModel):
@@ -128,7 +175,10 @@ async def _load_ai_profile(clerk_user_id: str) -> Optional[Dict[str, Any]]:
     Route (Django):
       GET /ai_profiles/profile.get?clerkUserId=...
 
-    Returns profile JSON or None if anything fails.
+    Returns:
+      - dict profile JSON if found
+      - None if profile does not exist (404)
+      - None on network / server error (with warning)
     """
     if not clerk_user_id:
         return None
@@ -139,13 +189,30 @@ async def _load_ai_profile(clerk_user_id: str) -> Optional[Dict[str, Any]]:
     try:
         async with httpx.AsyncClient(timeout=5) as cx:
             r = await cx.get(url, params={"clerkUserId": clerk_user_id})
+
         if r.status_code == 200:
             return r.json()
-        log.warning("ai_profile_get non-200 %s: %s", r.status_code, r.text)
+
+        if r.status_code == 404:
+            # Normal case for a new Clerk user: no AI profile row yet.
+            log.info(
+                "ai_profile_get 404 (no profile yet) for clerkUserId=%s",
+                clerk_user_id,
+            )
+            return None
+
+        # Anything else is an actual problem (500, 502, etc.)
+        log.warning(
+            "ai_profile_get non-200 %s for clerkUserId=%s: %s",
+            r.status_code,
+            clerk_user_id,
+            r.text,
+        )
     except Exception as e:
-        log.warning("ai_profile_get failed: %s", e)
+        log.warning("ai_profile_get failed for clerkUserId=%s: %s", clerk_user_id, e)
 
     return None
+
 
 
 def _apply_profile_defaults_to_filters(
@@ -169,7 +236,6 @@ def _apply_profile_defaults_to_filters(
     if "color" not in merged:
         colors = profile.get("preferred_colors") or []
         if isinstance(colors, list) and colors:
-            # store as lowercase for compatibility with recs filters
             merged["color"] = str(colors[0]).lower().strip()
 
     # Size personalization (top is safest generic default)
@@ -179,6 +245,187 @@ def _apply_profile_defaults_to_filters(
             merged["size"] = sz_top
 
     return merged
+
+
+# ---------------------------------------------------------
+# Lightweight in-memory cache of last recommendations
+# keyed by cartId / clerkUserId / guestSessionId.
+# For multi-worker prod you'd swap this for Redis/DB.
+# ---------------------------------------------------------
+
+# ---------------------------------------------------------
+# Lightweight in-memory session caches.
+# For multi-worker prod you'd swap this for Redis/DB.
+# ---------------------------------------------------------
+
+_SESSION_RECS: Dict[str, List[Dict[str, Any]]] = {}
+_SESSION_LAST_USER_MSG: Dict[str, str] = {}
+
+
+
+
+def _session_key_from_body(body: AgentIn) -> Optional[str]:
+    if body.cartId:
+        return f"cart:{body.cartId}"
+    if body.clerkUserId:
+        return f"user:{body.clerkUserId}"
+    if body.guestSessionId:
+        return f"guest:{body.guestSessionId}"
+    return None
+
+
+def _store_session_recs(body: AgentIn, items: List[AgentItem]) -> None:
+    key = _session_key_from_body(body)
+    if not key:
+        return
+    _SESSION_RECS[key] = [it.dict() for it in items]
+
+
+def _get_session_recs(body: AgentIn) -> List[Dict[str, Any]]:
+    key = _session_key_from_body(body)
+    if not key:
+        return []
+    return _SESSION_RECS.get(key, [])
+
+def _update_last_user_message(body: AgentIn) -> None:
+    """
+    Remember the latest user message per logical session
+    (cartId / clerkUserId / guestSessionId).
+    """
+    key = _session_key_from_body(body)
+    if not key:
+        return
+    _SESSION_LAST_USER_MSG[key] = body.message
+
+
+def _get_last_user_message(body: AgentIn) -> Optional[str]:
+    """
+    Fetch the previous user message for this logical session,
+    if we have one.
+    """
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_LAST_USER_MSG.get(key)
+
+
+async def _select_from_last_recs_via_llm(
+    message: str,
+    last_items: List[Dict[str, Any]],
+    prev_user_message: Optional[str] = None,
+) -> Optional[List[int]]:
+    """
+    Use the LLM to choose which item indices (0-based) in last_items
+    the user is referring to, based on their free-text message and,
+    optionally, the previous user message.
+
+    Returns:
+      - list of indices [i, j, ...] if the model is confident that
+        the user refers to exactly one or several specific items
+      - None if ambiguous / no selection
+    """
+    if not last_items:
+        return None
+
+    # Expose only safe metadata to the model.
+    items_for_llm: List[Dict[str, Any]] = []
+    for idx, raw in enumerate(last_items):
+        items_for_llm.append(
+            {
+                "index": idx,
+                "title": raw.get("title"),
+                "type": raw.get("type"),
+                "color": raw.get("color"),
+                "size": raw.get("size"),
+                "slug": raw.get("slug"),
+                "variantId": raw.get("variantId"),
+            }
+        )
+
+    system_prompt = """You are a helper that selects products from a list.
+
+You will receive:
+- 'items': a JSON array of visible products, each with an 'index' (0-based) and simple metadata.
+- 'user_message': the user's current message.
+- optionally 'previous_user_message': what the user said in the previous turn.
+
+Goals:
+- Decide whether the user is clearly referring to:
+    * exactly ONE item, or
+    * several specific items, or
+    * no clear subset.
+- The user may refer using:
+    * position ("the first hoodie", "item #2", "second and third"),
+    * descriptions (black hoodie, navy tee),
+    * colours,
+    * sizes,
+    * or pronouns ("this one", "that hoodie", "both of these").
+
+Output rules:
+- If they clearly refer to ONE item, respond:
+    {"mode": "one", "indices": [N]}
+  where N is the 0-based index from 'items'.
+- If they clearly refer to SEVERAL specific items, respond:
+    {"mode": "many", "indices": [N1, N2, ...]}
+- If it is ambiguous, or refers to a group like "all hoodies" without
+  specifying which of our items, respond:
+    {"mode": "none", "indices": []}
+
+Requirements:
+- Always respond with JSON ONLY, no explanations.
+- 'indices' must be a list of unique integers within the valid range of the items array.
+"""
+
+    user_payload: Dict[str, Any] = {
+        "items": items_for_llm,
+        "user_message": message,
+    }
+    if prev_user_message:
+        user_payload["previous_user_message"] = prev_user_message
+
+    client = LLMClient()
+    raw = await client.generate(
+        [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": json.dumps(user_payload, ensure_ascii=False),
+            },
+        ]
+    )
+
+    try:
+        text = raw.strip()
+        # Some models may wrap JSON in ```...``` or ```json ...```
+        if text.startswith("```"):
+            text = text.strip("`").strip()
+            if text.lower().startswith("json"):
+                text = text[4:].lstrip()
+        data = json.loads(text)
+    except Exception:
+        return None
+
+    mode = data.get("mode")
+    indices_raw = data.get("indices", [])
+
+    if not isinstance(indices_raw, list):
+        return None
+
+    # Normalise + validate indices
+    indices: List[int] = []
+    for x in indices_raw:
+        if isinstance(x, int) and 0 <= x < len(last_items):
+            if x not in indices:
+                indices.append(x)
+
+    if not indices:
+        return None
+
+    if mode not in ("one", "many"):
+        return None
+
+    return indices
+
 
 
 # ---------- History → LLM helpers ----------
@@ -226,42 +473,68 @@ async def _fetch_history_for_llm(
 def _history_to_llm_messages(
     history: List[Dict[str, Any]],
     user_message: str,
+    *,
+    smalltalk: bool = False,
 ) -> List[Dict[str, str]]:
     """
     Convert history rows into OpenAI-style messages, plus current user turn.
     """
+    is_first_turn = len(history) == 0
+
+    system_content = (
+        "You are Cove AI, a helpful assistant for the Cove streetwear brand.\n\n"
+        "Knowledge sources you may rely on in this mode:\n"
+        "- The conversation history you see below (previous user and assistant messages).\n"
+        "- Your general reasoning skills.\n\n"
+        "Very important safety rules:\n"
+        "1. Do NOT invent concrete operational details about Cove that you have not been told "
+        "   explicitly in this conversation (or via structured tools, if present). This includes:\n"
+        "   - exact return policies or refund windows (e.g. '30 days')\n"
+        "   - shipping times, delivery dates, or regions\n"
+        "   - stock levels, sizes in stock, or availability of specific items\n"
+        "   - exact prices, discounts, promo codes, or taxes\n"
+        "   - addresses, phone numbers, or contact details\n"
+        "2. Only if the user explicitly asks about one of those, and you do NOT have explicit "
+        "   information from the messages so far, say clearly that this information is not configured yet "
+        "   and suggest checking the website or contacting support. Do NOT volunteer these limitations "
+        "   in casual greetings or unrelated answers.\n"
+        "3. When summarising or referring to past turns, be precise and faithful to what "
+        "   the user actually said earlier. If you are unsure, say you are not sure.\n"
+        "4. For general style, brand vibe, or non-operational questions, you may answer "
+        "   in a friendly, concise way, but stay plausible for a modern minimal streetwear brand.\n"
+        "5. Do NOT talk about what you *cannot* do (e.g. 'I can't add to cart in chat') unless the user "
+        "   explicitly asks about that capability. Focus on what you *can* help with instead.\n"
+    )
+
+    if smalltalk:
+        system_content += (
+            "\n\nThe user's current message is a very short, non-question smalltalk message. "
+            "Reply with a short friendly greeting and ONE short line about how you can help "
+            "with Cove products, sizes, or outfit ideas. "
+            "Do NOT mention stock configuration, availability, cart or checkout limitations, "
+            "or any specific past products in this reply. "
+            "Do NOT refer to earlier conversations unless the user explicitly mentions them "
+            "in this message."
+        )
+    elif is_first_turn:
+        system_content += (
+            "\n\nThis is the first message in the current chat session. "
+            "You only see the user's current message; do NOT assume they are still "
+            "asking about anything from a previous visit (such as specific hoodies, sizes, etc.). "
+            "Only bring up previous topics if the user clearly refers to them."
+        )
+    else:
+        system_content += (
+            "\n\nUse the conversation history below when it is clearly relevant to the user's "
+            "current message, but do not hallucinate topics that were never mentioned."
+        )
+
     messages: List[Dict[str, str]] = [
-        {
-            "role": "system",
-            "content": (
-                "You are Cove AI, a helpful assistant for the Cove streetwear brand.\n\n"
-                "Knowledge sources you may rely on in this mode:\n"
-                "- The conversation history you see below (previous user and assistant messages).\n"
-                "- Your general reasoning skills.\n\n"
-                "Very important safety rules:\n"
-                "1. Do NOT invent concrete operational details about Cove that you have not been told "
-                "   explicitly in this conversation (or via structured tools, if present). This includes:\n"
-                "   - exact return policies or refund windows (e.g. '30 days')\n"
-                "   - shipping times, delivery dates, or regions\n"
-                "   - stock levels, sizes in stock, or availability of specific items\n"
-                "   - exact prices, discounts, promo codes, or taxes\n"
-                "   - addresses, phone numbers, or contact details\n"
-                "2. If you are asked about any of the above and you do NOT have explicit information "
-                "   from the messages so far, say clearly that this information is not configured yet "
-                "   and suggest checking the website or contacting support. Do not guess.\n"
-                "3. When summarising or referring to past turns, be precise and faithful to what "
-                "   the user actually said earlier. If you are unsure, say you are not sure.\n"
-                "4. For general style, brand vibe, or non-operational questions, you may answer "
-                "   in a friendly, concise way, but stay plausible for a modern minimal streetwear brand.\n\n"
-                "If you cannot answer a question safely with the information available, say so explicitly "
-                "instead of hallucinating details."
-            ),
-        }
+        {"role": "system", "content": system_content}
     ]
 
     for row in history:
         role = row.get("role") or "user"
-        # Map any unexpected roles to user/assistant
         if role not in ("user", "assistant", "system"):
             if role.lower() in ("bot", "assistant", "ai"):
                 role = "assistant"
@@ -274,9 +547,9 @@ def _history_to_llm_messages(
 
         messages.append({"role": role, "content": content})
 
-    # Current turn
     messages.append({"role": "user", "content": user_message})
     return messages
+
 
 
 
@@ -287,12 +560,26 @@ async def _call_llm_with_history(
     """
     History-aware general chat fallback.
 
-    - Fetches recent history based on clerkUserId / guestSessionId
-    - Builds messages
-    - Calls the default LLMClient
+    - If historyScope == "none": skip history entirely.
+    - Else: fetch recent history based on clerkUserId / guestSessionId.
     """
-    history = await _fetch_history_for_llm(body.clerkUserId, body.guestSessionId, limit=20)
-    messages = _history_to_llm_messages(history, body.message)
+    if body.historyScope == "none":
+        history: List[Dict[str, Any]] = []
+    else:
+        history = await _fetch_history_for_llm(
+            body.clerkUserId,
+            body.guestSessionId,
+            limit=20,
+        )
+
+    # generic structural check: very short, non-question, generic intent
+    smalltalk = _is_short_smalltalk(body.message, intent_kind)
+
+    messages = _history_to_llm_messages(
+        history,
+        body.message,
+        smalltalk=smalltalk,
+    )
 
     client = LLMClient()
     text = await client.generate(messages)
@@ -301,7 +588,11 @@ async def _call_llm_with_history(
         "answer": text,
         "history_len": len(history),
         "intent_kind": intent_kind,
+        "history_scope": body.historyScope,
     }
+
+
+
 
 
 # ---------- RAG / RECS / FIT delegates ----------
@@ -456,6 +747,8 @@ async def _call_fit_recommend(
 # ---------- Main agent endpoint ----------
 
 
+from app.vector.store import get_conn
+...
 @router.post("/ai/agent/query", response_model=AgentOut)
 async def agent_query(body: AgentIn) -> AgentOut:
     """
@@ -469,24 +762,37 @@ async def agent_query(body: AgentIn) -> AgentOut:
     - Pulls per-user AI profile (if signed in) to bias filters + fit.
     - Returns a structured payload the frontend can execute.
     """
-    global _conn
-    _conn = _conn or connect()
-
     q = body.message
+    prev_user_message = _get_last_user_message(body)
+    _update_last_user_message(body)
 
     # 0) Optional AI profile lookup for signed-in users
     ai_profile: Optional[Dict[str, Any]] = None
     if body.clerkUserId:
         ai_profile = await _load_ai_profile(body.clerkUserId)
 
-    # 1) Parse attributes (colors/types/sizes) using the same logic as RAG
-    attrs = _parse_query_attrs(_conn, q)
+    # 1) DB-dependent parsing: use a *fresh* connection from the pool
+    with get_conn() as conn:
+        # 1a) Parse attributes (colors/types/sizes) using the same logic as RAG
+        attrs = _parse_query_attrs(conn, q)
 
-    # 1b) Parse numeric filters (price range etc.) in a generic way
-    numeric_filters = parse_numeric_filters(q)
+        # 1b) Parse numeric filters (price range etc.) in a generic way
+        numeric_filters = parse_numeric_filters(q)
 
-    # 1c) Merge into a unified filters dict for recs / tools
-    base_filters: Dict[str, Any] = build_filters(attrs, numeric_filters)
+        # 1c) Merge into a unified filters dict for recs / tools
+        base_filters: Dict[str, Any] = build_filters(attrs, numeric_filters)
+
+    # 1d) Apply AI profile as fallback (never overriding explicit query filters)
+    rec_filters: Dict[str, Any] = _apply_profile_defaults_to_filters(
+        base_filters,
+        ai_profile,
+    )
+
+    # 2) Classify high-level intent (size_fit, policy, lookup_product, discover, etc.)
+    intent = await classify(q, attrs)
+    intent_kind = getattr(intent, "kind", "generic")
+    has_price_filter = getattr(intent, "has_price_filter", False)
+
 
     # 1d) Apply AI profile as fallback (never overriding explicit query filters)
     rec_filters: Dict[str, Any] = _apply_profile_defaults_to_filters(base_filters, ai_profile)
@@ -497,17 +803,12 @@ async def agent_query(body: AgentIn) -> AgentOut:
     has_price_filter = getattr(intent, "has_price_filter", False)
 
     # 3) Decide if user wants cart vs recs vs plain RAG / chat
-    # 3) Decide if user wants cart vs recs vs plain RAG / chat
-    wants_cart = _looks_like_cart_add(q)  # keep this very conservative
+    wants_cart = _looks_like_cart_add(q)  # keep this conservative
 
     # Only discovery intent should go to recommendations.
     # All other intents (lookup_product, policy, care, unknown, history_meta)
     # should be answered via RAG or LLM, not recs.
-    wants_recs = (
-        not wants_cart
-        and intent_kind == "discover"
-    )
-
+    wants_recs = (not wants_cart) and (intent_kind == "discover")
 
     debug_plan: Dict[str, Any] = {
         "intent_kind": intent_kind,
@@ -517,79 +818,188 @@ async def agent_query(body: AgentIn) -> AgentOut:
         "attrs": attrs,
         "numeric_filters": numeric_filters or None,
         "rec_filters": rec_filters or None,
-        "llm_used": False,  # default; flipped to True only in LLM branch
+        "llm_used": False,
+        "history_scope": body.historyScope,
     }
 
 
     if ai_profile:
         debug_plan["ai_profile_used"] = True
+        debug_plan["ai_profile_status"] = "loaded"
         debug_plan["ai_profile_keys"] = sorted(ai_profile.keys())
     else:
-        debug_plan["ai_profile_used"] = False
+        if body.clerkUserId:
+            debug_plan["ai_profile_used"] = False
+            debug_plan["ai_profile_status"] = "missing_for_clerk_user"
+        else:
+            debug_plan["ai_profile_used"] = False
+            debug_plan["ai_profile_status"] = "no_clerk_user"
+
 
     # ------------- Branch 1: cart_proposal (plan only, no side-effects) -------------
     if wants_cart:
-        # Use the same suggestion engine to resolve *which* product variant
-        rec_query = build_rec_query(q, rec_filters)
+        # First try: resolve from the last recommendations (context-aware "this/second one")
+        last_recs = _get_session_recs(body)
+        debug_plan["last_recs_count"] = len(last_recs)
 
-        rec_payload = {
-            "query": rec_query,
-            "filters": rec_filters,
-            "top_k": max(1, min(body.top_k, 4)),
-        }
-        rec_resp = await _call_recs_suggest(rec_payload)
-
-        debug_plan["rec_query"] = rec_query
-
-        raw_items = rec_resp.get("items") or []
-
-        items: List[AgentItem] = [
-            AgentItem(**it)
-            for it in raw_items
-            if isinstance(it, dict) and it.get("slug")
-        ]
-
-        debug_plan["rec_item_count"] = len(items)
-
-        if items:
-            top = items[0]
-
-            nice_type = (top.type or rec_filters.get("type") or "item").lower()
-            nice_color = (top.color or rec_filters.get("color") or "").lower()
-            nice_size = (top.size or rec_filters.get("size") or "").upper()
-
-            # Natural language: ask for confirmation instead of claiming we added it
-            parts: List[str] = ["Do you want me to add this"]
-            if nice_color:
-                parts.append(nice_color)
-            parts.append(nice_type)
-            if nice_size:
-                parts.append(f"in size {nice_size}")
-            parts.append("to your cart?")
-            answer = " ".join(parts).replace("  ", " ").strip()
-
-            # Minimal payload frontend will POST to /ai/agent/cart_add on confirm
-            cart_payload = {
-                "variantId": top.variantId,
-                "size": top.size or rec_filters.get("size"),
-                "quantity": 1,
-                "cartId": body.cartId,
-                "clerkUserId": body.clerkUserId,
-                "guestSessionId": body.guestSessionId,
-                "email": body.email,
-            }
-
-            return AgentOut(
-                kind="cart_proposal",
-                answer=answer,
-                citations=[],
-                items=items,
-                cart_payload=cart_payload,
-                debug_plan=debug_plan,
+        if last_recs:
+            indices = await _select_from_last_recs_via_llm(
+                message=q,
+                last_items=last_recs,
+                prev_user_message=prev_user_message,
             )
+            debug_plan["cart_source"] = "last_recs"
+            debug_plan["cart_selected_indices"] = indices
+            debug_plan["cart_prev_user_message"] = prev_user_message
 
-        # If we couldn’t resolve a concrete item, fall through to normal flows.
-        debug_plan["cart_add_note"] = "no_matching_item_from_recs"
+            # --- Case A: exactly ONE item resolved → normal cart_proposal ---
+            if indices and len(indices) == 1:
+                chosen_raw = last_recs[indices[0]]
+                top = AgentItem(**chosen_raw)
+
+                # Prefer an explicit size from the current message (rec_filters)
+                # but fall back to the size on the recommended item.
+                chosen_size = rec_filters.get("size") or top.size
+                nice_type = (top.type or rec_filters.get("type") or "item").lower()
+                nice_color = (top.color or rec_filters.get("color") or "").lower()
+                nice_size = (chosen_size or "").upper()
+
+                parts: List[str] = ["Do you want me to add this"]
+                if nice_color:
+                    parts.append(nice_color)
+                parts.append(nice_type)
+                if nice_size:
+                    parts.append(f"in size {nice_size}")
+                parts.append("to your cart?")
+                answer = " ".join(parts).replace("  ", " ").strip()
+
+                cart_payload = {
+                    "variantId": top.variantId,
+                    "size": chosen_size,
+                    "quantity": 1,
+                    "cartId": body.cartId,
+                    "clerkUserId": body.clerkUserId,
+                    "guestSessionId": body.guestSessionId,
+                    "email": body.email,
+                }
+
+
+                return AgentOut(
+                    kind="cart_proposal",
+                    answer=answer,
+                    citations=[],
+                    items=[top],
+                    cart_payload=cart_payload,
+                    debug_plan=debug_plan,
+                )
+
+            # --- Case B: several items resolved → list them, ask user to choose ---
+            if indices and len(indices) > 1:
+                items: List[AgentItem] = []
+                for i in indices:
+                    if 0 <= i < len(last_recs):
+                        raw = last_recs[i]
+                        if isinstance(raw, dict) and raw.get("slug"):
+                            items.append(AgentItem(**raw))
+
+                debug_plan["cart_multi_candidates"] = [
+                    it.slug for it in items if it.slug
+                ]
+
+                if items:
+                    return AgentOut(
+                        kind="recommendations",
+                        answer=(
+                            "You mentioned more than one item. "
+                            "Please tap a specific product or tell me which number to add "
+                            "(for example: “add the first hoodie in size M”)."
+                        ),
+                        citations=[],
+                        items=items,
+                        cart_payload=None,
+                        debug_plan=debug_plan,
+                    )
+
+
+        # Second try: user message itself contains enough structured product info
+        structured_product = is_structured_product_query(attrs)
+        debug_plan["cart_structured_product"] = bool(structured_product)
+
+        if structured_product:
+            rec_query = build_rec_query(q, rec_filters)
+
+            rec_payload = {
+                "query": rec_query,
+                "filters": rec_filters,
+                "top_k": max(1, min(body.top_k, 4)),
+            }
+            rec_resp = await _call_recs_suggest(rec_payload)
+
+            debug_plan["rec_query"] = rec_query
+
+            raw_items = rec_resp.get("items") or []
+
+            items: List[AgentItem] = [
+                AgentItem(**it)
+                for it in raw_items
+                if isinstance(it, dict) and it.get("slug")
+            ]
+
+            debug_plan["rec_item_count"] = len(items)
+
+            if items:
+                top = items[0]
+
+                chosen_size = rec_filters.get("size") or top.size
+                nice_type = (top.type or rec_filters.get("type") or "item").lower()
+                nice_color = (top.color or rec_filters.get("color") or "").lower()
+                nice_size = (top.size or rec_filters.get("size") or "").upper()
+
+                parts: List[str] = ["Do you want me to add this"]
+                if nice_color:
+                    parts.append(nice_color)
+                parts.append(nice_type)
+                if nice_size:
+                    parts.append(f"in size {nice_size}")
+                parts.append("to your cart?")
+                answer = " ".join(parts).replace("  ", " ").strip()
+
+                cart_payload = {
+                    "variantId": top.variantId,
+                    "size": chosen_size,
+                    "quantity": 1,
+                    "cartId": body.cartId,
+                    "clerkUserId": body.clerkUserId,
+                    "guestSessionId": body.guestSessionId,
+                    "email": body.email,
+                }
+
+                return AgentOut(
+                    kind="cart_proposal",
+                    answer=answer,
+                    citations=[],
+                    items=items,
+                    cart_payload=cart_payload,
+                    debug_plan=debug_plan,
+                )
+
+            debug_plan["cart_add_note"] = "no_matching_item_from_recs"
+
+        # Third try: we have cart intent but no resolvable item → ask user
+        debug_plan["cart_add_note"] = "cart_intent_but_no_resolvable_item"
+        return AgentOut(
+            kind="answer",
+            answer=(
+                "I’m not sure which item you want me to add. "
+                "Please either click a specific product or say something like "
+                "“Add the black hoodie in size M to my cart” or "
+                "“Add the second hoodie to my cart.”"
+            ),
+            citations=[],
+            items=[],
+            cart_payload=None,
+            debug_plan=debug_plan,
+        )
 
     # ------------- Branch 2: size & fit advisor --------------------------
     # If user is clearly asking "which size?", prioritize FIT engine.
@@ -653,6 +1063,9 @@ async def agent_query(body: AgentIn) -> AgentOut:
         debug_plan["rec_item_count"] = len(items)
 
         if items:
+            # Remember this set for follow-up cart actions
+            _store_session_recs(body, items)
+
             return AgentOut(
                 kind="recommendations",
                 answer="Here are some options that match what you asked for.",
@@ -665,13 +1078,14 @@ async def agent_query(body: AgentIn) -> AgentOut:
 
     # ------------- Branch 4: generic fallback -----------------------------
     # Decide between history-aware chat LLM vs RAG product answer.
- 
+
     use_llm_chat = intent_kind in ("generic", "policy", "history_meta", "unknown")
 
     if use_llm_chat and not wants_cart and not wants_recs:
         llm_resp = await _call_llm_with_history(body, intent_kind=intent_kind)
         debug_plan["llm_used"] = True
         debug_plan["llm_history_len"] = llm_resp.get("history_len", 0)
+        debug_plan["history_scope"] = llm_resp.get("history_scope", body.historyScope)
 
         return AgentOut(
             kind="answer",
@@ -680,6 +1094,7 @@ async def agent_query(body: AgentIn) -> AgentOut:
             items=[],
             debug_plan=debug_plan,
         )
+
 
     debug_plan["llm_used"] = False
 
@@ -695,7 +1110,6 @@ async def agent_query(body: AgentIn) -> AgentOut:
         items=[],
         debug_plan=debug_plan,
     )
-
 
 
 @router.post("/ai/agent/cart_add", response_model=AgentCartAddOut)

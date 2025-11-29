@@ -499,13 +499,12 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from psycopg.rows import dict_row
 
-from app.vector.store import connect, search_hybrid, search_keyword
+from app.vector.store import get_conn, search_hybrid, search_keyword
 from app.telemetry.trace import new_trace_id, emit
 
 log = logging.getLogger("cove.recs")
 router = APIRouter()
 
-_conn = None
 
 # -------------------------------------------------------------------
 # I/O models
@@ -518,7 +517,7 @@ class RecsFilters(BaseModel):
     color: Optional[str] = None   # black, green, etc.
     size: Optional[str] = None    # S, M, L, ...
 
-    # NEW: generic numeric price filters (in euros)
+    # generic numeric price filters (in euros)
     price_min: Optional[float] = None
     price_max: Optional[float] = None
 
@@ -562,7 +561,11 @@ def _extract_slug(url: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
-def _get_product_meta(conn, slug: str, preferred_color: Optional[str] = None) -> Optional[dict]:
+def _get_product_meta(
+    conn,
+    slug: str,
+    preferred_color: Optional[str] = None,
+) -> Optional[dict]:
     """
     Fetch a representative VARIANT doc by groupSlug for this product.
 
@@ -736,6 +739,40 @@ def _pick_primary_color(meta: dict, desired_color: Optional[str]) -> Optional[st
     return (desired_color or None)
 
 
+def _compute_popularity_score(meta: dict) -> float:
+    """
+    Popularity score in [0,1] from meta.
+    Falls back to 0.5 if nothing meaningful is present.
+    """
+    m = meta or {}
+
+    # direct popularity field if present
+    for key in ("popularityScore", "popularity", "popularity_score"):
+        if key in m:
+            try:
+                v = float(m[key])
+                if v < 0:
+                    return 0.0
+                if v > 1:
+                    return 1.0
+                return v
+            except Exception:
+                continue
+
+    # simple heuristic from views/orders if present
+    for key in ("views", "orders", "soldCount"):
+        if key in m:
+            try:
+                v = float(m[key])
+                if v <= 0:
+                    return 0.3
+                return max(0.3, min(1.0, 0.3 + 0.1 * (v ** 0.5)))
+            except Exception:
+                continue
+
+    return 0.5
+
+
 # -------------------------------------------------------------------
 # /ai/recs/suggest
 # -------------------------------------------------------------------
@@ -753,182 +790,191 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 + 0.3 * pop_score
                 + 0.2 * avail_score
     """
-    global _conn
-    _conn = _conn or connect()
     trace_id = new_trace_id()
 
     filters = body.filters or RecsFilters()
     top_k = max(1, min(body.top_k or 8, 24))
 
     has_price_filters = filters.price_min is not None or filters.price_max is not None
-    had_filters = any([
-        filters.type,
-        filters.tier,
-        filters.color,
-        filters.size,
-        has_price_filters,
-    ])
-
-    # 1) Anchor lookup (optional)
-    anchor_meta: Optional[dict] = None
-    anchor_slug = (body.anchor_slug or "").strip()
-    if anchor_slug:
-        anchor_meta = _get_product_meta(_conn, anchor_slug)
-        if not anchor_meta:
-            log.warning("recs_suggest: anchor slug %s not found", anchor_slug)
-
-    # 2) Build retrieval query
-    retrieval_query: str = ""
-    if anchor_meta:
-        retrieval_query = _build_anchor_query_text(anchor_meta.get("meta") or {})
-    if not retrieval_query:
-        retrieval_query = (body.query or "").strip()
-    if not retrieval_query:
-        emit(
-            "recs_empty_query",
-            trace_id,
-            {"reason": "no_anchor_no_query", "filters": filters.dict()},
-        )
-        return RecsOut(items=[])
-
-    # 3) Run search using existing helpers
-    USE_KEYWORD_ONLY = os.getenv("DISABLE_EMBEDDING", "false").lower() == "true"
-
-    if USE_KEYWORD_ONLY:
-        docs = search_keyword(
-            _conn,
-            query=retrieval_query,
-            kind="product",
-            top_k=top_k * 4,
-        )
-    else:
-        docs = search_hybrid(
-            _conn,
-            query=retrieval_query,
-            kind="product",
-            top_k=top_k * 4,
-        )
-
-    emit(
-        "recs_retrieval_done",
-        trace_id,
-        {
-            "query": retrieval_query,
-            "anchor_slug": anchor_slug or None,
-            "count": len(docs),
-            "top_titles": [d.get("title", "") for d in docs[:5]],
-        },
+    had_filters = any(
+        [
+            filters.type,
+            filters.tier,
+            filters.color,
+            filters.size,
+            has_price_filters,
+        ]
     )
 
-    if not docs:
-        return RecsOut(items=[])
+    # ----- Everything that touches Postgres is inside this block -----
+    with get_conn() as conn:
+        # 1) Anchor lookup (optional)
+        anchor_meta: Optional[dict] = None
+        anchor_slug = (body.anchor_slug or "").strip()
+        if anchor_slug:
+            anchor_meta = _get_product_meta(conn, anchor_slug)
+            if not anchor_meta:
+                log.warning("recs_suggest: anchor slug %s not found", anchor_slug)
 
-    # 4) Filter + score
-    candidates: List[Tuple[dict, dict]] = []  # (doc, meta)
+        # 2) Build retrieval query
+        retrieval_query: str = ""
+        if anchor_meta:
+            retrieval_query = _build_anchor_query_text(anchor_meta.get("meta") or {})
+        if not retrieval_query:
+            retrieval_query = (body.query or "").strip()
+        if not retrieval_query:
+            emit(
+                "recs_empty_query",
+                trace_id,
+                {"reason": "no_anchor_no_query", "filters": filters.dict()},
+            )
+            return RecsOut(items=[])
 
-    def _matches_filters(meta: dict) -> bool:
-        """
-        Apply type/tier/color/size and price_min/price_max to meta.
-        """
-        ptype = (meta.get("type") or "").lower().strip()
-        if filters.type and ptype and ptype != filters.type.lower().strip():
-            return False
+        # 3) Run search using existing helpers
+        USE_KEYWORD_ONLY = os.getenv("DISABLE_EMBEDDING", "false").lower() == "true"
 
-        ptier = (meta.get("tier") or "").lower().strip()
-        if filters.tier and ptier and ptier != filters.tier.lower().strip():
-            return False
+        if USE_KEYWORD_ONLY:
+            docs = search_keyword(
+                conn,
+                query=retrieval_query,
+                kind="product",
+                top_k=top_k * 4,
+            )
+        else:
+            docs = search_hybrid(
+                conn,
+                query=retrieval_query,
+                kind="product",
+                top_k=top_k * 4,
+            )
 
-        if filters.color:
-            wanted_color = filters.color.lower().strip()
-            cname = (meta.get("colorName") or "").lower().strip()
-            if cname and wanted_color and wanted_color != cname:
-                return False
+        emit(
+            "recs_retrieval_done",
+            trace_id,
+            {
+                "query": retrieval_query,
+                "anchor_slug": anchor_slug or None,
+                "count": len(docs),
+                "top_titles": [d.get("title", "") for d in docs[:5]],
+            },
+        )
 
-        if filters.size:
-            sizes = meta.get("sizes") or {}
-            if isinstance(sizes, dict):
-                requested = filters.size.upper().strip()
-                size_keys = {k.upper().strip() for k in sizes.keys()}
-                if requested not in size_keys:
+        if not docs:
+            return RecsOut(items=[])
+
+        # 4) Filter + score
+        candidates: List[Tuple[dict, dict]] = []  # (doc, meta)
+
+        def _matches_filters(meta: dict) -> bool:
+            """
+            Hard filters on type / tier / color / size / price.
+            Uses outer-scope `filters`.
+            """
+            m = meta or {}
+
+            # type
+            if filters.type:
+                if (m.get("type") or "").lower().strip() != filters.type.lower().strip():
                     return False
 
-        # --- Price filter (meta.price or meta.basePrice) ---
-        if filters.price_min is not None or filters.price_max is not None:
-            raw_price = meta.get("price", None)
-            if raw_price is None:
-                raw_price = meta.get("basePrice", None)
+            # tier
+            if filters.tier:
+                if (m.get("tier") or "").lower().strip() != filters.tier.lower().strip():
+                    return False
 
-            if raw_price is None:
-                return False
+            # color
+            if filters.color:
+                if (m.get("colorName") or "").lower().strip() != filters.color.lower().strip():
+                    return False
 
-            try:
-                price_val = float(raw_price)
-            except Exception:
-                return False
+            # size (require that size exists and is in stock, if numeric)
+            if filters.size:
+                size_key = filters.size.upper().strip()
+                sizes = m.get("sizes") or {}
+                if not isinstance(sizes, dict) or size_key not in sizes:
+                    return False
+                try:
+                    v = sizes[size_key]
+                    iv = int(v)
+                    if iv <= 0:
+                        return False
+                except Exception:
+                    # non-numeric; we only care that the key exists
+                    pass
 
-            if filters.price_min is not None and price_val < filters.price_min - 1e-6:
-                return False
-            if filters.price_max is not None and price_val > filters.price_max + 1e-6:
-                return False
+            # price band
+            price_val: Optional[float] = None
+            if "price" in m:
+                try:
+                    price_val = float(m["price"])
+                except Exception:
+                    price_val = None
 
-        return True
+            if price_val is not None:
+                if filters.price_min is not None and price_val < filters.price_min:
+                    return False
+                if filters.price_max is not None and price_val > filters.price_max:
+                    return False
 
-    for d in docs:
-        # First try to use meta from the search helper (if present)
-        meta = d.get("meta") or {}
+            return True
 
-        # If meta is missing / empty, resolve it via slug → ai_core.docs
-        if not meta or not meta.get("variantId"):
-            slug_from_url = _extract_slug(d.get("url", "") or "") or ""
-            if not slug_from_url:
-                continue
-
-            prod = _get_product_meta(_conn, slug_from_url, preferred_color=filters.color)
-            if not prod:
-                continue
-            meta = prod.get("meta") or {}
-
-        # Still no variantId → skip (legacy docs etc.)
-        variant_id = _pick_variant_id(meta)
-        if not variant_id:
-            continue
-
-        slug = meta.get("groupSlug") or _extract_slug(d.get("url", "") or "") or ""
-
-        # Apply filters (including price)
-        if not _matches_filters(meta):
-            continue
-
-        candidates.append((d, meta))
-
-    # If filters killed everything but base search had docs, we may relax
-    # NON-price filters. For now, we NEVER relax price filters:
-    # if user asks "between 15 and 20 euros" and nothing matches, we prefer
-    # returning no items over lying.
-    if not candidates and docs and had_filters and not has_price_filters:
-        emit(
-            "recs_relax_filters",
-            trace_id,
-            {"filters": filters.dict(), "docs": len(docs)},
-        )
         for d in docs:
             meta = d.get("meta") or {}
-            if not meta or not meta.get("variantId"):
+
+            # If meta is completely missing, resolve it via slug → ai_core.docs
+            if not meta:
                 slug_from_url = _extract_slug(d.get("url", "") or "") or ""
                 if not slug_from_url:
                     continue
-                prod = _get_product_meta(_conn, slug_from_url, preferred_color=None)
+
+                prod = _get_product_meta(conn, slug_from_url, preferred_color=filters.color)
                 if not prod:
                     continue
                 meta = prod.get("meta") or {}
 
+            # variantId is OPTIONAL for recs; we keep it if present
             variant_id = _pick_variant_id(meta)
-            if not variant_id:
-                continue
 
             slug = meta.get("groupSlug") or _extract_slug(d.get("url", "") or "") or ""
-            # NOTE: we skip _matches_filters() here → all non-price filters relaxed
+
+            if not _matches_filters(meta):
+                continue
+
+            # store doc + enriched meta (with optional variantId)
+            if variant_id and "variantId" not in meta:
+                meta = dict(meta)
+                meta["variantId"] = variant_id
+
             candidates.append((d, meta))
+
+        # Relax non-price filters if needed
+        if not candidates and docs and had_filters and not has_price_filters:
+            emit(
+                "recs_relax_filters",
+                trace_id,
+                {"filters": filters.dict(), "docs": len(docs)},
+            )
+            for d in docs:
+                meta = d.get("meta") or {}
+                if not meta:
+                    slug_from_url = _extract_slug(d.get("url", "") or "") or ""
+                    if not slug_from_url:
+                        continue
+                    prod = _get_product_meta(conn, slug_from_url, preferred_color=None)
+                    if not prod:
+                        continue
+                    meta = prod.get("meta") or {}
+
+                variant_id = _pick_variant_id(meta)
+                slug = meta.get("groupSlug") or _extract_slug(d.get("url", "") or "") or ""
+
+                if variant_id and "variantId" not in meta:
+                    meta = dict(meta)
+                    meta["variantId"] = variant_id
+
+                candidates.append((d, meta))
+
+    # ----- From here on, it's all in-memory; no DB needed -----
 
     if not candidates:
         emit("recs_no_candidates_after_filter", trace_id, {"filters": filters.dict()})
@@ -940,60 +986,47 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     scored_items: List[Tuple[float, RecItem]] = []
 
     for (doc, meta), sim in zip(candidates, norm_sim_scores):
-        slug = meta.get("groupSlug") or _extract_slug(doc.get("url", "") or "") or ""
-        title_raw = doc.get("title") or meta.get("name") or "Product"
-        title = _clean_title(title_raw)
+        meta = meta or {}
 
-        pop_raw = meta.get("popularity", 0.5)
-        try:
-            pop_score = float(pop_raw)
-        except Exception:
-            pop_score = 0.5
-        pop_score = max(0.0, min(pop_score, 1.0))
-
+        sim_score = float(sim)
+        pop_score = _compute_popularity_score(meta)
         avail_score = _compute_availability_score(meta, filters.size)
 
-        final_score = 0.5 * sim + 0.3 * pop_score + 0.2 * avail_score
+        final_score = 0.5 * sim_score + 0.3 * pop_score + 0.2 * avail_score
 
-        ptype = (meta.get("type") or "").lower().strip()
-        ptier = (meta.get("tier") or "").lower().strip()
-        primary_color = _pick_primary_color(meta, filters.color)
-        requested_size = (filters.size or "").upper().strip()
+        slug = meta.get("groupSlug") or _extract_slug(doc.get("url", "") or "") or ""
+        url = meta.get("url") or doc.get("url") or (f"/product/{slug}" if slug else "")
+        title_raw = meta.get("name") or doc.get("title", "Product")
+        title = _clean_title(title_raw)
 
+        color_name = _pick_primary_color(meta, filters.color)
         variant_id = _pick_variant_id(meta)
 
-        reason_pieces: List[str] = []
-        if ptype:
-            reason_pieces.append(f"Similar {ptype}")
+        reason_bits: List[str] = []
+        if (body.anchor_slug or "").strip():
+            reason_bits.append("similar to your selected item")
         else:
-            reason_pieces.append("Similar item")
-        if primary_color:
-            reason_pieces.append(primary_color.lower())
-        if requested_size:
-            reason_pieces.append(f"in size {requested_size}")
-        if ptier:
-            reason_pieces.append(f"from the {ptier} tier")
-        if avail_score >= 0.99:
-            reason_pieces.append("(requested size appears in stock)")
-        elif avail_score >= 0.6:
-            reason_pieces.append("(some sizes appear in stock)")
+            reason_bits.append("matches your query")
+        if filters.color:
+            reason_bits.append(f"color {filters.color.lower()}")
+        if filters.size:
+            reason_bits.append(f"size {filters.size.upper()}")
 
-        reason = " ".join(reason_pieces).strip()
+        reason = ", ".join(reason_bits).capitalize()
 
-        rec = RecItem(
+        item = RecItem(
             title=title,
-            url=doc.get("url") or (f"/product/{slug}" if slug else "/product"),
-            slug=slug or "",
-            score=round(final_score, 4),
+            url=url,
+            slug=slug,
+            score=final_score,
             reason=reason,
-            type=ptype or None,
-            tier=ptier or None,
-            color=primary_color,
-            size=requested_size or None,
+            type=meta.get("type"),
+            tier=meta.get("tier"),
+            color=color_name,
+            size=filters.size,
             variantId=variant_id,
         )
-
-        scored_items.append((final_score, rec))
+        scored_items.append((final_score, item))
 
     scored_items.sort(key=lambda x: x[0], reverse=True)
     top_items = [r for _, r in scored_items[:top_k]]
