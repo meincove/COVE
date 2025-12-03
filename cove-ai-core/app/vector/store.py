@@ -1,74 +1,193 @@
 # app/vector/store.py
 from __future__ import annotations
-import os, json, uuid
-from typing import Any, Dict, List, Tuple
+
+import os
+import json
+import uuid
+from time import time
+from typing import Any, Dict, List
 
 import httpx
 import psycopg
-from psycopg.rows import tuple_row
+from psycopg.rows import tuple_row, dict_row
 from pgvector.psycopg import register_vector
-from psycopg.rows import dict_row
+from contextlib import contextmanager
+
+# Optional pool import with graceful fallback
+try:
+    from psycopg_pool import ConnectionPool  # type: ignore
+except ImportError:  # psycopg_pool not installed
+    ConnectionPool = None  # type: ignore
 
 from app.core.config import PG_DSN
 
-# --------- DB ----------
-def connect():
-    conn = psycopg.connect(PG_DSN, autocommit=True)
+# ---------------------------------------------------------------------
+# DB + CONNECTION POOL
+# ---------------------------------------------------------------------
+
+DB_DSN = PG_DSN or os.getenv("DATABASE_URL")
+if not DB_DSN:
+    raise RuntimeError("PG_DSN or DATABASE_URL must be set for vector store")
+
+_pool: Any = None  # can be real ConnectionPool or dummy
+
+
+def get_pool():
+    """
+    Global connection pool (or a lightweight fallback).
+
+    In prod with psycopg_pool installed, this is a real ConnectionPool.
+    If psycopg_pool is missing (dev box), we fall back to a tiny wrapper
+    that just opens a fresh connection each time.
+    """
+    global _pool
+    if _pool is not None:
+        return _pool
+
+    # Fallback: no psycopg_pool available → simple dummy “pool”
+    if ConnectionPool is None:
+        class _DummyPool:
+            def connection(self):
+                # psycopg.Connection is itself a context manager
+                return psycopg.connect(DB_DSN, autocommit=True)
+
+        _pool = _DummyPool()
+        return _pool
+
+    # Normal path: real psycopg_pool.ConnectionPool
+    _pool = ConnectionPool(
+        conninfo=DB_DSN,
+        min_size=1,
+        max_size=10,
+        num_workers=3,
+        timeout=10,
+        # autocommit for our simple read/write use cases
+        kwargs={"autocommit": True},
+    )
+    return _pool
+
+
+@contextmanager
+def get_conn() -> psycopg.Connection:
+    """
+    Context manager that yields a *fresh, healthy* connection from the pool.
+
+    Usage:
+
+        from app.vector.store import get_conn
+
+        with get_conn() as conn:
+            docs = search_hybrid(conn, query="...", kind="product", top_k=6)
+    """
+    pool = get_pool()
+    with pool.connection() as conn:
+        # ensure pgvector is registered for <=> operator on every new connection
+        register_vector(conn)
+        yield conn
+
+
+def connect() -> psycopg.Connection:
+    """
+    Legacy helper for scripts / one-off jobs.
+
+    For web requests prefer `get_conn()` so connections come from the pool.
+    """
+    conn = psycopg.connect(DB_DSN, autocommit=True)
     register_vector(conn)
     return conn
 
-def upsert_doc(conn, kind:str, title:str, text:str, url:str, meta:dict, embedding:list):
+
+def upsert_doc(
+    conn: psycopg.Connection,
+    kind: str,
+    title: str,
+    text: str,
+    url: str,
+    meta: dict,
+    embedding: list,
+) -> None:
     with conn.cursor() as cur:
         cur.execute(
-            """INSERT INTO ai_core.docs(id,kind,title,text,url,meta,embedding)
-               VALUES(%s,%s,%s,%s,%s,%s,%s)
-               ON CONFLICT(id) DO UPDATE SET
-                 kind=EXCLUDED.kind, title=EXCLUDED.title, text=EXCLUDED.text,
-                 url=EXCLUDED.url, meta=EXCLUDED.meta, embedding=EXCLUDED.embedding
+            """
+            INSERT INTO ai_core.docs (id, kind, title, text, url, meta, embedding)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET
+                kind       = EXCLUDED.kind,
+                title      = EXCLUDED.title,
+                text       = EXCLUDED.text,
+                url        = EXCLUDED.url,
+                meta       = EXCLUDED.meta,
+                embedding  = EXCLUDED.embedding
             """,
-            (str(uuid.uuid4()), kind, title, text, url, json.dumps(meta), embedding)
+            (str(uuid.uuid4()), kind, title, text, url, json.dumps(meta), embedding),
         )
 
-# --------- Embeddings (sync, used by retriever) ----------
-EMBED_MODEL = os.getenv("EMBED_MODEL","openrouter:openai/text-embedding-3-small")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY","")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY","")
-COHERE_API_KEY = os.getenv("COHERE_API_KEY","")
+
+# ---------------------------------------------------------------------
+# EMBEDDINGS (sync, used by retriever)
+# ---------------------------------------------------------------------
+
+EMBED_MODEL = os.getenv("EMBED_MODEL", "openrouter:openai/text-embedding-3-small")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+COHERE_API_KEY = os.getenv("COHERE_API_KEY", "")
+
 
 def _embed_sync(texts: List[str]) -> List[List[float]]:
     if EMBED_MODEL.startswith("openrouter:"):
-        model = EMBED_MODEL.split("openrouter:",1)[1]
+        model = EMBED_MODEL.split("openrouter:", 1)[1]
         url = "https://openrouter.ai/api/v1/embeddings"
-        headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type":"application/json"}
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        }
         payload = {"model": model, "input": texts}
+
     elif EMBED_MODEL.startswith("cohere:"):
-        model = EMBED_MODEL.split("cohere:",1)[1]
+        model = EMBED_MODEL.split("cohere:", 1)[1]
         url = "https://api.cohere.ai/v1/embed"
-        headers = {"Authorization": f"Bearer {COHERE_API_KEY}", "Content-Type":"application/json"}
+        headers = {
+            "Authorization": f"Bearer {COHERE_API_KEY}",
+            "Content-Type": "application/json",
+        }
         payload = {"model": model, "texts": texts}
+
     else:
-        model = EMBED_MODEL.split("openai:",1)[1] if EMBED_MODEL.startswith("openai:") else EMBED_MODEL
+        model = EMBED_MODEL.split("openai:", 1)[1] if EMBED_MODEL.startswith("openai:") else EMBED_MODEL
         url = "https://api.openai.com/v1/embeddings"
-        headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type":"application/json"}
+        headers = {
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Content-Type": "application/json",
+        }
         payload = {"model": model, "input": texts}
 
     with httpx.Client(timeout=30) as cx:
         r = cx.post(url, headers=headers, json=payload)
         r.raise_for_status()
         data = r.json()
-        if "data" in data and data["data"] and "embedding" in data["data"][0]:
-            return [d["embedding"] for d in data["data"]]
-        if "embeddings" in data:  # Cohere
-            return data["embeddings"]
-        raise RuntimeError(f"Unexpected embedding response keys: {list(data.keys())}")
+
+    if "data" in data and data["data"] and "embedding" in data["data"][0]:
+        return [d["embedding"] for d in data["data"]]
+    if "embeddings" in data:  # Cohere
+        return data["embeddings"]
+
+    raise RuntimeError(f"Unexpected embedding response keys: {list(data.keys())}")
+
 
 def embed_query(query: str) -> List[float]:
     return _embed_sync([query])[0]
 
-# --------- Hybrid wrapper ----------
-# ... header unchanged ...
 
-def search_hybrid(conn: psycopg.Connection, query: str, kind: str, top_k: int = 6) -> List[Dict[str,Any]]:
+# ---------------------------------------------------------------------
+# HYBRID SEARCH WRAPPER
+# ---------------------------------------------------------------------
+
+def search_hybrid(
+    conn: psycopg.Connection,
+    query: str,
+    kind: str,
+    top_k: int = 6,
+) -> List[Dict[str, Any]]:
     from app.vector.hybrid import hybrid_search
 
     hits = hybrid_search(conn, query=query, index_name=kind, k=max(24, top_k), k_rerank=top_k)
@@ -90,33 +209,44 @@ def search_hybrid(conn: psycopg.Connection, query: str, kind: str, top_k: int = 
             )
             rows = cur.fetchall()
         hits = [
-            type("Dummy", (), {
-                "id": r[0], "kind": r[1],
-                "title": r[2] or "", "text": r[3] or "",
-                "url": r[4] or "", "meta": r[5] or {},
-                "score_final": float(r[6] or 0.0)
-            })() for r in rows
+            type(
+                "Dummy",
+                (),
+                {
+                    "id": r[0],
+                    "kind": r[1],
+                    "title": r[2] or "",
+                    "text": r[3] or "",
+                    "url": r[4] or "",
+                    "meta": r[5] or {},
+                    "score_final": float(r[6] or 0.0),
+                },
+            )()
+            for r in rows
         ]
 
-    # Map to rag.py expected dicts
     docs: List[Dict[str, Any]] = []
     for h in hits:
         meta = getattr(h, "meta", {}) or {}
-        title = getattr(h, "title", "") or meta.get("title","") or ""
-        url   = getattr(h, "url", "")   or meta.get("url","")   or ""
-        text  = getattr(h, "text", "")  or meta.get("text","")  or ""
-        docs.append({
-            "id": getattr(h, "id", ""),
-            "title": title,
-            "url": url,
-            "text": text,
-            "score": float(getattr(h, "score_final", 0.0)),
-            "meta": meta,
-        })
+        title = getattr(h, "title", "") or meta.get("title", "") or ""
+        url = getattr(h, "url", "") or meta.get("url", "") or ""
+        text = getattr(h, "text", "") or meta.get("text", "") or ""
+        docs.append(
+            {
+                "id": getattr(h, "id", ""),
+                "title": title,
+                "url": url,
+                "text": text,
+                "score": float(getattr(h, "score_final", 0.0)),
+                "meta": meta,
+            }
+        )
     return docs
 
 
-
+# ---------------------------------------------------------------------
+# PRODUCT HELPERS
+# ---------------------------------------------------------------------
 
 def get_product_by_slug(conn: psycopg.Connection, slug: str) -> dict | None:
     """
@@ -163,7 +293,7 @@ def get_variant_by_id(conn: psycopg.Connection, variant_id: str) -> dict | None:
             return None
 
         meta = row["meta"] or {}
-        colors = (meta.get("colors") or [])
+        colors = meta.get("colors") or []
         variant = next((c for c in colors if (c.get("variantId") or "") == variant_id), None)
 
         return {
@@ -176,43 +306,30 @@ def get_variant_by_id(conn: psycopg.Connection, variant_id: str) -> dict | None:
             "variant": variant,
         }
 
-from time import time
 
-_vocab_cache = {"t": 0, "colors": set(), "types": set(), "sizes": {"S","M","L","XL"}}
+# ---------------------------------------------------------------------
+# CATALOG VOCAB (colors/types) + CACHE
+# ---------------------------------------------------------------------
 
-def catalog_vocab(conn, ttl_sec: int = 60):
-    now = time()
-    if now - _vocab_cache["t"] < ttl_sec and _vocab_cache["colors"]:
-        return _vocab_cache
+_vocab_cache: Dict[str, Any] = {
+    "t": 0.0,
+    "colors": set(),
+    "types": set(),
+    "sizes": {"S", "M", "L", "XL"},
+}
 
-    colors, types = set(), set()
-    with conn.cursor() as cur:
-        # colors from meta.colors[].colorName
-        cur.execute("""
-            SELECT DISTINCT lower(c->>'colorName')
-            FROM ai_core.docs, jsonb_array_elements(meta->'colors') c
-            WHERE kind='product'
-        """)
-        colors = {r[0] for r in cur.fetchall()}
 
-        # types from meta.type/title (fallback)
-        cur.execute("""
-            SELECT DISTINCT lower(COALESCE(meta->>'type', title))
-            FROM ai_core.docs
-            WHERE kind='product'
-        """)
-        types = {r[0] for r in cur.fetchall()}
-
-    _vocab_cache.update({"t": now, "colors": colors, "types": types})
-    return _vocab_cache
-
-def catalog_vocab(conn) -> dict:
+def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]:
     """
-    Return lowercased distinct colors and types from *variant-level* product docs.
+    Return lowercased distinct colors and types for product variants.
 
     - colors: meta.colorName
     - types:  meta.type (fallback to first word of title)
     """
+    now = time()
+    if (now - _vocab_cache["t"] < ttl_sec) and _vocab_cache["colors"]:
+        return _vocab_cache
+
     colors, types = set(), set()
     with conn.cursor() as cur:
         # Colors from meta.colorName
@@ -236,11 +353,21 @@ def catalog_vocab(conn) -> dict:
         )
         types |= {r[0] for r in cur.fetchall() if r[0]}
 
-    return {"colors": colors, "types": types}
+    _vocab_cache.update({"t": now, "colors": colors, "types": types})
+    return _vocab_cache
 
 
-# at bottom of file (or near search_hybrid)
-def search_keyword(conn, *, query: str, kind: str = "product", top_k: int = 6):
+# ---------------------------------------------------------------------
+# PURE KEYWORD SEARCH
+# ---------------------------------------------------------------------
+
+def search_keyword(
+    conn: psycopg.Connection,
+    *,
+    query: str,
+    kind: str = "product",
+    top_k: int = 6,
+) -> List[Dict[str, Any]]:
     """
     Pure Postgres FTS keyword search; never calls embeddings.
     Returns rows shaped like search_hybrid: [{title, text, url, score}, ...]
@@ -250,8 +377,8 @@ def search_keyword(conn, *, query: str, kind: str = "product", top_k: int = 6):
         return []
 
     with conn.cursor() as cur:
-        # to_tsvector over title + text; adjust columns per your schema
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 title,
                 text,
@@ -265,16 +392,19 @@ def search_keyword(conn, *, query: str, kind: str = "product", top_k: int = 6):
             WHERE kind = %s
             ORDER BY score DESC
             LIMIT %s
-        """, (q, kind, top_k))
+            """,
+            (q, kind, top_k),
+        )
         rows = cur.fetchall()
 
-    out = []
-    for r in rows:
-        title, text, url, score = r
-        out.append({
-            "title": title or "",
-            "text": text or "",
-            "url": url or "",
-            "score": float(score) if score is not None else 0.0,
-        })
+    out: List[Dict[str, Any]] = []
+    for title, text, url, score in rows:
+        out.append(
+            {
+                "title": title or "",
+                "text": text or "",
+                "url": url or "",
+                "score": float(score) if score is not None else 0.0,
+            }
+        )
     return out

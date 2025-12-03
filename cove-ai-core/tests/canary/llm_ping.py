@@ -20,7 +20,7 @@ from app.providers.llm import LLMClient
 
 async def main() -> int:
     # ---- Read env flags exactly like your app does ----
-    model = os.getenv("LLM_MODEL", "<default-from-LLMClient>")
+    model = os.getenv("LLM_MODEL", "openrouter:openai/gpt-4o-mini")
     llm_offline = os.getenv("LLM_OFFLINE", "false").lower()
     llm_bypass = os.getenv("LLM_BYPASS_ON_FAIL", "false").lower()
     hard_timeout = int(os.getenv("LLM_HARD_TIMEOUT_SECS", "12"))
