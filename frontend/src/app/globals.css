@@ -13,17 +13,22 @@
 /* Resets & guards */
 *,
 *::before,
-*::after { box-sizing: border-box; }
+*::after {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
-  overflow: hidden;               
+  overflow: hidden;
 }
 
-html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
+html {
+  overflow-x: clip; /* no accidental horizontal scrollbars */
+}
 
 /* Tailwind */
 @import "tailwindcss";
@@ -34,8 +39,12 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
 
 /* Theme vars */
 @layer base {
-  * { @apply border-border outline-ring/50; }
-  body { @apply bg-background text-foreground; }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @theme inline {
@@ -55,12 +64,18 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
 :root {
   --radius: 0rem;
 
-  /* === Overlay sizing knobs (NEW) === */
-  /* You fully control overlay “page card” size with these */
-  --ov-top-offset: 122px;                 /* space from top screen to card */
-  --ov-w: min(100vw, 1400px);             /* card width (try 100vw, 1280px, etc.) */
-  --ov-h: 10dvh;                         /* card height (try 100dvh, 120dvh) */
-  --ov-radius: 6px;
+  /* === Frame sizing knobs (existing) === */
+  --frame-scale: 1;
+
+  /* Per-side rims for the shrunken tester-frame */
+  --gap-top: 72px;
+  --gap-right: 16px;
+  --gap-bottom: 24px;
+  --gap-left: 16px;
+
+  /* === Overlay sizing knobs (NEW) ===
+     Top offset is expressed relative to the shrink gap so it adapts automatically. */
+  --ov-top-offset: calc(var(--gap-top) * 0.15); /* small breathing room from top */
 
   /* light theme */
   --background: oklch(1 0 0);
@@ -69,19 +84,8 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
 
-  /* === Frame sizing knobs (existing) === */
-  --frame-scale: 1;
-
-  /* Per-side rims (pixel-perfect per side) */
-  --gap-top: 72px;
-  --gap-right: 16px;
-  --gap-bottom: 24px;
-  --gap-left: 16px;
-
-  /* Old overlay band height (kept for compatibility but not used) */
+  /* Legacy overlay bar helpers (safe to keep if you need them) */
   --band-top-height: var(--gap-top);
-
-  /* Overlay top bar spacing/sizing (legacy; safe to keep) */
   --overlay-top-pad: 12px;
   --overlay-top-bar-height: 56px;
   --overlay-top-hpad: 16px;
@@ -98,50 +102,111 @@ html { overflow-x: clip; }         /* no accidental horizontal scrollbars */
 }
 
 /* Helpers */
-.text-white { text-shadow: 0 1px 2px rgba(0,0,0,.5); }
-.perspective { perspective: 1200px; }
-@layer utilities { .animate-spin-slow { animation: spin 20s linear infinite; } }
+.text-white {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.perspective {
+  perspective: 1200px;
+}
+@layer utilities {
+  .animate-spin-slow {
+    animation: spin 20s linear infinite;
+  }
+}
 
 /* === The single global scroll frame === */
 .tester-frame {
   position: relative;
-  z-index: 200;                    /* above overlay backdrop (120) and below overlay card (180+) */
+  z-index: 200; /* above overlay backdrop (120) and below overlay card (180+) */
   height: 100dvh;
   width: 100%;
   overflow-y: auto;
   overflow-x: clip;
   background: var(--background);
   transition:
-    margin .28s ease,
-    width .28s ease,
-    height .28s ease,
-    border-radius .28s ease,
-    box-shadow .28s ease;
+    margin 0.28s ease,
+    width 0.28s ease,
+    height 0.28s ease,
+    border-radius 0.28s ease,
+    box-shadow 0.28s ease,
+    filter 0.28s ease;       
   scrollbar-gutter: stable both-edges;
   will-change: margin, width, height;
 }
 
+/* Dim the shrunken page when menu is open, but keep navbar pills bright */
+/* Dim ONLY the shrunken page area, leave navbar + overlay bar bright */
+html.menu-open .tester-frame::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+
+  /* start dimming below the top navbar band */
+  top: var(--gap-top);   /* currently 72px in :root */
+  bottom: 0;
+
+  z-index: 205;          /* below .nav-stick (210), above page content */
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 20% 0%,
+      rgba(255,255,255,0.35),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(255,255,255,0.35),
+      transparent 55%
+    ),
+    rgba(0, 0, 0, 0.18);
+}
+
+
+/* Cursor behaviour in menu mode:
+   - overlay/root (menu bar area) feels clickable (hand)
+   - shrunken page shows default arrow */
+html.menu-open .overlay-root {
+  cursor: pointer;
+}
+
+html.menu-open .tester-frame {
+  cursor: default;
+}
+
+
 /* Optional: hide scrollbar UI, keep scroll */
-.tester-frame::-webkit-scrollbar { display: none; }
-.tester-frame { scrollbar-width: none; }
+.tester-frame::-webkit-scrollbar {
+  display: none;
+}
+.tester-frame {
+  scrollbar-width: none;
+}
 
 /* === Menu open: per-side shrink (no scale) === */
 html.menu-open .tester-frame {
   margin: var(--gap-top) var(--gap-right) var(--gap-bottom) var(--gap-left);
-  width:  calc(100vw  - var(--gap-left) - var(--gap-right));
-  height: calc(100dvh - var(--gap-top)  - var(--gap-bottom));
+  width: calc(100vw - var(--gap-left) - var(--gap-right));
+  height: calc(100dvh - var(--gap-top) - var(--gap-bottom));
   border-radius: 24px;
   clip-path: inset(0 round 24px);
   box-shadow:
-    0 40px 120px -24px rgba(0,0,0,.55),
-    inset 0 0 0 1px rgba(255,255,255,.08);
+    0 40px 120px -24px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+html.menu-open .tester-frame {
+  filter: brightness(0.9) saturate(0.96);
 }
 
 /* Navbar sits inside the frame so it moves with it */
-.nav-stick { position: sticky; top: 0; height: 0; z-index: 210; pointer-events: auto; }
-
-
-
+.nav-stick {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 210;
+  pointer-events: auto;
+}
 
 /* FULL MODE ONLY – stays fully transparent over aurora */
 .nav-stick.nav-fullmode,
@@ -152,108 +217,140 @@ html.menu-open .tester-frame {
   border: none !important;
 }
 
-
-
 /* Navbar shell – layout only, no chrome */
-
-
 .nav-shell {
-  /* @apply rounded-2xl md:rounded-3xl border; */
-  background:  #FAF9F6;
+  background: #faf9f6; /* off-white for island/menu */
   color: #0b0b0b;
-  border-color:  #FAF9F6;
-  /* box-shadow: 0 18px 40px rgba(0,0,0,.25); */
-  /* backdrop-filter: blur(12px); */
+  border-color: #faf9f6;
 }
 
-
-
 /* Baikal-style island navbar shape: flatter on top, extra round on bottom */
- #cove-navbar-shell {
-  /* TL    TR    BR     BL  */
+#cove-navbar-shell {
+  /* TL    TR    BR    BL  */
   border-radius: 0px 0px 25px 25px;
-} 
+}
 
 /* Body surface holding page sections (demo) */
-.content-surface { background: #9ca3af; min-height: 100%; }
+.content-surface {
+  background: #9ca3af;
+  min-height: 100%;
+}
 
 /* Demo sections */
 .demo-section {
   background: #ffffff;
   color: #111827;
   border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-/* ===== NEW OVERLAY LAYOUT (independently sized card) ===== */
+/* ============================================
+   NEW OVERLAY LAYOUT (menu mode top bar)
+   ============================================ */
 
-/* Root covers screen and creates a top spacer + a stage area */
-.overlay-root{
+/* Root covers the whole viewport, but we only render a bar in the top band */
+.overlay-root {
   position: fixed;
   inset: 0;
   z-index: 180;
-  pointer-events: none;                 /* becomes auto when menu-open */
-  display: grid;
-  grid-template-rows: var(--ov-top-offset) 1fr;
+  pointer-events: none; /* becomes auto when menu-open */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-/* The stage centers the card horizontally */
-.overlay-stage{
-  display: grid;
-  place-items: start center;            /* start vertically, center horizontally */
+/* Stage row that holds the card; full viewport width */
+.overlay-stage {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
   overflow: visible;
 }
 
-/* The actual overlay “page card” you control */
-.overlay-card{
-  width: var(--ov-w);
-  height: var(--ov-h);
-  border-radius: var(--ov-radius);
+/* The overlay “page card” – aligned to shrunk tester-frame */
+.overlay-card {
+  /* horizontally match tester-frame rectangle */
+  width: calc(100vw - var(--gap-left) - var(--gap-right));
+  max-width: calc(100vw - var(--gap-left) - var(--gap-right));
+  margin-left: var(--gap-left);
+  margin-right: var(--gap-right);
+
+  /* keep the card fully inside the top band (no bleed behind frame) */
+  margin-top: var(--ov-top-offset);
+
+  border-radius: 16px;
   background: #ffffff;
-  box-shadow: 0 18px 40px rgba(0,0,0,.18);
-  overflow: hidden;                     /* keep children inside rounded corners */
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
   pointer-events: auto;
+
   display: grid;
-  grid-template-columns: 1fr 1.3fr 1fr; /* Left | Center | Right */
+  grid-template-columns: 1fr 1.3fr 1fr; /* Left | Center | Right (default) */
   gap: 12px;
   padding: 10px 12px;
+
+  color: #0b0b0b;
+  height: auto;       /* ✅ content-driven height, no 10dvh bleed */
+  overflow: visible;  /* dropdowns can spill out */
 }
 
-/* Mobile stacking */
-@media (max-width: 768px){
-  .overlay-card{
-    grid-template-columns: 1fr;
-    grid-auto-rows: min-content;
-    height: min(92dvh, var(--ov-h));
+/* equal thirds variant (what you use now) */
+.overlay-card.overlay-card--thirds {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .overlay-card.overlay-card--thirds {
+    grid-template-columns: 1fr 1fr 1fr; /* equal thirds on md+ */
   }
 }
 
 /* Slots inside the card */
 .overlay-slot-left,
 .overlay-slot-center,
-.overlay-slot-right{
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.overlay-slot-right {
   min-width: 0;
   overflow: hidden;
   padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Center (search) stretches */
-.overlay-slot-center > * { width: 100%; min-width: 0; }
+.overlay-slot-center > * {
+  width: 100%;
+  min-width: 0;
+}
 
-/* When the overlay is active (menu-open), allow clicks on root (otherwise it’s pass-through) */
-html.menu-open .overlay-root{ pointer-events: auto; }
+/* When the overlay is active (menu-open), allow clicks on root */
+html.menu-open .overlay-root {
+  pointer-events: auto;
+  cursor: pointer;
+}
 
 /* Make inline text/icons in card dark */
-.overlay-card { color: #0b0b0b; }
-.overlay-card :where(a,button,span,svg){ color:#0b0b0b !important; fill: currentColor; }
+.overlay-card {
+  color: #0b0b0b;
+}
+.overlay-card :where(a, button, span, svg) {
+  color: #0b0b0b !important;
+  fill: currentColor;
+}
 
-/* === Dev overlay-only mode (optional) === */
-html.overlay-dev .tester-frame { display: none !important; }
-html.overlay-dev .nav-stick   { display: none !important; }
-html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in dev */
+/* Dev overlay-only mode (optional) */
+html.overlay-dev .tester-frame {
+  display: none !important;
+}
+html.overlay-dev .nav-stick {
+  display: none !important;
+}
+html.overlay-dev .overlay-root {
+  pointer-events: auto;
+}
 
 /* ===== NAV: full (space-taking) vs island (floating) ===== */
 
@@ -266,7 +363,6 @@ html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in d
 }
 
 /* Full shell (wide bar) */
-
 .nav-full-shell {
   height: 72px;
   display: grid;
@@ -279,13 +375,15 @@ html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in d
   padding: 10px 10px;
 
   border-radius: 0px;
-  background: rgba(255,255,255,.96);
-  border: 1px solid rgba(0,0,0,.08);
-  box-shadow: 0 18px 40px rgba(0,0,0,.25);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(12px);
 
   color: #0b0b0b;
-  transition: transform .28s ease, opacity .28s ease;
+  transition:
+    transform 0.28s ease,
+    opacity 0.28s ease;
 }
 
 /* Island wrapper: sticky but ZERO height */
@@ -316,24 +414,38 @@ html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in d
 
   padding: 8px 12px;
   border-radius: 16px;
-  background: rgba(255,255,255,.96);
-  border: 1px solid rgba(0,0,0,.08);
-  box-shadow: 0 18px 40px rgba(0,0,0,.25);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(12px);
 
   color: #0b0b0b;
-  transition: transform .28s ease, opacity .28s ease;
+  transition:
+    transform 0.28s ease,
+    opacity 0.28s ease;
 }
 
 /* Slot helpers */
-.nav-left, .nav-right { display:flex; align-items:center; gap:10px; min-width:0; }
-.nav-center { display:flex; align-items:center; min-width:0; }
-.nav-center > * { width: 100%; }
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.nav-center {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.nav-center > * {
+  width: 100%;
+}
 
 /* Make nested buttons/links/icons dark */
-.nav-full-shell :where(a,button,span,svg),
-.nav-island-shell :where(a,button,span,svg){
-  color:#0b0b0b !important;
+.nav-full-shell :where(a, button, span, svg),
+.nav-island-shell :where(a, button, span, svg) {
+  color: #0b0b0b !important;
   fill: currentColor;
 }
 
@@ -352,11 +464,14 @@ html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in d
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .nav-full-shell, .nav-island-shell { transition: none; }
+  .nav-full-shell,
+  .nav-island-shell {
+    transition: none;
+  }
 }
 
 /* Floating island pill */
-.floating-nav{
+.floating-nav {
   position: fixed;
   top: 14px;
   left: 50%;
@@ -366,99 +481,95 @@ html.overlay-dev .overlay-root{ pointer-events: auto; } /* always clickable in d
 }
 
 /* Anchor lives inside .tester-frame */
-.island-anchor{
-  position: sticky; top: 0; height: 0;
-  z-index: 210; pointer-events: none;
+.island-anchor {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 210;
+  pointer-events: none;
 }
 
 /* The pill itself */
-.island-pill{
-  position: absolute; top: 14px; left: 50%;
+.island-pill {
+  position: absolute;
+  top: 14px;
+  left: 50%;
   transform: translateX(-50%);
-  pointer-events: auto; z-index: 260;
+  pointer-events: auto;
+  z-index: 260;
 }
 
 /* When search is shown, make the pill wide but not full-bleed */
-.island-pill.withSearch{ width: min(92vw, 1000px); }
-
-/* let dropdowns spill out of the bar */
-.overlay-card { overflow: visible; }   /* (replaces legacy .overlay-top-inner overflow rule) */
-
-
-/* ——— Overlay hard overrides ——— */
-
-/* Kill any legacy max-width/clamps that might still exist */
-.overlay-card {
-  max-width: none !important;
-  width: var(--ov-w) !important;   /* trust the variable */
-  margin: 0;                       /* no implicit centering margins */
-}
-
-/* Make sure parents don't introduce side gutters */
-.overlay-root,
-.overlay-stage {
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100vw;                    /* parent can’t be narrower than the viewport */
-}
-
-/* Optional: a “full-bleed” mode you can toggle */
-[data-fullbleed="true"] .overlay-card {
-  width: 100vw !important;
-  border-radius: 0;                /* edge-to-edge look */
-  box-shadow: none;                /* usually looks better when full-bleed */
+.island-pill.withSearch {
+  width: min(92vw, 1000px);
 }
 
 
-/* make the overlay card equal thirds on md+; single column on mobile as you had */
-.overlay-card.overlay-card--thirds {
-  display: grid;
-  grid-template-columns: 1fr;            /* mobile */
-  gap: 12px;
+/* 👇 When menu mode is on, the overlay card + slots use a hand cursor */
+html.menu-open .overlay-card,
+html.menu-open .overlay-slot-left,
+html.menu-open .overlay-slot-center,
+html.menu-open .overlay-slot-right {
+  cursor: pointer;
 }
-@media (min-width: 768px) {
-  .overlay-card.overlay-card--thirds {
-    grid-template-columns: 1fr 1fr 1fr;  /* equal thirds */
+
+/* ==== Scroll-lock toast (menu mode) ==== */
+
+.scroll-toast {
+  position: fixed;
+  inset: 0;
+  z-index: 170;                 /* above shrunken page, below overlay card if you want */
+  pointer-events: none;         /* never blocks clicks */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 32px;         /* float just above bottom rim */
+}
+
+.scroll-toast-inner {
+  background: rgba(15, 23, 42, 0.96);    /* slate-900-ish */
+  color: #f9fafb;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  font-size: 12px;
+  line-height: 1.25;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  animation: scroll-toast-pop 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-toast-title {
+  font-weight: 600;
+}
+
+.scroll-toast-subtitle {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+@keyframes scroll-toast-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
+    filter: blur(4px);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    filter: blur(2px);
   }
 }
-
-/* containment and padding for all three slots */
-.overlay-slot-left,
-.overlay-slot-center,
-.overlay-slot-right {
-  min-width: 0;          /* allow children to shrink inside grid */
-  overflow: hidden;      /* no leaking */
-  padding: 6px 8px;      /* comfy */
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* parent card look (keep white-ish background as requested) */
-.overlay-card {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 18px 40px rgba(0,0,0,.18);
-}
-
-
-/* The overlay root already fades; we align the card width to the revealed page area */
-.overlay-stage {
-  padding:
-    var(--overlay-top-pad)
-    calc(var(--gap-right) + var(--overlay-top-hpad))
-    0
-    calc(var(--gap-left)  + var(--overlay-top-hpad));
-}
-
-.overlay-card {
-  /* match visible page area; cap at the same max width */
-  max-width: min(
-    var(--overlay-top-max-w),
-    calc(100vw - var(--gap-left) - var(--gap-right) - 2*var(--overlay-top-hpad))
-  );
-  margin: 0 auto;
-}
-
-
-

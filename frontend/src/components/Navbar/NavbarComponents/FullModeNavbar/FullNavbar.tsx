@@ -82,10 +82,8 @@ export default function FullNavbar() {
       ? " bg-white shadow-[0_10px_35px_rgba(15,23,42,0.12)]"
       : " bg-transparent";
 
-  const centerBg =
-    layoutPhase === "compressed"
-      ? " bg-white shadow-[0_10px_35px_rgba(15,23,42,0.12)]"
-      : " bg-white/90 shadow-none";
+  const centerBg = " bg-transparent shadow-none";
+
 
   const rightBg =
     layoutPhase === "compressed"
@@ -147,7 +145,7 @@ export default function FullNavbar() {
                 className={centerBase + centerBg}
                 style={{
                   transform:
-                    layoutPhase === "expanded" ? "scale(1)" : "scale(0.98)",
+                    layoutPhase === "expanded" ? "scale(1)" : "scale(0.88)",
                   transition: centerTransition,
                 }}
               >

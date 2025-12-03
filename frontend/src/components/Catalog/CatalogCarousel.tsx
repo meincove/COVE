@@ -1,12 +1,14 @@
-// // src/components/Catalog/CatalogCarousel.tsx
+
 // 'use client'
 
 // import { CSSProperties, useEffect, useRef, useState } from 'react'
-// import { motion, AnimatePresence, useDragControls } from 'framer-motion'
+// import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 // import { useRouter } from 'next/navigation'
+// import { useInView } from 'react-intersection-observer'
+// import { ChevronLeft, ChevronRight } from 'lucide-react'
+
 // import CatalogCard from './CatalogCard'
 // import { useModal } from '@/src/context/ModalContext'
-// import { useInView } from 'react-intersection-observer'
 // import type { CatalogCardDTO } from '@/types/catalog'
 // import CatalogDetailPanel from './CatalogDetailPanel'
 
@@ -15,8 +17,6 @@
 //   sectionKey: string
 //   onReady?: () => void
 // }
-
-// /* ... CardRole, getCardRole, getCardLayout stay exactly as you have them ... */
 
 // type CardRole =
 //   | 'center'
@@ -49,6 +49,8 @@
 //   }
 // }
 
+// // still using fixed offsets for now – we’ll refactor to card-width–based
+// // math in the next step.
 // function getCardLayout(role: CardRole) {
 //   switch (role) {
 //     case 'center':
@@ -71,15 +73,21 @@
 //   }
 // }
 
+// // --- helper: mimic clamp(280px, 16.5vw, 620px) in JS ---
+// function computeCardWidth(viewportWidth: number): number {
+//   const min = 280
+//   const max = 620
+//   const preferred = 0.165 * viewportWidth // 16.5vw
+
+//   return Math.min(max, Math.max(min, preferred))
+// }
+
 // export default function CatalogCarousel({
 //   cards,
 //   sectionKey,
 //   onReady,
 // }: CatalogCarouselProps) {
-
-//    const dragControls = useDragControls() 
-
-//    // 🔔 Tell parent "I’m ready" as soon as we’ve mounted on the client
+//   // tell parent we’re ready to replace skeleton
 //   useEffect(() => {
 //     if (onReady) onReady()
 //   }, [onReady])
@@ -88,10 +96,37 @@
 //   const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
 //   const containerRef = useRef<HTMLDivElement>(null)
+//   const dragTriggeredRef = useRef(false)
+
 //   const { isModalOpen } = useModal()
 //   const router = useRouter()
 
-//   // which variant is selected for each card
+//   // ---- card width / height, driven by viewport ----
+//   const [cardWidth, setCardWidth] = useState<number>(() => {
+//     if (typeof window === 'undefined') return 320
+//     return computeCardWidth(window.innerWidth)
+//   })
+
+//   useEffect(() => {
+//     const handleResize = () => {
+//       setCardWidth(computeCardWidth(window.innerWidth))
+//     }
+
+//     handleResize()
+//     window.addEventListener('resize', handleResize)
+//     return () => window.removeEventListener('resize', handleResize)
+//   }, [])
+
+//   const cardSizingVars: CSSProperties = {
+//     '--card-width': `${cardWidth}px`,
+//     '--card-height': `${cardWidth * 1.35}px`,
+//   } as CSSProperties
+
+//   // drag threshold depends on card width (feels similar on all screens)
+//   const dragThreshold = cardWidth * 0.22 // ~60–80px depending on width
+//   const dragLimit = cardWidth * 0.35 // max distance card can be dragged
+
+//   // variant choice per card
 //   const [variantMap, setVariantMap] = useState<Record<string, string>>(() => {
 //     const initialMap: Record<string, string> = {}
 //     cards.forEach((card) => {
@@ -103,24 +138,21 @@
 //     return initialMap
 //   })
 
-//   // per-variant size + quantity
+//   // size + quantity per variant
 //   const [sizeMap, setSizeMap] = useState<Record<string, string | null>>({})
 //   const [qtyMap, setQtyMap] = useState<Record<string, number>>({})
 
-//   const cardSizingVars = {
-//     '--card-width': 'clamp(240px, 26vw, 380px)',
-//     '--card-height': 'clamp(320px, 52vh, 540px)',
-//   }
-
 //   const handleVariantChange = (cardId: string, variantId: string) => {
 //     setVariantMap((prev) => ({ ...prev, [cardId]: variantId }))
-//     // reset size + quantity for this variant
 //     setSizeMap((prev) => ({ ...prev, [variantId]: null }))
 //     setQtyMap((prev) => ({ ...prev, [variantId]: 0 }))
 //   }
 
 //   const handleSizeChange = (variantId: string, size: string) => {
 //     setSizeMap((prev) => ({ ...prev, [variantId]: size }))
+
+//     // OPTIONAL: if you want suggestions to update instantly you could
+//     // also reset qty here, etc.
 //   }
 
 //   const handleQuantityChange = (variantId: string, qty: number) => {
@@ -132,10 +164,26 @@
 //   const handlePrev = () =>
 //     setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length)
 
-//   const handleDragEnd = (_: any, info: any) => {
-//     if (expandedCardId) return
-//     if (info.offset.x < -100) handleNext()
-//     else if (info.offset.x > 100) handlePrev()
+//   // drag handlers for CENTER CARD
+//   const handleCardDragStart = () => {
+//     dragTriggeredRef.current = false
+//   }
+
+//   const handleCardDrag = (_: any, info: PanInfo) => {
+//     if (dragTriggeredRef.current) return
+
+//     if (info.offset.x <= -dragThreshold) {
+//       dragTriggeredRef.current = true
+//       handleNext()
+//     } else if (info.offset.x >= dragThreshold) {
+//       dragTriggeredRef.current = true
+//       handlePrev()
+//     }
+//   }
+
+//   const handleCardDragEnd = () => {
+//     // reset for next drag
+//     dragTriggeredRef.current = false
 //   }
 
 //   const { ref: inViewRef, inView } = useInView({
@@ -172,24 +220,34 @@
 //     if (expandedQty > 0) params.set('qty', String(expandedQty))
 
 //     const query = params.toString()
-//     const href = query
-//       ? `/product/${slug}?${query}`
-//       : `/product/${slug}`
+//     const href = query ? `/product/${slug}?${query}` : `/product/${slug}`
 
 //     router.push(href)
 //   }
-
-  
 
 //   return (
 //     <div
 //       className="relative w-full h-full flex flex-col items-center justify-center z-0"
 //       ref={inViewRef}
-//       style={cardSizingVars as CSSProperties}
+//       style={cardSizingVars}
 //     >
-//       {/* Dim backdrop feel when expanded */}
+//       {/* Soft blurred band when a card is expanded */}
 //       {hasExpanded && (
-//         <div className="absolute inset-0 rounded-xl bg-slate-900/35 pointer-events-none" />
+//         <div
+//           className="
+//             pointer-events-none
+//             absolute
+//             left-1/2 -translate-x-1/2
+//             top-1/2 -translate-y-1/2
+//             rounded-[40px]
+//             bg-slate-900/14
+//             backdrop-blur-md
+//           "
+//           style={{
+//             width: 'min(90vw, 950px)',
+//             height: 'var(--card-height)' as string,
+//           }}
+//         />
 //       )}
 
 //       {/* ARROWS */}
@@ -197,34 +255,51 @@
 //         <>
 //           <div className="absolute top-1/2 left-4 z-10 -translate-y-1/2">
 //             <button
+//               type="button"
 //               onClick={handlePrev}
-//               className="bg-black text-white px-3 py-2 rounded-full shadow-md hover:bg-gray-800 transition"
+//               className="
+//                 rounded-full
+//                 bg-slate-900/65
+//                 hover:bg-slate-900
+//                 text-slate-50
+//                 p-2
+//                 shadow-lg
+//                 backdrop-blur-sm
+//                 border border-white/10
+//                 transition
+//               "
 //             >
-//               ⬅️
+//               <ChevronLeft className="w-4 h-4" />
 //             </button>
 //           </div>
 //           <div className="absolute top-1/2 right-4 z-10 -translate-y-1/2">
 //             <button
+//               type="button"
 //               onClick={handleNext}
-//               className="bg-black text-white px-3 py-2 rounded-full shadow-md hover:bg-gray-800 transition"
+//               className="
+//                 rounded-full
+//                 bg-slate-900/65
+//                 hover:bg-slate-900
+//                 text-slate-50
+//                 p-2
+//                 shadow-lg
+//                 backdrop-blur-sm
+//                 border border-white/10
+//                 transition
+//               "
 //             >
-//               ➡️
+//               <ChevronRight className="w-4 h-4" />
 //             </button>
 //           </div>
 //         </>
 //       )}
 
-//       {/* CAROUSEL */}
+//       {/* CAROUSEL CONTAINER – no drag here now */}
 //       <motion.div
 //         className="relative w-full h-full flex items-center justify-center"
-//         drag={carouselInteractive ? 'x' : false}
-//         dragControls={dragControls}     // 🔹 drag only starts when we call dragControls.start
-//         dragListener={false}            // 🔹 disable automatic drag from children
-//         dragConstraints={{ left: 0, right: 0 }}
-//         onDragEnd={handleDragEnd}
 //         ref={containerRef}
 //         style={{
-//           pointerEvents: carouselInteractive ? 'auto' : 'auto',
+//           pointerEvents: 'auto',
 //           perspective: 1400,
 //           willChange: 'transform',
 //         }}
@@ -248,7 +323,7 @@
 //           if (isExpanded) {
 //             layout = {
 //               ...layout,
-//               x: layout.x - 320,
+//               x: layout.x - 320, // will refactor later to use cardWidth
 //               opacity: 1,
 //               blur: 0,
 //               zIndex: 120,
@@ -295,6 +370,20 @@
 //                   duration: 0.8,
 //                   ease: [0.16, 1, 0.3, 1],
 //                 }}
+//                 // 🔹 Drag only on the center card
+//                 drag={
+//                   carouselInteractive && isCenter
+//                     ? 'x'
+//                     : false
+//                 }
+//                 dragConstraints={{
+//                   left: -dragLimit,
+//                   right: dragLimit,
+//                 }}
+//                 dragElastic={0.22}
+//                 onDragStart={isCenter ? handleCardDragStart : undefined}
+//                 onDrag={isCenter ? handleCardDrag : undefined}
+//                 onDragEnd={isCenter ? handleCardDragEnd : undefined}
 //               >
 //                 <CatalogCard
 //                   {...card}
@@ -313,7 +402,6 @@
 //                   onVariantChange={(variantId) =>
 //                     handleVariantChange(card.id, variantId)
 //                   }
-                                  
 //                 />
 //               </motion.div>
 //             </AnimatePresence>
@@ -346,12 +434,11 @@
 // }
 
 
-
 // src/components/Catalog/CatalogCarousel.tsx
 'use client'
 
 import { CSSProperties, useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useDragControls } from 'framer-motion'
+import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useInView } from 'react-intersection-observer'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -398,6 +485,7 @@ function getCardRole(relativeOffset: number): CardRole {
   }
 }
 
+// still using fixed offsets for now – we’ll refactor later
 function getCardLayout(role: CardRole) {
   switch (role) {
     case 'center':
@@ -420,13 +508,20 @@ function getCardLayout(role: CardRole) {
   }
 }
 
+// --- helper: mimic clamp(280px, 16.5vw, 620px) in JS ---
+function computeCardWidth(viewportWidth: number): number {
+  const min = 280
+  const max = 620
+  const preferred = 0.165 * viewportWidth // 16.5vw
+
+  return Math.min(max, Math.max(min, preferred))
+}
+
 export default function CatalogCarousel({
   cards,
   sectionKey,
   onReady,
 }: CatalogCarouselProps) {
-  const dragControls = useDragControls()
-
   // tell parent we’re ready to replace skeleton
   useEffect(() => {
     if (onReady) onReady()
@@ -436,8 +531,35 @@ export default function CatalogCarousel({
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const dragTriggeredRef = useRef(false)
+
   const { isModalOpen } = useModal()
   const router = useRouter()
+
+  // ---- card width / height, driven by viewport ----
+  const [cardWidth, setCardWidth] = useState<number>(() => {
+    if (typeof window === 'undefined') return 320
+    return computeCardWidth(window.innerWidth)
+  })
+
+  useEffect(() => {
+    const handleResize = () => {
+      setCardWidth(computeCardWidth(window.innerWidth))
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const cardSizingVars: CSSProperties = {
+    '--card-width': `${cardWidth}px`,
+    '--card-height': `${cardWidth * 1.35}px`,
+  } as CSSProperties
+
+  // drag threshold depends on card width (feels similar on all screens)
+  const dragThreshold = cardWidth * 0.22 // ~60–80px depending on width
+  const dragLimit = cardWidth * 0.35 // max distance card can be dragged
 
   // variant choice per card
   const [variantMap, setVariantMap] = useState<Record<string, string>>(() => {
@@ -454,12 +576,6 @@ export default function CatalogCarousel({
   // size + quantity per variant
   const [sizeMap, setSizeMap] = useState<Record<string, string | null>>({})
   const [qtyMap, setQtyMap] = useState<Record<string, number>>({})
-
-  // keep in sync with card sizing
-  const cardSizingVars = {
-    '--card-width': 'clamp(240px, 26vw, 380px)',
-    '--card-height': 'clamp(320px, 52vh, 540px)',
-  }
 
   const handleVariantChange = (cardId: string, variantId: string) => {
     setVariantMap((prev) => ({ ...prev, [cardId]: variantId }))
@@ -480,10 +596,26 @@ export default function CatalogCarousel({
   const handlePrev = () =>
     setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length)
 
-  const handleDragEnd = (_: any, info: any) => {
-    if (expandedCardId) return
-    if (info.offset.x < -100) handleNext()
-    else if (info.offset.x > 100) handlePrev()
+  // drag handlers for CENTER CARD
+  const handleCardDragStart = () => {
+    dragTriggeredRef.current = false
+  }
+
+  const handleCardDrag = (_: any, info: PanInfo) => {
+    if (dragTriggeredRef.current) return
+
+    if (info.offset.x <= -dragThreshold) {
+      dragTriggeredRef.current = true
+      handleNext()
+    } else if (info.offset.x >= dragThreshold) {
+      dragTriggeredRef.current = true
+      handlePrev()
+    }
+  }
+
+  const handleCardDragEnd = () => {
+    // nothing else – dragSnapToOrigin will handle the snapping
+    dragTriggeredRef.current = false
   }
 
   const { ref: inViewRef, inView } = useInView({
@@ -529,7 +661,7 @@ export default function CatalogCarousel({
     <div
       className="relative w-full h-full flex flex-col items-center justify-center z-0"
       ref={inViewRef}
-      style={cardSizingVars as CSSProperties}
+      style={cardSizingVars}
     >
       {/* Soft blurred band when a card is expanded */}
       {hasExpanded && (
@@ -594,14 +726,9 @@ export default function CatalogCarousel({
         </>
       )}
 
-      {/* CAROUSEL */}
+      {/* CAROUSEL CONTAINER – no drag here now */}
       <motion.div
         className="relative w-full h-full flex items-center justify-center"
-        drag={carouselInteractive ? 'x' : false}
-        dragControls={dragControls}
-        dragListener={false}
-        dragConstraints={{ left: 0, right: 0 }}
-        onDragEnd={handleDragEnd}
         ref={containerRef}
         style={{
           pointerEvents: 'auto',
@@ -628,7 +755,7 @@ export default function CatalogCarousel({
           if (isExpanded) {
             layout = {
               ...layout,
-              x: layout.x - 320,
+              x: layout.x - 320, // will refactor later to use cardWidth
               opacity: 1,
               blur: 0,
               zIndex: 120,
@@ -675,6 +802,21 @@ export default function CatalogCarousel({
                   duration: 0.8,
                   ease: [0.16, 1, 0.3, 1],
                 }}
+                // 🔹 Drag only on the center card
+                drag={
+                  carouselInteractive && isCenter
+                    ? 'x'
+                    : false
+                }
+                dragConstraints={{
+                  left: -dragLimit,
+                  right: dragLimit,
+                }}
+                dragElastic={0.22}
+                dragSnapToOrigin={isCenter}   
+                onDragStart={isCenter ? handleCardDragStart : undefined}
+                onDrag={isCenter ? handleCardDrag : undefined}
+                onDragEnd={isCenter ? handleCardDragEnd : undefined}
               >
                 <CatalogCard
                   {...card}
@@ -723,5 +865,3 @@ export default function CatalogCarousel({
     </div>
   )
 }
-
-
