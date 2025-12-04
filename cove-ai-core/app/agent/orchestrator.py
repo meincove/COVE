@@ -9,17 +9,23 @@ import json
 import logging
 from pathlib import Path
 
-from app.providers.llm import LLMClient  # ✅ NEW: import LLM client
+from app.providers.llm import LLMClient
 
 log = logging.getLogger("cove.agent.intent")
 
 
 @dataclass
-@dataclass
 class Intent:
-    # kind is now one of:
-    #  "discover" | "lookup_product" | "size_fit" | "policy"
-    #  | "history_meta" | "generic" | "unknown"
+    # kind is one of:
+    #  "discover"       – browse / see options
+    #  "lookup_product" – product features / care / shrinkage
+    #  "size_fit"       – size & fit questions
+    #  "policy"         – shipping / returns / payments
+    #  "history_meta"   – ask about previous conversation
+    #  "greeting"       – pure greeting / thanks, no product intent
+    #  "small_talk"     – chit-chat, jokes, who built you, etc.
+    #  "generic"        – brand questions or misc not above
+    #  "unknown"        – fallback when unclear
     kind: str
     has_price_filter: bool = False
     subqueries: Optional[List[str]] = None
@@ -29,7 +35,8 @@ class Intent:
 CLASSIFIER_SYSTEM_PROMPT = """
 You are an intent classifier for Cove AI, a fashion e-commerce assistant.
 
-Input you receive (as user message) is a JSON object:
+INPUT
+You receive a JSON object:
 
 {
   "message": "<raw user message>",
@@ -47,61 +54,107 @@ You must output ONLY a JSON object like:
   "has_price_filter": false
 }
 
-Valid "kind" values:
+-----------------------------
+Valid "kind" values and rules
+-----------------------------
 
-- "discover": user wants to BROWSE or SEE product options.
-  The goal is to surface a list of items (recommendations).
-  Examples:
-    - "show me some black bombers"
-    - "what hoodies do you have in green?"
-    - "recommend some cargos under 50 euros"
-    - "i'm looking for relaxed joggers for travel"
-  IMPORTANT: choose "discover" ONLY if the user is primarily asking to see products / options.
+1) "greeting"
+   - The message is ONLY a greeting / polite phrase or brief thanks.
+   - There is NO concrete shopping intent, no product type and no question.
+   - Examples:
+       "hi"
+       "hello"
+       "hey cove"
+       "good evening"
+       "thanks"
+       "thank you so much"
+   - If the user also asks for products in the same message
+     (e.g. "hi, do you have black hoodies?") then this is NOT "greeting".
+     In that case choose "discover" / "size_fit" / "policy" etc.
 
-- "lookup_product": user is asking ABOUT product properties, features, care, materials, or shrinkage,
-  not to browse options.
-  Examples:
-    - "what material is this bomber made of?"
-    - "do any of your cargo jeans have smart heating or RFID-protected pockets?"
-    - "will your cotton bombers shrink heavily in the dryer?"
-    - "can I put your soft cotton tees in the dryer?"
-  IMPORTANT: if the user is mainly asking about features, capabilities, or care/shrinkage,
-  choose "lookup_product", NOT "discover", even if a product type is mentioned.
+2) "small_talk"
+   - Casual chit-chat unrelated to buying products.
+   - Examples:
+       "how are you"
+       "tell me a joke"
+       "who created you"
+       "what can you do"
+   - If there is a clear product intent together with chit-chat
+     (e.g. "how are you, can you show me some tees"), DO NOT use "small_talk".
+     Prefer the shopping-related kind instead (usually "discover").
 
-- "size_fit": user asks which size to buy or how something fits.
-  Examples:
-    - "which size should I pick?"
-    - "I'm 175cm and 70kg, will M be too tight for your bombers?"
+3) "discover"
+   - User wants to BROWSE or SEE product options.
+   - The goal is to surface a list of items (recommendations).
+   - Examples:
+       "show me some black bombers"
+       "what hoodies do you have in green?"
+       "recommend some cargos under 50 euros"
+       "i'm looking for relaxed joggers for travel"
+   - Choose "discover" ONLY if the primary intent is to see products/options.
 
-- "policy": user asks about returns, shipping, delivery, payment, etc.
-  Examples:
-    - "what is your return policy?"
-    - "how long does delivery take?"
-    - "can I return a bomber if it doesn’t fit?"
+4) "lookup_product"
+   - User is asking ABOUT product properties, features, care, or shrinkage,
+     not to browse options.
+   - Examples:
+       "what material is this bomber made of?"
+       "do any of your cargos have RFID-protected pockets?"
+       "will your cotton bombers shrink heavily in the dryer?"
+       "can I put your soft cotton tees in the dryer?"
+   - If the user mainly asks about features/capabilities/care, choose
+     "lookup_product" even if a product type is mentioned.
 
-- "history_meta": user asks about previous conversation context.
-  Examples:
-    - "what did I ask you earlier about bombers?"
-    - "what were we talking about before?"
-    - "remind me what I said about joggers"
+5) "size_fit"
+   - User asks which size to buy or how something fits.
+   - Examples:
+       "which size should I pick?"
+       "I'm 175cm and 70kg, will M be too tight for your bombers?"
+       "does this fit oversized or regular?"
 
-- "generic": normal chit-chat or brand questions not covered above.
-  Examples:
-    - "hi", "how are you?"
-    - "tell me about your brand"
+6) "policy"
+   - User asks about returns, shipping, delivery, payment, etc.
+   - Examples:
+       "what is your return policy?"
+       "how long does delivery take?"
+       "can I return a bomber if it doesn’t fit?"
+       "do you ship to France?"
 
-- "unknown": if you really cannot decide.
+7) "history_meta"
+   - User asks about previous conversation context.
+   - Examples:
+       "what did I ask you earlier about bombers?"
+       "what were we talking about before?"
+       "remind me what I said about joggers"
 
-has_price_filter = true if the user clearly constrains price/budget:
-  - "under 40 euros"
-  - "between 30 and 50"
-  - "around 30"
-  - "max 25€"
-  - "for 30-40 euro" etc.
+8) "generic"
+   - Brand or store questions not covered above.
+   - Examples:
+       "tell me about your brand"
+       "what makes Cove different?"
+       "are you a premium or budget brand?"
 
-Return ONLY the JSON object, no extra text.
+9) "unknown"
+   - Use this only if you really cannot decide.
+
+-----------------------------
+Price filters
+-----------------------------
+
+has_price_filter = true if the user clearly constrains price/budget, e.g.:
+
+  "under 40 euros"
+  "between 30 and 50"
+  "around 30"
+  "max 25€"
+  "for 30-40 euro"
+
+Otherwise has_price_filter = false.
+
+Return ONLY the JSON object, with fields:
+  - "kind": string (one of the above)
+  - "has_price_filter": boolean
+No extra text or explanation.
 """
-
 
 
 # ---------------- config loading ----------------
@@ -252,7 +305,6 @@ async def classify(message: str, attrs: Dict[str, List[str]]) -> Intent:
     ]
 
     try:
-        # ✅ async call into LLM
         raw = await client.generate(messages)
 
         # Try to extract a JSON object from the response

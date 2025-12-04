@@ -650,6 +650,47 @@ def _parse_fit_params(q: str) -> Optional[_FitParams]:
         fit_preference=fit_pref,
     )
 
+async def _generate_greeting(message: str, user_name: Optional[str]) -> str:
+    """
+    Use the LLM to answer pure greeting / small-talk in ONE short line.
+    No catalog / DB calls here.
+    """
+    name_hint = (
+        f" Address the user once as {user_name}."
+        if user_name
+        else ""
+    )
+
+    sys_prompt = (
+        "You are Cove AI, a friendly fashion assistant.\n"
+        "The user is greeting you or making small talk, not asking a concrete shopping question.\n"
+        "Reply in ONE short sentence: warm, concise, and end by inviting them to say "
+        "what they are looking for (products, sizes, outfits)."
+        + name_hint
+    )
+
+    messages = [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": message},
+    ]
+
+    try:
+        out = await _llm.generate(messages)
+        # keep first line, trimmed, reasonably short
+        line = out.strip().split("\n")[0]
+        return line[:280]
+    except Exception as e:
+        log.warning("greeting LLM failed, using fallback: %s", e)
+        # ultra-rare fallback only
+        if user_name:
+            return (
+                f"Hey {user_name}, I’m Cove AI. "
+                "I can help with Cove products, sizes, or outfit ideas — what are you looking for today?"
+            )
+        return (
+            "Hey, I’m Cove AI. I can help with Cove products, sizes, or outfit ideas — "
+            "what are you looking for today?"
+        )
 
 # ------------------ Catalog fetchers (verified stock & colors) ------------------
 
@@ -839,6 +880,13 @@ async def rag_query(body: RAGIn):
             trace_id,
             {"q": body.query, "attrs": attrs, "intent": intent_kind},
         )
+                # ---- Pure greeting / small-talk: skip RAG, use lightweight LLM reply ----
+        if intent_kind in ("greeting", "small_talk"):
+            text = await _generate_greeting(body.query, body.user_name)
+            return {
+                "answer": text,
+                "citations": [],
+            }
 
         # ---- Retrieval ----
         try:
