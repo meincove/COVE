@@ -183,11 +183,19 @@ html.menu-open .tester-frame {
   scrollbar-width: none;
 }
 
-/* === Menu open: per-side shrink (no scale) === */
+/* === Menu open: shrink from top-left only (responsive) === */
 html.menu-open .tester-frame {
-  margin: var(--gap-top) var(--gap-right) var(--gap-bottom) var(--gap-left);
-  width: calc(100vw - var(--gap-left) - var(--gap-right));
-  height: calc(100dvh - var(--gap-top) - var(--gap-bottom));
+  /* Responsive shrink values: 40px min, 5vh ideal, 80px max */
+  --shrink-amount: clamp(40px, 5vh, 80px);
+  
+  margin-top: var(--shrink-amount);
+  margin-left: var(--shrink-amount);
+  margin-right: 0;
+  margin-bottom: 0;
+  
+  width: calc(100vw - var(--shrink-amount));
+  height: calc(100dvh - var(--shrink-amount));
+  
   border-radius: 24px;
   clip-path: inset(0 round 24px);
   box-shadow:
@@ -196,7 +204,7 @@ html.menu-open .tester-frame {
 }
 
 html.menu-open .tester-frame {
-  filter: brightness(0.9) saturate(0.96);
+  filter: brightness(0.95) saturate(0.98);
 }
 
 /* Navbar sits inside the frame so it moves with it */
