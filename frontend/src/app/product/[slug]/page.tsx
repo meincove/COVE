@@ -184,9 +184,9 @@ export default function ProductPage() {
   return (
     <div className="relative min-h-screen text-white bg-[#2e4053] flex flex-col overflow-hidden">
       {/* Page Content */}
-      <div className="relative z-10 flex-1 w-full max-w-[1800px] mx-auto flex flex-col lg:flex-row gap-4 px-4 py-6">
-        {/* LEFT COLUMN */}
-        <div className="w-full lg:w-1/4 rounded-xl overflow-hidden">
+      <div className="relative z-10 flex-1 w-full max-w-[1800px] xl:max-w-[2000px] 2xl:max-w-[2400px] mx-auto flex flex-col md:flex-row lg:flex-row gap-3 sm:gap-4 md:gap-5 lg:gap-6 px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-5 md:py-6">
+        {/* LEFT COLUMN - Product Info & Gallery */}
+        <div className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 rounded-xl overflow-hidden">
           <ProductInfo
             name={product.name}
             price={product.price}
@@ -203,8 +203,8 @@ export default function ProductPage() {
           />
         </div>
 
-        {/* MIDDLE VIEWER */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center rounded-xl overflow-hidden">
+        {/* MIDDLE VIEWER - Main Image Display */}
+        <div className="w-full md:w-2/3 lg:w-1/2 xl:w-3/5 flex items-center justify-center rounded-xl overflow-hidden">
           <ImageOrbit
             images={selectedColor.images}
             currentIndex={currentImageIndex}
@@ -212,8 +212,8 @@ export default function ProductPage() {
           />
         </div>
 
-        {/* RIGHT CONFIGURATOR */}
-        <div className="w-full lg:w-1/3 rounded-xl overflow-hidden flex flex-col justify-end">
+        {/* RIGHT CONFIGURATOR - Size/Color Selection */}
+        <div className="w-full md:w-full lg:w-1/3 xl:w-1/4 rounded-xl overflow-hidden flex flex-col justify-end">
           <ProductConfigurator
             sizes={product.sizes}
             colors={product.colors}
