@@ -35,7 +35,7 @@ type UiProduct = {
   price: number
   basePrice: number
   description: string
-  // aggregated total stock per size (across variants) for the configurator
+  // aggregated total stock per size (across variants)
   sizes: UiSizeMap
   colors: UiColor[]
 }
@@ -54,7 +54,9 @@ export default function ProductPage() {
   const [product, setProduct] = useState<UiProduct | null>(null)
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [defaultSelectedSize, setDefaultSelectedSize] = useState<string | null>(null)
+  const [defaultSelectedSize, setDefaultSelectedSize] = useState<string | null>(
+    null
+  )
   const [defaultQuantity, setDefaultQuantity] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -94,6 +96,14 @@ export default function ProductPage() {
           return
         }
 
+        if (!uiProduct.colors || uiProduct.colors.length === 0) {
+          console.error('Product has no color variants')
+          setProduct(null)
+          setDefaultSelectedSize(null)
+          setDefaultQuantity(0)
+          return
+        }
+
         // ---------- resolve preferred variant / size / qty ----------
         const preferredVariantId =
           urlVariantId || storedProduct?.selectedVariantId || null
@@ -101,7 +111,7 @@ export default function ProductPage() {
         const preferredQtyRaw =
           urlQty ?? storedProduct?.quantity ?? storedProduct?.qty ?? null
 
-        // resolve color index
+        // --- resolve color index (by variant if provided) ---
         let colorIndex = 0
         if (preferredVariantId) {
           const idxByVariant = uiProduct.colors.findIndex(
@@ -112,27 +122,38 @@ export default function ProductPage() {
           }
         }
 
-        // resolve default size
-        const sizeMap = uiProduct.sizes
+        const activeColor = uiProduct.colors[colorIndex] ?? uiProduct.colors[0]
+        const activeSizeMap = activeColor?.sizes ?? {}
+
+        // --- resolve default size (per-color) ---
         let resolvedSize: string | null = null
-        if (preferredSize && sizeMap[preferredSize] !== undefined) {
+
+        if (preferredSize && activeSizeMap[preferredSize] !== undefined) {
           resolvedSize = preferredSize
         } else {
-          const sizeKeys = Object.keys(sizeMap)
+          const sizeKeys = Object.keys(activeSizeMap)
           resolvedSize = sizeKeys.length > 0 ? sizeKeys[0] : null
         }
 
-        // resolve default quantity
+        // --- resolve default quantity (per-color) ---
         const maxStock =
-          resolvedSize && sizeMap[resolvedSize] != null ? sizeMap[resolvedSize] : 0
+          resolvedSize && activeSizeMap[resolvedSize] != null
+            ? activeSizeMap[resolvedSize]
+            : 0
 
         let resolvedQty = 0
         if (preferredQtyRaw != null) {
           const parsed = Number(preferredQtyRaw)
           if (!Number.isNaN(parsed)) {
-            resolvedQty = Math.max(0, parsed)
+            resolvedQty = Math.max(1, parsed) // at least 1 if user chose something
           }
         }
+
+        // If still 0 but stock exists, default to 1
+        if (resolvedQty === 0 && maxStock > 0) {
+          resolvedQty = 1
+        }
+
         if (maxStock > 0) {
           resolvedQty = Math.min(resolvedQty, maxStock)
         } else {
@@ -179,7 +200,16 @@ export default function ProductPage() {
     )
   }
 
-  const selectedColor = product.colors[selectedColorIndex]
+  if (!product.colors || product.colors.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-lg text-gray-400">No variants available for product</p>
+      </div>
+    )
+  }
+
+  const selectedColor =
+    product.colors[selectedColorIndex] ?? product.colors[0]
 
   return (
     <div className="relative min-h-screen text-white bg-[#2e4053] flex flex-col overflow-hidden">
@@ -215,7 +245,8 @@ export default function ProductPage() {
         {/* RIGHT CONFIGURATOR */}
         <div className="w-full lg:w-1/3 rounded-xl overflow-hidden flex flex-col justify-end">
           <ProductConfigurator
-            sizes={product.sizes}
+            // IMPORTANT: per-color sizes, not aggregated product.sizes
+            sizes={selectedColor.sizes}
             colors={product.colors}
             defaultColor={selectedColor}
             variantId={selectedColor.variantId}
