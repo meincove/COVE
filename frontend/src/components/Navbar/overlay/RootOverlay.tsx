@@ -297,54 +297,24 @@ export default function RootOverlay() {
 
   return (
     <>
-      {/* Peach global backdrop tint */}
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "oklch(0.93 0.08 70)",
-          opacity: devOnly ? 1 : open ? 1 : 0,
-          transition: devOnly ? "none" : "opacity .25s ease",
-          zIndex: 120,
-          pointerEvents: "none",
-        }}
-      />
+
 
       {/* Main overlay bar: width + position handled entirely by CSS */}
       <div className="overlay-root" style={rootStyle as React.CSSProperties}>
         <div className="overlay-stage">
           <div className="overlay-card overlay-card--thirds">
             {/* LEFT SLOT */}
-            <div
-              className="overlay-slot-left"
-              style={{
-                background: "rgba(255,182,193,.28)",
-                borderRadius: 10,
-              }}
-            >
+            <div className="overlay-slot-left">
               <LeftActions />
             </div>
 
             {/* CENTER SLOT */}
-            <div
-              className="overlay-slot-center"
-              style={{
-                background: "rgba(186, 170, 255, .22)",
-                borderRadius: 10,
-              }}
-            >
+            <div className="overlay-slot-center">
               <SearchBar />
             </div>
 
             {/* RIGHT SLOT */}
-            <div
-              className="overlay-slot-right justify-end md:justify-end"
-              style={{
-                background: "rgba(255,182,193,.28)",
-                borderRadius: 10,
-              }}
-            >
+            <div className="overlay-slot-right justify-end md:justify-end">
               <RightActions />
               <button
                 className="overlay-close"
