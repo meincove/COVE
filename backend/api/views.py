@@ -2,6 +2,7 @@ import os
 import json
 import jwt
 import requests
+import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, FileResponse
 from django.contrib.auth import get_user_model
@@ -17,6 +18,7 @@ from django.db.utils import OperationalError
 from ai_profiles.models import AiUserProfile
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
@@ -34,10 +36,9 @@ def sync_user(request):
         decoded = jwt.decode(session_token, options={"verify_signature": False})
         session_id = decoded.get("sid")
         clerk_user_id = decoded.get("sub")
-        print("🔑 Clerk Session ID:", session_id)
-        print("👤 Clerk User ID:", clerk_user_id)
+        logger.info(f"Syncing user with Clerk ID: {clerk_user_id}")
     except Exception as e:
-        print("❌ Error decoding JWT:", e)
+        logger.warning(f"Error decoding JWT: {e}")
         return JsonResponse({'error': 'Invalid session token'}, status=400)
 
     if not session_id or not clerk_user_id:
@@ -50,15 +51,15 @@ def sync_user(request):
             timeout=5
         )
     except requests.exceptions.RequestException as e:
-        print("❌ Clerk API request error:", e)
+        logger.error(f"Clerk API request error: {e}")
         return JsonResponse({'error': 'Failed to reach Clerk API'}, status=503)
 
     if response.status_code != 200:
-        print("❌ Clerk API error:", response.text)
+        logger.warning(f"Clerk API returned {response.status_code} for user {clerk_user_id}")
         return JsonResponse({'error': 'Invalid Clerk user ID'}, status=401)
 
     clerk_data = response.json()
-    print("📄 Clerk Response:", json.dumps(clerk_data, indent=2))
+    logger.debug(f"Fetched Clerk user data for: {clerk_user_id}")
 
     # Extract Clerk data
     email = clerk_data.get("email_addresses", [{}])[0].get("email_address", "")
@@ -79,7 +80,7 @@ def sync_user(request):
     try:
         existing = User.objects.get(email=email)
         if not existing.user_id:
-            print("⚠️ Email already exists in DB. Updating existing user with Clerk ID.")
+            logger.info(f"Linking existing email {email} to Clerk ID {clerk_user_id}")
             existing.user_id = clerk_user_id
             existing.first_name = first_name
             existing.last_name = last_name
@@ -136,7 +137,7 @@ def sync_user(request):
 
     except Exception as e:
         # This MUST NOT break login – just log and continue
-        print("⚠️ Failed to sync AiUserProfile:", e)
+        logger.warning(f"Failed to sync AiUserProfile: {e}")
 
     return JsonResponse({
         'status': 'success',

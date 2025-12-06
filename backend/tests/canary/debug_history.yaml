@@ -1,0 +1,26 @@
+defaults:
+  base_url: "http://127.0.0.1:8000"
+  endpoint: "/ai/agent/query"
+  method: "POST"
+  top_k: 6
+  django_base_url: "http://127.0.0.1:8001"
+
+cases:
+  - id: history_bomber_recall
+    label: "History – recall bomber query"
+    history_seed:
+      guestSessionId: "canary-history-debug"
+      turns:
+        - role: "user"
+          content: "Show me a black bomber in size M"
+        - role: "assistant"
+          content: "Here are some bombers that match your size."
+    payload:
+      message: "By the way, what did I ask you earlier about bombers?"
+      top_k: 3
+      guestSessionId: "canary-history-debug"
+    expect:
+      kind: "answer"
+      min_history_len: 2
+    assert_plan:
+      intent_kind: "history_meta"

@@ -1,0 +1,420 @@
+INFO:     Will watch for changes in these directories: ['/Users/ssg/Desktop/COVE/cove-ai-core']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [36167] using WatchFiles
+Fit rules loaded: 4 entries
+INFO:     Started server process [36210]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:65231 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1764999670.122529, "event": "query_received", "trace_id": "2ec53920c16546b7", "q": "What everyday black tees do you have for summer?", "attrs": {"colors": ["black"], "sizes": [], "types": ["tee"]}, "intent": "discover"}
+{"ts": 1764999671.188855, "event": "retrieval_done", "trace_id": "2ec53920c16546b7", "count": 6, "top_titles": ["Cove Casual Tee — black", "Cove Casual Tee — black", "Cove Casual Tee — white", "Cove Casual Tee — white", "Cove Designer Structured Tee — jet black"], "scores": [0.527511508912535, 0.5274359898231032, 0.5093219887402081, 0.5092734401985082, 0.4923560032420189]}
+{"ts": 1764999671.23295, "event": "rerank_skipped", "trace_id": "2ec53920c16546b7"}
+INFO:     127.0.0.1:65240 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65241 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65242 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65243 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65244 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65245 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+{"ts": 1764999675.629816, "event": "verification_done", "trace_id": "2ec53920c16546b7", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:65233 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65222 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1764999677.3098838, "event": "query_received", "trace_id": "b61d1e4030034b7f", "q": "I want cargo jeans for everyday city outfits.", "attrs": {"colors": [], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1764999678.872451, "event": "retrieval_done", "trace_id": "b61d1e4030034b7f", "count": 6, "top_titles": ["Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — washed black"], "scores": [0.42979247658826814, 0.42887813283177234, 0.4195988649249507, 0.4187792366379318, 0.40904683009487863]}
+{"ts": 1764999678.8729322, "event": "rerank_skipped", "trace_id": "b61d1e4030034b7f"}
+INFO:     127.0.0.1:65291 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65292 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65293 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65294 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65295 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65296 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+{"ts": 1764999683.318889, "event": "verification_done", "trace_id": "b61d1e4030034b7f", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:65260 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65259 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1764999684.896821, "event": "query_received", "trace_id": "d71c0b67eae9466b", "q": "Show me relaxed joggers for travel, preferably black, around 40 euros.", "attrs": {"colors": ["black"], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1764999686.783699, "event": "retrieval_done", "trace_id": "d71c0b67eae9466b", "count": 6, "top_titles": ["Cove Casual Denim Jacket — washed black", "Cove Casual Denim Jacket — washed black", "Cove Designer Hoodie — jet black", "Cove Designer Hoodie — jet black", "Cove Casual Loopback Hoodie — stone grey"], "scores": [0.4168270677041357, 0.4167575488542057, 0.41323546092298935, 0.4131782702697362, 0.4064563512802124]}
+{"ts": 1764999686.785563, "event": "rerank_skipped", "trace_id": "d71c0b67eae9466b"}
+INFO:     127.0.0.1:65321 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65323 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65325 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65327 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65332 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65334 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+{"ts": 1764999692.663282, "event": "verification_done", "trace_id": "d71c0b67eae9466b", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:65309 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65308 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65352 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1764999698.423102, "event": "query_received", "trace_id": "54c2bc37e1e1454f", "q": "Show me green cotton bombers.", "attrs": {"colors": ["green"], "sizes": [], "types": ["bomber"]}, "intent": "discover"}
+{"ts": 1764999699.756652, "event": "retrieval_done", "trace_id": "54c2bc37e1e1454f", "count": 6, "top_titles": ["Cove Originals Satin Bomber — deep green", "Cove Originals Satin Bomber — deep green", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Originals Satin Bomber — deep burgundy"], "scores": [0.5214733766631269, 0.5214275277086358, 0.4479271306969863, 0.4479271306969863, 0.443964991333188]}
+{"ts": 1764999699.795268, "event": "rerank_skipped", "trace_id": "54c2bc37e1e1454f"}
+INFO:     127.0.0.1:65371 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65373 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65374 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65375 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65377 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65378 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+{"ts": 1764999706.28988, "event": "verification_done", "trace_id": "54c2bc37e1e1454f", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:65359 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65350 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-session found=False
+INFO:     127.0.0.1:65389 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-jeans found=False
+INFO:     127.0.0.1:65402 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-joggers found=False
+INFO:     127.0.0.1:65414 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:65427 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65452 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+[_store_session_recs] key=guest:canary-history-001 items=3
+[_get_history] Requesting http://127.0.0.1:8001/ai_profiles/history/ with params={'limit': '20', 'guestSessionId': 'canary-history-001'}
+[_get_history] Response 200: {"items": [{"id": "96be7317-7195-47d4-8161-982539fd1acd", "guest_session_id": "canary-history-001", "clerk_user_id": "", "email": "", "role": "user", "kind": "discover", "content": "By the way, what d
+[_store_session_recs] key=guest:canary-history-001 items=3
+INFO:     127.0.0.1:65451 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:65475 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65532 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1764999776.224889, "event": "query_received", "trace_id": "5709762d7d98408f", "q": "What everyday black tees do you have for summer?", "attrs": {"colors": ["black"], "sizes": [], "types": ["tee"]}, "intent": "discover"}
+{"ts": 1764999777.355536, "event": "retrieval_done", "trace_id": "5709762d7d98408f", "count": 6, "top_titles": ["Cove Casual Tee — black", "Cove Casual Tee — black", "Cove Casual Tee — white", "Cove Casual Tee — white", "Cove Designer Structured Tee — jet black"], "scores": [0.527511508912535, 0.5274359898231032, 0.5093219887402081, 0.5092734401985082, 0.4923560032420189]}
+{"ts": 1764999777.389316, "event": "rerank_skipped", "trace_id": "5709762d7d98408f"}
+INFO:     127.0.0.1:49157 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49158 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49159 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49160 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49161 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49162 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+{"ts": 1764999781.565151, "event": "verification_done", "trace_id": "5709762d7d98408f", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49154 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65529 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1764999783.254348, "event": "query_received", "trace_id": "4e01c89a0071423a", "q": "I want cargo jeans for everyday city outfits.", "attrs": {"colors": [], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1764999784.35961, "event": "retrieval_done", "trace_id": "4e01c89a0071423a", "count": 6, "top_titles": ["Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — washed black"], "scores": [0.42979247658826814, 0.42887813283177234, 0.4195988649249507, 0.4187792366379318, 0.40904683009487863]}
+{"ts": 1764999784.359731, "event": "rerank_skipped", "trace_id": "4e01c89a0071423a"}
+INFO:     127.0.0.1:49181 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49182 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49183 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49184 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49185 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49186 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+{"ts": 1764999788.2167392, "event": "verification_done", "trace_id": "4e01c89a0071423a", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49176 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49175 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1764999789.83675, "event": "query_received", "trace_id": "94e6617398874c17", "q": "Show me relaxed joggers for travel, preferably black, around 40 euros.", "attrs": {"colors": ["black"], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1764999791.190259, "event": "retrieval_done", "trace_id": "94e6617398874c17", "count": 6, "top_titles": ["Cove Casual Denim Jacket — washed black", "Cove Casual Denim Jacket — washed black", "Cove Designer Hoodie — jet black", "Cove Designer Hoodie — jet black", "Cove Casual Loopback Hoodie — stone grey"], "scores": [0.41680137810683116, 0.41673203806472126, 0.4132237784133097, 0.4131665281554153, 0.40646272897720337]}
+{"ts": 1764999791.19063, "event": "rerank_skipped", "trace_id": "94e6617398874c17"}
+INFO:     127.0.0.1:49205 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49206 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49207 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49208 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49209 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49210 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+{"ts": 1764999794.9203892, "event": "verification_done", "trace_id": "94e6617398874c17", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49198 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49197 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49223 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1764999799.263455, "event": "query_received", "trace_id": "470d092e126e446d", "q": "Show me green cotton bombers.", "attrs": {"colors": ["green"], "sizes": [], "types": ["bomber"]}, "intent": "discover"}
+{"ts": 1764999800.542001, "event": "retrieval_done", "trace_id": "470d092e126e446d", "count": 6, "top_titles": ["Cove Originals Satin Bomber — deep green", "Cove Originals Satin Bomber — deep green", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Originals Satin Bomber — deep burgundy"], "scores": [0.5215322349629122, 0.5214863264117761, 0.4479731783874894, 0.4479731783874894, 0.4440271325079045]}
+{"ts": 1764999800.5725272, "event": "rerank_skipped", "trace_id": "470d092e126e446d"}
+INFO:     127.0.0.1:49233 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49234 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49235 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49236 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49237 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49238 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+{"ts": 1764999804.5164611, "event": "verification_done", "trace_id": "470d092e126e446d", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49229 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49221 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-session found=False
+INFO:     127.0.0.1:49250 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-jeans found=False
+INFO:     127.0.0.1:49262 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-joggers found=False
+INFO:     127.0.0.1:49273 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:49285 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49303 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+[_store_session_recs] key=guest:canary-history-001 items=3
+[_get_history] Requesting http://127.0.0.1:8001/ai_profiles/history/ with params={'limit': '20', 'guestSessionId': 'canary-history-001'}
+[_get_history] Response 200: {"items": [{"id": "c48906ff-4134-4b9e-9c2d-8bb407d55ce8", "guest_session_id": "canary-history-001", "clerk_user_id": "", "email": "", "role": "user", "kind": "discover", "content": "By the way, what d
+[_store_session_recs] key=guest:canary-history-001 items=3
+INFO:     127.0.0.1:49302 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:49324 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49374 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1764999867.424133, "event": "query_received", "trace_id": "6710ae60ced145ac", "q": "What everyday black tees do you have for summer?", "attrs": {"colors": ["black"], "sizes": [], "types": ["tee"]}, "intent": "discover"}
+{"ts": 1764999868.599277, "event": "retrieval_done", "trace_id": "6710ae60ced145ac", "count": 6, "top_titles": ["Cove Casual Tee — black", "Cove Casual Tee — black", "Cove Casual Tee — white", "Cove Casual Tee — white", "Cove Designer Structured Tee — jet black"], "scores": [0.527511508912535, 0.5274359898231032, 0.5093219887402081, 0.5092734401985082, 0.4923560032420189]}
+{"ts": 1764999868.63318, "event": "rerank_skipped", "trace_id": "6710ae60ced145ac"}
+INFO:     127.0.0.1:49381 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49382 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49383 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49385 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49386 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49387 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+{"ts": 1764999872.53041, "event": "verification_done", "trace_id": "6710ae60ced145ac", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49377 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49372 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1764999874.05507, "event": "query_received", "trace_id": "dbcb5df1ee824ac1", "q": "I want cargo jeans for everyday city outfits.", "attrs": {"colors": [], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1764999875.079766, "event": "retrieval_done", "trace_id": "dbcb5df1ee824ac1", "count": 6, "top_titles": ["Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — washed black"], "scores": [0.42979247658826814, 0.42887813283177234, 0.4195988649249507, 0.4187792366379318, 0.40904683009487863]}
+{"ts": 1764999875.0798762, "event": "rerank_skipped", "trace_id": "dbcb5df1ee824ac1"}
+INFO:     127.0.0.1:49405 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49406 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49407 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49409 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49410 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49412 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+{"ts": 1764999879.1269062, "event": "verification_done", "trace_id": "dbcb5df1ee824ac1", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49401 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49399 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1764999880.855563, "event": "query_received", "trace_id": "e2357f358cd44375", "q": "Show me relaxed joggers for travel, preferably black, around 40 euros.", "attrs": {"colors": ["black"], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1764999882.082089, "event": "retrieval_done", "trace_id": "e2357f358cd44375", "count": 6, "top_titles": ["Cove Casual Denim Jacket — washed black", "Cove Casual Denim Jacket — washed black", "Cove Designer Hoodie — jet black", "Cove Designer Hoodie — jet black", "Cove Casual Loopback Hoodie — stone grey"], "scores": [0.4168270677041357, 0.4167575488542057, 0.41323546092298935, 0.4131782702697362, 0.4064563512802124]}
+{"ts": 1764999882.08219, "event": "rerank_skipped", "trace_id": "e2357f358cd44375"}
+INFO:     127.0.0.1:49429 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49430 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49431 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49433 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49434 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49435 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+{"ts": 1764999886.430227, "event": "verification_done", "trace_id": "e2357f358cd44375", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49425 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49424 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49449 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1764999890.298659, "event": "query_received", "trace_id": "e3a41e9dcdfe4124", "q": "Show me green cotton bombers.", "attrs": {"colors": ["green"], "sizes": [], "types": ["bomber"]}, "intent": "discover"}
+{"ts": 1764999891.40649, "event": "retrieval_done", "trace_id": "e3a41e9dcdfe4124", "count": 6, "top_titles": ["Cove Originals Satin Bomber — deep green", "Cove Originals Satin Bomber — deep green", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Originals Satin Bomber — deep burgundy"], "scores": [0.5215322349629122, 0.5214863264117761, 0.4479731783874894, 0.4479731783874894, 0.4440271325079045]}
+{"ts": 1764999891.444546, "event": "rerank_skipped", "trace_id": "e3a41e9dcdfe4124"}
+INFO:     127.0.0.1:49459 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49460 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49461 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49462 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49463 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49464 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+{"ts": 1764999895.609511, "event": "verification_done", "trace_id": "e3a41e9dcdfe4124", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49452 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49447 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-session found=False
+INFO:     127.0.0.1:49475 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-jeans found=False
+INFO:     127.0.0.1:49487 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-joggers found=False
+INFO:     127.0.0.1:49499 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:49510 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49529 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+[_store_session_recs] key=guest:canary-history-001 items=3
+[_get_history] Requesting http://127.0.0.1:8001/ai_profiles/history/ with params={'limit': '20', 'guestSessionId': 'canary-history-001'}
+[_get_history] Response 200: {"items": [{"id": "67f4579f-c428-4259-8df4-78c65e57ca86", "guest_session_id": "canary-history-001", "clerk_user_id": "", "email": "", "role": "user", "kind": "discover", "content": "By the way, what d
+[_store_session_recs] key=guest:canary-history-001 items=3
+INFO:     127.0.0.1:49528 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:49549 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49708 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1765000110.646997, "event": "query_received", "trace_id": "bc7b193d0b764326", "q": "What everyday black tees do you have for summer?", "attrs": {"colors": ["black"], "sizes": [], "types": ["tee"]}, "intent": "discover"}
+{"ts": 1765000111.873294, "event": "retrieval_done", "trace_id": "bc7b193d0b764326", "count": 6, "top_titles": ["Cove Casual Tee — black", "Cove Casual Tee — black", "Cove Casual Tee — white", "Cove Casual Tee — white", "Cove Designer Structured Tee — jet black"], "scores": [0.527511508912535, 0.5274359898231032, 0.5093219887402081, 0.5092734401985082, 0.4923560032420189]}
+{"ts": 1765000111.903797, "event": "rerank_skipped", "trace_id": "bc7b193d0b764326"}
+INFO:     127.0.0.1:49715 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49716 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49717 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49719 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49720 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49721 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+{"ts": 1765000115.931707, "event": "verification_done", "trace_id": "bc7b193d0b764326", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49712 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49706 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765000117.5607061, "event": "query_received", "trace_id": "1db47bc4daf648dc", "q": "I want cargo jeans for everyday city outfits.", "attrs": {"colors": [], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1765000118.7925508, "event": "retrieval_done", "trace_id": "1db47bc4daf648dc", "count": 6, "top_titles": ["Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — washed black"], "scores": [0.4298694389980766, 0.42895545285143677, 0.41968196630479104, 0.4188624870099187, 0.4091313020821761]}
+{"ts": 1765000118.7926478, "event": "rerank_skipped", "trace_id": "1db47bc4daf648dc"}
+INFO:     127.0.0.1:49739 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49740 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49741 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49742 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49744 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49745 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+{"ts": 1765000122.57179, "event": "verification_done", "trace_id": "1db47bc4daf648dc", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49735 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49733 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765000124.1662211, "event": "query_received", "trace_id": "c96e0a931d13473f", "q": "Show me relaxed joggers for travel, preferably black, around 40 euros.", "attrs": {"colors": ["black"], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1765000125.879392, "event": "retrieval_done", "trace_id": "c96e0a931d13473f", "count": 6, "top_titles": ["Cove Casual Denim Jacket — washed black", "Cove Casual Denim Jacket — washed black", "Cove Designer Hoodie — jet black", "Cove Designer Hoodie — jet black", "Cove Casual Loopback Hoodie — stone grey"], "scores": [0.4168270677041357, 0.4167575488542057, 0.41323546092298935, 0.4131782702697362, 0.4064563512802124]}
+{"ts": 1765000125.8802292, "event": "rerank_skipped", "trace_id": "c96e0a931d13473f"}
+INFO:     127.0.0.1:49761 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49762 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49763 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49765 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49766 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49768 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+{"ts": 1765000129.7052941, "event": "verification_done", "trace_id": "c96e0a931d13473f", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49757 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49756 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49784 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1765000135.6563892, "event": "query_received", "trace_id": "e638599e621d43a3", "q": "Show me green cotton bombers.", "attrs": {"colors": ["green"], "sizes": [], "types": ["bomber"]}, "intent": "discover"}
+{"ts": 1765000136.995501, "event": "retrieval_done", "trace_id": "e638599e621d43a3", "count": 6, "top_titles": ["Cove Originals Satin Bomber — deep green", "Cove Originals Satin Bomber — deep green", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Originals Satin Bomber — deep burgundy"], "scores": [0.5215337535976622, 0.5214875470262037, 0.44798727798576155, 0.44798727798576155, 0.44404096411926275]}
+{"ts": 1765000137.0305831, "event": "rerank_skipped", "trace_id": "e638599e621d43a3"}
+INFO:     127.0.0.1:49794 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49796 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49797 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49798 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49799 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49800 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+{"ts": 1765000140.947169, "event": "verification_done", "trace_id": "e638599e621d43a3", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49789 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49783 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-session found=False
+INFO:     127.0.0.1:49813 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-jeans found=False
+INFO:     127.0.0.1:49824 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_get_session_recs] key=guest:canary-cart-joggers found=False
+INFO:     127.0.0.1:49836 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:49847 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49866 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+[_store_session_recs] key=guest:canary-history-001 items=3
+[_get_history] Requesting http://127.0.0.1:8001/ai_profiles/history/ with params={'limit': '20', 'guestSessionId': 'canary-history-001'}
+[_get_history] Response 200: {"items": [{"id": "d6a13587-c842-4a9f-9ebb-503c557ea543", "guest_session_id": "canary-history-001", "clerk_user_id": "", "email": "", "role": "user", "kind": "discover", "content": "By the way, what d
+[_store_session_recs] key=guest:canary-history-001 items=3
+INFO:     127.0.0.1:49865 - "POST /ai/agent/query HTTP/1.1" 200 OK
+[_call_llm_with_history] Calling LLM...
+[_call_llm_with_history] LLM returned
+INFO:     127.0.0.1:49887 - "POST /ai/agent/query HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/routes/agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [36210]
+Fit rules loaded: 4 entries
+INFO:     Started server process [37668]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routes/rag.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37668]
+Fit rules loaded: 4 entries
+INFO:     Started server process [37677]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:49981 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1765000263.699154, "event": "query_received", "trace_id": "1ac91d3ebe0847cb", "q": "What everyday black tees do you have for summer?", "attrs": {"colors": ["black"], "sizes": [], "types": ["tee"]}, "intent": "discover"}
+{"ts": 1765000264.809429, "event": "retrieval_done", "trace_id": "1ac91d3ebe0847cb", "count": 6, "top_titles": ["Cove Casual Tee — black", "Cove Casual Tee — black", "Cove Casual Tee — white", "Cove Casual Tee — white", "Cove Designer Structured Tee — jet black"], "scores": [0.527511508912535, 0.5274359898231032, 0.5093219887402081, 0.5092734401985082, 0.4923560032420189]}
+{"ts": 1765000264.895752, "event": "rerank_skipped", "trace_id": "1ac91d3ebe0847cb"}
+INFO:     127.0.0.1:49987 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49988 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49989 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49990 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49991 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49992 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+{"ts": 1765000269.083293, "event": "verification_done", "trace_id": "1ac91d3ebe0847cb", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:49983 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49972 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765000270.779726, "event": "query_received", "trace_id": "94368138b86f4d64", "q": "I want cargo jeans for everyday city outfits.", "attrs": {"colors": [], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1765000271.853903, "event": "retrieval_done", "trace_id": "94368138b86f4d64", "count": 6, "top_titles": ["Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — washed black"], "scores": [0.42979247658826814, 0.42887813283177234, 0.4195988649249507, 0.4187792366379318, 0.40904683009487863]}
+{"ts": 1765000271.854003, "event": "rerank_skipped", "trace_id": "94368138b86f4d64"}
+INFO:     127.0.0.1:50010 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50011 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50012 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50013 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50014 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50015 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+{"ts": 1765000275.637496, "event": "verification_done", "trace_id": "94368138b86f4d64", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50006 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50005 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765000277.250537, "event": "query_received", "trace_id": "d408880f4f774896", "q": "Show me relaxed joggers for travel, preferably black, around 40 euros.", "attrs": {"colors": ["black"], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1765000279.4000692, "event": "retrieval_done", "trace_id": "d408880f4f774896", "count": 6, "top_titles": ["Cove Casual Denim Jacket — washed black", "Cove Casual Denim Jacket — washed black", "Cove Designer Hoodie — jet black", "Cove Designer Hoodie — jet black", "Cove Casual Loopback Hoodie — stone grey"], "scores": [0.4168270677041357, 0.4167575488542057, 0.41323546092298935, 0.4131782702697362, 0.4064563512802124]}
+{"ts": 1765000279.40037, "event": "rerank_skipped", "trace_id": "d408880f4f774896"}
+INFO:     127.0.0.1:50039 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50040 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50042 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50043 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50044 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50046 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+{"ts": 1765000283.5298839, "event": "verification_done", "trace_id": "d408880f4f774896", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50029 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50027 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50060 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1765000287.666164, "event": "query_received", "trace_id": "cd0c1acabff64559", "q": "Show me green cotton bombers.", "attrs": {"colors": ["green"], "sizes": [], "types": ["bomber"]}, "intent": "discover"}
+{"ts": 1765000288.842762, "event": "retrieval_done", "trace_id": "cd0c1acabff64559", "count": 6, "top_titles": ["Cove Originals Satin Bomber — deep green", "Cove Originals Satin Bomber — deep green", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Originals Satin Bomber — deep burgundy"], "scores": [0.5215322349629122, 0.5214863264117761, 0.4479731783874894, 0.4479731783874894, 0.4440271325079045]}
+{"ts": 1765000288.897475, "event": "rerank_skipped", "trace_id": "cd0c1acabff64559"}
+INFO:     127.0.0.1:50069 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50070 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50071 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50072 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50073 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50074 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+{"ts": 1765000292.822398, "event": "verification_done", "trace_id": "cd0c1acabff64559", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50063 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50059 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50085 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50097 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50108 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50119 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50137 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+[_get_history] Requesting http://127.0.0.1:8001/ai_profiles/history/ with params={'limit': '20', 'guestSessionId': 'canary-history-001'}
+[_get_history] Response 200: {"items": [{"id": "30a8727c-3d23-4b7e-8251-fed6f1b5e462", "guest_session_id": "canary-history-001", "clerk_user_id": "", "email": "", "role": "user", "kind": "discover", "content": "By the way, what d
+INFO:     127.0.0.1:50136 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50158 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50207 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1765000327.592044, "event": "query_received", "trace_id": "1858b25372254f7a", "q": "What everyday black tees do you have for summer?", "attrs": {"colors": ["black"], "sizes": [], "types": ["tee"]}, "intent": "discover"}
+{"ts": 1765000328.774475, "event": "retrieval_done", "trace_id": "1858b25372254f7a", "count": 6, "top_titles": ["Cove Casual Tee — black", "Cove Casual Tee — black", "Cove Casual Tee — white", "Cove Casual Tee — white", "Cove Designer Structured Tee — jet black"], "scores": [0.527511508912535, 0.5274359898231032, 0.5093219887402081, 0.5092734401985082, 0.4923560032420189]}
+{"ts": 1765000328.828651, "event": "rerank_skipped", "trace_id": "1858b25372254f7a"}
+INFO:     127.0.0.1:50215 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50217 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50218 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50220 - "GET /ai/tools/product.get?slug=tee-casual-cotton-14.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50221 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50222 - "GET /ai/tools/product.get?slug=tee-designer-structuredcotton-34.99 HTTP/1.1" 200 OK
+{"ts": 1765000332.892214, "event": "verification_done", "trace_id": "1858b25372254f7a", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50210 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50206 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765000334.5484202, "event": "query_received", "trace_id": "804d15750f8b4d36", "q": "I want cargo jeans for everyday city outfits.", "attrs": {"colors": [], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1765000335.649187, "event": "retrieval_done", "trace_id": "804d15750f8b4d36", "count": 6, "top_titles": ["Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — dark indigo", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — mid blue", "Cove Casual Denim Jacket — washed black"], "scores": [0.42979247658826814, 0.42887813283177234, 0.4195988649249507, 0.4187792366379318, 0.40904683009487863]}
+{"ts": 1765000335.649288, "event": "rerank_skipped", "trace_id": "804d15750f8b4d36"}
+INFO:     127.0.0.1:50240 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50241 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50259 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50270 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50271 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50273 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+{"ts": 1765000341.2125041, "event": "verification_done", "trace_id": "804d15750f8b4d36", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50236 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50235 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765000343.705757, "event": "query_received", "trace_id": "fa18787aafd54b58", "q": "Show me relaxed joggers for travel, preferably black, around 40 euros.", "attrs": {"colors": ["black"], "sizes": [], "types": []}, "intent": "size_fit"}
+{"ts": 1765000345.023678, "event": "retrieval_done", "trace_id": "fa18787aafd54b58", "count": 6, "top_titles": ["Cove Casual Denim Jacket — washed black", "Cove Casual Denim Jacket — washed black", "Cove Designer Hoodie — jet black", "Cove Designer Hoodie — jet black", "Cove Casual Loopback Hoodie — stone grey"], "scores": [0.4168270677041357, 0.4167575488542057, 0.41323546092298935, 0.4131782702697362, 0.4064563512802124]}
+{"ts": 1765000345.0238469, "event": "rerank_skipped", "trace_id": "fa18787aafd54b58"}
+INFO:     127.0.0.1:50295 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50296 - "GET /ai/tools/product.get?slug=jacket-casual-denim-49.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50297 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50298 - "GET /ai/tools/product.get?slug=hoodie-designer-fleece-59.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50299 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50300 - "GET /ai/tools/product.get?slug=hoodie-casual-loopback-24.99 HTTP/1.1" 200 OK
+{"ts": 1765000349.037291, "event": "verification_done", "trace_id": "fa18787aafd54b58", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50288 - "POST /ai/rag/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50287 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50316 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+{"ts": 1765000359.436311, "event": "query_received", "trace_id": "608f2f3087494421", "q": "Show me green cotton bombers.", "attrs": {"colors": ["green"], "sizes": [], "types": ["bomber"]}, "intent": "discover"}
+{"ts": 1765000364.190737, "event": "retrieval_done", "trace_id": "608f2f3087494421", "count": 6, "top_titles": ["Cove Originals Satin Bomber — deep green", "Cove Originals Satin Bomber — deep green", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Designer Faux Leather Bomber — smoke grey", "Cove Originals Satin Bomber — deep burgundy"], "scores": [0.5215322349629122, 0.5214863264117761, 0.4479731783874894, 0.4479731783874894, 0.4440271325079045]}
+{"ts": 1765000364.2284338, "event": "rerank_skipped", "trace_id": "608f2f3087494421"}
+INFO:     127.0.0.1:50326 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50329 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50331 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+rag.query failed: 
+INFO:     127.0.0.1:50332 - "GET /ai/tools/product.get?slug=bomber-designer-fauxleather-99.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50338 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50340 - "GET /ai/tools/product.get?slug=bomber-originals-satin-69.99 HTTP/1.1" 200 OK
+{"ts": 1765000372.507148, "event": "verification_done", "trace_id": "608f2f3087494421", "had_corrections": false, "corrections": {}}
+INFO:     127.0.0.1:50314 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50348 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50366 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50382 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50394 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50415 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+[_get_history] Requesting http://127.0.0.1:8001/ai_profiles/history/ with params={'limit': '20', 'guestSessionId': 'canary-history-001'}
+[_get_history] Response 200: {"items": [{"id": "65a5a720-d8c5-44db-8fac-e048a49ecb2e", "guest_session_id": "canary-history-001", "clerk_user_id": "", "email": "", "role": "user", "kind": "discover", "content": "By the way, what d
+INFO:     127.0.0.1:50414 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50451 - "POST /ai/agent/query HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [37677]
+INFO:     Stopping reloader process [36167]

@@ -10,129 +10,11 @@ import logging
 from pathlib import Path
 
 from app.providers.llm import LLMClient
-CLASSIFIER_SYSTEM_PROMPT = """
-You are an intent classifier for Cove AI, a fashion e-commerce assistant.
+from app.core.rules import get_prompt
 
-INPUT
-You receive a JSON object:
+def _get_classifier_prompt() -> str:
+    return get_prompt("classifier", default="You are an intent classifier. Output JSON only.")
 
-{
-  "message": "<raw user message>",
-  "attrs": {
-    "colors": [...],
-    "types": [...],
-    "sizes": [...]
-  }
-}
-
-You must output ONLY a JSON object like:
-
-{
-  "kind": "...",
-  "has_price_filter": false
-}
-
------------------------------
-Valid "kind" values and rules
------------------------------
-
-1) "greeting"
-   - The message is ONLY a greeting / polite phrase or brief thanks.
-   - There is NO concrete shopping intent, no product type and no question.
-   - Examples:
-       "hi"
-       "hello"
-       "hey cove"
-       "good evening"
-       "thanks"
-       "thank you so much"
-   - If the user also asks for products in the same message
-     (e.g. "hi, do you have black hoodies?") then this is NOT "greeting".
-     In that case choose "discover" / "size_fit" / "policy" etc.
-
-2) "small_talk"
-   - Casual chit-chat unrelated to buying products.
-   - Examples:
-       "how are you"
-       "tell me a joke"
-       "who created you"
-       "what can you do"
-   - If there is a clear product intent together with chit-chat
-     (e.g. "how are you, can you show me some tees"), DO NOT use "small_talk".
-     Prefer the shopping-related kind instead (usually "discover").
-
-3) "discover"
-   - User wants to BROWSE or SEE product options.
-   - The goal is to surface a list of items (recommendations).
-   - Examples:
-       "show me some black bombers"
-       "what hoodies do you have in green?"
-       "recommend some cargos under 50 euros"
-       "i'm looking for relaxed joggers for travel"
-   - Choose "discover" ONLY if the primary intent is to see products/options.
-
-4) "lookup_product"
-   - User is asking ABOUT product properties, features, care, or shrinkage,
-     not to browse options.
-   - Examples:
-       "what material is this bomber made of?"
-       "do any of your cargos have RFID-protected pockets?"
-       "will your cotton bombers shrink heavily in the dryer?"
-       "can I put your soft cotton tees in the dryer?"
-   - If the user mainly asks about features/capabilities/care, choose
-     "lookup_product" even if a product type is mentioned.
-
-5) "size_fit"
-   - User asks which size to buy or how something fits.
-   - Examples:
-       "which size should I pick?"
-       "I'm 175cm and 70kg, will M be too tight for your bombers?"
-       "does this fit oversized or regular?"
-
-6) "policy"
-   - User asks about returns, shipping, delivery, payment, etc.
-   - Examples:
-       "what is your return policy?"
-       "how long does delivery take?"
-       "can I return a bomber if it doesn’t fit?"
-       "do you ship to France?"
-
-7) "history_meta"
-   - User asks about previous conversation context.
-   - Examples:
-       "what did I ask you earlier about bombers?"
-       "what were we talking about before?"
-       "remind me what I said about joggers"
-
-8) "generic"
-   - Brand or store questions not covered above.
-   - Examples:
-       "tell me about your brand"
-       "what makes Cove different?"
-       "are you a premium or budget brand?"
-
-9) "unknown"
-   - Use this only if you really cannot decide.
-
------------------------------
-Price filters
------------------------------
-
-has_price_filter = true if the user clearly constrains price/budget, e.g.:
-
-  "under 40 euros"
-  "between 30 and 50"
-  "around 30"
-  "max 25€"
-  "for 30-40 euro"
-
-Otherwise has_price_filter = false.
-
-Return ONLY the JSON object, with fields:
-  - "kind": string (one of the above)
-  - "has_price_filter": boolean
-No extra text or explanation.
-""".strip()
 
 
 
@@ -324,31 +206,26 @@ _load_intent_config()
 
 # ---------------- Stable, non-business helpers ----------------
 
-_PRICE_UNDER_RE = re.compile(r"\b(under|below|less than|max)\b", re.IGNORECASE)
-_PRICE_NUMBER_RE = re.compile(r"\b\d+(\.\d+)?\b")
-_PRICE_BETWEEN_RE = re.compile(
-    r"\bbetween\s+\d+(\.\d+)?\s+(and|-)\s+\d+(\.\d+)?",
-    re.IGNORECASE,
-)
-_PRICE_CURRENCY_RE = re.compile(
-    r"\b\d+(\.\d+)?\s?(eur|euro|€)\b",
-    re.IGNORECASE,
-)
-
+from app.core.rules import get_regex_rules
 
 def _looks_like_price_filter(q: str) -> bool:
     """
     Lightweight detector for explicit price filters.
-
-    This is "code knowledge" (regex heuristics) but not business-specific:
-    it doesn't know anything about Cove products or categories.
     """
+    rules = get_regex_rules().get("price", {})
     ql = q.lower()
-    if _PRICE_UNDER_RE.search(ql) and _PRICE_NUMBER_RE.search(ql):
+    
+    # Helper to check regex match
+    def _matches(key: str) -> bool:
+        pattern = rules.get(key)
+        if not pattern: return False
+        return bool(re.search(pattern, ql, re.IGNORECASE))
+
+    if _matches("under") and _matches("number"):
         return True
-    if _PRICE_BETWEEN_RE.search(ql):
+    if _matches("between"):
         return True
-    if _PRICE_CURRENCY_RE.search(ql):
+    if _matches("currency"):
         return True
     return False
 
@@ -384,7 +261,7 @@ def _classify_by_rules(message: str) -> str:
 async def _classify_with_llm(
     message: str,
     has_price_filter: bool,
-) -> Optional[str]:
+) -> Tuple[Optional[str], Optional[bool]]:
     """
     Optional refinement using a small router LLM.
 
@@ -403,9 +280,13 @@ async def _classify_with_llm(
         )
         labels_str = ", ".join(sorted(allowed_labels))
 
+        # We now use the external prompt file, but we still inject the valid labels dynamically
+        # to ensure the LLM knows exactly which JSON values are valid.
+        base_prompt = _get_classifier_prompt()
+        
         system_prompt = (
-            "You are an intent classifier for a fashion e-commerce assistant.\n"
-            f"Valid intent labels are: {labels_str}.\n"
+            f"{base_prompt}\n\n"
+            f"VALID INTENT LABELS: {labels_str}.\n"
             "Always respond with exactly one label from this set.\n"
             "If you truly cannot decide, respond with 'unknown'."
         )
@@ -430,11 +311,11 @@ async def _classify_with_llm(
             log.warning("Router LLM returned invalid label %r", label)
             return None
 
-        return label
+        return label, None
 
     except Exception as e:
         log.warning("LLM router classify failed: %s", e, exc_info=True)
-        return None
+        return None, None
 
 
 # ---------------- Public API ----------------
@@ -461,8 +342,7 @@ async def classify(message: str, attrs: Dict[str, List[str]]) -> Intent:
         if USE_LLM_ROUTER and kind in ("generic", "unknown"):
             refined_kind, hp_llm = await _classify_with_llm(
                 message=message,
-                attrs=attrs,
-                has_price_filter_hint=has_price_filter,
+                has_price_filter=has_price_filter,
             )
             if refined_kind:
                 kind = refined_kind

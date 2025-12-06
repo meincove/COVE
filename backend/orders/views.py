@@ -2,14 +2,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, throttling
 from django.utils import timezone
+from django.db import transaction
+import logging
 from .serializers import OrderSerializer
 from .models import Order, OrderItem, OrderSummary, CheckoutCart
+
+logger = logging.getLogger(__name__)
 
 
 class SaveOrderView(APIView):
     def post(self, request):
         data = request.data
-        print("[DEBUG] Incoming SaveOrderView payload:", data)
+        logger.debug(f"SaveOrderView received order with {len(data.get('cart', []))} items")
 
         # Auth / identity flags
         is_django_user = request.user.is_authenticated
@@ -23,12 +27,25 @@ class SaveOrderView(APIView):
         last_name = data.get("last_name")
         user_email = data.get("user_email")
 
-        # Auto-increment user number for CheckoutCart tracking
-        last_cart = CheckoutCart.objects.order_by("-id").first()
-        user_number = last_cart.user + 1 if last_cart and last_cart.user else 1
+        # Validate email if provided
+        if user_email:
+            from utils.validators import validate_email
+            from rest_framework.exceptions import ValidationError as DRFValidationError
+            try:
+                user_email = validate_email(user_email)
+            except DRFValidationError as e:
+                logger.warning(f"Invalid email in order: {user_email}")
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Create the Order (now includes shipping/tax fields if provided)
-        order = Order.objects.create(
+        # Start atomic transaction
+        try:
+            with transaction.atomic():
+                # Auto-increment user number for CheckoutCart tracking
+                last_cart = CheckoutCart.objects.order_by("-id").first()
+                user_number = last_cart.user + 1 if last_cart and last_cart.user else 1
+
+                # ✅ Create the Order (now includes shipping/tax fields if provided)
+                order = Order.objects.create(
             user=django_user,
             is_guest=is_guest,
             total_price=data["totalAmount"],
@@ -47,66 +64,75 @@ class SaveOrderView(APIView):
             shipping_state=data.get("shipping_state"),
             shipping_postal_code=data.get("shipping_postal_code"),
             shipping_country=data.get("shipping_country"),
-            shipping_cost=data.get("shipping_cost", 0),
-            tax_amount=data.get("tax_amount", 0),
-        )
+                    shipping_cost=data.get("shipping_cost", 0),
+                    tax_amount=data.get("tax_amount", 0),
+                )
 
-        for item in data["cart"]:
-            # Save to OrderItem
-            OrderItem.objects.create(
-                order=order,
-                product_id=item["productId"],
-                variant_id=item["variantId"],
-                size=item["size"],
-                color=item["color"],
-                quantity=item["quantity"],
-                price=item["price"],
-                user_email=user_email,
-            )
+                for item in data["cart"]:
+                    # Save to OrderItem
+                    OrderItem.objects.create(
+                        order=order,
+                        product_id=item["productId"],
+                        variant_id=item["variantId"],
+                        size=item["size"],
+                        color=item["color"],
+                        quantity=item["quantity"],
+                        price=item["price"],
+                        user_email=user_email,
+                    )
 
-            # Save to OrderSummary
-            OrderSummary.objects.create(
-                user=django_user,
-                is_guest=is_guest,
-                payment_intent_id=data["paymentIntentId"],
-                product_id=item["productId"],
-                variant_id=item["variantId"],
-                color=item["color"],
-                size=item["size"],
-                quantity=item["quantity"],
-                price=item["price"],
-                created_at=timezone.now(),
-                clerk_user_id=clerk_user_id,
-                guest_session_id=guest_session_id,
-                first_name=first_name,
-                last_name=last_name,
-                user_email=user_email,
-            )
+                    # Save to OrderSummary
+                    OrderSummary.objects.create(
+                        user=django_user,
+                        is_guest=is_guest,
+                        payment_intent_id=data["paymentIntentId"],
+                        product_id=item["productId"],
+                        variant_id=item["variantId"],
+                        color=item["color"],
+                        size=item["size"],
+                        quantity=item["quantity"],
+                        price=item["price"],
+                        created_at=timezone.now(),
+                        clerk_user_id=clerk_user_id,
+                        guest_session_id=guest_session_id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        user_email=user_email,
+                    )
 
-            # Save to CheckoutCart
-            CheckoutCart.objects.create(
-                user=user_number,
-                is_guest=is_guest,
-                clerk_user_id=clerk_user_id,
-                guest_session_id=guest_session_id,
-                payment_intent_id=data["paymentIntentId"],
-                checkout_session_id=data.get("checkoutSessionId"),
+                    # Save to CheckoutCart
+                    CheckoutCart.objects.create(
+                        user=user_number,
+                        is_guest=is_guest,
+                        clerk_user_id=clerk_user_id,
+                        guest_session_id=guest_session_id,
+                        payment_intent_id=data["paymentIntentId"],
+                        checkout_session_id=data.get("checkoutSessionId"),
 
-                product_id=item["productId"],
-                variant_id=item["variantId"],
-                name=item.get("name"),
-                type=item.get("type"),
-                tier=item.get("tier"),
+                        product_id=item["productId"],
+                        variant_id=item["variantId"],
+                        name=item.get("name"),
+                        type=item.get("type"),
+                        tier=item.get("tier"),
 
-                first_name=first_name,
-                last_name=last_name,
-                size=item["size"],
-                color_name=item["colorName"],
-                quantity=item["quantity"],
-                price_per_unit=item["price"],
-                total_price=round(item["price"] * item["quantity"], 2),
-                user_email=user_email,
-            )
+                        first_name=first_name,
+                        last_name=last_name,
+                        size=item["size"],
+                        color_name=item["colorName"],
+                        quantity=item["quantity"],
+                        price_per_unit=item["price"],
+                        total_price=round(item["price"] * item["quantity"], 2),
+                        user_email=user_email,
+                    )
+
+                logger.info(f"Order {order.id} created successfully")
+
+        except KeyError as e:
+            logger.error(f"Missing required field in order: {e}")
+            return Response({"error": f"Missing required field: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Failed to create order: {e}", exc_info=True)
+            return Response({"error": "Failed to create order"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(
             {"message": "Order saved successfully", "order_id": order.id},
