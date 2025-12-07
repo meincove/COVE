@@ -1,0 +1,71 @@
+{
+    "description": "Prompt template configuration for intent-based optimization",
+    "version": "1.0.0",
+    "templates": {
+        "greeting": {
+            "template_file": "greeting.txt",
+            "max_tokens": 100,
+            "temperature": 0.7,
+            "description": "Brief, friendly greeting responses"
+        },
+        "small_talk": {
+            "template_file": "small_talk.txt",
+            "max_tokens": 150,
+            "temperature": 0.8,
+            "description": "Casual conversation, brand questions"
+        },
+        "discover": {
+            "template_file": "discover.txt",
+            "max_tokens": 200,
+            "temperature": 0.7,
+            "description": "Product discovery and browsing"
+        },
+        "lookup_product": {
+            "template_file": "lookup_product.txt",
+            "max_tokens": 250,
+            "temperature": 0.6,
+            "description": "Product features, care, materials"
+        },
+        "size_fit": {
+            "template_file": "size_fit.txt",
+            "max_tokens": 200,
+            "temperature": 0.6,
+            "description": "Sizing and fit guidance"
+        },
+        "policy": {
+            "template_file": "policy.txt",
+            "max_tokens": 200,
+            "temperature": 0.5,
+            "description": "Shipping, returns, payment policies"
+        },
+        "history_meta": {
+            "template_file": "history_meta.txt",
+            "max_tokens": 150,
+            "temperature": 0.7,
+            "description": "Questions about past conversation"
+        },
+        "generic": {
+            "template_file": "generic.txt",
+            "max_tokens": 200,
+            "temperature": 0.7,
+            "description": "General brand questions"
+        },
+        "unknown": {
+            "template_file": "agent_chat.txt",
+            "max_tokens": 300,
+            "temperature": 0.7,
+            "description": "Fallback to full prompt"
+        }
+    },
+    "default_template": "agent_chat.txt",
+    "optimization_goals": {
+        "token_reduction_target": 0.35,
+        "first_token_target_ms": 1500,
+        "maintain_quality": true
+    },
+    "features": {
+        "use_optimized_prompts": true,
+        "log_token_savings": true,
+        "fallback_to_default": true
+    }
+}

@@ -20,6 +20,245 @@ The cache implementation uses **in-memory Python dictionaries**.
 
 ---
 
+## Week 4 Success Validation
+
+Once deployed to production with Redis (or single-worker in-memory), verify:
+
+1. **Policy cache working**: Ask "what is your return policy?" - should respond instantly (<100ms)
+2. **Cache stats logged**: Check logs for hit/miss rates
+3. **Performance improved**: Compare Week 4 vs Week 3 response times
+4. **No regressions**: All existing features still work
+
+---
+
+## Week 5: Streaming & Prompt Optimization Deployment
+
+**New Features**:
+- Real-time streaming responses (SSE)
+- 78% token reduction via optimized prompts
+- Feature-flagged MCP tool routing
+
+### Prerequisites
+
+✅ Week 4 deployed and stable  
+✅ OpenRouter API configured (`OPENROUTER_API_KEY`)  
+✅ All servers running (AI core, frontend, backend)
+
+### Deployment Steps
+
+#### Step 1: Verify Week 5 Code Deployed
+
+```bash
+# Check backend files exist
+ls cove-ai-core/app/core/llm_streaming.py
+ls cove-ai-core/app/routes/streaming.py
+ls cove-ai-core/app/core/prompt_builder.py
+ls cove-ai-core/data/prompt_config.json
+
+# Check frontend files exist
+ls frontend/src/hooks/useAgentStreaming.ts
+ls frontend/src/app/api/agent-dev/query/stream/route.ts
+```
+
+#### Step 2: Streaming Endpoint (Already Live)
+
+The streaming endpoint is **already active** on deployment:
+```
+POST /ai/agent/query/stream
+```
+
+Test it:
+```bash
+curl -N -X POST http://your-domain.com/ai/agent/query/stream \
+  -H "Content-Type: application/json" \
+  -d '{"message": "hi"}'
+
+# Expected: SSE events streaming tokens
+```
+
+#### Step 3: Prompt Optimization (Already Active)
+
+Prompt optimization is **enabled by default**.
+
+Verify:
+```bash
+cd cove-ai-core
+python3 test_prompt_optimization.py
+
+# Expected: "✅ PASSED! Achieved 78.3% reduction"
+```
+
+**To disable** (not recommended):
+Edit `data/prompt_config.json`:
+```json
+{
+  "features": {
+    "use_optimized_prompts": false
+  }
+}
+```
+
+#### Step 4: Enable Streaming (Frontend) - OPTIONAL
+
+**Default**: Streaming is **OFF** (uses blocking endpoint)
+
+**To enable**:
+
+1. **Add to production `.env`**:
+```bash
+NEXT_PUBLIC_USE_STREAMING=true
+AI_CORE_URL=https://your-ai-core-domain.com
+```
+
+2. **Rebuild frontend**:
+```bash
+cd frontend
+npm run build
+pm2 restart frontend  # or your process manager
+```
+
+3. **Verify**: Visit agent-dev page, type "hi", should see word-by-word animation
+
+#### Step 5: MCP Tool Routing (Optional)
+
+MCP routing is **OFF by default** (uses direct tool calls).
+
+**To enable** (optional):
+
+Add to `.env`:
+```bash
+USE_MCP_TOOLS=true
+```
+
+Restart AI core:
+```bash
+pm2 restart ai-core
+```
+
+### Feature Flags Summary
+
+| Feature | Flag | Default | Recommended |
+|---------|------|---------|-------------|
+| **Prompt Optimization** | `use_optimized_prompts` in config | ON | Keep ON ✅ |
+| **Streaming** | `NEXT_PUBLIC_USE_STREAMING` | OFF | Enable gradually |
+| **MCP Routing** | `USE_MCP_TOOLS` | OFF | Keep OFF (not needed) |
+
+### Gradual Rollout (Recommended)
+
+**Week 1: Internal Testing**
+- Enable streaming on agent-dev only
+- Monitor metrics for 3-7 days
+- Gather team feedback
+
+**Week 2: Beta Users**  
+- Enable for 10% of users via feature flag
+- A/B test streaming vs blocking
+- Monitor: first token time, error rate, user satisfaction
+
+**Week 3: Full Rollout**
+- Gradually increase to 50%, then 100%
+- Keep blocking endpoint as fallback
+- Continue monitoring
+
+### Monitoring Week 5 Features
+
+**Streaming Metrics** (check AI core logs):
+```bash
+tail -f logs/app.log | grep "first_token"
+
+# Look for:
+# "🚀 First token in XXXms" (expect: 200-500ms)
+# "✅ Streaming complete" (success confirmations)
+```
+
+**Prompt Optimization Metrics**:
+```bash
+tail -f logs/app.log | grep "template"
+
+# Look for:
+# "📝 Using template: greeting" (template selection)
+# "system_prompt_tokens=~7" (token counts)
+```
+
+**Success Indicators**:
+- First token time: <2s (expect: 200-500ms)
+- Token reduction: 70-80% vs baseline
+- Error rate: <1%
+- User satisfaction maintained/improved
+
+### Rollback Plan
+
+**If streaming causes issues**:
+
+1. **Quick disable** (frontend):
+```bash
+# Set in .env
+NEXT_PUBLIC_USE_STREAMING=false
+
+# Rebuild
+npm run build && pm2 restart frontend
+```
+
+2. **Backend still works** - blocking endpoint `/ai/agent/query` untouched
+
+**If prompts cause issues**:
+
+Edit `data/prompt_config.json`:
+```json
+{
+  "features": {
+    "use_optimized_prompts": false
+  }
+}
+```
+
+Restart AI core - will fall back to default prompts.
+
+### Week 5 Success Validation
+
+Once deployed, verify:
+
+1. **Streaming works**: Test in browser, see word-by-word text
+2. **First token fast**: Check logs, should be 200-500ms
+3. **Prompts optimized**: Verify 70-80% token reduction in logs
+4. **No regressions**: All Week 4 features still work
+5. **Cost savings**: Monitor API usage, should see ~78% reduction in input tokens
+
+### Troubleshooting
+
+**Problem**: Streaming not working  
+**Check**: Frontend env variable set, frontend restarted  
+**Fix**: Verify `NEXT_PUBLIC_USE_STREAMING=true` in `.env`, rebuild frontend
+
+**Problem**: Slow responses  
+**Check**: OpenRouter API status, prompt optimization enabled  
+**Fix**: Verify templates exist in `data/prompts/`, check `prompt_config.json`
+
+**Problem**: High error rate  
+**Check**: Logs for specific errors  
+**Fix**: Disable streaming temporarily, investigate, re-enable when fixed
+
+### Additional Resources
+
+- **Deployment Guide**: `WEEK5_DEPLOYMENT.md`
+- **Complete Walkthrough**: `week5_complete_walkthrough.md`
+- **Test Scripts**: `test_prompt_optimization.py`, `test_mcp_routing.py`
+
+---
+
+## Production Deployment Summary
+
+| Week | Features | Deployment Status | Flags |
+|------|----------|-------------------|-------|
+| Week 4 | Cache, commerce tools | ✅ Deployed | `REDIS_URL` (optional) |
+| **Week 5** | **Streaming, optimized prompts** | ✅ **Code deployed, features optional** | `NEXT_PUBLIC_USE_STREAMING` (OFF) |
+
+**Current State**: Week 5 code is deployed, prompt optimization is ON, streaming is OFF (safe default).
+
+**Recommended Action**: Keep as-is for stability, enable streaming gradually for testing.
+
+---
+
 ## 🎯 Action Required Before Production
 
 ### Option 1: Single Worker Deployment (Quick Fix)

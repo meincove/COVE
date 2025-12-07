@@ -421,6 +421,8 @@ import ChatProductCard from "@/src/components/cove-ai/ChatProductCard";
 import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
 import LoadingSkeleton from "@/src/components/cove-ai/LoadingSkeleton";
 import Toast, { ToastType } from "@/src/components/cove-ai/Toast";
+import { useAgentStreaming } from "@/src/hooks/useAgentStreaming";  // Week 5
+import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/TypingIndicator";  // Week 5
 
 // ---------- TYPES ----------
 
@@ -534,6 +536,15 @@ export default function CoveChatWidget() {
 
   const { guestSessionId, ensureGuestSessionId } = useCartSessionStore();
   const addItem = useCartStore((s) => s.addItem);
+
+  // Week 5: Streaming support (feature flag)
+  const USE_STREAMING = process.env.NEXT_PUBLIC_USE_STREAMING === 'true';
+  const {
+    streamingMessage,
+    isStreaming,
+    sendStreamingMessage,
+    cancelStreaming
+  } = useAgentStreaming();
 
   // Make sure we *have* a guest session id
   useEffect(() => {
