@@ -12,9 +12,9 @@ export default function HomePage() {
     const hasVisited = localStorage.getItem('cove_has_visited')
 
     if (!hasVisited) {
-      // First-time visitor - redirect to choose-path
+      // First-time visitor - redirect to welcome
       localStorage.setItem('cove_has_visited', 'true')
-      router.push('/choose-path')
+      router.push('/welcome')
     }
     // If they've visited before, show TesterPage (they're here to shop)
   }, [router])

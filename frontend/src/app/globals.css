@@ -264,14 +264,18 @@ html {
 
   /* Full navbar wrapper TAKES space */
   .nav-full-wrap {
-    position: sticky;
-    top: 0;
+    position: relative;
+    /* Changed from sticky to relative so it takes space */
     z-index: 210;
     background: transparent;
+    min-height: 88px;
+    /* Ensure it takes vertical space */
   }
 
-  /* Full shell (wide bar) */
+  /* Full shell (wide bar) - now sticky within the wrapper */
   .nav-full-shell {
+    position: sticky;
+    top: 0;
     height: 72px;
     display: grid;
     grid-template-columns: auto 1fr auto;
