@@ -17,6 +17,7 @@ class CaseResult:
   notes: List[str]
   kind: Optional[str] = None
   answer: Optional[str] = None
+  debug_plan: Optional[Dict[str, Any]] = None
 
 
 async def seed_history(
@@ -43,7 +44,7 @@ async def seed_history(
     # nothing to do
     return
 
-  url = django_base_url.rstrip("/") + "/ai_profiles/log_chat/"
+  url = django_base_url.rstrip("/") + "/ai_profiles/history/log/"
 
   async with httpx.AsyncClient(timeout=5.0) as cx:
     for t in turns:
@@ -53,20 +54,25 @@ async def seed_history(
         continue
 
       payload = {
-        "guestSessionId": guest_id,
-        "clerkUserId": clerk_id,
+        "guest_session_id": guest_id or "",
+        "clerk_user_id": clerk_id or "",
         "role": role,
         "content": content,
-        "agent_kind": "cove_ai",
-        "cartId": None,
+        "kind": "seed",
         "meta": {
           "source": "agent_canary",
           "case_seed": True,
         },
+        "source": "agent_canary",
       }
 
+      print(f"[seed_history] Payload: {json.dumps(payload)}")
+
       try:
-        await cx.post(url, json=payload)
+        resp = await cx.post(url, json=payload)
+        if resp.status_code >= 400:
+            print(f"[seed_history] error: {resp.status_code} {resp.text}")
+        resp.raise_for_status()
       except Exception as e:
         # Don't crash the whole suite if seeding fails; just log and continue.
         print(f"[seed_history] warning: failed to seed turn ({role}): {e}")
@@ -97,9 +103,11 @@ async def run_case(
 
   # --- optional history seeding ---
   if history_seed_cfg and django_base_url:
+    print(f"[{cid}] Seeding history...")
     await seed_history(django_base_url, history_seed_cfg)
 
-  async with httpx.AsyncClient(timeout=20.0) as cx:
+  print(f"[{cid}] Sending request to {url}...")
+  async with httpx.AsyncClient(timeout=60.0) as cx:
     if method.upper() == "POST":
       resp = await cx.post(url, json=payload)
     else:
@@ -177,6 +185,7 @@ async def run_case(
     notes=notes,
     kind=kind,
     answer=answer,
+    debug_plan=debug_plan,
   )
 
 
@@ -220,6 +229,8 @@ async def main(path: str) -> int:
     if r.notes:
       for note in r.notes:
         print(f"   - {note}")
+      if not r.passed and r.debug_plan:
+        print(f"   debug_plan: {json.dumps(r.debug_plan, indent=2)}")
     # optional: very short answer preview
     if r.answer:
       preview = r.answer.replace("\n", " ")[:120]

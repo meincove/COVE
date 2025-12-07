@@ -6,7 +6,7 @@ class CheckoutItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1, max_value=10)
 
 class CreateCheckoutSessionSerializer(serializers.Serializer):
-    items = CheckoutItemSerializer(many=True, allow_empty=False)
+    items = CheckoutItemSerializer(many=True, allow_empty=True)  # Week 4: Allow empty for cart-based checkout
     clerkUserId = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
     guestSessionId = serializers.CharField(max_length=255, required=False, allow_blank=True, allow_null=True)
     customer_email = serializers.EmailField(required=False, allow_null=True)

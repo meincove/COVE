@@ -1,0 +1,70 @@
+{
+    "description": "MCP client configuration for tool routing",
+    "version": "1.0.0",
+    "features": {
+        "use_mcp_tools": false,
+        "fallback_to_direct": true,
+        "log_routing_decisions": true
+    },
+    "tools": {
+        "recommend_products": {
+            "mcp_name": "recommend_products",
+            "direct_module": "app.cove_ai_tools.recommendations",
+            "direct_function": "recommend_products",
+            "enabled": true
+        },
+        "get_size_fit_advice": {
+            "mcp_name": "get_size_fit_advice",
+            "direct_module": "app.cove_ai_tools.size_fit",
+            "direct_function": "get_size_fit_advice",
+            "enabled": true
+        },
+        "cart_add": {
+            "mcp_name": "cart_add",
+            "direct_module": "app.cove_ai_tools.cart",
+            "direct_function": "cart_add",
+            "enabled": true
+        },
+        "cart_get": {
+            "mcp_name": "cart_get",
+            "direct_module": "app.cove_ai_tools.cart",
+            "direct_function": "cart_get",
+            "enabled": true
+        },
+        "checkout_start": {
+            "mcp_name": "checkout_start",
+            "direct_module": "app.cove_ai_tools.checkout",
+            "direct_function": "checkout_start",
+            "enabled": true
+        },
+        "order_get_status": {
+            "mcp_name": "order_get_status",
+            "direct_module": "app.cove_ai_tools.orders",
+            "direct_function": "order_get_status",
+            "enabled": true
+        },
+        "email_send_order_confirmation": {
+            "mcp_name": "email_send_order_confirmation",
+            "direct_module": "app.cove_ai_tools.emails",
+            "direct_function": "email_send_order_confirmation",
+            "enabled": true
+        }
+    },
+    "mcp_server": {
+        "command": "python",
+        "args": [
+            "-m",
+            "app.cove_mcp.commerce_server"
+        ],
+        "timeout_seconds": 30,
+        "retry": {
+            "max_attempts": 3,
+            "backoff_ms": 100
+        }
+    },
+    "metrics": {
+        "track_routing": true,
+        "track_latency": true,
+        "log_errors": true
+    }
+}
