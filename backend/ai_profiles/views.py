@@ -264,5 +264,120 @@ def get_history(request):
     # Return in chronological order (oldest → newest) for the LLM
     msgs.reverse()
 
-    return JsonResponse({"messages": msgs})
+    return JsonResponse({" messages": msgs})
 
+
+# ---------------------------------------------------------------------------
+# Conversation History API (for AI Core)
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def conversation_history_get(request):
+    """
+    GET /ai_profiles/history/?guestSessionId=...&clerkUserId=...&limit=N
+    
+    Returns last N conversation events for the user/session in chronological order.
+    Used by cove-ai-core to fetch conversation context.
+    """
+    from .models import AiConversationEvent
+    
+    guest_session_id = request.GET.get("guestSessionId", "").strip()
+    clerk_user_id = request.GET.get("clerkUserId", "").strip()
+    limit_raw = request.GET.get("limit", "20")
+    
+    try:
+        limit = max(1, min(int(limit_raw), 100))
+    except ValueError:
+        limit = 20
+    
+    if not guest_session_id and not clerk_user_id:
+        # No identifiers => nothing to return
+        return JsonResponse({"items": []}, status=200)
+    
+    qs = AiConversationEvent.objects.all()
+    if guest_session_id:
+        qs = qs.filter(guest_session_id=guest_session_id)
+    if clerk_user_id:
+        qs = qs.filter(clerk_user_id=clerk_user_id)
+    
+    # newest first in DB → reverse to chronological for LLM
+    events = list(qs.order_by("-created_at")[:limit])
+    events.reverse()
+    
+    items = []
+    for event in events:
+        items.append({
+            "id": str(event.id),
+            "guest_session_id": event.guest_session_id,
+            "clerk_user_id": event.clerk_user_id,
+            "email": event.email,
+            "role": event.role,
+            "kind": event.kind,
+            "content": event.content,
+            "meta": event.meta,
+            "source": event.source,
+            "created_at": event.created_at.isoformat(),
+        })
+    
+    return JsonResponse({"items": items}, status=200)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def conversation_event_log(request):
+    """
+    POST /ai_profiles/history/log/
+    
+    Body: AiConversationEvent fields (except id/created_at which are auto-generated).
+    Used by cove-ai-core to log each user/assistant turn.
+    """
+    from .models import AiConversationEvent
+    
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse(
+            {"error": "invalid_json", "details": "Could not parse request body"},
+            status=400
+        )
+    
+    # Validate required fields
+    role = data.get("role")
+    if role not in ["user", "assistant"]:
+        return JsonResponse(
+            {"error": "invalid_role", "details": "role must be 'user' or 'assistant'"},
+            status=400
+        )
+    
+    content = data.get("content", "")
+    if not content:
+        return JsonResponse(
+            {"error": "missing_content", "details": "content is required"},
+            status=400
+        )
+    
+    # Create event
+    event = AiConversationEvent.objects.create(
+        guest_session_id=data.get("guest_session_id", ""),
+        clerk_user_id=data.get("clerk_user_id", ""),
+        email=data.get("email", ""),
+        role=role,
+        kind=data.get("kind", ""),
+        content=content,
+        meta=data.get("meta", {}),
+        source=data.get("source", "cove-ai-core"),
+    )
+    
+    return JsonResponse({
+        "id": str(event.id),
+        "guest_session_id": event.guest_session_id,
+        "clerk_user_id": event.clerk_user_id,
+        "email": event.email,
+        "role": event.role,
+        "kind": event.kind,
+        "content": event.content,
+        "meta": event.meta,
+        "source": event.source,
+        "created_at": event.created_at.isoformat(),
+    }, status=201)

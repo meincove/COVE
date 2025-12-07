@@ -1,0 +1,31 @@
+INFO:     Will watch for changes in these directories: ['/Users/ssg/Desktop/COVE/cove-ai-core']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [55936] using WatchFiles
+Fit rules loaded: 4 entries
+INFO:     Started server process [55980]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+{"ts": 1765003369.799974, "event": "query_received", "trace_id": "80037289fb5742a1", "q": "black bomber", "attrs": {}, "intent": "discover"}
+{"ts": 1765003371.334359, "event": "recs_retrieval_done", "trace_id": "80037289fb5742a1", "query": "black bomber", "anchor_slug": null, "count": 8, "top_titles": ["Cove Designer Embroidered Bomber — black with tonal embroidery", "Cove Designer Embroidered Bomber — black with tonal embroidery", "Cove Originals Satin Bomber — black", "Cove Originals Satin Bomber — black", "Cove Designer Faux Leather Bomber — black"]}
+{"ts": 1765003371.335257, "event": "recs_done", "trace_id": "80037289fb5742a1", "count": 2, "filters": {"type": "bomber", "tier": null, "color": "black", "size": null, "price_min": null, "price_max": null}, "anchor_slug": null, "query": "black bomber"}
+INFO:     127.0.0.1:53236 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53228 - "POST /ai/agent/query HTTP/1.1" 200 OK
+{"ts": 1765003391.204007, "event": "query_received", "trace_id": "4f6be3e32f1d4f82", "q": "black bomber", "attrs": {}, "intent": "discover"}
+{"ts": 1765003392.7101598, "event": "recs_retrieval_done", "trace_id": "4f6be3e32f1d4f82", "query": "black bomber", "anchor_slug": null, "count": 8, "top_titles": ["Cove Designer Embroidered Bomber — black with tonal embroidery", "Cove Designer Embroidered Bomber — black with tonal embroidery", "Cove Originals Satin Bomber — black", "Cove Originals Satin Bomber — black", "Cove Designer Faux Leather Bomber — black"]}
+{"ts": 1765003392.711054, "event": "recs_done", "trace_id": "4f6be3e32f1d4f82", "count": 2, "filters": {"type": "bomber", "tier": null, "color": "black", "size": null, "price_min": null, "price_max": null}, "anchor_slug": null, "query": "black bomber"}
+INFO:     127.0.0.1:53277 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53272 - "POST /ai/agent/query HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/routes/agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [55980]
+Fit rules loaded: 4 entries
+INFO:     Started server process [56737]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+{"ts": 1765003424.921193, "event": "query_received", "trace_id": "8a84f0c1a0524a02", "q": "black bomber", "attrs": {}, "intent": "discover"}
+{"ts": 1765003426.739309, "event": "recs_retrieval_done", "trace_id": "8a84f0c1a0524a02", "query": "black bomber", "anchor_slug": null, "count": 8, "top_titles": ["Cove Designer Embroidered Bomber — black with tonal embroidery", "Cove Designer Embroidered Bomber — black with tonal embroidery", "Cove Originals Satin Bomber — black", "Cove Originals Satin Bomber — black", "Cove Designer Faux Leather Bomber — black"]}
+{"ts": 1765003426.741647, "event": "recs_done", "trace_id": "8a84f0c1a0524a02", "count": 2, "filters": {"type": "bomber", "tier": null, "color": "black", "size": null, "price_min": null, "price_max": null}, "anchor_slug": null, "query": "black bomber"}
+INFO:     127.0.0.1:53320 - "POST /ai/recs/suggest HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53315 - "POST /ai/agent/query HTTP/1.1" 200 OK

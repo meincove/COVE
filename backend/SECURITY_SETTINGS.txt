@@ -1,0 +1,66 @@
+# ============================================================================
+# SECURITY CONFIGURATION - Add to settings.py
+# ============================================================================
+
+# ---- Django Cache Configuration (for idempotency keys) ----
+# Using local memory cache for development
+# For production, switch to Redis or Memcached
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+        }
+    }
+}
+
+# Production Redis example (uncomment and configure for production):
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         },
+#         'KEY_PREFIX': 'cove',
+#         'TIMEOUT': 3600,  # 1 hour default
+#     }
+# }
+
+# ---- Django REST Framework Throttle Rates ----
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',           # Anonymous requests (guest checkouts)
+        'user': '1000/hour',          # Authenticated users
+        'checkout': '10/hour',        # Checkout session creation (per IP)
+        'payment_intent': '20/hour',  # Payment intent creation
+    },
+    # ... existing DRF settings ...
+}
+
+# ---- Stripe Configuration ----
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', 'http://localhost:3000/checkout/success')
+STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', 'http://localhost:3000/checkout/cancel')
+STRIPE_CURRENCY = os.getenv('STRIPE_CURRENCY', 'eur')
+
+# ---- Clerk Configuration ----
+CLERK_WEBHOOK_SECRET = os.getenv('CLERK_WEBHOOK_SECRET')
+
+# ---- Email Configuration ----
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+
+# ---- Payment Security Settings ----
+AUTO_RESTOCK_ON_REFUND = os.getenv('AUTO_RESTOCK_ON_REFUND', 'True').lower() == 'true'
+
+# ============================================================================
+# END SECURITY CONFIGURATION
+# ============================================================================

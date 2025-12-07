@@ -650,6 +650,29 @@ def add_size_policy_docs(conn: Connection) -> int:
     conn.commit()
     return len(examples)
 
+def add_general_policy_docs(conn: Connection) -> int:
+    """
+    Seed general policies (shipping, returns).
+    """
+    examples = [
+        {
+            "title": "Shipping & Delivery Policy",
+            "text": "Standard delivery takes 3-5 business days. Express delivery takes 1-2 business days. We ship to most European countries.",
+            "url": "/policies/shipping",
+            "meta": {"category": "shipping"}
+        },
+        {
+            "title": "Return & Refund Policy",
+            "text": "You can return any item within 30 days of receipt if it is unworn and in original condition. We offer free returns for store credit, or a refund to original payment method (minus shipping).",
+            "url": "/policies/returns",
+            "meta": {"category": "returns"}
+        }
+    ]
+    for ex in examples:
+        upsert_doc(conn, kind="policy", title=ex["title"], text=ex["text"], url=ex["url"], meta=ex["meta"])
+    conn.commit()
+    return len(examples)
+
 # ------------------------------- CLI ---------------------------------
 
 def main():
@@ -690,6 +713,10 @@ def main():
     # Always seed a tiny size policy set (safe & idempotent)
     n = add_size_policy_docs(conn)
     print(f"[ingest] Inserted/updated size policy docs: {n}")
+    total_inserted += n
+
+    n = add_general_policy_docs(conn)
+    print(f"[ingest] Inserted/updated general policy docs: {n}")
     total_inserted += n
 
     if args.embed_missing:

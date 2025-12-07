@@ -176,6 +176,7 @@ REST_FRAMEWORK = {
         "anon": "60/min",      # all anonymous requests
         "user": "120/min",     # authenticated users
         "checkout": "10/min",  # our checkout endpoint (scoped)
+        "order_email": "5/hour",  # order email resend (scoped)
     },
 }
 

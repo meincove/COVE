@@ -1,4 +1,5 @@
 # backend/ai_profiles/models.py
+import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -166,3 +167,76 @@ class ChatMessage(models.Model):
         return f"[{self.role}] {self.content[:40]}..."
 
 
+class AiConversationEvent(models.Model):
+    """
+    One message in a conversation between user and Cove AI.
+    
+    This is the primary source of truth for conversation history,
+    used by the AI agent to maintain context across turns.
+    """
+    
+    ROLE_USER = "user"
+    ROLE_ASSISTANT = "assistant"
+    
+    ROLE_CHOICES = (
+        (ROLE_USER, "user"),
+        (ROLE_ASSISTANT, "assistant"),
+    )
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Identity / session
+    guest_session_id = models.CharField(
+        max_length=128,
+        blank=True,
+        db_index=True,
+        help_text="Anonymous session id from frontend (guestSessionId).",
+    )
+    clerk_user_id = models.CharField(
+        max_length=128,
+        blank=True,
+        db_index=True,
+        help_text="Clerk user id if logged in.",
+    )
+    email = models.EmailField(
+        blank=True,
+        help_text="Email if available at the time of the event.",
+    )
+    
+    # Message content
+    role = models.CharField(
+        max_length=16,
+        choices=ROLE_CHOICES,
+        help_text="'user' or 'assistant'.",
+    )
+    kind = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="High-level kind: 'question', 'answer', 'recommendations', 'size_fit', etc.",
+    )
+    content = models.TextField(
+        help_text="Raw text that the user or assistant saw.",
+    )
+    meta = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Optional structured metadata (filters, items, cartId, etc.).",
+    )
+    
+    source = models.CharField(
+        max_length=64,
+        default="cove-ai-core",
+        help_text="Origin service, e.g. 'cove-ai-core', 'frontend', etc.",
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=["guest_session_id", "created_at"]),
+            models.Index(fields=["clerk_user_id", "created_at"]),
+        ]
+        ordering = ["-created_at"]
+    
+    def __str__(self) -> str:
+        return f"{self.created_at} {self.role} {self.kind} ({self.guest_session_id or self.clerk_user_id})"

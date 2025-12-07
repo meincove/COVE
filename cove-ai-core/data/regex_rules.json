@@ -1,0 +1,24 @@
+{
+    "price": {
+        "under": "\\b(under|below|less than|max)\\b",
+        "number": "\\b\\d+(\\.\\d+)?\\b",
+        "between": "\\bbetween\\s+\\d+(\\.\\d+)?\\s+(and|-)\\s+\\d+(\\.\\d+)?",
+        "currency": "\\b\\d+(\\.\\d+)?\\s?(eur|euro|€)\\b"
+    },
+    "cart": {
+        "phrases": [
+            "add",
+            "put",
+            "into",
+            "to my",
+            "in my"
+        ],
+        "buy_verbs": "\\b(buy|purchase|order|checkout|i\\'ll take|i will take)\\b",
+        "add_pattern": "\\badd (this|that|one|it)\\b",
+        "product_types": "\\b(hoodie|bomber|jacket|jeans|t[- ]?shirt|shirt|cargo|pant|pants)\\b"
+    },
+    "smalltalk": {
+        "max_length": 40,
+        "max_tokens": 4
+    }
+}

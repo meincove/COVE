@@ -1,0 +1,19 @@
+{
+    "searchable_fields": [
+        "name",
+        "type",
+        "material",
+        "tier",
+        "gender",
+        "colorName"
+    ],
+    "style_fields": [
+        "styleTags",
+        "useCases"
+    ],
+    "filters": {
+        "type": "type",
+        "tier": "tier",
+        "color": "colorName"
+    }
+}

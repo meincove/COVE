@@ -16,3 +16,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
 PG_DSN = os.getenv("PG_DSN")
+
+DJANGO_BASE_URL = os.getenv("DJANGO_BASE_URL", "http://127.0.0.1:8001")
+COVE_CORE_BASE_URL = os.getenv("COVE_CORE_BASE_URL", "http://127.0.0.1:8000")

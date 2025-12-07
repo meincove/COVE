@@ -95,3 +95,33 @@ class SizeStockPrice(models.Model):
 
     def __str__(self):
         return f"{self.variant.variant_id} - {self.size} ({self.quantity} pcs)"
+
+
+# --------------------------------------
+# Cart System
+# --------------------------------------
+class Cart(models.Model):
+    cart_id = models.CharField(max_length=100, primary_key=True)  # UUID or session ID
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Optional user linkage
+    clerk_user_id = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    guest_session_id = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    email = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Cart {self.cart_id}"
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    variant = models.ForeignKey(ColorGroup, on_delete=models.CASCADE)
+    size = models.CharField(max_length=10)
+    quantity = models.PositiveIntegerField(default=1)
+    
+    class Meta:
+        unique_together = ('cart', 'variant', 'size')
+
+    def __str__(self):
+        return f"{self.quantity}x {self.variant.variant_id} ({self.size})"
