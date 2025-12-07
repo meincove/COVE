@@ -27,7 +27,8 @@ body {
 }
 
 html {
-  overflow-x: clip; /* no accidental horizontal scrollbars */
+  overflow-x: clip;
+  /* no accidental horizontal scrollbars */
 }
 
 /* Tailwind */
@@ -42,6 +43,7 @@ html {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -75,7 +77,8 @@ html {
 
   /* === Overlay sizing knobs (NEW) ===
      Top offset is expressed relative to the shrink gap so it adapts automatically. */
-  --ov-top-offset: calc(var(--gap-top) * 0.15); /* small breathing room from top */
+  --ov-top-offset: calc(var(--gap-top) * 0.15);
+  /* small breathing room from top */
 
   /* light theme */
   --background: oklch(1 0 0);
@@ -105,485 +108,384 @@ html {
 .text-white {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 .perspective {
   perspective: 1200px;
 }
+
 @layer utilities {
   .animate-spin-slow {
     animation: spin 20s linear infinite;
   }
-}
 
-/* === The single global scroll frame === */
-.tester-frame {
-  position: relative;
-  z-index: 200; /* above overlay backdrop (120) and below overlay card (180+) */
-  height: 100dvh;
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: clip;
-  background: var(--background);
-  transition:
-    margin 0.28s ease,
-    width 0.28s ease,
-    height 0.28s ease,
-    border-radius 0.28s ease,
-    box-shadow 0.28s ease,
-    filter 0.28s ease;       
-  scrollbar-gutter: stable both-edges;
-  will-change: margin, width, height;
-}
+  /* Optional: hide scrollbar UI, keep scroll */
+  .tester-frame::-webkit-scrollbar {
+    display: none;
+  }
 
-/* Dim the shrunken page when menu is open, but keep navbar pills bright */
-/* Dim ONLY the shrunken page area, leave navbar + overlay bar bright */
-html.menu-open .tester-frame::before {
-  content: "";
-  position: fixed;
-  left: 0;
-  right: 0;
+  .tester-frame {
+    scrollbar-width: none;
+  }
 
-  /* start dimming below the top navbar band */
-  top: var(--gap-top);   /* currently 72px in :root */
-  bottom: 0;
+  /* === Menu open: shrink from top-left only (responsive, more space) === */
+  html.menu-open .tester-frame {
+    /* Increased shrink for more space on top/left */
+    --shrink-amount: clamp(60px, 8vh, 120px);
 
-  z-index: 205;          /* below .nav-stick (210), above page content */
-  pointer-events: none;
-  background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(255,255,255,0.35),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 80% 0%,
-      rgba(255,255,255,0.35),
-      transparent 55%
-    ),
-    rgba(0, 0, 0, 0.18);
-}
+    margin-top: var(--shrink-amount);
+    margin-left: var(--shrink-amount);
+    margin-right: 0;
+    margin-bottom: 0;
 
+    width: calc(100vw - var(--shrink-amount));
+    height: calc(100dvh - var(--shrink-amount));
 
-/* Cursor behaviour in menu mode:
-   - overlay/root (menu bar area) feels clickable (hand)
-   - shrunken page shows default arrow */
-html.menu-open .overlay-root {
-  cursor: pointer;
-}
+    /* Remove border radius - clean edge */
+    border-radius: 0;
 
-html.menu-open .tester-frame {
-  cursor: default;
-}
+    /* Remove clip-path to prevent content bleeding */
+    overflow: hidden;
 
+    /* Subtle shadow only */
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.25);
+  }
 
-/* Optional: hide scrollbar UI, keep scroll */
-.tester-frame::-webkit-scrollbar {
-  display: none;
-}
-.tester-frame {
-  scrollbar-width: none;
-}
+  /* Remove dim filter - keep page normal */
+  html.menu-open .tester-frame {
+    filter: none;
+  }
 
-/* === Menu open: per-side shrink (no scale) === */
-html.menu-open .tester-frame {
-  margin: var(--gap-top) var(--gap-right) var(--gap-bottom) var(--gap-left);
-  width: calc(100vw - var(--gap-left) - var(--gap-right));
-  height: calc(100dvh - var(--gap-top) - var(--gap-bottom));
-  border-radius: 24px;
-  clip-path: inset(0 round 24px);
-  box-shadow:
-    0 40px 120px -24px rgba(0, 0, 0, 0.55),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
+  /* Navbar wrapper - FIXED at top with WHITE background */
+  .nav-stick {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    /* Changed from 0 to auto */
+    z-index: 300;
+    /* Higher z-index */
+    pointer-events: auto;
+    background: white;
+    /* Solid white background */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 
-html.menu-open .tester-frame {
-  filter: brightness(0.9) saturate(0.96);
-}
+  /* FULL MODE navbar shell */
+  .nav-stick.nav-fullmode {
+    background: white !important;
+    /* Force white background */
+  }
 
-/* Navbar sits inside the frame so it moves with it */
-.nav-stick {
-  position: sticky;
-  top: 0;
-  height: 0;
-  z-index: 210;
-  pointer-events: auto;
-}
+  .nav-shell.nav-fullmode-shell {
+    background: white !important;
+    /* Force white background */
+  }
 
-/* FULL MODE ONLY – stays fully transparent over aurora */
-.nav-stick.nav-fullmode,
-.nav-shell.nav-fullmode-shell {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  border: none !important;
-}
+  /* Add padding to body to account for fixed navbar */
+  body {
+    padding-top: 88px;
+    /* Height of navbar */
+  }
 
-/* Navbar shell – layout only, no chrome */
-.nav-shell {
-  background: #faf9f6; /* off-white for island/menu */
-  color: #0b0b0b;
-  border-color: #faf9f6;
-}
+  /* Body surface holding page sections (demo) */
+  .content-surface {
+    background: #9ca3af;
+    min-height: 100%;
+  }
 
-/* Baikal-style island navbar shape: flatter on top, extra round on bottom */
-#cove-navbar-shell {
-  /* TL    TR    BR    BL  */
-  border-radius: 0px 0px 25px 25px;
-}
+  /* Demo sections */
+  .demo-section {
+    background: #ffffff;
+    color: #111827;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
 
-/* Body surface holding page sections (demo) */
-.content-surface {
-  background: #9ca3af;
-  min-height: 100%;
-}
-
-/* Demo sections */
-.demo-section {
-  background: #ffffff;
-  color: #111827;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-/* ============================================
+  /* ============================================
    NEW OVERLAY LAYOUT (menu mode top bar)
    ============================================ */
 
-/* Root covers the whole viewport, but we only render a bar in the top band */
-.overlay-root {
-  position: fixed;
-  inset: 0;
-  z-index: 180;
-  pointer-events: none; /* becomes auto when menu-open */
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-/* Stage row that holds the card; full viewport width */
-.overlay-stage {
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-}
-
-/* The overlay “page card” – aligned to shrunk tester-frame */
-.overlay-card {
-  /* horizontally match tester-frame rectangle */
-  width: calc(100vw - var(--gap-left) - var(--gap-right));
-  max-width: calc(100vw - var(--gap-left) - var(--gap-right));
-  margin-left: var(--gap-left);
-  margin-right: var(--gap-right);
-
-  /* keep the card fully inside the top band (no bleed behind frame) */
-  margin-top: var(--ov-top-offset);
-
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
-  pointer-events: auto;
-
-  display: grid;
-  grid-template-columns: 1fr 1.3fr 1fr; /* Left | Center | Right (default) */
-  gap: 12px;
-  padding: 10px 12px;
-
-  color: #0b0b0b;
-  height: auto;       /* ✅ content-driven height, no 10dvh bleed */
-  overflow: visible;  /* dropdowns can spill out */
-}
-
-/* equal thirds variant (what you use now) */
-.overlay-card.overlay-card--thirds {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-@media (min-width: 768px) {
-  .overlay-card.overlay-card--thirds {
-    grid-template-columns: 1fr 1fr 1fr; /* equal thirds on md+ */
+  /* Root covers the whole viewport, but we only render a bar in the top band */
+  .overlay-root {
+    position: fixed;
+    inset: 0;
+    z-index: 180;
+    pointer-events: none;
+    /* becomes auto when menu-open */
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
   }
-}
 
-/* Slots inside the card */
-.overlay-slot-left,
-.overlay-slot-center,
-.overlay-slot-right {
-  min-width: 0;
-  overflow: hidden;
-  padding: 6px 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+  /* Stage row that holds the card; full viewport width */
+  .overlay-stage {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
 
-/* Center (search) stretches */
-.overlay-slot-center > * {
-  width: 100%;
-  min-width: 0;
-}
+  @media (min-width: 768px) {
+    .overlay-card.overlay-card--thirds {
+      grid-template-columns: 1fr 1fr 1fr;
+      /* equal thirds on md+ */
+    }
+  }
 
-/* When the overlay is active (menu-open), allow clicks on root */
-html.menu-open .overlay-root {
-  pointer-events: auto;
-  cursor: pointer;
-}
+  /* Slots inside the card */
+  .overlay-slot-left,
+  .overlay-slot-center,
+  .overlay-slot-right {
+    min-width: 0;
+    overflow: hidden;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-/* Make inline text/icons in card dark */
-.overlay-card {
-  color: #0b0b0b;
-}
-.overlay-card :where(a, button, span, svg) {
-  color: #0b0b0b !important;
-  fill: currentColor;
-}
+  /* Center (search) stretches */
+  .overlay-slot-center>* {
+    width: 100%;
+    min-width: 0;
+  }
 
-/* Dev overlay-only mode (optional) */
-html.overlay-dev .tester-frame {
-  display: none !important;
-}
-html.overlay-dev .nav-stick {
-  display: none !important;
-}
-html.overlay-dev .overlay-root {
-  pointer-events: auto;
-}
+  /* When the overlay is active (menu-open), allow clicks on root */
+  html.menu-open .overlay-root {
+    pointer-events: auto;
+    cursor: pointer;
+  }
 
-/* ===== NAV: full (space-taking) vs island (floating) ===== */
+  /* Make inline text/icons in card dark */
+  .overlay-card {
+    color: #0b0b0b;
+  }
 
-/* Full navbar wrapper TAKES space */
-.nav-full-wrap {
-  position: sticky;
-  top: 0;
-  z-index: 210;
-  background: transparent;
-}
+  .overlay-card :where(a, button, span, svg) {
+    color: #0b0b0b !important;
+    fill: currentColor;
+  }
 
-/* Full shell (wide bar) */
-.nav-full-shell {
-  height: 72px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
+  /* Dev overlay-only mode (optional) */
+  html.overlay-dev .tester-frame {
+    display: none !important;
+  }
 
-  width: min(calc(100% - 24px), 1200px);
-  margin: 8px auto;
-  padding: 10px 10px;
+  html.overlay-dev .nav-stick {
+    display: none !important;
+  }
 
-  border-radius: 0px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
+  html.overlay-dev .overlay-root {
+    height: 0;
+    z-index: 211;
+    pointer-events: none;
+  }
 
-  color: #0b0b0b;
-  transition:
-    transform 0.28s ease,
-    opacity 0.28s ease;
-}
-
-/* Island wrapper: sticky but ZERO height */
-.nav-island-wrap {
-  position: sticky;
-  top: 0;
-  height: 0;
-  z-index: 211;
-  pointer-events: none;
-}
-
-/* Island shell (floating compact bar) */
-.nav-island-shell {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translate(-50%, -16px);
-  opacity: 0;
-  pointer-events: auto;
-
-  height: 64px;
-  width: clamp(360px, 60vw, 680px);
-
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-
-  padding: 8px 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
-
-  color: #0b0b0b;
-  transition:
-    transform 0.28s ease,
-    opacity 0.28s ease;
-}
-
-/* Slot helpers */
-.nav-left,
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.nav-center {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-.nav-center > * {
-  width: 100%;
-}
-
-/* Make nested buttons/links/icons dark */
-.nav-full-shell :where(a, button, span, svg),
-.nav-island-shell :where(a, button, span, svg) {
-  color: #0b0b0b !important;
-  fill: currentColor;
-}
-
-/* ====== Animated states toggled by data-attrs ====== */
-
-[data-collapse-full="true"] .nav-full-shell {
-  transform: translateY(-110%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-[data-show-island="true"] .nav-island-shell {
-  transform: translate(-50%, 0);
-  opacity: 1;
-}
-
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .nav-full-shell,
+  /* Island shell (floating compact bar) */
   .nav-island-shell {
-    transition: none;
-  }
-}
-
-/* Floating island pill */
-.floating-nav {
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 260;
-  pointer-events: auto;
-}
-
-/* Anchor lives inside .tester-frame */
-.island-anchor {
-  position: sticky;
-  top: 0;
-  height: 0;
-  z-index: 210;
-  pointer-events: none;
-}
-
-/* The pill itself */
-.island-pill {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: auto;
-  z-index: 260;
-}
-
-/* When search is shown, make the pill wide but not full-bleed */
-.island-pill.withSearch {
-  width: min(92vw, 1000px);
-}
-
-
-/* 👇 When menu mode is on, the overlay card + slots use a hand cursor */
-html.menu-open .overlay-card,
-html.menu-open .overlay-slot-left,
-html.menu-open .overlay-slot-center,
-html.menu-open .overlay-slot-right {
-  cursor: pointer;
-}
-
-/* ==== Scroll-lock toast (menu mode) ==== */
-
-.scroll-toast {
-  position: fixed;
-  inset: 0;
-  z-index: 170;                 /* above shrunken page, below overlay card if you want */
-  pointer-events: none;         /* never blocks clicks */
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 32px;         /* float just above bottom rim */
-}
-
-.scroll-toast-inner {
-  background: rgba(15, 23, 42, 0.96);    /* slate-900-ish */
-  color: #f9fafb;
-  padding: 10px 18px;
-  border-radius: 9999px;
-  font-size: 12px;
-  line-height: 1.25;
-  box-shadow:
-    0 18px 40px rgba(15, 23, 42, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  animation: scroll-toast-pop 1.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.scroll-toast-title {
-  font-weight: 600;
-}
-
-.scroll-toast-subtitle {
-  font-size: 11px;
-  opacity: 0.85;
-}
-
-@keyframes scroll-toast-pop {
-  0% {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translate(-50%, -16px);
     opacity: 0;
-    transform: translateY(18px) scale(0.95);
-    filter: blur(4px);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-  80% {
-    opacity: 1;
-    transform: translateY(-2px) scale(1.01);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.98);
-    filter: blur(2px);
-  }
-}
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    pointer-events: auto;
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
+    height: 64px;
+    width: clamp(360px, 60vw, 680px);
+
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+
+    color: #0b0b0b;
+    transition:
+      transform 0.28s ease,
+      opacity 0.28s ease;
+  }
+
+  /* Slot helpers */
+  .nav-left,
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .nav-center {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .nav-center>* {
+    width: 100%;
+  }
+
+  /* Make nested buttons/links/icons dark */
+  .nav-full-shell :where(a, button, span, svg),
+  .nav-island-shell :where(a, button, span, svg) {
+    color: #0b0b0b !important;
+    fill: currentColor;
+  }
+
+  /* ====== Animated states toggled by data-attrs ====== */
+
+  [data-collapse-full="true"] .nav-full-shell {
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  [data-show-island="true"] .nav-island-shell {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+
+    .nav-full-shell,
+    .nav-island-shell {
+      transition: none;
+    }
+  }
+
+  /* Floating island pill */
+  .floating-nav {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 260;
+    pointer-events: auto;
+  }
+
+  /* Anchor lives inside .tester-frame */
+  .island-anchor {
+    position: sticky;
+    top: 0;
+    height: 0;
+    z-index: 210;
+    pointer-events: none;
+  }
+
+  /* The pill itself */
+  .island-pill {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    z-index: 260;
+  }
+
+  /* When search is shown, make the pill wide but not full-bleed */
+  .island-pill.withSearch {
+    width: min(92vw, 1000px);
+  }
+
+
+  /* 👇 When menu mode is on, the overlay card + slots use a hand cursor */
+  html.menu-open .overlay-card,
+  html.menu-open .overlay-slot-left,
+  html.menu-open .overlay-slot-center,
+  html.menu-open .overlay-slot-right {
+    cursor: pointer;
+  }
+
+  /* ==== Scroll-lock toast (menu mode) ==== */
+
+  .scroll-toast {
+    position: fixed;
+    inset: 0;
+    z-index: 170;
+    /* above shrunken page, below overlay card if you want */
+    pointer-events: none;
+    /* never blocks clicks */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 32px;
+    /* float just above bottom rim */
+  }
+
+  .scroll-toast-inner {
+    background: rgba(15, 23, 42, 0.96);
+    /* slate-900-ish */
+    color: #f9fafb;
+    padding: 10px 18px;
+    border-radius: 9999px;
+    font-size: 12px;
+    line-height: 1.25;
+    box-shadow:
+      0 18px 40px rgba(15, 23, 42, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    animation: scroll-toast-pop 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .scroll-toast-title {
+    font-weight: 600;
+  }
+
+  .scroll-toast-subtitle {
+    font-size: 11px;
+    opacity: 0.85;
+  }
+
+  @keyframes scroll-toast-pop {
+    0% {
+      opacity: 0;
+      transform: translateY(18px) scale(0.95);
+      filter: blur(4px);
+    }
+
+    40% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    80% {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.01);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+      filter: blur(2px);
+    }
+  }
+
+  /* Fade-in animation from develop branch */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
 }

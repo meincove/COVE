@@ -46,7 +46,7 @@ export default function CatalogPage() {
   }
 
   return (
-    <main className="w-full min-h-screen flex flex-col bg-[#F1F3E0]">
+    <main className="w-full min-h-screen flex flex-col bg-[#F1F3E0] px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
       {tierEntries.map(([tierKey, cards], index) => {
         const tierLabel = formatTierLabel(tierKey)
         const title = `Cove – ${tierLabel}`

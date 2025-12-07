@@ -141,7 +141,6 @@
 
 
 
-// src/components/Navbar/NavbarController.tsx
 "use client";
 
 import {
@@ -152,6 +151,7 @@ import {
   useContext,
   PropsWithChildren,
 } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import FullNavbar from "./NavbarComponents/FullModeNavbar/FullNavbar";
 import IslandNavbar from "./NavbarComponents/IslandModeNavbar/IslandNavbar";
@@ -174,6 +174,7 @@ export function useNavbarMode() {
 }
 
 export default function NavbarController({ children }: PropsWithChildren<{}>) {
+  const pathname = usePathname();
   const [mode, setModeState] = useState<NavbarMode>("full");
 
   const lastNonMenuModeRef = useRef<Exclude<NavbarMode, "menu">>("full");
@@ -281,20 +282,23 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
 
   // inside NavbarController return
 
-return (
-  <NavbarModeCtx.Provider value={{ mode, setMode }}>
-    <AnimatePresence mode="wait" initial={false}>
-      {mode === "full" && <FullNavbar key="full" />}
+  return (
+    <NavbarModeCtx.Provider value={{ mode, setMode }}>
+      {/* Hide navbar on welcome page */}
+      {pathname !== '/' && (
+        <AnimatePresence mode="wait" initial={false}>
+          {mode === "full" && <FullNavbar key="full" />}
 
-      {/* ONE shared IslandNavbar instance for both island + menu */}
-      {mode !== "full" && (
-        <IslandNavbar key="island" isMenu={mode === "menu"} />
+          {/* ONE shared IslandNavbar instance for both island + menu */}
+          {mode !== "full" && (
+            <IslandNavbar key="island" isMenu={mode === "menu"} />
+          )}
+        </AnimatePresence>
       )}
-    </AnimatePresence>
 
-    {children}
-  </NavbarModeCtx.Provider>
-);
+      {children}
+    </NavbarModeCtx.Provider>
+  );
 
 
   // return (

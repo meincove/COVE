@@ -18,24 +18,24 @@ export default function PaymentPage() {
 
   const { user, isSignedIn } = useUser()
 
-const clerkUserId = user?.id || null
-const firstName = user?.firstName || 'Guest'
-const lastName = user?.lastName || ''
+  const clerkUserId = user?.id || null
+  const firstName = user?.firstName || 'Guest'
+  const lastName = user?.lastName || ''
 
-const router = useRouter()
+  const router = useRouter()
 
 
   return (
     <StripeProvider>
-      <div className="flex flex-col md:flex-row min-h-screen bg-zinc-950 text-white">
-         <button
-        onClick={() => router.back()}
-        className="mb-4 text-sm text-gray-700 hover:underline"
-      >
-        ← Back
-      </button>
+      <div className="flex flex-col md:flex-row lg:flex-row min-h-screen bg-zinc-950 text-white">
+        <button
+          onClick={() => router.back()}
+          className="mb-4 mx-4 mt-4 sm:mx-6 md:mx-8 text-sm sm:text-base text-gray-400 hover:text-white hover:underline transition-colors"
+        >
+          ← Back
+        </button>
         {/* LEFT: Stripe Form */}
-        <div className="md:w-1/2 p-6">
+        <div className="md:w-1/2 lg:w-1/2 xl:w-2/5 p-4 sm:p-5 md:p-6 lg:p-8">
           <StripeCheckout
             cardName={cardName}
             setCardName={setCardName}
@@ -49,14 +49,14 @@ const router = useRouter()
             setFocusedField={setFocusedField}
             tier={tier}
 
-             clerkUserId={clerkUserId}
-          firstName={firstName}
-          lastName={lastName}
+            clerkUserId={clerkUserId}
+            firstName={firstName}
+            lastName={lastName}
           />
         </div>
 
         {/* RIGHT: 3D Card */}
-        <div className="md:w-1/2 h-[500px] md:h-auto">
+        <div className="md:w-1/2 lg:w-1/2 xl:w-3/5 min-h-[400px] sm:min-h-[500px] md:h-auto">
           <ThreeDCard
             cardNumber={cardNumber}
             expiry={expiry}

@@ -203,14 +203,12 @@ import { useEffect, useMemo, useState } from "react";
 import LeftActions from "@/src/components/Navbar/NavbarComponents/NavbarParts/LeftActions";
 import RightActions from "@/src/components/Navbar/NavbarComponents/NavbarParts/RightActions";
 import SearchBar from "@/src/components/Navbar/NavbarComponents/NavbarParts/SearchBar";
-import ScrollLockNotification from "@/src/components/ui/ScrollLockNotification";
 
 const DEV_FLAG_KEY = "cove:overlayDebug";
 
 export default function RootOverlay() {
   const [open, setOpen] = useState(false);
   const [devOnly, setDevOnly] = useState(false);
-  const [showScrollNotice, setShowScrollNotice] = useState(false);
 
   // Open / close via custom events
   useEffect(() => {
@@ -289,46 +287,6 @@ export default function RootOverlay() {
     return () => document.removeEventListener("mousedown", handler, true);
   }, [open, devOnly]);
 
-  // NEW: intercept scroll while menu is open & show animated notice
-  useEffect(() => {
-    if (!open || devOnly) {
-      setShowScrollNotice(false);
-      return;
-    }
-
-    const frame = document.querySelector(".tester-frame") as HTMLElement | null;
-    if (!frame) return;
-
-    let noticeTimeout: number | null = null;
-
-    const triggerNotice = () => {
-      setShowScrollNotice(true);
-      if (noticeTimeout) window.clearTimeout(noticeTimeout);
-      noticeTimeout = window.setTimeout(() => {
-        setShowScrollNotice(false);
-      }, 1800);
-    };
-
-    const onWheel = (evt: WheelEvent) => {
-      evt.preventDefault();
-      triggerNotice();
-    };
-
-    const onTouchMove = (evt: TouchEvent) => {
-      evt.preventDefault();
-      triggerNotice();
-    };
-
-    frame.addEventListener("wheel", onWheel, { passive: false });
-    frame.addEventListener("touchmove", onTouchMove, { passive: false });
-
-    return () => {
-      frame.removeEventListener("wheel", onWheel);
-      frame.removeEventListener("touchmove", onTouchMove);
-      if (noticeTimeout) window.clearTimeout(noticeTimeout);
-    };
-  }, [open, devOnly]);
-
   const rootStyle = useMemo(
     () => ({
       opacity: devOnly ? 1 : open ? 1 : 0,
@@ -339,54 +297,24 @@ export default function RootOverlay() {
 
   return (
     <>
-      {/* Peach global backdrop tint */}
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "oklch(0.93 0.08 70)",
-          opacity: devOnly ? 1 : open ? 1 : 0,
-          transition: devOnly ? "none" : "opacity .25s ease",
-          zIndex: 120,
-          pointerEvents: "none",
-        }}
-      />
+
 
       {/* Main overlay bar: width + position handled entirely by CSS */}
       <div className="overlay-root" style={rootStyle as React.CSSProperties}>
         <div className="overlay-stage">
           <div className="overlay-card overlay-card--thirds">
             {/* LEFT SLOT */}
-            <div
-              className="overlay-slot-left"
-              style={{
-                background: "rgba(255,182,193,.28)",
-                borderRadius: 10,
-              }}
-            >
+            <div className="overlay-slot-left">
               <LeftActions />
             </div>
 
             {/* CENTER SLOT */}
-            <div
-              className="overlay-slot-center"
-              style={{
-                background: "rgba(186, 170, 255, .22)",
-                borderRadius: 10,
-              }}
-            >
+            <div className="overlay-slot-center">
               <SearchBar />
             </div>
 
             {/* RIGHT SLOT */}
-            <div
-              className="overlay-slot-right justify-end md:justify-end"
-              style={{
-                background: "rgba(255,182,193,.28)",
-                borderRadius: 10,
-              }}
-            >
+            <div className="overlay-slot-right justify-end md:justify-end">
               <RightActions />
               <button
                 className="overlay-close"
@@ -412,11 +340,6 @@ export default function RootOverlay() {
           </div>
         </div>
       </div>
-
-      {/* Scroll lock notice – always rendered relative to viewport, above shrunken page */}
-      <ScrollLockNotification
-        visible={open && !devOnly && showScrollNotice}
-      />
 
       {/* Small dev badge */}
       {devOnly && (

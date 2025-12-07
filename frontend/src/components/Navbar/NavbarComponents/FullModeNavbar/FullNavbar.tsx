@@ -9,6 +9,7 @@ import { useScrollPhase } from "../../hooks/useScrollPhase";
 import { useCartStore } from "@/src/store/cartStore";
 import CartModal from "@/src/components/Catalog/CartModal";
 import { useRouter } from "next/navigation";
+import { useUser, useClerk } from "@clerk/nextjs";
 
 type LayoutPhase = "expanded" | "compressed";
 
@@ -27,7 +28,8 @@ export default function FullNavbar() {
   const { items } = useCartStore();
   const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
   const router = useRouter();
-  const isSignedIn = false; // TODO: wire to Clerk
+  const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const leftRef = useRef<HTMLDivElement | null>(null);
@@ -71,11 +73,11 @@ export default function FullNavbar() {
   const centerTransition = "transform 0.28s ease-in-out";
 
   const leftBase =
-    "flex items-center gap-3 rounded-full px-4 py-1.5 text-xs md:text-sm font-medium tracking-wide transition-[background-color,box-shadow] duration-300";
+    "flex items-center gap-2 sm:gap-3 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium tracking-wide transition-[background-color,box-shadow] duration-300";
   const centerBase =
-    "max-w-xl w-full rounded-full px-3 py-1 transition-[background-color,box-shadow] duration-300";
+    "max-w-xl w-full rounded-full px-2 sm:px-3 py-1 transition-[background-color,box-shadow] duration-300";
   const rightBase =
-    "flex items-center gap-3 rounded-full px-4 py-1.5 text-xs md:text-sm transition-[background-color,box-shadow] duration-300 ml-auto";
+    "flex items-center gap-2 sm:gap-3 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm transition-[background-color,box-shadow] duration-300 ml-auto";
 
   const leftBg =
     layoutPhase === "compressed"
@@ -163,26 +165,38 @@ export default function FullNavbar() {
               }}
             >
               {isSignedIn ? (
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs md:text-sm font-medium bg-black text-white hover:bg-black/90"
-                >
-                  Dashboard
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard")}
+                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium bg-black text-white hover:bg-black/90"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await signOut()
+                      router.push('/')
+                    }}
+                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm hover:bg-black/5"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <>
                   <button
                     type="button"
-                    onClick={() => router.push("/sign-in")}
-                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs md:text-sm hover:bg-black/5"
+                    onClick={() => router.push('/sign-in')}
+                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm hover:bg-black/5"
                   >
                     Sign in
                   </button>
                   <button
                     type="button"
-                    onClick={() => router.push("/sign-up")}
-                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs md:text-sm font-medium bg-black text-white hover:bg-black/90"
+                    onClick={() => router.push('/sign-up')}
+                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium bg-black text-white hover:bg-black/90"
                   >
                     Sign up
                   </button>
@@ -192,9 +206,9 @@ export default function FullNavbar() {
               <button
                 type="button"
                 onClick={() => setCartOpen(true)}
-                className="relative inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-black/5"
+                className="relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full hover:bg-black/5 min-h-[44px] min-w-[44px]"
               >
-                <ShoppingBag className="h-4 w-4" />
+                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-black text-[10px] font-semibold text-white">
                     {itemCount}
@@ -204,16 +218,16 @@ export default function FullNavbar() {
 
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-black/5"
+                className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full hover:bg-black/5 min-h-[44px] min-w-[44px]"
               >
-                <Globe2 className="h-4 w-4" />
+                <Globe2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
 
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-black/5"
+                className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full hover:bg-black/5 min-h-[44px] min-w-[44px]"
               >
-                <Heart className="h-4 w-4" />
+                <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>
