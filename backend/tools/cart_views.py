@@ -80,26 +80,6 @@ def _get_or_create_cart(data: Dict[str, Any]) -> Cart:
 
 # --- Views -------------------------------------------------------------------
 
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def cart_get(request):
-    cart_id = request.query_params.get("cartId")
-    if not cart_id:
-        return Response({"detail": "cartId required"}, status=400)
-        
-    try:
-        cart = Cart.objects.get(cart_id=cart_id)
-        return Response(_serialize_cart(cart))
-    except Cart.DoesNotExist:
-        # Return empty cart structure for valid ID
-        return Response({
-            "cartId": cart_id,
-            "items": [],
-            "total": 0.0,
-            "currency": "EUR",
-            "itemCount": 0
-        })
-
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def cart_add(request):
@@ -108,7 +88,7 @@ def cart_add(request):
     
     data = request.data or {}
     variant_id = data.get("variantId")
-    size = data.get("size")
+    size = data.get("size") or "M" # Default to M if null/empty
     
     # Validate quantity
     try:
@@ -116,8 +96,9 @@ def cart_add(request):
     except DRFValidationError as e:
         return Response({"detail": str(e)}, status=400)
     
-    if not variant_id or not size:
-        return Response({"detail": "variantId and size required"}, status=400)
+    if not variant_id:
+        return Response({"detail": "variantId required"}, status=400)
+
         
     try:
         variant = ColorGroup.objects.get(variant_id=variant_id)
@@ -188,3 +169,69 @@ def cart_update(request):
             )
             
     return Response(_serialize_cart(cart))
+
+
+# --- Week 4: Cart Unification Endpoints --------------------------------------
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def cart_get(request):
+    """
+    GET /tools/cart.get?clerkUserId=...&guestSessionId=...
+    
+    Fetch cart for a user or guest session.
+    Returns serialized cart with items, prices, totals.
+    """
+    clerk_user_id = request.GET.get("clerkUserId", "").strip()
+    guest_session_id = request.GET.get("guestSessionId", "").strip()
+    
+    if not clerk_user_id and not guest_session_id:
+        return Response({"detail": "clerkUserId or guestSessionId required"}, status=400)
+    
+    # Try to find existing cart
+    cart = None
+    if clerk_user_id:
+        cart = Cart.objects.filter(clerk_user_id=clerk_user_id).first()
+    elif guest_session_id:
+        cart = Cart.objects.filter(guest_session_id=guest_session_id).first()
+    
+    if not cart:
+        # Return empty cart
+        return Response({
+            "cartId": None,
+            "items": [],
+            "total": 0.0,
+            "itemCount": 0
+        })
+    
+    return Response(_serialize_cart(cart))
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def cart_clear(request):
+    """
+    POST /tools/cart.clear
+    Body: {clerkUserId, guestSessionId}
+    
+    Clear all items from user's cart.
+    """
+    data = request.data or {}
+    clerk_user_id = data.get("clerkUserId", "").strip()
+    guest_session_id = data.get("guestSessionId", "").strip()
+    
+    if not clerk_user_id and not guest_session_id:
+        return Response({"detail": "clerkUserId or guestSessionId required"}, status=400)
+    
+    # Find cart
+    cart = None
+    if clerk_user_id:
+        cart = Cart.objects.filter(clerk_user_id=clerk_user_id).first()
+    elif guest_session_id:
+        cart = Cart.objects.filter(guest_session_id=guest_session_id).first()
+    
+    if cart:
+        # Delete all cart items
+        cart.items.all().delete()
+    
+    return Response({"ok": True, "message": "Cart cleared"})

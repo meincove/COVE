@@ -1,141 +1,199 @@
 {
-    "version": 1,
-    "intents": [
-      {
-        "name": "size_fit",
-        "priority": 100,
-        "keywords": [
-          "size",
-          "fit",
-          "tight",
-          "loose",
-          "oversized",
-          "slim",
-          "relaxed",
-          "baggy",
-          "height",
-          "weight",
-          "cm",
-          "kg",
-          "inches",
-          "lbs"
-        ]
-      },
-      {
-        "name": "policy",
-        "priority": 90,
-        "keywords": [
-          "return",
-          "refund",
-          "shipping",
-          "delivery",
-          "exchange",
-          "rückgabe",
-          "versand",
-          "umtausch",
-          "policy",
-          "cancel",
-          "cancellation",
-          "tax",
-          "customs",
-          "vat",
-          "duty"
-        ]
-      },
-      {
-        "name": "history_meta",
-        "priority": 80,
-        "keywords": [
-          "what did i say",
-          "what did we talk",
-          "previous chat",
-          "earlier conversation",
-          "conversation history",
-          "before this",
-          "remind me what i said"
-        ]
-      },
-      {
-        "name": "lookup_product",
-        "priority": 70,
-        "keywords": [
-          "material is",
-          "made of",
-          "fabric",
-          "gsm",
-          "shrink",
-          "shrinkage",
-          "do your hoodies shrink",
-          "wash",
-          "washing instructions",
-          "care",
-          "durable",
-          "stretchy"
-        ]
-      },
-      {
-        "name": "discover",
-        "priority": 60,
-        "keywords": [
-          "hoodie",
-          "hoodies",
-          "t-shirt",
-          "tshirt",
-          "tee",
-          "tees",
-          "jacket",
-          "bomber",
-          "jeans",
-          "joggers",
-          "pants",
-          "trousers",
-          "sweatshirt",
-          "crewneck"
-        ]
-      },
-      {
-        "name": "generic",
-        "priority": 20,
-        "keywords": [
-          "what is cove",
-          "tell me about your brand",
-          "what makes cove different",
-          "what makes kove different",
-          "are you premium",
-          "are you budget",
-          "luxury streetwear"
-        ]
-      },
-      {
-        "name": "greeting",
-        "priority": 15,
-        "keywords": [
-          "hi",
-          "hello",
-          "hey",
-          "good morning",
-          "good evening",
-          "good night",
-          "thanks",
-          "thank you"
-        ]
-      },
-      {
-        "name": "small_talk",
-        "priority": 12,
-        "keywords": [
-          "how are you",
-          "tell me a joke",
-          "who created you",
-          "what can you do"
-        ]
-      }
-    ],
-    "brand_aliases": [
-      "cove",
-      "kove",
-      "wearcove",
-      "wearcove.ai"
-    ]
-  }
-  
+  "version": 1,
+  "intents": [
+    {
+      "name": "checkout_start",
+      "priority": 105,
+      "keywords": [
+        "checkout",
+        "buy now",
+        "proceed to payment",
+        "pay for cart",
+        "complete purchase",
+        "go to checkout",
+        "ready to pay",
+        "purchase",
+        "ready to buy"
+      ]
+    },
+    {
+      "name": "order_query",
+      "priority": 102,
+      "keywords": [
+        "my orders",
+        "order history",
+        "last order",
+        "previous purchase",
+        "track order",
+        "where is my order",
+        "show orders",
+        "order status",
+        "show my purchases",
+        "what did i buy"
+      ]
+    },
+    {
+      "name": "order_email",
+      "priority": 101,
+      "keywords": [
+        "resend",
+        "confirmation email",
+        "receipt",
+        "resend confirmation",
+        "email receipt",
+        "send me confirmation",
+        "resend my email",
+        "send receipt again"
+      ]
+    },
+    {
+      "name": "size_fit",
+      "priority": 100,
+      "keywords": [
+        "what size",
+        "which size",
+        "recommend size",
+        "size should i",
+        "size would fit",
+        "will it fit",
+        "does it fit",
+        "how does it fit",
+        "fit tight",
+        "fit loose",
+        "too tight",
+        "too loose",
+        "too big",
+        "too small",
+        "sizing",
+        "measurements",
+        "i'm",
+        "i am",
+        "height",
+        "weight",
+        "cm tall",
+        "kg",
+        "inches tall",
+        "lbs",
+        "oversized fit",
+        "slim fit",
+        "relaxed fit",
+        "true to size"
+      ]
+    },
+    {
+      "name": "policy",
+      "priority": 90,
+      "keywords": [
+        "return",
+        "refund",
+        "shipping",
+        "delivery",
+        "exchange",
+        "rückgabe",
+        "versand",
+        "umtausch",
+        "policy",
+        "cancel",
+        "cancellation",
+        "tax",
+        "customs",
+        "vat",
+        "duty"
+      ]
+    },
+    {
+      "name": "history_meta",
+      "priority": 80,
+      "keywords": [
+        "what did i say",
+        "what did we talk",
+        "previous chat",
+        "earlier conversation",
+        "conversation history",
+        "before this",
+        "remind me what i said"
+      ]
+    },
+    {
+      "name": "lookup_product",
+      "priority": 70,
+      "keywords": [
+        "material is",
+        "made of",
+        "fabric",
+        "gsm",
+        "shrink",
+        "shrinkage",
+        "do your hoodies shrink",
+        "wash",
+        "washing instructions",
+        "care",
+        "durable",
+        "stretchy"
+      ]
+    },
+    {
+      "name": "discover",
+      "priority": 60,
+      "keywords": [
+        "hoodie",
+        "hoodies",
+        "t-shirt",
+        "tshirt",
+        "tee",
+        "tees",
+        "jacket",
+        "bomber",
+        "jeans",
+        "joggers",
+        "pants",
+        "trousers",
+        "sweatshirt",
+        "crewneck"
+      ]
+    },
+    {
+      "name": "generic",
+      "priority": 20,
+      "keywords": [
+        "what is cove",
+        "tell me about your brand",
+        "what makes cove different",
+        "what makes kove different",
+        "are you premium",
+        "are you budget",
+        "luxury streetwear"
+      ]
+    },
+    {
+      "name": "greeting",
+      "priority": 15,
+      "keywords": [
+        "hi",
+        "hello",
+        "hey",
+        "good morning",
+        "good evening",
+        "good night",
+        "thanks",
+        "thank you"
+      ]
+    },
+    {
+      "name": "small_talk",
+      "priority": 12,
+      "keywords": [
+        "how are you",
+        "tell me a joke",
+        "who created you",
+        "what can you do"
+      ]
+    }
+  ],
+  "brand_aliases": [
+    "cove",
+    "kove",
+    "wearcove",
+    "wearcove.ai"
+  ]
+}

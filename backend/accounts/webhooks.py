@@ -5,6 +5,10 @@ from django.conf import settings
 from svix.webhooks import Webhook, WebhookVerificationError
 
 from .models import CustomUser
+from payments.utils import sanitize_email, generate_fallback_email
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def _primary_email_from_clerk(data: dict) -> str | None:
@@ -25,7 +29,11 @@ def clerk_webhook(request):
 
     secret = getattr(settings, "CLERK_WEBHOOK_SECRET", None)
     if not secret:
-        return JsonResponse({"error": "CLERK_WEBHOOK_SECRET not set"}, status=500)
+        log.critical("CLERK_WEBHOOK_SECRET not configured - webhooks cannot be verified!")
+        return JsonResponse(
+            {"error": "service_misconfigured", "details": "Webhook verification unavailable"},
+            status=503
+        )
 
     payload = request.body.decode("utf-8")
     headers = {
@@ -38,15 +46,23 @@ def clerk_webhook(request):
         Webhook(secret).verify(payload, headers)
         event = json.loads(payload)
     except WebhookVerificationError:
+        log.error("Clerk webhook: invalid signature")
         return JsonResponse({"error": "Invalid signature"}, status=400)
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+        log.exception("Clerk webhook: parsing error")
+        return JsonResponse({"error": "webhook_error"}, status=400)
 
     etype = event.get("type")
     data = event.get("data", {})
 
-    clerk_user_id = data.get("id")                    # <-- maps to CustomUser.user_id
-    email = _primary_email_from_clerk(data) or ""
+    clerk_user_id = data.get("id")  # maps to CustomUser.user_id
+    email_raw = _primary_email_from_clerk(data)
+    
+    # ---- SECURITY FIX: Sanitize email and use hashed fallback ----
+    email = sanitize_email(email_raw)
+    if not email:
+        email = generate_fallback_email(clerk_user_id)
+    
     first_name = data.get("first_name") or ""
     last_name = data.get("last_name") or ""
     image_url = data.get("image_url") or ""
@@ -56,11 +72,11 @@ def clerk_webhook(request):
         user, _created = CustomUser.objects.update_or_create(
             user_id=clerk_user_id,
             defaults={
-                "email": email or f"{clerk_user_id}@noemail.local",  # email is unique in your model
+                "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
                 "image_url": image_url,
-                "username": email or clerk_user_id,                 # optional username
+                "username": email or clerk_user_id,
                 "is_active": True,
             },
         )

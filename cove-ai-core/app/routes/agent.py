@@ -28,7 +28,15 @@ from app.config import DJANGO_BASE_URL, COVE_CORE_BASE_URL
 from app.cove_ai_tools import recommendations as tools_recs
 from app.cove_ai_tools import size_fit as tools_size_fit
 from app.cove_ai_tools import cart as tools_cart
+# Week 4 - Phase 4: Commerce tools
+from app.cove_ai_tools import checkout as tools_checkout
+from app.cove_ai_tools import orders as tools_orders
+from app.cove_ai_tools import emails as tools_emails
 from app.history_logger import log_history_turn
+# Week 4 - Phase 5: Performance optimizations
+from app.core.cache import get_cached, set_cached, make_cache_key
+from app.core.policy_cache import get_policy_answer
+from app.core.performance import measure_time
 
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
@@ -188,18 +196,37 @@ class AgentItem(BaseModel):
     variantId: Optional[str] = None
 
 
+# Week 4: Agentic Enhancement - Visible Thinking Status
+class AgentStatus(BaseModel):
+    """Status updates to show agent's thinking process"""
+    kind: Literal["status"]
+    status: Literal[
+        "searching",
+        "analyzing",
+        "reasoning",
+        "comparing",
+        "recommending",
+        "adding_to_cart",
+        "creating_checkout"
+    ]
+    message: str
+    details: Optional[str] = None
+
+
 class AgentOut(BaseModel):
-    kind: Literal["answer", "recommendations", "cart_proposal"]
+    kind: Literal["answer", "recommendations", "cart_proposal", "checkout_ready"]
     answer: str
     citations: List[Dict[str, Any]] = Field(default_factory=list)
     items: List[AgentItem] = Field(default_factory=list)
     cart_payload: Optional[Dict[str, Any]] = None
+    checkout: Optional[Dict[str, Any]] = None  # Week 4: For checkout_ready responses
+    thinking_steps: Optional[List[Dict[str, str]]] = None  # Week 4: Agentic - Show reasoning
     debug_plan: Optional[Dict[str, Any]] = None
 
 
 class AgentCartAddIn(BaseModel):
     variantId: str
-    size: str
+    size: Optional[str] = None  # Allow None for cart proposals without size
     quantity: int = 1
 
     cartId: Optional[str] = None
@@ -316,6 +343,8 @@ def _apply_profile_defaults_to_filters(
 
 _SESSION_RECS: Dict[str, List[Dict[str, Any]]] = {}
 _SESSION_LAST_USER_MSG: Dict[str, str] = {}
+# Week 4: Track when we asked user for size
+_SESSION_AWAITING_SIZE: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, ...}}
 
 
 def _session_key_from_body(body: AgentIn) -> Optional[str]:
@@ -340,6 +369,28 @@ def _get_session_recs(body: AgentIn) -> List[Dict[str, Any]]:
     if not key:
         return []
     return _SESSION_RECS.get(key, [])
+
+
+def _set_awaiting_size(body: AgentIn, product_info: Dict[str, Any]) -> None:
+    """Store that we're waiting for size input from this session."""
+    key = _session_key_from_body(body)
+    if key:
+        _SESSION_AWAITING_SIZE[key] = product_info
+
+
+def _get_awaiting_size(body: AgentIn) -> Optional[Dict[str, Any]]:
+    """Get product info if we're waiting for size from this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_AWAITING_SIZE.get(key)
+
+
+def _clear_awaiting_size(body: AgentIn) -> None:
+    """Clear size-awaiting state."""
+    key = _session_key_from_body(body)
+    if key and key in _SESSION_AWAITING_SIZE:
+        del _SESSION_AWAITING_SIZE[key]
 
 
 def _update_last_user_message(body: AgentIn) -> None:
@@ -944,7 +995,8 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     intent_kind = getattr(intent, "kind", "generic")
     has_price_filter = getattr(intent, "has_price_filter", False)
 
-    wants_cart = _looks_like_cart_add(q)
+    # Don't treat checkout intent as cart_add
+    wants_cart = _looks_like_cart_add(q) and intent_kind != "checkout_start"
     wants_recs = (not wants_cart) and (intent_kind == "discover")
 
     debug_plan: Dict[str, Any] = {
@@ -958,6 +1010,67 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         "llm_used": False,
         "history_scope": body.historyScope,
     }
+    
+    # Week 4: Check if we were awaiting size input
+    awaiting = _get_awaiting_size(body)
+    if awaiting:
+        # If user is starting a new discover query, clear stale awaiting state
+        if intent_kind == "discover" and not _looks_like_cart_add(q):
+            _clear_awaiting_size(body)
+            awaiting = None  # Treat as if no awaiting state
+        
+    if awaiting:
+        # Only process size if this looks like JUST a size response
+        # Use existing cart add detection (no hardcoding!)
+        size = None
+        
+        # Check if message looks like cart add intent using existing function
+        has_cart_intent = _looks_like_cart_add(q)
+        
+        # Only extract size if NOT a cart add command
+        if not has_cart_intent:
+            match = re.search(r'\b(?:size\s+)?([smlxSMLX]{1,3})\b', q)
+            if match:
+                size = match.group(1).upper()
+        
+        if size:
+            # Clear the awaiting state
+            _clear_awaiting_size(body)
+            
+            # Recreate cart_proposal with the size
+            product = awaiting["product"]
+            top = AgentItem(**product)
+            
+            nice_type = (top.type or "").lower()
+            nice_color = (top.color or "").lower()
+            
+            parts = ["Do you want me to add this"]
+            if nice_color:
+                parts.append(nice_color)
+            parts.append(nice_type)
+            parts.append(f"in size {size}")
+            parts.append("to your cart?")
+            answer = " ".join(parts).replace("  ", " ").strip()
+            
+            cart_payload = {
+                "variantId": top.variantId,
+                "size": size,
+                "quantity": 1,
+                "cartId": body.cartId,
+                "clerkUserId": body.clerkUserId,
+                "guestSessionId": body.guestSessionId,
+                "email": body.email,
+            }
+            
+            return AgentOut(
+                kind="cart_proposal",
+                answer=answer,
+                citations=[],
+                items=[top],
+                cart_payload=cart_payload,
+                debug_plan={**debug_plan, "size_provided_in_followup": True},
+            )
+        # If has_cart_intent, just fall through - don't clear state, let normal flow handle it
 
     if ai_profile:
         debug_plan["ai_profile_used"] = True
@@ -991,6 +1104,27 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 top = AgentItem(**chosen_raw)
 
                 chosen_size = rec_filters.get("size") or top.size
+                
+                # Week 4: If size not specified, ask user instead of cart_proposal with null
+                if not chosen_size:
+                    nice_type = (top.type or rec_filters.get("type") or "item").lower()
+                    nice_color = (top.color or rec_filters.get("color") or "").lower()
+                    product_desc = f"{nice_color} {nice_type}".strip() if nice_color else nice_type
+                    
+                    # Store that we're awaiting size for this product
+                    _set_awaiting_size(body, {
+                        "product": top.dict(),
+                        "filters": rec_filters,
+                    })
+                    
+                    return AgentOut(
+                        kind="answer",
+                        answer=f"Great choice! What size would you like for the {product_desc}? (S, M, L, XL)",
+                        citations=[],
+                        items=[top],
+                        debug_plan=debug_plan,
+                    )
+                
                 nice_type = (top.type or rec_filters.get("type") or "item").lower()
                 nice_color = (top.color or rec_filters.get("color") or "").lower()
                 nice_size = (chosen_size or "").upper()
@@ -1163,6 +1297,192 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
         debug_plan["fit_used"] = False
 
+    # --- Branch 2a: CHECKOUT (Week 4) -------------------------------------------
+    if intent_kind == "checkout_start":
+        try:
+            payload = {
+                "clerkUserId": body.clerkUserId,
+                "guestSessionId": body.guestSessionId,
+                "email": body.email,
+                "country": "DE",  # Default, could be enhanced with user profile
+                "shippingSpeed": "standard",
+            }
+            
+            result = await tools_checkout.checkout_start(payload)
+            
+            if result.get("ok"):
+                checkout_data = result["data"]
+                checkout_url = checkout_data["paymentUrl"]
+                total = checkout_data.get("total", "0.00")
+                
+                debug_plan["checkout_used"] = True
+                debug_plan["checkout_total"] = total
+                
+                # Week 4: Offer two checkout options for better UX
+                return AgentOut(
+                    kind="checkout_ready",
+                    answer=f"✅ Checkout ready! Your total is €{total}. Choose how you'd like to proceed:",
+                    citations=[],
+                    items=[],
+                    checkout={
+                        "paymentUrl": checkout_url,
+                        "checkoutPageUrl": "/checkoutpage",  # Review cart page
+                        "total": float(total) if total else 0.0,
+                        "currency": "EUR",
+                        "checkoutId": checkout_data.get("checkoutId", ""),
+                    },
+                    debug_plan=debug_plan,
+                )
+            else:
+                error_msg = result.get("error", "Checkout failed")
+                debug_plan["checkout_error"] = error_msg
+                
+                return AgentOut(
+                    kind="answer",
+                    answer=f"Sorry, I couldn't start checkout: {error_msg}",
+                    citations=[],
+                    items=[],
+                    debug_plan=debug_plan,
+                )
+        except Exception as e:
+            log.exception("checkout_start failed")
+            return AgentOut(
+                kind="answer",
+                answer="Sorry, checkout is temporarily unavailable. Please try again.",
+                citations=[],
+                items=[],
+                debug_plan=debug_plan,
+            )
+
+    # --- Branch 2b: ORDER HISTORY (Week 4) --------------------------------------
+    if intent_kind == "order_query":
+        try:
+            payload = {
+                "clerkUserId": body.clerkUserId,
+                "guestSessionId": body.guestSessionId,
+                "email": body.email,
+                "limit": 5,
+            }
+            
+            result = await tools_orders.order_get_status(payload)
+            
+            if result.get("ok"):
+                orders = result["data"]["orders"]
+                
+                if not orders:
+                    return AgentOut(
+                        kind="answer",
+                        answer="You don't have any orders yet. Ready to start shopping?",
+                        citations=[],
+                        items=[],
+                        debug_plan=debug_plan,
+                    )
+                
+                # Format order summary
+                summary_lines = []
+                for order in orders[:3]:  # Show max 3
+                    summary_lines.append(
+                        f"• Order #{order['orderId']}: €{order['total']} - "
+                        f"{order['itemCount']} items - {order['status']}"
+                    )
+                
+                answer = "Here are your recent orders:\\n" + "\\n".join(summary_lines)
+                
+                debug_plan["orders_found"] = len(orders)
+                
+                return AgentOut(
+                    kind="answer",
+                    answer=answer,
+                    citations=[],
+                    items=[],
+                    debug_plan=debug_plan,
+                )
+            else:
+                error_msg = result.get("error", "Couldn't fetch orders")
+                return AgentOut(
+                    kind="answer",
+                    answer=f"Sorry, {error_msg}",
+                    citations=[],
+                    items=[],
+                    debug_plan=debug_plan,
+                )
+        except Exception as e:
+            log.exception("order_query failed")
+            return AgentOut(
+                kind="answer",
+                answer="Sorry, couldn't retrieve your orders right now.",
+                citations=[],
+                items=[],
+                debug_plan=debug_plan,
+            )
+
+    # --- Branch 2c: EMAIL RESEND (Week 4) ---------------------------------------
+    if intent_kind == "order_email":
+        try:
+            # First get last order
+            payload = {
+                "clerkUserId": body.clerkUserId,
+                "guestSessionId": body.guestSessionId,
+                "email": body.email,
+                "limit": 1,
+            }
+            
+            order_result = await tools_orders.order_get_status(payload)
+            
+            if order_result.get("ok") and order_result["data"]["orders"]:
+                last_order_id = order_result["data"]["orders"][0]["orderId"]
+                
+                # Resend email
+                email_payload = {
+                    "orderId": last_order_id,
+                    "forceResend": False,
+                }
+                
+                email_result = await tools_emails.email_send_order_confirmation(email_payload)
+                
+                if email_result.get("ok"):
+                    data = email_result["data"]
+                    if data["alreadySent"]:
+                        answer = f"The confirmation for order #{last_order_id} was already sent to {data['sentTo']}."
+                    else:
+                        answer = f"✅ Confirmation email sent to {data['sentTo']} for order #{last_order_id}!"
+                    
+                    debug_plan["email_sent"] = True
+                    debug_plan["order_id"] = last_order_id
+                    
+                    return AgentOut(
+                        kind="answer",
+                        answer=answer,
+                        citations=[],
+                        items=[],
+                        debug_plan=debug_plan,
+                    )
+                else:
+                    return AgentOut(
+                        kind="answer",
+                        answer=f"Sorry, couldn't send the email: {email_result.get('error', 'Unknown error')}",
+                        citations=[],
+                        items=[],
+                        debug_plan=debug_plan,
+                    )
+            else:
+                return AgentOut(
+                    kind="answer",
+                    answer="No orders found to resend confirmation for.",
+                    citations=[],
+                    items=[],
+                    debug_plan=debug_plan,
+                )
+        except Exception as e:
+            log.exception("order_email failed")
+            return AgentOut(
+                kind="answer",
+                answer="Sorry, couldn't resend confirmation email right now.",
+                citations=[],
+                items=[],
+                debug_plan=debug_plan,
+            )
+
     # --- Branch 3: recommendations (browse products) ---------------------------
     if wants_recs:
         rec_query = build_rec_query(q, rec_filters)
@@ -1204,13 +1524,36 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             if intro_info.get("llm_used"):
                 debug_plan["llm_used"] = True
 
-            answer_text = intro_info.get("text", "Here are some options that match what you asked for.")
+            intro_line = intro_info.get("text", "Here are some options that match what you asked for.")
+
+            # Week 4: Agentic Enhancement - Show thinking process
+            thinking_steps = [
+                {
+                    "icon": "🔍",
+                    "status": "Searching catalog",
+                    "detail": f"Found {len(items)} {rec_filters.get('type', 'items')}"
+                },
+            ]
+            
+            if ai_profile:
+                thinking_steps.append({
+                    "icon": "🧠",
+                    "status": "Analyzing preferences",
+                    "detail": f"Filtered to {rec_filters.get('tier', 'preferred')} tier"
+                })
+            
+            thinking_steps.append({
+                "icon": "✨",
+                "status": "Ranking matches",
+                "detail": f"Top {len(items)} recommendations ready"
+            })
 
             return AgentOut(
                 kind="recommendations",
-                answer=answer_text,
+                answer=intro_line,
                 citations=[],
                 items=items,
+                thinking_steps=thinking_steps,  # Week 4: Show reasoning
                 debug_plan=debug_plan,
             )
 
@@ -1227,6 +1570,22 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     )
 
     if use_llm_chat and not wants_cart and not wants_recs:
+        # Phase 5: Check static policy cache first (instant response)
+        if intent_kind == "policy":
+            policy_answer = get_policy_answer(body.message)
+            if policy_answer:
+                debug_plan["policy_cache_hit"] = True
+                debug_plan["cache_used"] = True
+                
+                return AgentOut(
+                    kind="answer",
+                    answer=policy_answer,
+                    citations=[],
+                    items=[],
+                    debug_plan=debug_plan,
+                )
+        
+        # No cache hit, use LLM
         llm_resp = await _call_llm_with_history(body, intent_kind=intent_kind)
         debug_plan["llm_used"] = True
         debug_plan["llm_history_len"] = llm_resp.get("history_len", 0)

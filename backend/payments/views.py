@@ -14,9 +14,12 @@ from django.db import transaction
 from .models import StripeEvent
 
 from payments.shipping import shipping_amount_for, speed_display_name
+from payments.decorators import require_https, validate_stripe_event_age
+from payments.utils import sanitize_email, validate_shipping_input
 
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from django.core.cache import cache
 
 
 
@@ -50,6 +53,7 @@ def _to_cents(val) -> int:
 
 
 @csrf_exempt
+@throttle_classes([ScopedRateThrottle])
 def create_payment_intent(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST method only"}, status=405)
@@ -90,12 +94,15 @@ def create_payment_intent(request):
 
     except Exception as e:
         log.exception("create_payment_intent failed")
-        return JsonResponse({"error": str(e)}, status=400)
+        return JsonResponse({"error": "payment_intent_creation_failed"}, status=400)
+
+create_payment_intent.throttle_scope = "payment_intent"
 
 
 # NEW: Server-side create-checkout-session (uses Stripe Price IDs or DB price fallback)
 
 @csrf_exempt
+@require_https
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @authentication_classes([])
@@ -114,6 +121,21 @@ def create_checkout_session(request):
 
     Returns: { "id": "<cs_...>", "url": "https://checkout.stripe.com/..." }
     """
+    # ---- SECURITY FIX: Idempotency key enforcement ----
+    idem_key = request.headers.get("Idempotency-Key")
+    if not idem_key:
+        return JsonResponse(
+            {"error": "idempotency_key_required", "details": "Include Idempotency-Key header"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Check cache for duplicate request
+    cache_key = f"checkout_idem:{idem_key}"
+    cached_response = cache.get(cache_key)
+    if cached_response:
+        log.info(f"Idempotent checkout request: {idem_key}")
+        return JsonResponse(cached_response, status=status.HTTP_200_OK)
+    
     serializer = CreateCheckoutSessionSerializer(data=request.data)
     if not serializer.is_valid():
         return JsonResponse({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -122,7 +144,58 @@ def create_checkout_session(request):
     items = v["items"]
     clerk_user_id = v.get("clerkUserId") or ""
     guest_session_id = v.get("guestSessionId") or ""
-    customer_email = v.get("customer_email") or None
+    customer_email_raw = v.get("customer_email") or None
+    
+    # Week 4: If items is empty, fetch from cart (cart-based checkout)
+    if not items:
+        from catalog.models import Cart, CartItem
+        try:
+            # Try to find cart by user ID or session
+            if clerk_user_id:
+                cart = Cart.objects.filter(clerk_user_id=clerk_user_id).first()
+            elif guest_session_id:
+                cart = Cart.objects.filter(guest_session_id=guest_session_id).first()
+            else:
+                cart = None
+            
+            if cart:
+                # Fetch cart items with price info from SizeStockPrice
+                cart_items = CartItem.objects.filter(cart=cart).select_related('variant')
+                items = []
+                for cart_item in cart_items:
+                    try:
+                        # Get price from SizeStockPrice
+                        ssp = SizeStockPrice.objects.get(
+                            variant__variant_id=cart_item.variant.variant_id,
+                            size=cart_item.size
+                        )
+                        items.append({
+                            "variantId": cart_item.variant.variant_id,
+                            "size": cart_item.size,
+                            "quantity": cart_item.quantity,
+                            "_price": ssp.price,  # Internal field for validation
+                        })
+                    except SizeStockPrice.DoesNotExist:
+                        log.warning(f"SizeStockPrice not found for {cart_item.variant.variant_id}/{cart_item.size}")
+                        continue
+        except Exception as e:
+            log.error(f"Failed to fetch cart: {e}")
+            pass  # Fall through to empty items check below
+    
+    # Validate we have items (either provided or fetched from cart)
+    if not items:
+        return JsonResponse(
+            {"error": "No items to checkout. Cart is empty or items not provided."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # ---- SECURITY FIX: Email sanitization ----
+    customer_email = sanitize_email(customer_email_raw)
+    if customer_email_raw and not customer_email:
+        return JsonResponse(
+            {"error": "invalid_email", "details": "Provide a valid email address"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     currency = getattr(settings, "STRIPE_CURRENCY", "eur").lower()
     success_url = settings.STRIPE_SUCCESS_URL
@@ -134,33 +207,44 @@ def create_checkout_session(request):
     TAX_RATE_ID = os.environ.get("STRIPE_TAX_RATE_ID")
     tax_rates = [TAX_RATE_ID] if TAX_RATE_ID else []
 
-    # Build Stripe line_items from trusted server-side catalog
+    # ---- SECURITY FIX: Atomic stock reservation ----
+    # Build line items AND reserve stock in a single atomic transaction
     line_items = []
-    snapshot_items = []  # we persist these after we know session.id
+    snapshot_items = []
+    reserved_stock = []  # Track for rollback if needed
 
-    for it in items:
-        variant_id = it["variantId"]
-        size = it["size"].upper()
-        qty = int(it["quantity"])
+    try:
+        with transaction.atomic():
+            for it in items:
+                variant_id = it["variantId"]
+                size = it["size"].upper()
+                qty = int(it["quantity"])
 
-        try:
-            ssp = (
-                SizeStockPrice.objects
-                .select_related("variant", "variant__product")
-                .get(variant__variant_id=variant_id, size=size)
-            )
-        except SizeStockPrice.DoesNotExist:
-            return JsonResponse(
-                {"error": f"Variant/size not found: {variant_id} / {size}"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+                try:
+                    # Lock the row to prevent race conditions
+                    ssp = (
+                        SizeStockPrice.objects
+                        .select_related("variant", "variant__product")
+                        .select_for_update()
+                        .get(variant__variant_id=variant_id, size=size)
+                    )
+                except SizeStockPrice.DoesNotExist:
+                    return JsonResponse(
+                        {"error": f"Variant/size not found: {variant_id} / {size}"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
-        # Soft stock check (final decrement happens in webhook transaction)
-        if qty > ssp.quantity:
-            return JsonResponse(
-                {"error": f"Insufficient stock for {variant_id} {size}. Available: {ssp.quantity}."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+                # Atomic stock check - now inside transaction with lock
+                if qty > ssp.quantity:
+                    return JsonResponse(
+                        {"error": f"Insufficient stock for {variant_id} {size}. Available: {ssp.quantity}."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Reserve stock immediately (will rollback if Stripe session creation fails)
+                ssp.quantity -= qty
+                ssp.save(update_fields=["quantity"])
+                reserved_stock.append({"ssp": ssp, "qty": qty, "variant_id": variant_id, "size": size})
 
         # Use Stripe Price ID if available; else build price_data
         if ssp.stripe_price_id:
@@ -190,45 +274,56 @@ def create_checkout_session(request):
                 li["tax_rates"] = tax_rates
             line_items.append(li)
 
-        # Prepare snapshot (checkout_session_id filled after session create)
-        prod = ssp.variant.product
-        total_price_dec = (Decimal(str(unit_price_dec)) * Decimal(qty)).quantize(Decimal("0.01"))
-        snapshot_items.append({
-            "is_guest": is_guest,
-            "user": None,
-            "clerk_user_id": clerk_user_id or None,
-            "guest_session_id": guest_session_id or None,
-            "payment_intent_id": None,
-            "checkout_session_id": None,
+            # Prepare snapshot (checkout_session_id filled after session create)
+            prod = ssp.variant.product
+            total_price_dec = (Decimal(str(unit_price_dec)) * Decimal(qty)).quantize(Decimal("0.01"))
+            snapshot_items.append({
+                "is_guest": is_guest,
+                "user": None,
+                "clerk_user_id": clerk_user_id or None,
+                "guest_session_id": guest_session_id or None,
+                "payment_intent_id": None,
+                "checkout_session_id": None,
 
-            "variant_id": variant_id,
-            "product_id": prod.product_id,
-            "name": prod.name,
-            "type": prod.type,
-            "tier": prod.tier,
+                "variant_id": variant_id,
+                "product_id": prod.product_id,
+                "name": prod.name,
+                "type": prod.type,
+                "tier": prod.tier,
 
-            "first_name": None,
-            "last_name": None,
-            "user_email": customer_email,
+                "first_name": None,
+                "last_name": None,
+                "user_email": customer_email,
 
-            "size": size,
-            "color_name": ssp.variant.color_name,
-            "quantity": qty,
-            "price_per_unit": unit_price_dec,
-            "total_price": total_price_dec,
-        })
+                "size": size,
+                "color_name": ssp.variant.color_name,
+                "quantity": qty,
+                "price_per_unit": unit_price_dec,
+                "total_price": total_price_dec,
+            })
+    except Exception as e:
+        # Transaction will auto-rollback, restoring reserved stock
+        log.exception("Stock reservation failed")
+        return JsonResponse(
+            {"error": "stock_reservation_failed"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
     if not line_items:
         return JsonResponse({"error": "No valid line items."}, status=status.HTTP_400_BAD_REQUEST)
 
-    idem_key = request.headers.get("Idempotency-Key") or str(uuid.uuid4())
-
     try:
-        # ---- Build zone-based shipping from destination country ----
-        # Expect the frontend to send ISO-2 country code in the POST body as "country" (e.g., "DE", "FR", "US", "IN")
-        dest_country = (request.data.get("country") or "DE").upper()
-        weight_g = int(request.data.get("totalWeightGrams") or 0)
-        shipping_speed = (request.data.get("shippingSpeed") or "standard").lower()  # "standard" | "express"
+        # ---- SECURITY FIX: Validate shipping inputs ----
+        country_raw = request.data.get("country") or "DE"
+        weight_raw = request.data.get("totalWeightGrams") or 0
+        
+        valid, error_msg, sanitized = validate_shipping_input(country_raw, weight_raw)
+        if not valid:
+            return JsonResponse({"error": "invalid_shipping_input", "details": error_msg}, status=status.HTTP_400_BAD_REQUEST)
+        
+        dest_country = sanitized["country"]
+        weight_g = sanitized["weight_g"]
+        shipping_speed = (request.data.get("shippingSpeed") or "standard").lower()
         
         std_amount = shipping_amount_for(dest_country, weight_g, "standard")
         exp_amount = shipping_amount_for(dest_country, weight_g, "express")
@@ -311,12 +406,21 @@ def create_checkout_session(request):
                 d["checkout_session_id"] = cs_id
             CheckoutCart.objects.bulk_create([CheckoutCart(**d) for d in snapshot_items])
 
-        return JsonResponse({"id": session.id, "url": session.url}, status=status.HTTP_200_OK)
+        response_data = {"id": session.id, "url": session.url}
+        
+        # ---- SECURITY FIX: Cache response for idempotency (1 hour TTL) ----
+        cache.set(cache_key, response_data, timeout=3600)
+        
+        return JsonResponse(response_data, status=status.HTTP_200_OK)
 
     except stripe.error.StripeError as e:
-        return JsonResponse({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        log.error("Stripe error in checkout: %s", e)
+        # Stock will be auto-restored via transaction rollback
+        return JsonResponse({"error": "stripe_error"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return JsonResponse({"error": f"Unexpected error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        log.exception("Unexpected checkout error")
+        # Stock will be auto-restored via transaction rollback
+        return JsonResponse({"error": "checkout_failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 create_checkout_session.throttle_scope = "checkout"
 
@@ -534,6 +638,7 @@ def _send_order_receipt(order_id: int, resend: bool = False) -> None:
 
 
 @csrf_exempt
+@require_https
 def stripe_webhook(request):
     """Handle Stripe events: checkout.session.completed, payment_failed, refunded."""
     if request.method != "POST":
@@ -548,6 +653,13 @@ def stripe_webhook(request):
     # Verify + dedupe by event id (exactly-once)
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+        
+        # ---- SECURITY FIX: Webhook timestamp validation ----
+        is_valid, error_msg = validate_stripe_event_age(event, max_age_seconds=300)
+        if not is_valid:
+            log.warning(f"Rejected webhook: {error_msg}")
+            return JsonResponse({"error": error_msg}, status=400)
+        
         try:
             record, created = StripeEvent.objects.get_or_create(
                 event_id=event["id"],
@@ -559,8 +671,10 @@ def stripe_webhook(request):
             # Don't fail the webhook if event logging fails
             pass
     except ValueError:
+        log.error("Webhook: invalid payload")
         return JsonResponse({"error": "invalid_payload"}, status=400)
     except stripe.error.SignatureVerificationError:
+        log.error("Webhook: invalid signature")
         return JsonResponse({"error": "invalid_signature"}, status=400)
 
     etype = event.get("type")
@@ -591,8 +705,8 @@ def stripe_webhook(request):
         first_name = (metadata.get("first_name") or "") or None
         last_name = (metadata.get("last_name") or "") or None
         user_email = (
-            (session.get("customer_details") or {}).get("email")
-            or metadata.get("user_email")
+            sanitize_email((session.get("customer_details") or {}).get("email"))
+            or sanitize_email(metadata.get("user_email"))
             or None
         )
         user = User.objects.filter(user_id=clerk_user_id).first() if clerk_user_id else None

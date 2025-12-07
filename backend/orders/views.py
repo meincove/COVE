@@ -183,3 +183,62 @@ class MyOrdersView(APIView):
         qs = qs.prefetch_related("items")[:limit]
 
         return Response(OrderSerializer(qs, many=True).data, status=200)
+
+
+class SendOrderReceiptView(APIView):
+    """
+    POST /api/orders/send-receipt/
+    Body: {"orderId": 123, "forceResend": false}
+    
+    Resends the order confirmation email for a specific order.
+    """
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [throttling.ScopedRateThrottle]
+    throttle_scope = "order_email"
+    
+    def post(self, request):
+        order_id = request.data.get("orderId")
+        force_resend = request.data.get("forceResend", False)
+        
+        if not order_id:
+            return Response(
+                {"error": "orderId is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Verify order exists
+            order = Order.objects.get(pk=order_id)
+        except Order.DoesNotExist:
+            return Response(
+                {"error": f"Order {order_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Import the email sender from payments
+        from payments.views import _send_order_receipt
+        
+        try:
+            # Send the email (idempotent by default unless forceResend=True)
+            _send_order_receipt(order.id, resend=force_resend)
+            
+            # Check if email was actually sent
+            order.refresh_from_db()
+            was_sent = order.receipt_emailed
+            
+            return Response({
+                "ok": True,
+                "data": {
+                    "orderId": order.id,
+                    "sent": was_sent,
+                    "alreadySent": was_sent and not force_resend,
+                    "sentTo": order.user_email or "unknown"
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.exception(f"Failed to send receipt for order {order_id}")
+            return Response(
+                {"error": "Failed to send receipt", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
