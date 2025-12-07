@@ -7,7 +7,7 @@ from .models import UserProfile
 
 # Customize UserProfile display in admin
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone_number', 'clerk_id', 'created_at')
-    search_fields = ('user__email', 'user__username', 'phone_number', 'clerk_id')
+    list_display = ('user', 'phone_number', 'clerk_user_id', 'created_at')
+    search_fields = ('user__email', 'user__username', 'phone_number', 'clerk_user_id')
 
 

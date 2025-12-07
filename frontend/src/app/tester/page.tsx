@@ -4,7 +4,6 @@
 import SectionOne from "@/src/components/tester/SectionOne";
 import SectionTwo from "@/src/components/tester/SectionTwo";
 import SectionThree from "@/src/components/tester/SectionThree";
-import GlobalScrollHUD from "@/src/components/dev/GlobalScrollHUD";
 import LightRunwayScene from "@/src/components/LightRunway";
 
 export default function TesterPage() {
@@ -14,12 +13,9 @@ export default function TesterPage() {
       <SectionOne />
 
       <LightRunwayScene />
-      
+
       <SectionTwo />
       <SectionThree />
-
-      {/* global page HUD – always visible on /tester */}
-      <GlobalScrollHUD containerSel=".tester-frame" />
     </div>
   );
 }

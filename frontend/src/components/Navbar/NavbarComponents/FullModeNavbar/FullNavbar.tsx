@@ -9,7 +9,7 @@ import { useScrollPhase } from "../../hooks/useScrollPhase";
 import { useCartStore } from "@/src/store/cartStore";
 import CartModal from "@/src/components/Catalog/CartModal";
 import { useRouter } from "next/navigation";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 
 type LayoutPhase = "expanded" | "compressed";
 
@@ -28,8 +28,8 @@ export default function FullNavbar() {
   const { items } = useCartStore();
   const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
   const router = useRouter();
-  const { openSignIn, openSignUp } = useClerk();
   const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const leftRef = useRef<HTMLDivElement | null>(null);
@@ -165,25 +165,37 @@ export default function FullNavbar() {
               }}
             >
               {isSignedIn ? (
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium bg-black text-white hover:bg-black/90"
-                >
-                  Dashboard
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard")}
+                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium bg-black text-white hover:bg-black/90"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await signOut()
+                      router.push('/')
+                    }}
+                    className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm hover:bg-black/5"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <>
                   <button
                     type="button"
-                    onClick={() => openSignIn()}
+                    onClick={() => router.push('/sign-in')}
                     className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm hover:bg-black/5"
                   >
                     Sign in
                   </button>
                   <button
                     type="button"
-                    onClick={() => openSignUp()}
+                    onClick={() => router.push('/sign-up')}
                     className="hidden sm:inline-flex rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium bg-black text-white hover:bg-black/90"
                   >
                     Sign up

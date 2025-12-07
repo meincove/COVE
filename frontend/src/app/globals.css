@@ -155,18 +155,39 @@ html {
     filter: none;
   }
 
-  /* Navbar sits inside the frame so it moves with it */
+  /* Navbar wrapper - FIXED at top with WHITE background */
   .nav-stick {
-    position: sticky;
+    position: fixed;
     top: 0;
-    height: 0;
-    z-index: 210;
+    left: 0;
+    right: 0;
+    height: auto;
+    /* Changed from 0 to auto */
+    z-index: 300;
+    /* Higher z-index */
     pointer-events: auto;
+    background: white;
+    /* Solid white background */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  /* FULL MODE ONLY – stays fully transparent over aurora */
-  .nav-stick.nav-fullmode,
-  .nav-shell.nav-fullmode-shell {}
+  /* FULL MODE navbar shell */
+  .nav-stick.nav-fullmode {
+    background: white !important;
+    /* Force white background */
+  }
+
+  .nav-shell.nav-fullmode-shell {
+    background: white !important;
+    /* Force white background */
+  }
+
+  /* Add padding to body to account for fixed navbar */
+  body {
+    padding-top: 88px;
+    /* Height of navbar */
+  }
 
   /* Body surface holding page sections (demo) */
   .content-surface {
@@ -257,51 +278,6 @@ html {
   }
 
   html.overlay-dev .overlay-root {
-    pointer-events: auto;
-  }
-
-  /* ===== NAV: full (space-taking) vs island (floating) ===== */
-
-  /* Full navbar wrapper TAKES space */
-  .nav-full-wrap {
-    position: relative;
-    /* Changed from sticky to relative so it takes space */
-    z-index: 210;
-    background: transparent;
-    min-height: 88px;
-    /* Ensure it takes vertical space */
-  }
-
-  /* Full shell (wide bar) - now sticky within the wrapper */
-  .nav-full-shell {
-    position: sticky;
-    top: 0;
-    height: 72px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 12px;
-
-    width: min(calc(100% - 24px), 1200px);
-    margin: 8px auto;
-    padding: 10px 10px;
-
-    border-radius: 0px;
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(12px);
-
-    color: #0b0b0b;
-    transition:
-      transform 0.28s ease,
-      opacity 0.28s ease;
-  }
-
-  /* Island wrapper: sticky but ZERO height */
-  .nav-island-wrap {
-    position: sticky;
-    top: 0;
     height: 0;
     z-index: 211;
     pointer-events: none;

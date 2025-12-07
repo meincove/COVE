@@ -113,7 +113,7 @@ def sync_user(request):
     try:
         # Clerk ID is the natural key, but we also make sure it is linked to this Django user
         ai_profile, profile_created = AiUserProfile.objects.get_or_create(
-            clerk_id=clerk_user_id,
+            clerk_user_id=clerk_user_id,
             defaults={
                 "user": user,
                 "phone_number": phone_number,
