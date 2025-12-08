@@ -61,8 +61,26 @@ class ProductRecommender:
         self.cf_enabled = cf_config["item_based_cf"]["enabled"]
         self.hybrid_fusion = cf_config["hybrid_fusion"]
         
+        # A/B testing support
+        self.ab_testing_enabled = False  # Set to True to enable A/B tests
+        
         log.info(f"ProductRecommender initialized with model: {self.embedding_model}")
         log.info(f"Collaborative filtering: {self.cf_enabled}")
+        log.info(f"A/B testing: {self.ab_testing_enabled}")
+    
+    def _should_enable_cf_for_user(self, user_id: Optional[str]) -> bool:
+        """Determine if CF should be enabled for this user (considering A/B tests)"""
+        if not self.cf_enabled:
+            return False
+        
+        if not self.ab_testing_enabled or not user_id:
+            return self.cf_enabled
+        
+        # Use A/B testing to determine CF enablement
+        from app.mcp_agents.product_recommender.ab_testing import get_ab_manager
+        ab_manager = get_ab_manager()
+        return ab_manager.should_use_cf(user_id)
+
     
     async def recommend(
         self,
@@ -94,8 +112,9 @@ class ProductRecommender:
         
         base_results = await hybrid.search(query, parsed_filters, limit=top_k * 2)
         
-        # Apply collaborative filtering if enabled and user_id provided
-        if self.cf_enabled and user_id:
+        # Apply collaborative filtering if enabled for this user (considers A/B testing)
+        cf_enabled_for_user = self._should_enable_cf_for_user(user_id)
+        if cf_enabled_for_user and user_id:
             base_results = await self._apply_collaborative_filtering(
                 base_results,
                 user_id,
