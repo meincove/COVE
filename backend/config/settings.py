@@ -155,7 +155,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "tools",
-    "ai_profiles"
+    "ai_profiles",
+    'analytics.apps.AnalyticsConfig',  # User interaction tracking (Dec 8, 2025)
 ]
 
 REST_FRAMEWORK = {
