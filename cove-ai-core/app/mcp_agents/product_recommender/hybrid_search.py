@@ -93,36 +93,17 @@ class HybridSearch:
         limit: int
     ) -> List[Dict[str, Any]]:
         """
-        Vector similarity search using pgvector.
-        
-        Uses cosine distance operator (<=>)
+        Vector similarity search using pgvector on Neon.
         """
-        # TODO: Integrate with actual pgvector database
-        # For now, mock implementation
+        from app.mcp_agents.product_recommender.vector_db import get_vector_db
         
-        log.debug(f"Vector search with {len(query_embedding)} dims, limit={limit}")
-        
-        # Mock results - will be replaced with actual DB query
-        mock_results = [
-            {
-                "id": "prod_001",
-                "title": "Cove Designer Hoodie",
-                "type": "hoodie",
-                "tier": "designer",
-                "price": 59.99,
-                "similarity_score": 0.87
-            },
-            {
-                "id": "prod_002",
-                "title": "Cove Designer Tee",
-                "type": "tee",
-                "tier": "designer",
-                "price": 34.99,
-                "similarity_score": 0.75
-            }
-        ]
-        
-        return mock_results
+        try:
+            vector_db = await get_vector_db()
+            results = await vector_db.vector_search(query_embedding, filters, limit)
+            return results
+        except Exception as e:
+            log.warning(f"Vector search failed, using fallback: {e}")
+            return self._mock_vector_results()
     
     async def _keyword_search(
         self,
@@ -131,26 +112,49 @@ class HybridSearch:
         limit: int
     ) -> List[Dict[str, Any]]:
         """
-        Keyword search using PostgreSQL full-text search (BM25-like).
+        Keyword search using PostgreSQL full-text search on Neon.
         """
-        # TODO: Integrate with actual Postgres full-text search
-        # For now, mock implementation
+        from app.mcp_agents.product_recommender.vector_db import get_vector_db
         
-        log.debug(f"Keyword search for '{query}', limit={limit}")
-        
-        # Mock results
-        mock_results = [
+        try:
+            vector_db = await get_vector_db()
+            results = await vector_db.keyword_search(query, filters, limit)
+            return results
+        except Exception as e:
+            log.warning(f"Keyword search failed, using fallback: {e}")
+            return self._mock_keyword_results()
+    
+    def _mock_vector_results(self) -> List[Dict[str, Any]]:
+        """Fallback mock results if database unavailable"""
+        log.debug("Using mock vector results (fallback)")
+        return [
             {
                 "id": "prod_001",
-                "title": "Cove Designer Hoodie",
+                "slug": "hoodie-designer-fleece-59.99",
+                "title": "Cove Designer Hoodie - MOCK",
                 "type": "hoodie",
                 "tier": "designer",
                 "price": 59.99,
+                "metadata": {},
+                "similarity_score": 0.87
+            }
+        ]
+    
+    def _mock_keyword_results(self) -> List[Dict[str, Any]]:
+        """Fallback mock results if database unavailable"""
+        log.debug("Using mock keyword results (fallback)")
+        return [
+            {
+                "id": "prod_001",
+                "slug": "hoodie-designer-fleece-59.99",
+                "title": "Cove Designer Hoodie - MOCK",
+                "type": "hoodie",
+                "tier": "designer",
+                "price": 59.99,
+                "metadata": {},
                 "keyword_score": 0.92
             }
         ]
-        
-        return mock_results
     
     def _reciprocal_rank_fusion(
         self,
