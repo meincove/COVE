@@ -15,6 +15,7 @@ import type {
 } from "@/types/agent";
 import ChatProductCard from "@/src/components/cove-ai/ChatProductCard";
 import ProductCarousel from "@/src/components/cove-ai/ProductCarousel";
+import SuggestedQueries from "@/src/components/cove-ai/SuggestedQueries";
 import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
 import LoadingSkeleton from "@/src/components/cove-ai/LoadingSkeleton";
 import Toast, { ToastType } from "@/src/components/cove-ai/Toast";
@@ -79,6 +80,7 @@ type AssistantMeta =
 
 type ChatMessage = BaseMessage & {
   meta?: AssistantMeta;
+  suggestedActions?: import("@/types/agent").SuggestedAction[];
 };
 
 function makeId() {
@@ -151,12 +153,14 @@ export default function CoveChatWidget() {
     thinkingSteps,
     introText,
     items: streamedItems,
+    error: streamError,
     isStreaming: isStreamingProgress,
     sendQuery: sendStreamingQuery,
     cartProposal,
     checkout,
     answer,
     kind,
+    suggestedActions,
   } = useAgentStream();
 
   // Week 6: Chat history persistence
@@ -166,7 +170,9 @@ export default function CoveChatWidget() {
   // Week 6: Router for navigation (no page refresh)
   const router = useRouter();
 
-  // Load history into messages on mount
+  // Week 6: Disabled auto-load of chat history (prevents seeing old chats)
+  // Users start fresh each time - history is still saved to DB
+  /*
   useEffect(() => {
     if (!historyLoading && history.length > 0 && messages.length === 0) {
       // Convert history to chat messages
@@ -180,6 +186,14 @@ export default function CoveChatWidget() {
       setHasStartedChat(true); // Mark as started if we have history
     }
   }, [history, historyLoading]);
+  */
+
+  // Clear messages when user signs out or signs in (prevents showing wrong user's history)
+  useEffect(() => {
+    // Clear messages and reset chat when auth state changes
+    setMessages([]);
+    setHasStartedChat(false);
+  }, [isSignedIn, user?.id]);
 
   // Make sure we *have* a guest session id
   useEffect(() => {
@@ -491,6 +505,7 @@ export default function CoveChatWidget() {
               kind: 'recommendations',
               items: streamedItems,
             },
+            suggestedActions: suggestedActions || [],
           }
         ];
       });
@@ -506,7 +521,7 @@ export default function CoveChatWidget() {
         },
       });
     }
-  }, [isStreamingProgress, introText, streamedItems, saveMessage]);
+  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage]);
 
   // Week 6: Handle cart proposal from streaming
   useEffect(() => {
@@ -765,12 +780,10 @@ export default function CoveChatWidget() {
           return (
             <div
               key={m.id}
-              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+              className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-300`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${isUser
-                  ? "bg-neutral-100 text-black"
-                  : "bg-neutral-800 text-neutral-50"
+                className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm text-neutral-50 overflow-hidden ${isUser ? "chat-msg-user" : "chat-msg-assistant"
                   }`}
               >
                 {/* Week 6: Show thinking steps inline for temp message */}
@@ -795,7 +808,7 @@ export default function CoveChatWidget() {
 
                 {/* Recommendations */}
                 {recMeta?.items && recMeta.items.length > 0 && (
-                  <div className="mt-3 -mx-8">
+                  <div className="mt-1">
                     <ProductCarousel items={recMeta.items} />
                   </div>
                 )}
@@ -870,10 +883,57 @@ export default function CoveChatWidget() {
                     </p>
                   </div>
                 )}
+
+                {/* Week 6: Suggested Actions (Context-aware quick replies) */}
+                {!isUser && m.suggestedActions && m.suggestedActions.length > 0 && (
+                  <SuggestedQueries
+                    suggestions={m.suggestedActions}
+                    onSelect={(query) => {
+                      // Auto-send by setting input and triggering submit
+                      setInput(query);
+                      // Trigger form submission after a brief delay to ensure input is set
+                      setTimeout(() => {
+                        const form = document.querySelector('form') as HTMLFormElement;
+                        form?.requestSubmit();
+                      }, 50);
+                    }}
+                    disabled={loading}
+                  />
+                )}
               </div>
             </div>
           );
         })}
+
+        {/* Welcome suggestions - shown when chat is empty */}
+        {messages.length === 0 && !loading && (
+          <div className="flex flex-col items-center justify-center py-8 px-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium text-neutral-200 mb-2">
+                👋 Hey! What can I help you find today?
+              </h3>
+              <p className="text-sm text-neutral-400">
+                Try one of these to get started:
+              </p>
+            </div>
+            <SuggestedQueries
+              suggestions={[
+                { id: 'welcome-1', text: '✨ Show me trending styles', query: 'Show me trending styles' },
+                { id: 'welcome-2', text: '🧥 I need a hoodie', query: 'Show me some hoodies' },
+                { id: 'welcome-3', text: '👕 Looking for tees', query: 'Show me some tees' },
+                { id: 'welcome-4', text: '🎨 Surprise me!', query: 'Recommend something cool' },
+              ]}
+              onSelect={async (query) => {
+                setInput(query);
+                setTimeout(() => {
+                  const form = document.querySelector('form') as HTMLFormElement;
+                  form?.requestSubmit();
+                }, 50);
+              }}
+              disabled={loading}
+            />
+          </div>
+        )}
 
         {loading && <LoadingSkeleton />}
 
