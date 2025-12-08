@@ -1105,7 +1105,7 @@ async def rag_query(body: RAGIn):
         )
                 # ---- Pure greeting / small-talk: skip RAG, use lightweight LLM reply ----
         if intent_kind in ("greeting", "small_talk"):
-            text = await _generate_greeting(body.query, body.user_name)
+            text = await _generate_greeting(body.query, getattr(body, 'userName', None))
             return {
                 "answer": text,
                 "citations": [],

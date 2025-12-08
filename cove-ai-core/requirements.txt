@@ -6,3 +6,5 @@ python-dotenv==1.0.1
 psycopg[binary]==3.2.3
 pgvector==0.2.5
 orjson==3.10.7
+neo4j>=5.15.0
+neo4j>=5.15.0

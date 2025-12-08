@@ -1031,22 +1031,23 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     )
     
     semantic_intent = classification_result["intent"]
-    confidence = classification_result.get("confidence", 0.95)
-    
-    log.info(f"[INTENT] Classified '{q[:50]}...' as '{semantic_intent}' (confidence: {confidence:.1%})")
-    
     # Map semantic intent to orchestrator intent kind
+    # Week 6: Use intelligent LLM-based intent classification
     from app.mcp_agents.intent_mapping import map_semantic_intent_to_orchestrator
+    semantic_intent = classification_result["intent"]
+    confidence = classification_result.get("confidence", 0.95)
     intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
+    
+    # Production monitoring - using print for immediate visibility
+    print(f"🔍 [INTENT_MONITOR] query='{q[:80]}' | semantic='{semantic_intent}' | mapped='{intent_kind}' | conf={confidence:.2%}")
+    
+    wants_cart = _looks_like_cart_add(q) and intent_kind != "checkout_start"
+    wants_recs = (not wants_cart) and (intent_kind == "discover")
     
     # Keep backward compatibility - still use old classify for price_filter detection
     # (Can be removed once we add entity extraction to classifier)
     old_intent = await classify(q, attrs)
     has_price_filter = getattr(old_intent, "has_price_filter", False)
-
-    # Don't treat checkout intent as cart_add
-    wants_cart = _looks_like_cart_add(q) and intent_kind != "checkout_start"
-    wants_recs = (not wants_cart) and (intent_kind == "discover")
 
     debug_plan: Dict[str, Any] = {
         "intent_kind": intent_kind,
