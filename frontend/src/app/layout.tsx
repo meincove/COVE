@@ -7,11 +7,10 @@ import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
 import ModalHost from "@/src/components/ModalHost";
 import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
-import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot"; // NEW: Stunning chatbot!
+import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot";
 
 import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
 import NavbarController from "@/src/components/Navbar/NavbarController";
-import ScrollHUD from "@/src/components/dev/ScrollHUD";
 
 export const metadata: Metadata = {
   title: "Cove",
@@ -37,7 +36,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <FloatingChatbot />
 
               <ModalHost />
-              <ScrollHUD />
             </ModalProvider>
           </ThemeProvider>
         </body>
@@ -45,4 +43,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </ClerkProvider>
   );
 }
-

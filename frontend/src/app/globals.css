@@ -184,10 +184,10 @@ html {
   }
 
   /* Add padding to body to account for fixed navbar */
-  body {
+  /* DISABLED FOR WELCOME PAGE */
+  /* body {
     padding-top: 88px;
-    /* Height of navbar */
-  }
+  } */
 
   /* Body surface holding page sections (demo) */
   .content-surface {
@@ -487,5 +487,22 @@ html {
 
   .animate-fade-in {
     animation: fade-in 0.3s ease-out forwards;
+  }
+
+  /* WELCOME PAGE: Hide navbar and prevent scrolling */
+  body:has(.welcome-page-root) .nav-full-wrap,
+  body:has(.welcome-page-root) .nav-stick,
+  body:has(.welcome-page-root) .nav-island-shell,
+  body:has(.welcome-page-root) .nav-full-shell {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body:has(.welcome-page-root) .tester-frame {
+    overflow: hidden !important;
+  }
+
+  body:has(.welcome-page-root) {
+    overflow: hidden !important;
   }
 }
