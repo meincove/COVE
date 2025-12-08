@@ -37,6 +37,8 @@ from app.history_logger import log_history_turn
 from app.core.cache import get_cached, set_cached, make_cache_key
 from app.core.policy_cache import get_policy_answer
 from app.core.performance import measure_time
+# Week 5-6: Intelligent LLM-based intent classification
+from app.mcp_agents.intent_classifier import get_classifier
 
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
@@ -1017,9 +1019,30 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         'status': 'Understanding your request'
     })
 
-    intent = await classify(q, attrs)
-    intent_kind = getattr(intent, "kind", "generic")
-    has_price_filter = getattr(intent, "has_price_filter", False)
+    # === INTELLIGENT LLM-BASED INTENT CLASSIFICATION ===
+    # Use 93% accurate semantic classifier instead of regex/rules
+    intelligent_classifier = get_classifier()
+    classification_result = intelligent_classifier.classify(
+        query=q,
+        context={
+            "user_id": body.clerkUserId or body.guestSessionId,
+            "cart_id": body.cartId,
+        }
+    )
+    
+    semantic_intent = classification_result["intent"]
+    confidence = classification_result.get("confidence", 0.95)
+    
+    log.info(f"[INTENT] Classified '{q[:50]}...' as '{semantic_intent}' (confidence: {confidence:.1%})")
+    
+    # Map semantic intent to orchestrator intent kind
+    from app.mcp_agents.intent_mapping import map_semantic_intent_to_orchestrator
+    intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
+    
+    # Keep backward compatibility - still use old classify for price_filter detection
+    # (Can be removed once we add entity extraction to classifier)
+    old_intent = await classify(q, attrs)
+    has_price_filter = getattr(old_intent, "has_price_filter", False)
 
     # Don't treat checkout intent as cart_add
     wants_cart = _looks_like_cart_add(q) and intent_kind != "checkout_start"
@@ -1027,6 +1050,8 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
     debug_plan: Dict[str, Any] = {
         "intent_kind": intent_kind,
+        "semantic_intent": semantic_intent,  # Add for debugging
+        "confidence": confidence,
         "has_price_filter": has_price_filter,
         "wants_cart": wants_cart,
         "wants_recs": wants_recs,
@@ -1317,6 +1342,36 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 kind="answer",
                 answer=f"{size_part}.{extra_note}".strip(),
                 citations=citations,
+                items=[],
+                debug_plan=debug_plan,
+            )
+
+        # No fit recommendation (likely missing user measurements)
+        # Check if user has provided measurements in their query or profile
+        has_measurements = ai_profile and (
+            ai_profile.get("height_cm") or ai_profile.get("weight_kg")
+        )
+        
+        if not has_measurements:
+            # Ask for measurements intelligently (config-driven via prompt)
+            from app.core.rules import get_prompt
+            
+            ask_dimensions_msg = get_prompt(
+                "ask_for_dimensions",
+                default=(
+                    "To give you the best sizing advice, could you share your height and weight? "
+                    "That helps me recommend the perfect fit! Our items come in different fits "
+                    "(regular, oversized, relaxed), so knowing your measurements ensures you get exactly what you want."
+                )
+            )
+            
+            debug_plan["fit_used"] = False
+            debug_plan["asked_for_dimensions"] = True
+            
+            return AgentOut(
+                kind="answer",
+                answer=ask_dimensions_msg,
+                citations=[],
                 items=[],
                 debug_plan=debug_plan,
             )

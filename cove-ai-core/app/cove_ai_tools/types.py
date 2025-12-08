@@ -108,3 +108,17 @@ class EmailSendConfirmationData(TypedDict):
     sent: bool
     alreadySent: bool
     sentTo: str
+
+
+# ============================================================================
+# Suggested Actions Types
+# ============================================================================
+
+class SuggestedAction(TypedDict):
+    """Context-aware suggested query for user."""
+    id: str  # Unique identifier from config
+    text: str  # Display text for the button
+    query: str  # Actual query to send when clicked
+    type: str  # "action", "question", "navigation", "discovery", "account"
+    icon: str  # Icon identifier (optional)
+    priority: int  # Display priority (lower = higher priority)

@@ -19,6 +19,7 @@ export type StreamState = {
     checkout: any | null;
     answer: string | null;
     kind: string | null;
+    suggestedActions: any[] | null;  // Week 6: Context-aware quick replies
 };
 
 export function useAgentStream() {
@@ -32,6 +33,7 @@ export function useAgentStream() {
         checkout: null,
         answer: null,
         kind: null,
+        suggestedActions: null,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -60,6 +62,7 @@ export function useAgentStream() {
             checkout: null,
             answer: null,
             kind: null,
+            suggestedActions: null,
         });
 
         try {
@@ -173,6 +176,13 @@ export function useAgentStream() {
                     ...prev,
                     answer: data.text || '',
                     introText: data.text || '',
+                }));
+                break;
+
+            case 'suggestions':
+                setState(prev => ({
+                    ...prev,
+                    suggestedActions: data.suggestions || [],
                 }));
                 break;
 
