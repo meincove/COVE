@@ -635,18 +635,16 @@ async def _build_discover_intro(
     if not items:
         return {"text": default_text, "llm_used": False, "history_len": 0, "summary_used": False}
 
-    # If user disabled history, return generic intro
-    if body.historyScope == "none":
-        return {"text": default_text, "llm_used": False, "history_len": 0, "summary_used": False}
-
-    # Fetch history
-    raw_history = await _fetch_history_for_llm(body.clerkUserId, body.guestSessionId, limit=20)
-    history_len = len(raw_history)
-
-    if history_len == 0:
-        return {"text": default_text, "llm_used": False, "history_len": 0, "summary_used": False}
-
-    summary, _ = await _prepare_history_for_llm(raw_history)
+    # Fetch history (optional - work without it too!)
+    raw_history = []
+    history_len = 0
+    summary = ""
+    
+    if body.historyScope != "none":
+        raw_history = await _fetch_history_for_llm(body.clerkUserId, body.guestSessionId, limit=20)
+        history_len = len(raw_history)
+        if history_len > 0:
+            summary, _ = await _prepare_history_for_llm(raw_history)
 
     # Small preview of items
     items_preview = []
@@ -659,25 +657,36 @@ async def _build_discover_intro(
             "tier": it.tier,
         })
 
-    system_prompt = """You write ONE short intro sentence for product recommendations.
+    # Enhanced system prompt that works with OR without history
+    system_prompt = """You are a friendly AI stylist writing a short, engaging intro for product recommendations.
 
-Input JSON has: message, attrs, rec_filters, items_preview, history_len, summary.
+Input JSON has: message (user query), items_preview (products found), history_len, summary.
 
 Rules:
-- If history_len == 0 OR summary is empty: write a generic intro.
-- If history_len > 0 AND summary exists: MAY lightly reference style/chat history.
-- Max 22 words. Friendly, concise, minimal modern vibe.
-- Output ONLY the sentence. No JSON, no quotes.
+- Write ONE short, engaging sentence (max 22 words).
+- If history_len > 0 AND summary exists: Lightly reference their style/preferences.
+- If history_len == 0: Still be engaging! Reference what they asked for and what you found.
+- Be friendly, modern, minimal vibe. Sound like a cool stylist, not a robot.
+- Output ONLY the sentence. No quotes, no JSON, no explanations.
+
+Examples (NO history):
+- "Found 4 hoodies that match your vibe. Let's see what speaks to you."
+- "Here are some bombers I think you'll love. Clean, minimal, premium."
+- "Picked out some tees that fit what you're looking for. Check them out."
+
+Examples (WITH history):
+- "Based on what you usually like, here are some hoodies that fit your aesthetic."
+- "Found some bombers in your style. Think you'll dig these."
 """
 
     user_payload = {
         "message": body.message,
-        "attrs": attrs,
-        "rec_filters": rec_filters,
         "items_preview": items_preview,
         "history_len": history_len,
         "summary": summary or "",
     }
+
+    log.info(f"[StylistBrain] Generating intro: history_len={history_len}, items={len(items)}, query='{body.message[:50]}'")
 
     client = LLMClient()
     try:
@@ -686,15 +695,24 @@ Rules:
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
         ])
         text = (text or "").strip()
+        
+        # Remove quotes if LLM added them
+        if text.startswith('"') and text.endswith('"'):
+            text = text[1:-1]
+        if text.startswith("'") and text.endswith("'"):
+            text = text[1:-1]
+            
         if not text:
             raise ValueError("empty intro from LLM")
 
         if len(text) > 250:
             text = text[:250]
 
+        log.info(f"[StylistBrain] ✅ Generated: '{text}' (llm_used=True)")
         return {"text": text, "llm_used": True, "history_len": history_len, "summary_used": bool(summary)}
+        
     except Exception as e:
-        log.warning("discover intro LLM failed: %s", e)
+        log.warning(f"[StylistBrain] ❌ LLM failed: {e}, falling back to default")
         return {"text": default_text, "llm_used": False, "history_len": history_len, "summary_used": bool(summary)}
 
 
@@ -972,6 +990,8 @@ async def agent_query(body: AgentIn) -> AgentOut:
     return out
 
 
+from app.core.events import emit_event
+
 async def _agent_query_impl(body: AgentIn) -> AgentOut:
     q = body.message
     prev_user_message = _get_last_user_message(body)
@@ -990,6 +1010,12 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         base_filters,
         ai_profile,
     )
+
+    # Event: Understanding request
+    emit_event('thinking:step', {
+        'icon': '🧠',
+        'status': 'Understanding your request'
+    })
 
     intent = await classify(q, attrs)
     intent_kind = getattr(intent, "kind", "generic")
@@ -1485,6 +1511,12 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
     # --- Branch 3: recommendations (browse products) ---------------------------
     if wants_recs:
+        # Event: Searching catalog
+        emit_event('thinking:step', {
+            'icon': '🔍',
+            'status': 'Searching catalog'
+        })
+
         rec_query = build_rec_query(q, rec_filters)
 
         rec_payload = {
@@ -1503,6 +1535,13 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             for it in raw_items
             if isinstance(it, dict) and it.get("slug")
         ]
+
+        # Event: Found items
+        emit_event('thinking:step', {
+            'icon': '✓',
+            'status': f'Found {len(items)} items',
+            'done': True
+        })
 
         debug_plan["rec_item_count"] = len(items)
 
@@ -1526,26 +1565,11 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
             intro_line = intro_info.get("text", "Here are some options that match what you asked for.")
 
-            # Week 4: Agentic Enhancement - Show thinking process
-            thinking_steps = [
-                {
-                    "icon": "🔍",
-                    "status": "Searching catalog",
-                    "detail": f"Found {len(items)} {rec_filters.get('type', 'items')}"
-                },
-            ]
-            
-            if ai_profile:
-                thinking_steps.append({
-                    "icon": "🧠",
-                    "status": "Analyzing preferences",
-                    "detail": f"Filtered to {rec_filters.get('tier', 'preferred')} tier"
-                })
-            
-            thinking_steps.append({
-                "icon": "✨",
-                "status": "Ranking matches",
-                "detail": f"Top {len(items)} recommendations ready"
+            # Event: Ranking complete
+            emit_event('thinking:step', {
+                'icon': '✓',
+                'status': 'Top recommendations ready',
+                'done': True
             })
 
             return AgentOut(
@@ -1553,7 +1577,6 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 answer=intro_line,
                 citations=[],
                 items=items,
-                thinking_steps=thinking_steps,  # Week 4: Show reasoning
                 debug_plan=debug_plan,
             )
 

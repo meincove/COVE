@@ -33,7 +33,7 @@ export default function CoveChatLauncher() {
         <div
           className="
             fixed bottom-20 right-4 z-[200]
-            w-[360px] max-w-[calc(100vw-2rem)]
+            w-[480px] max-w-[calc(100vw-2rem)]
             h-[480px] max-h-[calc(100vh-6rem)]
             rounded-2xl border border-neutral-800
             bg-neutral-950/90

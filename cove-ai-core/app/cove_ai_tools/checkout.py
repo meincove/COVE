@@ -5,6 +5,7 @@ Checkout tools for AI agent.
 Provides standard checkout functionality with Stripe Checkout Sessions.
 """
 import logging
+import time
 from typing import Dict, Any
 
 from .config import ToolsConfig
@@ -59,20 +60,25 @@ async def checkout_start(payload: CheckoutStartInput) -> CheckoutStartOutput:
     
     client = get_http_client()
     
+    # Generate unique idempotency key per checkout attempt (include timestamp)
+    user_id = payload.get('clerkUserId') or payload.get('guestSessionId') or 'unknown'
+    timestamp_ms = int(time.time() * 1000)
+    idempotency_key = f"ai-checkout-{user_id}-{timestamp_ms}"
+    
     try:
         # Call Django create-checkout-session endpoint
         response = await client.post(
             ToolsConfig.PAYMENTS_CHECKOUT_URL,
             json_data=request_data,
-            headers={"Idempotency-Key": f"ai-checkout-{payload.get('clerkUserId') or payload.get('guestSessionId')}"}
+            headers={"Idempotency-Key": idempotency_key}
         )
         
         # Normalize response
         checkout_data: CheckoutStartData = {
             "checkoutId": response.get("id", ""),
             "paymentUrl": response.get("url", ""),
-            "currency": "EUR",  # From backend config
-            "total": "0.00"  # Not returned by current endpoint, would need enhancement
+            "currency": response.get("currency", "EUR").upper(),
+            "total": f"{response.get('amount_total', 0) / 100:.2f}"
         }
         
         logger.info("Checkout session created", extra={

@@ -22,6 +22,7 @@ from app.routes.fit import router as fit_router
 from app.routes.health import router as health_router
 from app.routes import recs, agent, assistant
 from app.routes import streaming  # Week 5: NEW streaming endpoint
+from app.routes import agent_stream  # Week 6: Agent with thinking progress
 from app.routes import metrics  # Week 6: Metrics and monitoring
 
 app = FastAPI(title="Cove AI Core")
@@ -33,6 +34,7 @@ app.include_router(recs.router)
 app.include_router(agent.router)
 app.include_router(assistant.router)
 app.include_router(streaming.router, prefix="/ai")  # Week 5: Streaming endpoint
+app.include_router(agent_stream.router)  # Week 6: Agent progress streaming
 # Week 6: Metrics endpoints
 app.include_router(metrics.router, prefix="/api", tags=["metrics"])
 

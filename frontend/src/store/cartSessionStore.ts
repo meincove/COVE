@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 type CartSessionState = {
   cartId: string | null;
@@ -18,20 +19,27 @@ function makeGuestId() {
   return `guest_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
 }
 
-export const useCartSessionStore = create<CartSessionState>((set, get) => ({
-  cartId: null,
-  guestSessionId: null,
+export const useCartSessionStore = create<CartSessionState>()(
+  persist(
+    (set, get) => ({
+      cartId: null,
+      guestSessionId: null,
 
-  setCartId: (id) => set({ cartId: id }),
+      setCartId: (id) => set({ cartId: id }),
 
-  setGuestSessionId: (id) => set({ guestSessionId: id }),
+      setGuestSessionId: (id) => set({ guestSessionId: id }),
 
-  ensureGuestSessionId: () => {
-    const existing = get().guestSessionId;
-    if (existing) return existing;
+      ensureGuestSessionId: () => {
+        const existing = get().guestSessionId;
+        if (existing) return existing;
 
-    const newId = makeGuestId();
-    set({ guestSessionId: newId });
-    return newId;
-  },
-}));
+        const newId = makeGuestId();
+        set({ guestSessionId: newId });
+        return newId;
+      },
+    }),
+    {
+      name: "cove_guest_session", // unique name
+    }
+  )
+);

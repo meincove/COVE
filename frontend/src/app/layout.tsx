@@ -7,7 +7,7 @@ import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
 import ModalHost from "@/src/components/ModalHost";
 import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
-import CoveChatLauncher from "@/src/components/cove-ai/CoveChatLauncher";
+import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot"; // NEW: Stunning chatbot!
 
 import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
 import NavbarController from "@/src/components/Navbar/NavbarController";
@@ -33,8 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <main>{children}</main>
               </div>
 
-              {/* Floating Cove AI chat – visible on all pages */}
-              <CoveChatLauncher />
+              {/* NEW: Stunning Floating AI Chatbot – visible on ALL pages! */}
+              <FloatingChatbot />
 
               <ModalHost />
               <ScrollHUD />

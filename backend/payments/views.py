@@ -406,7 +406,12 @@ def create_checkout_session(request):
                 d["checkout_session_id"] = cs_id
             CheckoutCart.objects.bulk_create([CheckoutCart(**d) for d in snapshot_items])
 
-        response_data = {"id": session.id, "url": session.url}
+        response_data = {
+            "id": session.id, 
+            "url": session.url,
+            "amount_total": session.amount_total,  # In cents
+            "currency": session.currency or "eur",
+        }
         
         # ---- SECURITY FIX: Cache response for idempotency (1 hour TTL) ----
         cache.set(cache_key, response_data, timeout=3600)

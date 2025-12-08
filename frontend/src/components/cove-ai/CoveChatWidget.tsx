@@ -1,413 +1,9 @@
-// "use client";
-
-// import { useState, useEffect, FormEvent } from "react";
-// import { useUser } from "@clerk/nextjs";
-
-// import { useCartSessionStore } from "@/src/store/cartSessionStore";
-// import { useCartStore } from "@/src/store/cartStore";
-// import type { CartItem } from "@/types/cart";
-// import type {
-//   AgentItem,
-//   AgentCartPayload,
-//   AgentResponse,
-// } from "@/types/agent";
-// import ChatProductCard from "@/src/components/cove-ai/ChatProductCard";
-
-// type BaseMessage = {
-//   id: string;
-//   role: "user" | "assistant";
-//   content: string;
-// };
-
-// type CartProposalMeta = {
-//   kind: "cart_proposal";
-//   agentResponse: AgentResponse;
-//   confirmed?: boolean;
-//   cancelled?: boolean;
-// };
-
-// type RecommendationsMeta = {
-//   kind: "recommendations";
-//   items: AgentItem[];
-// };
-
-// type AssistantMeta = CartProposalMeta | RecommendationsMeta;
-
-// type ChatMessage =
-//   | (BaseMessage & { meta?: undefined })
-//   | (BaseMessage & { meta: AssistantMeta });
-
-// function makeId() {
-//   return Math.random().toString(36).slice(2) + Date.now().toString(36);
-// }
-
-// // ---------- TYPE GUARDS ----------
-
-// function isCartProposalMeta(
-//   meta: AssistantMeta | undefined,
-// ): meta is CartProposalMeta {
-//   return meta?.kind === "cart_proposal";
-// }
-
-// function isRecommendationsMeta(
-//   meta: AssistantMeta | undefined,
-// ): meta is RecommendationsMeta {
-//   return meta?.kind === "recommendations";
-// }
-
-// export default function CoveChatWidget() {
-//   const [messages, setMessages] = useState<ChatMessage[]>([]);
-//   const [input, setInput] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   // NEW: track whether this widget has already sent at least one user message
-//   const [hasStartedChat, setHasStartedChat] = useState(false);
-
-//   const { user, isSignedIn } = useUser();
-
-//   const { guestSessionId, ensureGuestSessionId } = useCartSessionStore();
-//   const addItem = useCartStore((s) => s.addItem);
-
-//   useEffect(() => {
-//     ensureGuestSessionId();
-//   }, [ensureGuestSessionId]);
-
-//   async function handleSubmit(e: FormEvent) {
-//     e.preventDefault();
-//     if (!input.trim() || loading) return;
-
-//     const userMsg: ChatMessage = {
-//       id: makeId(),
-//       role: "user",
-//       content: input.trim(),
-//     };
-
-//     setMessages((prev) => [...prev, userMsg]);
-//     setInput("");
-//     setLoading(true);
-
-//     try {
-//       const sessionId = guestSessionId ?? ensureGuestSessionId();
-
-//       // If this is the very first user message in this widget,
-//       // tell the backend not to load any old per-user history.
-//       const isFirstTurnInThisWidget = !hasStartedChat;
-
-//       const payload: any = {
-//         message: userMsg.content,
-//         top_k: 4,
-//         guestSessionId: sessionId,
-//         historyScope: isFirstTurnInThisWidget ? "none" : "user",
-//       };
-
-//       if (isSignedIn && user) {
-//         payload.clerkUserId = user.id;
-//         const emailObj = user.primaryEmailAddress;
-//         payload.email = emailObj ? emailObj.emailAddress : null;
-//       }
-
-//       // mark that this chat has now started
-//       if (!hasStartedChat) {
-//         setHasStartedChat(true);
-//       }
-
-//       const res = await fetch("/api/agent-dev/query", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(payload),
-//       });
-
-//       if (!res.ok) {
-//         throw new Error(`Query failed: ${res.status}`);
-//       }
-
-//       const data: AgentResponse = await res.json();
-//       handleAgentResponse(data);
-//     } catch (err) {
-//       console.error("Error talking to agent:", err);
-//       const errorMsg: ChatMessage = {
-//         id: makeId(),
-//         role: "assistant",
-//         content:
-//           "Sorry, something went wrong talking to Cove AI. Please try again.",
-//       };
-//       setMessages((prev) => [...prev, errorMsg]);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }
-
-//   function handleAgentResponse(data: AgentResponse) {
-//     if (data.kind === "answer") {
-//       const msg: ChatMessage = {
-//         id: makeId(),
-//         role: "assistant",
-//         content: data.answer,
-//       };
-//       setMessages((prev) => [...prev, msg]);
-//       return;
-//     }
-
-//     if (data.kind === "cart_proposal") {
-//       const firstItem = data.items?.[0];
-//       const cp = data.cart_payload;
-
-//       const summary =
-//         firstItem && cp
-//           ? `I found ${firstItem.title} in size ${cp.size}. Add this to your cart?`
-//           : data.answer || "I found an item I can add to your cart. Proceed?";
-
-//       const msg: ChatMessage = {
-//         id: makeId(),
-//         role: "assistant",
-//         content: summary,
-//         meta: {
-//           kind: "cart_proposal",
-//           agentResponse: data,
-//         },
-//       };
-
-//       setMessages((prev) => [...prev, msg]);
-//       return;
-//     }
-
-//     if (data.kind === "recommendations") {
-//       const items = data.items ?? [];
-
-//       const msg: ChatMessage = {
-//         id: makeId(),
-//         role: "assistant",
-//         content:
-//           data.answer || "Here are some options that match what you asked for.",
-//         meta: items.length
-//           ? ({
-//               kind: "recommendations",
-//               items,
-//             } as RecommendationsMeta)
-//           : undefined,
-//       };
-
-//       setMessages((prev) => [...prev, msg]);
-//       return;
-//     }
-
-//     const msg: ChatMessage = {
-//       id: makeId(),
-//       role: "assistant",
-//       content: data.answer,
-//     };
-//     setMessages((prev) => [...prev, msg]);
-//   }
-
-//   async function handleConfirmCartProposal(messageId: string) {
-//     const target = messages.find(
-//       (m) => m.id === messageId && isCartProposalMeta(m.meta),
-//     );
-//     if (!target || !target.meta) return;
-
-//     const meta = target.meta as CartProposalMeta;
-//     const { agentResponse } = meta;
-//     const cp = agentResponse.cart_payload;
-//     const firstItem = agentResponse.items?.[0];
-
-//     if (!cp || !firstItem) {
-//       console.warn("Cart proposal missing cart_payload or items");
-//       return;
-//     }
-
-//     const sessionId = guestSessionId ?? ensureGuestSessionId();
-
-//     const payload: AgentCartPayload = {
-//       ...cp,
-//       guestSessionId: sessionId,
-//       cartId: cp.cartId ?? null,
-//     };
-
-//     try {
-//       setMessages((prev) =>
-//         prev.map((m) =>
-//           m.id === messageId
-//             ? { ...m, content: m.content + " (adding...)" }
-//             : m,
-//         ),
-//       );
-
-//       fetch("/api/agent-dev/cart-add", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(payload),
-//       }).catch((err) => {
-//         console.warn("Background cart-add call failed:", err);
-//       });
-
-//       const cartItem: CartItem = {
-//         productId: firstItem.slug ?? cp.variantId,
-//         variantId: cp.variantId,
-//         name: firstItem.title,
-//         type: firstItem.type ?? "",
-//         tier: firstItem.tier ?? "",
-//         size: cp.size,
-//         color: firstItem.color ?? "",
-//         colorName: firstItem.color ?? "",
-//         quantity: cp.quantity,
-//         price: 0, // TODO: wire real prices
-//         imageUrl: "/clothing-images/placeholder.png",
-//         material: "",
-//       };
-
-//       await addItem(cartItem);
-
-//       setMessages((prev) =>
-//         prev.map((m) =>
-//           m.id === messageId && isCartProposalMeta(m.meta)
-//             ? {
-//                 ...m,
-//                 content: "Added to your cart. You can open it from the navbar.",
-//                 meta: {
-//                   ...m.meta,
-//                   confirmed: true,
-//                 } as CartProposalMeta,
-//               }
-//             : m,
-//         ),
-//       );
-//     } catch (err) {
-//       console.error("Error in cart-add flow:", err);
-//       setMessages((prev) =>
-//         prev.map((m) =>
-//           m.id === messageId && isCartProposalMeta(m.meta)
-//             ? {
-//                 ...m,
-//                 content:
-//                   "I tried to add this to your cart, but something went wrong. Please try again.",
-//                 meta: {
-//                   ...m.meta,
-//                   confirmed: false,
-//                 } as CartProposalMeta,
-//               }
-//             : m,
-//         ),
-//       );
-//     }
-//   }
-
-//   function handleCancelCartProposal(messageId: string) {
-//     setMessages((prev) =>
-//       prev.map((m) =>
-//         m.id === messageId && isCartProposalMeta(m.meta)
-//           ? {
-//               ...m,
-//               content: "Okay, I won’t add that item to your cart.",
-//               meta: {
-//                 ...m.meta,
-//                 cancelled: true,
-//               } as CartProposalMeta,
-//             }
-//           : m,
-//       ),
-//     );
-//   }
-
-//   return (
-//     <div className="flex flex-col h-full max-h-[600px] rounded-2xl border border-neutral-800 bg-neutral-950/80">
-//       {/* Messages list */}
-//       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-//         {messages.map((m) => {
-//           const isUser = m.role === "user";
-
-//           const cartMeta = isCartProposalMeta(m.meta)
-//             ? (m.meta as CartProposalMeta)
-//             : undefined;
-//           const recMeta = isRecommendationsMeta(m.meta)
-//             ? (m.meta as RecommendationsMeta)
-//             : undefined;
-
-//           return (
-//             <div
-//               key={m.id}
-//               className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-//             >
-//               <div
-//                 className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-//                   isUser
-//                     ? "bg-neutral-100 text-black"
-//                     : "bg-neutral-800 text-neutral-50"
-//                 }`}
-//               >
-//                 <p className="whitespace-pre-wrap">{m.content}</p>
-
-//                 {/* vertical list of product cards */}
-//                 {!isUser &&
-//                   recMeta &&
-//                   recMeta.items &&
-//                   recMeta.items.length > 0 && (
-//                     <div className="mt-3 space-y-2">
-//                       {recMeta.items.map((item, idx) => (
-//                         <ChatProductCard
-//                           key={`${item.variantId ?? item.slug ?? item.url}-${idx}`}
-//                           item={item}
-//                         />
-//                       ))}
-//                     </div>
-//                   )}
-
-//                 {/* cart proposal confirm / cancel */}
-//                 {cartMeta && !cartMeta.confirmed && !cartMeta.cancelled && (
-//                   <div className="mt-2 flex gap-2">
-//                     <button
-//                       className="px-3 py-1 text-xs rounded-full bg-emerald-500 text-black hover:bg-emerald-400 transition"
-//                       onClick={() => handleConfirmCartProposal(m.id)}
-//                     >
-//                       Add to cart
-//                     </button>
-//                     <button
-//                       className="px-3 py-1 text-xs rounded-full bg-neutral-700 text-neutral-100 hover:bg-neutral-600 transition"
-//                       onClick={() => handleCancelCartProposal(m.id)}
-//                     >
-//                       Cancel
-//                     </button>
-//                   </div>
-//                 )}
-//               </div>
-//             </div>
-//           );
-//         })}
-
-//         {loading && (
-//           <div className="text-xs text-neutral-400 mt-2">
-//             Cove AI is thinking…
-//           </div>
-//         )}
-//       </div>
-
-//       {/* Input */}
-//       <form
-//         onSubmit={handleSubmit}
-//         className="border-t border-neutral-800 px-3 py-2 flex gap-2"
-//       >
-//         <input
-//           className="flex-1 bg-transparent text-sm text-neutral-100 placeholder:text-neutral-500 outline-none"
-//           placeholder="Ask Cove AI anything about products, sizes, fits…"
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//         />
-//         <button
-//           type="submit"
-//           disabled={loading || !input.trim()}
-//           className="px-3 py-1 text-sm rounded-full bg-neutral-100 text-black disabled:opacity-40"
-//         >
-//           Send
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// src/components/cove-ai/CoveChatWidget.tsx
 "use client";
 
-import { useState, useEffect, useMemo, FormEvent } from "react";
+import { useState, useEffect, useMemo, useRef, FormEvent } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { Send, X, Check, Package, ShoppingCart } from "lucide-react";
 
 import { useCartSessionStore } from "@/src/store/cartSessionStore";
 import { useCartStore } from "@/src/store/cartStore";
@@ -418,11 +14,16 @@ import type {
   AgentResponse,
 } from "@/types/agent";
 import ChatProductCard from "@/src/components/cove-ai/ChatProductCard";
+import ProductCarousel from "@/src/components/cove-ai/ProductCarousel";
 import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
 import LoadingSkeleton from "@/src/components/cove-ai/LoadingSkeleton";
 import Toast, { ToastType } from "@/src/components/cove-ai/Toast";
-import { useAgentStreaming } from "@/src/hooks/useAgentStreaming";  // Week 5
-import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/TypingIndicator";  // Week 5
+import { useAgentStreaming } from "@/src/hooks/useAgentStreaming";
+import { useAgentStream } from "@/src/hooks/useAgentStream";
+import { useChatHistory } from "@/src/hooks/useChatHistory";
+import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/TypingIndicator";
+import ThinkingSteps from "@/src/components/cove-ai/ThinkingSteps";
+import PersonalizedGreeting from "@/src/components/cove-ai/PersonalizedGreeting";
 
 // ---------- TYPES ----------
 
@@ -538,13 +139,47 @@ export default function CoveChatWidget() {
   const addItem = useCartStore((s) => s.addItem);
 
   // Week 5: Streaming support (feature flag)
-  const USE_STREAMING = process.env.NEXT_PUBLIC_USE_STREAMING === 'true';
+  const USE_STREAMING = process.env.NEXT_PUBLIC_USE_STREAMING === 'true';  // Week 5: Streaming (optional - feature flagged)
   const {
     streamingMessage,
-    isStreaming,
+    isStreaming: isStreamingText,
     sendStreamingMessage,
-    cancelStreaming
   } = useAgentStreaming();
+
+  // Week 6: Real-time thinking progress + ALL response types
+  const {
+    thinkingSteps,
+    introText,
+    items: streamedItems,
+    isStreaming: isStreamingProgress,
+    sendQuery: sendStreamingQuery,
+    cartProposal,
+    checkout,
+    answer,
+    kind,
+  } = useAgentStream();
+
+  // Week 6: Chat history persistence
+  const sessionId = guestSessionId || ensureGuestSessionId();
+  const { history, isLoading: historyLoading, saveMessage } = useChatHistory(sessionId);
+
+  // Week 6: Router for navigation (no page refresh)
+  const router = useRouter();
+
+  // Load history into messages on mount
+  useEffect(() => {
+    if (!historyLoading && history.length > 0 && messages.length === 0) {
+      // Convert history to chat messages
+      const historyMessages: ChatMessage[] = history.map((h, i) => ({
+        id: `history-${i}-${Date.now()}`,
+        role: h.role,
+        content: h.content,
+        meta: h.meta,
+      }));
+      setMessages(historyMessages);
+      setHasStartedChat(true); // Mark as started if we have history
+    }
+  }, [history, historyLoading]);
 
   // Make sure we *have* a guest session id
   useEffect(() => {
@@ -567,8 +202,8 @@ export default function CoveChatWidget() {
     return null;
   }, [user]);
 
-  // -------- AUTO-GREETING EFFECT (once per widget mount) --------
-  // -------- AUTO-GREETING EFFECT (once per widget mount) --------
+  // -------- AUTO-GREETING EFFECT (DISABLED - Using PersonalizedGreeting component instead) --------
+  /*
   useEffect(() => {
     // don’t run twice
     if (hasSentGreeting) return;
@@ -638,13 +273,15 @@ export default function CoveChatWidget() {
     isSignedIn,
     user,
   ]);
+  */
+
 
 
   // -------- SUBMIT HANDLER --------
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || isStreamingProgress) return;
 
     const userMsg: ChatMessage = {
       id: makeId(),
@@ -653,73 +290,39 @@ export default function CoveChatWidget() {
     };
 
     setMessages((prev) => [...prev, userMsg]);
+    const query = input.trim().toLowerCase();
     setInput("");
     setLoading(true);
 
+    // Week 6: Save user message to history
+    saveMessage({
+      role: 'user',
+      content: userMsg.content,
+    });
+
     try {
       const sessionId = guestSessionId ?? ensureGuestSessionId();
-
-      const isFirstTurnInThisWidget = !hasStartedChat;
-
-      const payload: any = {
-        message: userMsg.content,
-        top_k: 4,
-        guestSessionId: sessionId,
-        historyScope: isFirstTurnInThisWidget ? "none" : "user",
-        userName,
-      };
-
-      if (isSignedIn && user) {
-        payload.clerkUserId = user.id;
-        const emailObj = user.primaryEmailAddress;
-        payload.email = emailObj ? emailObj.emailAddress : null;
-      }
 
       if (!hasStartedChat) {
         setHasStartedChat(true);
       }
 
-      // Week 4: Add request timeout (30s)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      // Week 6: ALL queries use streaming - backend decides routing!
+      // No hardcoded patterns - let the agent's classify() decide
+      await sendStreamingQuery(
+        userMsg.content,
+        isSignedIn && user ? user.id : undefined,
+        sessionId
+      );
 
-      try {
-        const res = await fetch("/api/agent-dev/query", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!res.ok) {
-          throw new Error(`Query failed: ${res.status}`);
-        }
-
-        const data: AgentResponse = await res.json();
-        handleAgentResponse(data);
-      } catch (err: any) {
-        clearTimeout(timeoutId);
-
-        if (err.name === 'AbortError') {
-          console.error("Request timed out after 30s");
-          const errorMsg: ChatMessage = {
-            id: makeId(),
-            role: "assistant",
-            content: "Request timed out. The server is taking too long to respond. Please try again.",
-          };
-          setMessages((prev) => [...prev, errorMsg]);
-        } else {
-          console.error("Error talking to agent:", err);
-          const errorMsg: ChatMessage = {
-            id: makeId(),
-            role: "assistant",
-            content: "Sorry, something went wrong talking to Cove AI. Please try again.",
-          };
-          setMessages((prev) => [...prev, errorMsg]);
-        }
-      }
+    } catch (err: any) {
+      console.error("Error talking to agent:", err);
+      const errorMsg: ChatMessage = {
+        id: makeId(),
+        role: "assistant",
+        content: "Sorry, something went wrong talking to Cove AI. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
@@ -816,7 +419,7 @@ export default function CoveChatWidget() {
         content: data.answer || "Here are your recent orders:",
         meta: {
           kind: "order_history",
-          orders: data.orders.orders,
+          orders: data.orders, // Fixed: data.orders is already the array
         },
       };
       setMessages((prev) => [...prev, msg]);
@@ -847,7 +450,165 @@ export default function CoveChatWidget() {
     setMessages((prev) => [...prev, msg]);
   }
 
-  // -------- CART PROPOSAL ACTIONS --------
+  // Week 6: Add thinking message when streaming starts
+  useEffect(() => {
+    if (isStreamingProgress && thinkingSteps.length > 0) {
+      // Check if we already have a thinking message
+      const hasThinkingMsg = messages.some(m => m.id === 'thinking-temp');
+
+      if (!hasThinkingMsg) {
+        // Add a temporary thinking message
+        const thinkingMsg: ChatMessage = {
+          id: 'thinking-temp',
+          role: 'assistant',
+          content: '',
+        };
+        setMessages(prev => [...prev, thinkingMsg]);
+      } else {
+        // Update the thinking message with latest steps
+        setMessages(prev => prev.map(m =>
+          m.id === 'thinking-temp'
+            ? { ...m, content: '' } // Content doesn't matter, steps render separately
+            : m
+        ));
+      }
+    }
+  }, [isStreamingProgress, thinkingSteps]);
+
+  // Week 6: Replace thinking message with final result
+  useEffect(() => {
+    if (!isStreamingProgress && introText && streamedItems.length > 0) {
+      // Remove thinking message and add final result
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== 'thinking-temp');
+        return [
+          ...filtered,
+          {
+            id: makeId(),
+            role: 'assistant',
+            content: introText,
+            meta: {
+              kind: 'recommendations',
+              items: streamedItems,
+            },
+          }
+        ];
+      });
+
+      // Week 6: Save assistant message to history
+      saveMessage({
+        role: 'assistant',
+        content: introText,
+        kind: 'recommendations',
+        meta: {
+          kind: 'recommendations',
+          items: streamedItems,
+        },
+      });
+    }
+  }, [isStreamingProgress, introText, streamedItems, saveMessage]);
+
+  // Week 6: Handle cart proposal from streaming
+  useEffect(() => {
+    if (!isStreamingProgress && cartProposal) {
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== 'thinking-temp');
+        return [
+          ...filtered,
+          {
+            id: makeId(),
+            role: 'assistant' as const,
+            content: cartProposal.answer || '',
+            meta: {
+              kind: 'cart_proposal' as const,
+              agentResponse: {
+                kind: 'cart_proposal' as const,
+                answer: cartProposal.answer || '',
+                cart_payload: cartProposal.cart_payload,
+                items: cartProposal.items || [],
+                citations: [],
+              },
+            } as CartProposalMeta,
+          }
+        ];
+      });
+      saveMessage({
+        role: 'assistant',
+        content: cartProposal.answer || '',
+        kind: 'cart_proposal',
+        meta: {
+          kind: 'cart_proposal',
+          agentResponse: {
+            kind: 'cart_proposal',
+            answer: cartProposal.answer || '',
+            cart_payload: cartProposal.cart_payload,
+            items: cartProposal.items || [],
+            citations: [],
+          },
+        }
+      });
+    }
+  }, [isStreamingProgress, cartProposal, saveMessage]);
+
+  // Week 6: Handle checkout from streaming
+  useEffect(() => {
+    if (!isStreamingProgress && checkout) {
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== 'thinking-temp');
+        return [
+          ...filtered,
+          {
+            id: makeId(),
+            role: 'assistant',
+            content: checkout.answer || 'Your checkout is ready!',
+            meta: {
+              kind: 'checkout_ready',
+              paymentUrl: checkout.paymentUrl,
+              checkoutPageUrl: checkout.checkoutPageUrl,
+              total: checkout.total,
+              currency: checkout.currency,
+            },
+          }
+        ];
+      });
+      saveMessage({
+        role: 'assistant',
+        content: checkout.answer || '',
+        kind: 'checkout_ready',
+        meta: {
+          kind: 'checkout_ready',
+          paymentUrl: checkout.paymentUrl,
+          checkoutPageUrl: checkout.checkoutPageUrl,
+          total: checkout.total,
+          currency: checkout.currency,
+        }
+      });
+    }
+  }, [isStreamingProgress, checkout, saveMessage]);
+
+  // Week 6: Handle plain answers from streaming
+  useEffect(() => {
+    if (!isStreamingProgress && answer && kind === 'answer') {
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== 'thinking-temp');
+        return [
+          ...filtered,
+          {
+            id: makeId(),
+            role: 'assistant',
+            content: answer,
+          }
+        ];
+      });
+      saveMessage({
+        role: 'assistant',
+        content: answer,
+        kind: 'answer',
+      });
+    }
+  }, [isStreamingProgress, answer, kind, saveMessage]);
+
+  // -------- CART / CHECKOUT ACTIONS --------
 
   async function handleConfirmCartProposal(messageId: string) {
     const target = messages.find(
@@ -978,6 +739,9 @@ export default function CoveChatWidget() {
     <div className="flex flex-col h-full max-h-[600px] rounded-2xl border border-neutral-800 bg-neutral-950/80">
       {/* Messages list */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        {/* Personalized Greeting - NEW! */}
+        {messages.length === 0 && !isStreamingProgress && <PersonalizedGreeting />}
+
         {messages.map((m) => {
           const isUser = m.role === "user";
 
@@ -1009,27 +773,32 @@ export default function CoveChatWidget() {
                   : "bg-neutral-800 text-neutral-50"
                   }`}
               >
-                <p className="whitespace-pre-wrap">{m.content}</p>
-
-                {/* Week 4: Agent thinking process */}
-                {!isUser && recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
-                  <AgentThinkingSteps steps={recMeta.thinking_steps} />
+                {/* Week 6: Show thinking steps inline for temp message */}
+                {!isUser && m.id === 'thinking-temp' && isStreamingProgress && (
+                  <div className="flex flex-wrap gap-2">
+                    {thinkingSteps.map((step, i) => (
+                      <div
+                        key={i}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-xs"
+                        style={{ animationDelay: `${i * 100}ms` }}
+                      >
+                        <span className="text-base">{step.icon}</span>
+                        <span className="text-purple-200">{step.status}</span>
+                        {step.done && <Check className="h-3 w-3 text-green-400" />}
+                      </div>
+                    ))}
+                  </div>
                 )}
 
-                {/* vertical list of product cards */}
-                {!isUser &&
-                  recMeta &&
-                  recMeta.items &&
-                  recMeta.items.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {recMeta.items.map((item, idx) => (
-                        <ChatProductCard
-                          key={`${item.variantId ?? item.slug ?? item.url}-${idx}`}
-                          item={item}
-                        />
-                      ))}
-                    </div>
-                  )}
+                {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
+
+
+                {/* Recommendations */}
+                {recMeta?.items && recMeta.items.length > 0 && (
+                  <div className="mt-3 -mx-8">
+                    <ProductCarousel items={recMeta.items} />
+                  </div>
+                )}
 
                 {/* cart proposal confirm / cancel */}
                 {cartMeta && !cartMeta.confirmed && !cartMeta.cancelled && (
@@ -1053,13 +822,13 @@ export default function CoveChatWidget() {
                 {checkoutMeta && (
                   <div className="mt-3 space-y-2">
                     <button
-                      onClick={() => window.location.href = checkoutMeta.checkoutPageUrl || '/checkoutpage'}
+                      onClick={() => window.location.href = (checkoutMeta.checkoutPageUrl || '/checkoutpage')}
                       className="block w-full px-4 py-2 text-center rounded-lg border border-gray-300 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                     >
                       📋 Review Cart First
                     </button>
                     <button
-                      onClick={() => window.location.href = checkoutMeta.paymentUrl}
+                      onClick={() => window.open(checkoutMeta.paymentUrl, '_blank')}
                       className="block w-full px-4 py-2 text-center rounded-lg bg-green-500 text-white font-medium hover:bg-green-400 transition"
                     >
                       💳 Proceed to Payment ({checkoutMeta.currency || 'EUR'} {(checkoutMeta.total || 0).toFixed(2)})
@@ -1068,7 +837,7 @@ export default function CoveChatWidget() {
                 )}
 
                 {/* Week 4: Order history */}
-                {orderMeta && orderMeta.orders && orderMeta.orders.length > 0 && (
+                {orderMeta && orderMeta.orders && Array.isArray(orderMeta.orders) && orderMeta.orders.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {orderMeta.orders.map((order, idx) => (
                       <div
@@ -1131,13 +900,15 @@ export default function CoveChatWidget() {
       </form>
 
       {/* Week 4: Toast notifications */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-    </div>
+      {
+        toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )
+      }
+    </div >
   );
 }

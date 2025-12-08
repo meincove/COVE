@@ -4,8 +4,11 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ShoppingCart, Heart, ExternalLink, Sparkles, Check, X } from "lucide-react";
 
 import type { AgentItem } from "@/types/agent";
+import type { CartItem } from "@/types/cart";
+import { useCartStore } from "@/src/store/cartStore";
 import {
   resolveAgentItemForChat,
   fallbackResolveAgentItemForChat,
@@ -14,10 +17,13 @@ import {
 
 type ChatProductCardProps = {
   item: AgentItem;
+  index?: number;
 };
 
-export default function ChatProductCard({ item }: ChatProductCardProps) {
+export default function ChatProductCard({ item, index = 0 }: ChatProductCardProps) {
   const router = useRouter();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Start with a cheap synchronous fallback (AgentItem fields only)
   const [resolved, setResolved] = useState<ResolvedProductForChat>(() =>
@@ -66,65 +72,197 @@ export default function ChatProductCard({ item }: ChatProductCardProps) {
     }
   };
 
+  const addItem = useCartStore((s) => s.addItem);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isAdding || isAdded) return;
+
+    setIsAdding(true);
+    try {
+      // Construct a cart item from the agent item
+      const cartItem: CartItem = {
+        productId: item.slug || item.variantId || 'unknown',
+        variantId: item.variantId || 'unknown',
+        name: title,
+        price: 0, // TODO: Get real price if available
+        quantity: 1,
+        imageUrl: imageUrl || '/clothing-images/placeholder.png',
+        size: item.size || 'M', // Default or from item
+        color: item.color || 'Black',
+        colorName: colorName || item.color || 'Black',
+        tier: item.tier || '',
+        type: item.type || 'clothing',
+        material: '',
+      };
+
+      await addItem(cartItem);
+
+      // Show success state
+      setIsAdding(false);
+      setIsAdded(true);
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setIsAdded(false);
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to add to cart", err);
+      setIsAdding(false);
+    }
+  };
+
   return (
-    <button
-      type="button"
+    <div
+      className={`
+        group relative
+        w-64 h-[340px] shrink-0
+        rounded-2xl overflow-hidden
+        bg-neutral-900
+        transform transition-all duration-500 ease-out
+        hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/30
+        cursor-pointer
+        animate-fade-in-up
+      `}
+      style={{
+        animationDelay: `${index * 100}ms`,
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
-      className="w-full text-left rounded-2xl border border-neutral-800 bg-neutral-900/80 px-3 py-3 flex gap-3 hover:border-neutral-500 transition"
+      role="button"
     >
-      {/* Image / fallback */}
-      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-800">
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-[10px] text-neutral-500 px-1 text-center">
-            Image not available
+      {/* Full Background Image */}
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          className={`
+            object-cover transition-transform duration-700
+            ${isHovered ? 'scale-110' : 'scale-100'}
+          `}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
+          <Sparkles className="h-12 w-12 text-neutral-600 animate-pulse" />
+        </div>
+      )}
+
+      {/* Gradient Overlay - Always visible for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+
+      {/* Top Badges */}
+      <div className="absolute top-3 left-3 flex flex-col gap-1">
+        {(fromCatalog || imageUrl || priceLabel) && (
+          <div className="px-2 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center gap-1">
+            <Check className="h-3 w-3 text-green-400" />
+            <span className="text-[10px] font-medium text-white">Available</span>
+          </div>
+        )}
+        {item.tier && (
+          <div className="px-2 py-1 rounded-full bg-purple-500/20 backdrop-blur-md border border-purple-500/30">
+            <span className="text-[10px] font-medium text-purple-200">{item.tier}</span>
           </div>
         )}
       </div>
 
-      {/* Text section */}
-      <div className="flex flex-col gap-1 text-xs text-neutral-100 flex-1">
-        <div className="font-medium text-sm leading-tight">{title}</div>
+      {/* Like Button - Floating Top Right */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsLiked(!isLiked);
+        }}
+        className={`
+          absolute top-3 right-3
+          h-8 w-8 rounded-full flex items-center justify-center
+          backdrop-blur-md transition-all duration-200
+          ${isLiked ? 'bg-red-500 text-white' : 'bg-black/30 text-white hover:bg-black/50'}
+        `}
+      >
+        <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+      </button>
 
-        {subtitle && (
-          <div className="text-[11px] text-neutral-400">{subtitle}</div>
-        )}
-
-        {reason && (
-          <div className="text-[11px] text-neutral-300 line-clamp-2">
-            {reason}
-          </div>
-        )}
-
-        <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
-          <div className="flex items-center gap-2">
-            {colorName && (
-              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-[10px] text-neutral-300">
-                {colorName}
+      {/* Bottom Content Area */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
+        {/* Title & Price */}
+        <div>
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="font-bold text-sm text-white leading-tight line-clamp-2 flex-1">
+              {title}
+            </h3>
+            {priceLabel && (
+              <span className="font-bold text-sm text-white bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                {priceLabel}
               </span>
             )}
-            <span
-              className={`text-[10px] uppercase tracking-wide ${
-                fromCatalog ? "text-emerald-400" : "text-neutral-500"
-              }`}
-            >
-              {fromCatalog ? "IN CATALOG" : "NOT IN CURRENT CATALOG"}
-            </span>
           </div>
-
-          {priceLabel && (
-            <span className="text-[11px] font-semibold text-neutral-50">
-              {priceLabel}
-            </span>
+          {subtitle && (
+            <p className="text-xs text-neutral-300 mt-1 line-clamp-1">{subtitle}</p>
           )}
         </div>
+
+        {/* Reason Pill */}
+        {reason && (
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-purple-400" />
+            <p className="text-[10px] text-purple-200 line-clamp-1">
+              {reason}
+            </p>
+          </div>
+        )}
+
+        {/* Action Button - Expands on Hover */}
+        <div className={`
+          overflow-hidden transition-all duration-300
+          ${isHovered ? 'max-h-12 opacity-100 mt-2' : 'max-h-0 opacity-0'}
+        `}>
+          <button
+            onClick={handleAddToCart}
+            disabled={isAdding || isAdded}
+            className={`
+              w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 
+              transition-all duration-300
+              ${isAdded
+                ? 'bg-emerald-500 text-white'
+                : isAdding
+                  ? 'bg-neutral-500 text-white cursor-not-allowed'
+                  : 'bg-white text-black hover:bg-neutral-200'
+              }
+            `}
+          >
+            {isAdded ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                Added!
+              </>
+            ) : isAdding ? (
+              <>
+                <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-3.5 w-3.5" />
+                Add to Cart
+              </>
+            )}
+          </button>
+        </div>
       </div>
-    </button>
+
+      <style jsx>{`
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
+    </div>
   );
 }

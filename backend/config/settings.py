@@ -228,6 +228,7 @@ import os
 USE_RDS = os.getenv("USE_RDS", "0") in ("1", "true", "True")
 
 if USE_RDS:
+    # Neon DB Configuration - Optimized for serverless PostgreSQL
     DATABASES = {
         "default": dj_database_url.config(
             env="DATABASE_URL",
@@ -235,10 +236,19 @@ if USE_RDS:
                 "DATABASE_URL",
                 "postgresql://neondb_owner:npg_L5mXATyRf6nF@ep-mute-dream-ag0ojpws-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require",
             ),
-            conn_max_age=600,
-            conn_health_checks=True,
+            # Neon-optimized settings:
+            conn_max_age=0,  # ← FIX: Disable persistent connections for Neon
+            conn_health_checks=True,  # Check connection before use
+            ssl_require=True,
         )
     }
+    
+    # Additional Neon-specific optimizations (connection timeout only)
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": 10,  # Timeout for new connections
+        # Note: statement_timeout removed - not supported by Neon pooler
+    }
+    
 else:
     DATABASES = {
         "default": {

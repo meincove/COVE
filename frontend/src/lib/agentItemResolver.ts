@@ -58,9 +58,8 @@ type CatalogProductResponse = {
 export function fallbackResolveAgentItemForChat(
   item: AgentItem,
 ): ResolvedProductForChat {
-  const fallbackSubtitle = `${item.tier ?? ""}${
-    item.type ? ` • ${item.type}` : ""
-  }`.trim();
+  const fallbackSubtitle = `${item.tier ?? ""}${item.type ? ` • ${item.type}` : ""
+    }`.trim();
 
   return {
     title: item.title,
@@ -131,11 +130,22 @@ export async function resolveAgentItemForChat(
   // start from a safe fallback
   const base = fallbackResolveAgentItemForChat(item);
 
+  console.log('[AgentItemResolver] Resolving item:', {
+    variantId: item.variantId,
+    slug: item.slug,
+    color: item.color,
+    title: item.title
+  });
+
   const product = await fetchCatalogProductForItem(item);
+
   if (!product) {
     // can't find anything in catalog -> keep fallback
+    console.warn('[AgentItemResolver] No product found in catalog for:', item.title);
     return base;
   }
+
+  console.log('[AgentItemResolver] Found product:', product.name, 'with', product.colors?.length, 'variants');
 
   const variants = product.colors ?? [];
 
@@ -182,9 +192,8 @@ export async function resolveAgentItemForChat(
     ? `/clothing-images/${imgName}`
     : undefined;
 
-  const subtitle = `${product.tier ?? ""}${
-    product.type ? ` • ${product.type}` : ""
-  }`.trim();
+  const subtitle = `${product.tier ?? ""}${product.type ? ` • ${product.type}` : ""
+    }`.trim();
 
   const productUrl = `/product/${product.slug}?variantId=${encodeURIComponent(
     v.variantId,

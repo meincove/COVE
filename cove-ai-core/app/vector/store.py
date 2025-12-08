@@ -45,13 +45,15 @@ def init_pool():
                 return psycopg.connect(DB_DSN, autocommit=True)
         _pool = _DummyPool()
     else:
-        # Real pool
+        # Real pool - Neon-optimized
         _pool = ConnectionPool(
             conninfo=DB_DSN,
-            min_size=1,
-            max_size=10,
-            num_workers=3,
+            min_size=0,  # Neon: Start with no connections
+            max_size=5,  # Neon: Keep pool small
+            num_workers=2,
             timeout=10,
+            max_lifetime=300,  # Recycle every 5 min
+            max_idle=60,  # Close idle after 1 min
             kwargs={"autocommit": True},
         )
 
@@ -237,12 +239,15 @@ def get_pool():
         return _pool
 
     # Normal path: real psycopg_pool.ConnectionPool
+    # Neon-optimized: connections recycled frequently to avoid SSL timeout
     _pool = ConnectionPool(
         conninfo=DB_DSN,
-        min_size=1,
-        max_size=10,
-        num_workers=3,
+        min_size=0,  # Neon: Start with no connections
+        max_size=5,  # Neon: Keep pool small for serverless
+        num_workers=2,  # Reduced for Neon
         timeout=10,
+        max_lifetime=300,  # ← NEON FIX: Recycle connections every 5 minutes
+        max_idle=60,  # ← NEON FIX: Close idle connections after 1 minute
         # autocommit for our simple read/write use cases
         kwargs={"autocommit": True},
     )
