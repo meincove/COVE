@@ -1,0 +1,86 @@
+{
+    "version": "1.0.0",
+    "description": "Personalization configuration for COVE product recommendations",
+    "signals": {
+        "browse_history": {
+            "enabled": true,
+            "weight": 0.3,
+            "decay_factor": 0.9,
+            "max_items": 20,
+            "description": "Product views and clicks"
+        },
+        "purchase_history": {
+            "enabled": true,
+            "weight": 0.4,
+            "decay_factor": 0.7,
+            "max_items": 10,
+            "description": "Completed purchases (strongest signal)"
+        },
+        "cart_actions": {
+            "enabled": true,
+            "weight": 0.2,
+            "decay_factor": 0.95,
+            "max_items": 15,
+            "description": "Add to cart, remove from cart"
+        },
+        "search_history": {
+            "enabled": true,
+            "weight": 0.1,
+            "decay_factor": 0.8,
+            "max_items": 10,
+            "description": "Search queries"
+        }
+    },
+    "collaborative_filtering": {
+        "enabled": true,
+        "method": "item_based",
+        "similarity_metric": "cosine",
+        "min_common_users": 3,
+        "top_k_similar": 10,
+        "description": "Users like you also liked..."
+    },
+    "temporal_decay": {
+        "enabled": true,
+        "half_life_days": 14,
+        "min_weight": 0.1,
+        "description": "Recent interactions matter more"
+    },
+    "diversity": {
+        "enabled": true,
+        "category_spread": 0.3,
+        "tier_mix": 0.2,
+        "description": "Avoid filter bubbles, show variety"
+    },
+    "cold_start": {
+        "new_user_threshold_days": 7,
+        "fallback_to_popular": true,
+        "explore_factor": 0.3,
+        "description": "New users with no history"
+    },
+    "real_time": {
+        "session_weight": 0.2,
+        "immediate_feedback": true,
+        "update_frequency_seconds": 60,
+        "description": "Adapt to current session behavior"
+    },
+    "privacy": {
+        "anonymize_after_days": 90,
+        "respect_do_not_track": true,
+        "opt_out_supported": true,
+        "description": "GDPR/CCPA compliant"
+    },
+    "performance": {
+        "cache_ttl_seconds": 300,
+        "profile_update_batch_size": 100,
+        "max_latency_ms": 30,
+        "description": "Performance targets"
+    },
+    "metadata": {
+        "last_updated": "2025-12-08",
+        "research_sources": [
+            "E-commerce personalization best practices 2024-2025",
+            "Implicit feedback recommendation systems",
+            "Collaborative filtering with deep learning"
+        ]
+    }
+}

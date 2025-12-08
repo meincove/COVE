@@ -5,13 +5,25 @@ Research-backed approach using pgvector for optimal performance.
 
 import asyncio
 import hashlib
+import os
 from typing import List, Dict, Any, Optional, Tuple
 from functools import lru_cache
 import logging
 
-from litellm import embedding, aembedding
+from dotenv import load_dotenv
+from openai import AsyncOpenAI
+
+# Load environment variables
+load_dotenv()
 
 log = logging.getLogger("cove.hybrid_search")
+
+# OpenAI client configured for OpenRouter
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+openrouter_client = AsyncOpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY
+)
 
 
 class HybridSearch:
@@ -24,7 +36,7 @@ class HybridSearch:
     - Throughput: >100 QPS
     """
     
-    def __init__(self, embedding_model: str = "openrouter:openai/text-embedding-3-small"):
+    def __init__(self, embedding_model: str = "openai/text-embedding-3-small"):
         self.embedding_model = embedding_model
         self.embedding_cache = {}
         
@@ -63,20 +75,20 @@ class HybridSearch:
         return fused_results[:limit]
     
     async def _get_embedding(self, text: str) -> List[float]:
-        """Generate or retrieve cached embedding"""
+        """Generate or retrieve cached embedding via OpenRouter"""
         # Cache key
         cache_key = hashlib.md5(text.encode()).hexdigest()
         
         if cache_key in self.embedding_cache:
             return self.embedding_cache[cache_key]
         
-        # Generate embedding
-        response = await aembedding(
+        # Generate embedding via OpenRouter
+        response = await openrouter_client.embeddings.create(
             model=self.embedding_model,
             input=[text]
         )
         
-        emb = response.data[0]["embedding"]
+        emb = response.data[0].embedding
         
         # Cache it (LRU with max 1000 entries)
         if len(self.embedding_cache) > 1000:

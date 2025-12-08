@@ -56,37 +56,66 @@ class ProductRecommender:
         self,
         query: str,
         filters: Optional[Dict[str, Any]] = None,
-        user_context: Optional[Dict[str, Any]] = None,
-        limit: int = 10
+        top_k: int = 10,
+        user_id: Optional[str] = None
     ) -> List[Product]:
         """
-        Get product recommendations based on query and context.
+        Get personalized product recommendations.
         
         Args:
-            query: Search query (e.g., "show me hoodies")
-            filters: Price, type, tier constraints
-            user_context: User ID, history, preferences
-            limit: Maximum results to return
+            query: Search query
+            filters: Optional filters (price, type, tier, etc)
+            top_k: Number of results to return
+            user_id: Optional user ID for personalization
             
         Returns:
-            List of Product objects ranked by relevance
+            List of recommended products
         """
-        log.info(f"Recommend query='{query}' filters={filters} limit={limit}")
+        log.info(f"Recommend: query='{query}', filters={filters}, top_k={top_k}, user_id={user_id}")
         
-        # Step 1: Parse filters
+        # Parse and validate filters
         parsed_filters = self._parse_filters(filters or {})
         
-        # Step 2: Vector similarity search
-        candidates = await self._vector_search(query, parsed_filters, limit * 3)
+        # Get base results from hybrid search
+        from app.mcp_agents.product_recommender.hybrid_search import get_hybrid_search
+        hybrid = get_hybrid_search()
         
-        # Step 3: Apply ranking strategies
-        ranked = await self._rank_products(candidates, query, user_context or {})
+        base_results = await hybrid.search(query, parsed_filters, limit=top_k * 2)
         
-        # Step 4: Apply final filters and limit
-        results = self._apply_filters(ranked, parsed_filters)[:limit]
+        # Apply personalization if user_id provided
+        if user_id:
+            from app.mcp_agents.product_recommender.personalization import get_personalization_engine
+            personalization = get_personalization_engine()
+            
+            # Get user profile (in production, this would query a database)
+            # For now, we'll use None which triggers cold start handling
+            user_profile = None  # TODO: Fetch from database
+            
+            base_results = personalization.personalize_results(base_results, user_profile)
+            log.info(f"Applied personalization for user {user_id}")
         
-        log.info(f"Returning {len(results)} recommendations")
-        return results
+        # Rank products using config weights
+        ranked = self._rank_products(base_results)
+        
+        # Apply final filters
+        filtered = self._apply_filters(ranked, parsed_filters)
+        
+        # Convert to Product dataclass
+        products = [
+            Product(
+                id=r.get('id', r.get('product_id', 'unknown')),
+                title=r.get('title', 'Unknown'),
+                price=r.get('price', 0.0),
+                type=r.get('type'),
+                tier=r.get('tier'),
+                slug=r.get('slug', ''),
+                score=r.get('final_score', r.get('rrf_score', 0.0))
+            )
+            for r in filtered[:top_k]
+        ]
+        
+        log.info(f"Returning {len(products)} personalized recommendations")
+        return products
     
     def _parse_filters(self, filters: Dict[str, Any]) -> Dict[str, Any]:
         """Parse and validate filters"""
@@ -151,76 +180,45 @@ class ProductRecommender:
         
         return candidates
     
-    async def _rank_products(
+    def _rank_products(
         self,
-        candidates: List[Dict[str, Any]],
-        query: str,
-        user_context: Dict[str, Any]
-    ) -> List[Product]:
+        results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
-        Apply multi-factor ranking using configured strategies.
+        Apply multi-factor ranking (already done by hybrid search + personalization).
+        Just pass through since ranking is handled upstream.
         """
-        ranked = []
+        # Results already ranked by hybrid search RRF + personalization
+        # Just ensure they have scores
+        for result in results:
+            if 'final_score' not in result and 'rrf_score' not in result:
+                result['final_score'] = 0.5
         
-        for candidate in candidates:
-            # Base similarity score
-            similarity = candidate.get("similarity_score", 0.5)
-            
-            # Popularity score (mock for now)
-            popularity = 0.7  # TODO: Get from analytics
-            
-            # Personalization score (mock for now)
-            personalization = 0.6  # TODO: Based on user history
-            
-            # Weighted combination
-            weights = self.ranking_strategies
-            final_score = (
-                similarity * weights["similarity"]["weight"] +
-                popularity * weights["popularity"]["weight"] +
-                personalization * weights["personalization"]["weight"]
-            )
-            
-            product = Product(
-                id=candidate["id"],
-                title=candidate["title"],
-                type=candidate["type"],
-                tier=candidate["tier"],
-                price=candidate["price"],
-                slug=candidate["slug"],
-                score=final_score,
-                reason="Matches your query"
-            )
-            
-            ranked.append(product)
-        
-        # Sort by score descending
-        ranked.sort(key=lambda p: p.score, reverse=True)
-        
-        return ranked
+        return results
     
     def _apply_filters(
         self,
-        products: List[Product],
+        results: List[Dict[str, Any]],
         filters: Dict[str, Any]
-    ) -> List[Product]:
-        """Apply final filtering"""
-        filtered = products
+    ) -> List[Dict[str, Any]]:
+        """Apply final filtering to results"""
+        filtered = results
         
         # Price filter
         if "price" in filters:
             price_filter = filters["price"]
             if price_filter["min"] is not None:
-                filtered = [p for p in filtered if p.price >= price_filter["min"]]
+                filtered = [r for r in filtered if r.get("price", 0) >= price_filter["min"]]
             if price_filter["max"] is not None:
-                filtered = [p for p in filtered if p.price <= price_filter["max"]]
+                filtered = [r for r in filtered if r.get("price", 0) <= price_filter["max"]]
         
         # Type filter
         if "type" in filters:
-            filtered = [p for p in filtered if p.type == filters["type"]]
+            filtered = [r for r in filtered if r.get("type") == filters["type"]]
         
         # Tier filter
         if "tier" in filters:
-            filtered = [p for p in filtered if p.tier == filters["tier"]]
+            filtered = [r for r in filtered if r.get("tier") == filters["tier"]]
         
         return filtered
 
