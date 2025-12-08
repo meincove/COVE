@@ -24,7 +24,7 @@ class HybridSearch:
     - Throughput: >100 QPS
     """
     
-    def __init__(self, embedding_model: str = "text-embedding-3-small"):
+    def __init__(self, embedding_model: str = "openrouter:openai/text-embedding-3-small"):
         self.embedding_model = embedding_model
         self.embedding_cache = {}
         
