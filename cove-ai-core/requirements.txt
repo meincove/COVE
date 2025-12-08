@@ -8,3 +8,5 @@ pgvector==0.2.5
 orjson==3.10.7
 neo4j>=5.15.0
 neo4j>=5.15.0
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

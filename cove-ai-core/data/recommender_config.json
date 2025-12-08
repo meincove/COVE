@@ -1,0 +1,86 @@
+{
+    "model_config": {
+        "embedding_model": "text-embedding-3-small",
+        "embedding_dimensions": 1536,
+        "batch_size": 100
+    },
+    "ranking_strategies": {
+        "similarity": {
+            "enabled": true,
+            "weight": 0.6,
+            "description": "Vector similarity to query"
+        },
+        "popularity": {
+            "enabled": true,
+            "weight": 0.2,
+            "description": "Product popularity score"
+        },
+        "personalization": {
+            "enabled": true,
+            "weight": 0.2,
+            "description": "User history and preferences"
+        }
+    },
+    "filters": {
+        "price": {
+            "enabled": true,
+            "default_min": null,
+            "default_max": null
+        },
+        "type": {
+            "enabled": true,
+            "values": [
+                "hoodie",
+                "tee",
+                "bomber",
+                "jacket",
+                "pants"
+            ]
+        },
+        "tier": {
+            "enabled": true,
+            "values": [
+                "originals",
+                "limited",
+                "designer"
+            ]
+        },
+        "color": {
+            "enabled": true,
+            "values": [
+                "jet black",
+                "ink navy",
+                "deep charcoal",
+                "stone grey",
+                "stone beige"
+            ]
+        },
+        "availability": {
+            "enabled": true,
+            "in_stock_only": true
+        }
+    },
+    "performance": {
+        "cache_ttl_seconds": 300,
+        "max_results": 50,
+        "default_limit": 10,
+        "similarity_threshold": 0.1
+    },
+    "fallback": {
+        "use_popular_on_error": true,
+        "use_random_sample": false,
+        "min_results": 3
+    },
+    "personalization_config": {
+        "use_browse_history": true,
+        "use_purchase_history": true,
+        "use_ai_profile": true,
+        "history_weight_decay": 0.9,
+        "max_history_items": 20
+    },
+    "metadata": {
+        "version": "1.0.0",
+        "last_updated": "2025-12-08",
+        "description": "Configuration for LLM-powered product recommender with vector similarity and personalization"
+    }
+}
