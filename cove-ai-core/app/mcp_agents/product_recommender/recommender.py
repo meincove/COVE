@@ -128,38 +128,28 @@ class ProductRecommender:
         top_k: int
     ) -> List[Dict[str, Any]]:
         """
-        Perform vector similarity search.
-        
-        TODO: Integrate with actual vector store (Qdrant/Pinecone/pgvector)
-        For now, returns mock data
+        Perform hybrid search (vector + keyword) using RRF fusion.
+        Replaces mock implementation with production-ready hybrid search.
         """
-        # This will be replaced with actual vector search
-        # from app.vector.store import search_hybrid
-        # results = await search_hybrid(query, kind="product", top_k=top_k)
+        from app.mcp_agents.product_recommender.hybrid_search import get_hybrid_search
         
-        # Mock implementation
-        mock_products = [
-            {
-                "id": "prod_001",
-                "title": "Cove Designer Hoodie",
-                "type": "hoodie",
-                "tier": "designer",
-                "price": 59.99,
-                "slug": "hoodie-designer-fleece-59.99",
-                "similarity_score": 0.85
-            },
-            {
-                "id": "prod_002",
-                "title": "Cove Designer Tee",
-                "type": "tee",
-                "tier": "designer",
-                "price": 34.99,
-                "slug": "tee-designer-structured-34.99",
-                "similarity_score": 0.72
-            }
-        ]
+        hybrid = get_hybrid_search()
+        results = await hybrid.search(query, filters, top_k)
         
-        return mock_products
+        # Convert to expected format
+        candidates = []
+        for result in results:
+            candidates.append({
+                "id": result["id"],
+                "title": result["title"],
+                "type": result["type"],
+                "tier": result["tier"],
+                "price": result["price"],
+                "slug": result.get("slug", ""),
+                "similarity_score": result.get("rrf_score", 0.5)
+            })
+        
+        return candidates
     
     async def _rank_products(
         self,
