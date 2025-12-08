@@ -1,0 +1,280 @@
+{
+    "suggestion_config": {
+        "max_suggestions": 4,
+        "auto_submit": false,
+        "show_icons": true,
+        "animation_delay_ms": 50
+    },
+    "suggestion_rules": {
+        "recommendations": {
+            "priority": 1,
+            "conditions": {
+                "requires": [
+                    "has_items"
+                ]
+            },
+            "suggestions": [
+                {
+                    "id": "add_first_item",
+                    "template": "Add {item_title} to cart",
+                    "query_template": "add {variant_id} to cart in size {default_size}",
+                    "type": "action",
+                    "icon": "shopping_cart",
+                    "priority": 1,
+                    "conditions": {
+                        "requires": [
+                            "has_items"
+                        ]
+                    }
+                },
+                {
+                    "id": "ask_size",
+                    "template": "What size should I get?",
+                    "query": "what size should i get for this",
+                    "type": "question",
+                    "icon": "help_circle",
+                    "priority": 2,
+                    "conditions": {
+                        "requires": [
+                            "has_items"
+                        ],
+                        "not_requires": [
+                            "user_has_size"
+                        ]
+                    }
+                },
+                {
+                    "id": "show_more",
+                    "template": "Show more options",
+                    "query_template": "show me more {item_type}s",
+                    "type": "navigation",
+                    "icon": "arrow_right",
+                    "priority": 3
+                },
+                {
+                    "id": "tell_quality",
+                    "template": "Tell me about the quality",
+                    "query": "tell me about the quality and materials",
+                    "type": "question",
+                    "icon": "info",
+                    "priority": 4
+                },
+                {
+                    "id": "show_similar",
+                    "template": "Show similar items",
+                    "query": "show me items similar to {item_title}",
+                    "type": "navigation",
+                    "icon": "sparkles",
+                    "priority": 5
+                }
+            ]
+        },
+        "cart_proposal": {
+            "priority": 1,
+            "conditions": {
+                "requires": [
+                    "has_cart_payload"
+                ]
+            },
+            "suggestions": [
+                {
+                    "id": "confirm_add",
+                    "template": "✓ Yes, add it",
+                    "query": "yes add to cart",
+                    "type": "action",
+                    "icon": "check",
+                    "priority": 1
+                },
+                {
+                    "id": "different_size",
+                    "template": "Show different size",
+                    "query": "show me this in a different size",
+                    "type": "navigation",
+                    "icon": "refresh",
+                    "priority": 2
+                },
+                {
+                    "id": "different_color",
+                    "template": "Different color?",
+                    "query": "do you have this in a different color",
+                    "type": "navigation",
+                    "icon": "palette",
+                    "priority": 3,
+                    "conditions": {
+                        "requires": [
+                            "has_color_variants"
+                        ]
+                    }
+                },
+                {
+                    "id": "similar_items",
+                    "template": "Show similar items",
+                    "query": "show similar items",
+                    "type": "navigation",
+                    "icon": "sparkles",
+                    "priority": 4
+                }
+            ]
+        },
+        "greeting": {
+            "priority": 1,
+            "suggestions": [
+                {
+                    "id": "trending",
+                    "template": "🔥 What's trending?",
+                    "query": "show me what's trending",
+                    "type": "discovery",
+                    "icon": "trending_up",
+                    "priority": 1
+                },
+                {
+                    "id": "show_hoodies",
+                    "template": "👕 Show me hoodies",
+                    "query": "show me some hoodies",
+                    "type": "search",
+                    "icon": "shopping_bag",
+                    "priority": 2
+                },
+                {
+                    "id": "my_orders",
+                    "template": "📦 My orders",
+                    "query": "show my order history",
+                    "type": "account",
+                    "icon": "package",
+                    "priority": 3,
+                    "conditions": {
+                        "requires": [
+                            "user_has_orders"
+                        ]
+                    }
+                },
+                {
+                    "id": "surprise_me",
+                    "template": "✨ Surprise me",
+                    "query": "recommend something for me",
+                    "type": "discovery",
+                    "icon": "sparkles",
+                    "priority": 4,
+                    "conditions": {
+                        "not_requires": [
+                            "user_has_orders"
+                        ]
+                    }
+                }
+            ]
+        },
+        "checkout_ready": {
+            "priority": 1,
+            "conditions": {
+                "requires": [
+                    "has_checkout_data"
+                ]
+            },
+            "suggestions": [
+                {
+                    "id": "review_cart",
+                    "template": "🛒 Review my cart first",
+                    "query": "show my cart",
+                    "type": "navigation",
+                    "icon": "shopping_cart",
+                    "priority": 1
+                },
+                {
+                    "id": "keep_shopping",
+                    "template": "Keep shopping",
+                    "query": "show me more items",
+                    "type": "navigation",
+                    "icon": "arrow_right",
+                    "priority": 2
+                },
+                {
+                    "id": "view_similar",
+                    "template": "View similar items",
+                    "query": "show me similar items to what's in my cart",
+                    "type": "navigation",
+                    "icon": "sparkles",
+                    "priority": 3
+                }
+            ]
+        },
+        "order_history": {
+            "priority": 1,
+            "conditions": {
+                "requires": [
+                    "has_orders"
+                ]
+            },
+            "suggestions": [
+                {
+                    "id": "reorder",
+                    "template": "Reorder last purchase",
+                    "query": "add my last order to cart",
+                    "type": "action",
+                    "icon": "refresh",
+                    "priority": 1
+                },
+                {
+                    "id": "track_order",
+                    "template": "Track latest order",
+                    "query": "track my latest order",
+                    "type": "navigation",
+                    "icon": "package",
+                    "priority": 2
+                },
+                {
+                    "id": "browse_new",
+                    "template": "Browse new arrivals",
+                    "query": "show me new arrivals",
+                    "type": "discovery",
+                    "icon": "sparkles",
+                    "priority": 3
+                }
+            ]
+        },
+        "default": {
+            "priority": 999,
+            "suggestions": [
+                {
+                    "id": "start_over",
+                    "template": "Start over",
+                    "query": "show me something else",
+                    "type": "navigation",
+                    "icon": "refresh",
+                    "priority": 1
+                },
+                {
+                    "id": "help",
+                    "template": "What can you do?",
+                    "query": "what can you help me with",
+                    "type": "question",
+                    "icon": "help_circle",
+                    "priority": 2
+                },
+                {
+                    "id": "browse",
+                    "template": "Browse catalog",
+                    "query": "show me your catalog",
+                    "type": "discovery",
+                    "icon": "grid",
+                    "priority": 3
+                }
+            ]
+        }
+    },
+    "template_variables": {
+        "item_title": "First item title from recommendations",
+        "variant_id": "First item variant ID",
+        "default_size": "User's preferred size or 'M'",
+        "item_type": "Product type (hoodie, t-shirt, etc.)",
+        "item_color": "Product color"
+    },
+    "condition_descriptions": {
+        "has_items": "Response includes product items",
+        "has_cart_payload": "Response includes cart proposal data",
+        "has_checkout_data": "Response includes checkout information",
+        "has_orders": "User has order history",
+        "user_has_size": "User has size preference saved",
+        "user_has_orders": "User has placed orders before",
+        "has_color_variants": "Product has multiple color options"
+    }
+}

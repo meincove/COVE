@@ -1,0 +1,100 @@
+{
+    "version": "1.0",
+    "description": "A/B testing configuration for recommendation system experiments",
+    "experiments": {
+        "cf_vs_baseline": {
+            "enabled": true,
+            "name": "Collaborative Filtering vs Baseline",
+            "description": "Test if CF improves recommendations over vector similarity alone",
+            "variants": {
+                "control": {
+                    "weight": 0.5,
+                    "config": {
+                        "cf_enabled": false,
+                        "personalization_enabled": true,
+                        "vector_similarity_enabled": true
+                    }
+                },
+                "treatment": {
+                    "weight": 0.5,
+                    "config": {
+                        "cf_enabled": true,
+                        "personalization_enabled": true,
+                        "vector_similarity_enabled": true
+                    }
+                }
+            },
+            "metrics": [
+                "click_through_rate",
+                "conversion_rate",
+                "avg_time_on_page",
+                "items_added_to_cart",
+                "purchase_completion"
+            ],
+            "start_date": "2025-12-08",
+            "end_date": null,
+            "min_sample_size": 1000
+        }
+    },
+    "assignment": {
+        "method": "user_id_hash",
+        "persist": true,
+        "cookie_name": "ab_variant",
+        "cookie_ttl_days": 30
+    },
+    "tracking": {
+        "events": {
+            "recommendation_shown": {
+                "enabled": true,
+                "properties": [
+                    "variant",
+                    "user_id",
+                    "query",
+                    "results_count",
+                    "timestamp"
+                ]
+            },
+            "recommendation_clicked": {
+                "enabled": true,
+                "properties": [
+                    "variant",
+                    "user_id",
+                    "product_id",
+                    "position",
+                    "timestamp"
+                ]
+            },
+            "cart_add": {
+                "enabled": true,
+                "properties": [
+                    "variant",
+                    "user_id",
+                    "product_id",
+                    "from_recommendation",
+                    "timestamp"
+                ]
+            },
+            "purchase": {
+                "enabled": true,
+                "properties": [
+                    "variant",
+                    "user_id",
+                    "product_ids",
+                    "total_value",
+                    "timestamp"
+                ]
+            }
+        },
+        "storage": {
+            "type": "database",
+            "table": "ab_test_events"
+        }
+    },
+    "analysis": {
+        "confidence_level": 0.95,
+        "min_effect_size": 0.05,
+        "auto_stop_winning_variant": false,
+        "auto_stop_losing_variant": true,
+        "significance_check_interval_hours": 24
+    }
+}

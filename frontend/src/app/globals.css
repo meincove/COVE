@@ -489,20 +489,40 @@ html {
     animation: fade-in 0.3s ease-out forwards;
   }
 
-  /* WELCOME PAGE: Hide navbar and prevent scrolling */
-  body:has(.welcome-page-root) .nav-full-wrap,
-  body:has(.welcome-page-root) .nav-stick,
-  body:has(.welcome-page-root) .nav-island-shell,
-  body:has(.welcome-page-root) .nav-full-shell {
-    display: none !important;
-    visibility: hidden !important;
+  /* Chat message aesthetics */
+  .chat-msg-user {
+    background: linear-gradient(135deg,
+        rgba(147, 51, 234, 0.35) 0%,
+        rgba(168, 85, 247, 0.25) 50%,
+        rgba(236, 72, 153, 0.2) 100%);
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    box-shadow:
+      0 10px 25px -5px rgba(168, 85, 247, 0.25),
+      0 0 20px rgba(168, 85, 247, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
   }
 
-  body:has(.welcome-page-root) .tester-frame {
-    overflow: hidden !important;
+  .chat-msg-assistant {
+    background: linear-gradient(135deg,
+        rgba(30, 30, 35, 0.95) 0%,
+        rgba(45, 40, 50, 0.9) 30%,
+        rgba(35, 30, 45, 0.92) 70%,
+        rgba(25, 25, 30, 0.95) 100%);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 20px 50px -12px rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(168, 85, 247, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  body:has(.welcome-page-root) {
-    overflow: hidden !important;
+  .chat-msg-assistant:hover {
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow:
+      0 20px 50px -12px rgba(168, 85, 247, 0.15),
+      0 0 40px rgba(168, 85, 247, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    transform: translateY(-1px);
   }
 }

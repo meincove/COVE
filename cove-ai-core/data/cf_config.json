@@ -1,0 +1,48 @@
+{
+    "version": "1.0",
+    "description": "Config-driven collaborative filtering for product recommendations",
+    "item_based_cf": {
+        "enabled": true,
+        "similarity_metric": "cosine",
+        "min_common_users": 2,
+        "top_k_similar": 20,
+        "cache_ttl_hours": 24,
+        "recompute_frequency_days": 7,
+        "min_interactions": 1
+    },
+    "matrix_factorization": {
+        "enabled": false,
+        "algorithm": "als",
+        "n_factors": 50,
+        "regularization": 0.01,
+        "iterations": 10,
+        "implicit_confidence_weight": 40,
+        "training_frequency_days": 7
+    },
+    "hybrid_fusion": {
+        "enabled": true,
+        "weights": {
+            "item_cf": 0.3,
+            "matrix_factorization": 0.3,
+            "vector_similarity": 0.2,
+            "personalization": 0.2
+        },
+        "cold_start_threshold_interactions": 5
+    },
+    "performance": {
+        "cache_recommendations": true,
+        "cache_ttl_minutes": 30,
+        "max_batch_size": 1000,
+        "use_approximate_nn": false
+    },
+    "data_sources": {
+        "user_interactions_table": "user_product_interactions",
+        "min_interactions_per_user": 1,
+        "interaction_types": {
+            "view": 0.3,
+            "cart_add": 0.6,
+            "purchase": 1.0,
+            "search": 0.2
+        }
+    }
+}

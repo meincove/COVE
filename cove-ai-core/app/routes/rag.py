@@ -210,12 +210,19 @@ async def rag_query(body: RAGIn):
     
     raw = await _llm.generate(messages)
     
-    # 4. Parse JSON
+    # 4. Parse response (supports both JSON and plain text)
     try:
         clean = _strip_code_fences(raw)
-        data = eval(clean) if clean.startswith("{") else {"answer": clean, "citations": []} # simple fallback
-    except:
-        data = {"answer": raw, "citations": []}
+        # Try JSON parsing first (backwards compatibility)
+        if clean.startswith("{"):
+            import json
+            data = json.loads(clean)
+        else:
+            # Plain text response (new behavior)
+            data = {"answer": clean, "citations": []}
+    except Exception:
+        # Fallback: treat as plain text
+        data = {"answer": raw.strip(), "citations": []}
         
     # 5. Normalize citations
     if not data.get("citations"):
@@ -594,13 +601,11 @@ def _build_suggestions_for_unknown(
 
 
 def _build_system_prompt(intent_kind: str) -> str:
-    base = (
-        "You are Cove AI, the assistant for a fashion brand. "
-        "Use ONLY the provided context. If the context doesn't contain the information, reply with 'Unknown'. "
-        "Return STRICT JSON: {answer: string, citations: array}. "
-        "The 'answer' must be a single short sentence."
-    )
-
+    """Build system prompt from config file (no hardcoded JSON!)"""
+    from app.core.rules import get_prompt
+    
+    base = get_prompt("rag", default="You are Cove AI. Answer questions helpfully using only the provided context.")
+    
     ik = (intent_kind or "generic").lower()
 
     if ik == "policy":
@@ -613,6 +618,7 @@ def _build_system_prompt(intent_kind: str) -> str:
         return (
             base
             + " Focus on size and fit information (which sizes exist, general fit notes). "
+              "If you don't have the user's measurements, ask for them warmly to give better advice. "
               "Do NOT invent new sizes or discuss store policies unless clearly present in the context."
         )
     elif ik == "lookup_product":
@@ -624,7 +630,7 @@ def _build_system_prompt(intent_kind: str) -> str:
     elif ik == "multi":
         return (
             base
-            + " If the question has multiple parts (e.g. product plus shipping), answer each part briefly in the same sentence. "
+            + " If the question has multiple parts (e.g. product plus shipping), answer each part briefly. "
               "Keep the answer concise and grounded in the context."
         )
     else:
@@ -1099,7 +1105,7 @@ async def rag_query(body: RAGIn):
         )
                 # ---- Pure greeting / small-talk: skip RAG, use lightweight LLM reply ----
         if intent_kind in ("greeting", "small_talk"):
-            text = await _generate_greeting(body.query, body.user_name)
+            text = await _generate_greeting(body.query, getattr(body, 'userName', None))
             return {
                 "answer": text,
                 "citations": [],

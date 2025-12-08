@@ -12,6 +12,7 @@ from fastapi.responses import StreamingResponse
 
 from app.routes.agent import AgentIn, _agent_query_impl, log
 from app.core.events import set_event_emitter, clear_event_emitter
+from app.core.suggested_actions import get_suggestions_engine
 
 router = APIRouter(prefix="/ai/agent", tags=["agent"])
 
@@ -105,6 +106,33 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
             }
             yield f"event: answer\ndata: {json.dumps(answer_data)}\n\n"
 
+        
+        # === GENERATE SUGGESTED ACTIONS ===
+        # Build context from result for suggestions engine
+        suggestions_context = {
+            "items": [item.dict() for item in result.items] if result.items else [],
+            "cart_payload": result.cart_payload if hasattr(result, 'cart_payload') else None,
+            "checkout_data": result.checkout if hasattr(result, 'checkout') else None,
+            "orders": result.orders if hasattr(result, 'orders') else [],
+            # User context would come from AgentIn body
+            "user_has_size": bool(body.userPreferences and body.userPreferences.get('size')) if hasattr(body, 'userPreferences') else False,
+            "user_has_orders": False,  # TODO: Check user order history
+            "has_color_variants": False,  # TODO: Check from product catalog
+        }
+        
+        # Generate contextual suggestions
+        suggestions_engine = get_suggestions_engine()
+        suggested_actions = suggestions_engine.generate(
+            intent=result.kind,
+            context=suggestions_context
+        )
+        
+        # Emit suggestions if any were generated
+        if suggested_actions:
+            print(f"[SUGGESTIONS DEBUG] Generated {len(suggested_actions)} suggestions: {suggested_actions}")
+            yield f"event: suggestions\ndata: {json.dumps({'suggestions': suggested_actions})}\n\n"
+        else:
+            print(f"[SUGGESTIONS DEBUG] No suggestions generated for intent={result.kind}, context keys={list(suggestions_context.keys())}")
         
         # Always send done event
         yield f"event: done\ndata: {json.dumps({'kind': result.kind})}\n\n"

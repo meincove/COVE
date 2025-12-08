@@ -1,0 +1,286 @@
+{
+    "intents": {
+        "recommendations": {
+            "description": "User wants product suggestions or recommendations",
+            "priority": 1,
+            "examples": [
+                "show me hoodies",
+                "I'm looking for jackets",
+                "recommend something casual",
+                "what's trending?"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "montre-moi des sweats",
+                    "je cherche des vestes"
+                ],
+                "es": [
+                    "enséñame sudaderas",
+                    "busco chaquetas"
+                ],
+                "de": [
+                    "zeig mir Hoodies",
+                    "ich suche Jacken"
+                ]
+            },
+            "keywords": [
+                "show",
+                "recommend",
+                "suggest",
+                "looking for",
+                "want"
+            ],
+            "required_entities": [],
+            "optional_entities": [
+                "product_type",
+                "style",
+                "color",
+                "size"
+            ]
+        },
+        "cart_proposal": {
+            "description": "User wants to add specific item to cart",
+            "priority": 1,
+            "examples": [
+                "add this to cart",
+                "I want the black hoodie",
+                "put it in my cart",
+                "I'll take the large"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "ajouter au panier",
+                    "je veux le noir"
+                ],
+                "es": [
+                    "añadir al carrito",
+                    "quiero el negro"
+                ],
+                "de": [
+                    "in den Warenkorb",
+                    "ich nehme das"
+                ]
+            },
+            "keywords": [
+                "add",
+                "cart",
+                "buy",
+                "purchase",
+                "want",
+                "take"
+            ],
+            "required_entities": [],
+            "optional_entities": [
+                "product_id",
+                "size",
+                "color",
+                "quantity"
+            ]
+        },
+        "checkout_ready": {
+            "description": "User ready to complete purchase",
+            "priority": 1,
+            "examples": [
+                "checkout",
+                "buy now",
+                "complete purchase",
+                "proceed to payment"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "payer",
+                    "acheter maintenant"
+                ],
+                "es": [
+                    "pagar",
+                    "comprar ahora"
+                ],
+                "de": [
+                    "bezahlen",
+                    "jetzt kaufen"
+                ]
+            },
+            "keywords": [
+                "checkout",
+                "pay",
+                "buy now",
+                "purchase",
+                "payment"
+            ],
+            "required_entities": [],
+            "optional_entities": []
+        },
+        "order_history": {
+            "description": "User asks about past orders or order status",
+            "priority": 1,
+            "examples": [
+                "where is my order",
+                "track my package",
+                "order status",
+                "show my orders"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "où est ma commande",
+                    "suivre mon colis"
+                ],
+                "es": [
+                    "dónde está mi pedido",
+                    "rastrear mi paquete"
+                ],
+                "de": [
+                    "wo ist meine Bestellung",
+                    "Paket verfolgen"
+                ]
+            },
+            "keywords": [
+                "order",
+                "track",
+                "delivery",
+                "shipment",
+                "package"
+            ],
+            "required_entities": [],
+            "optional_entities": [
+                "order_id",
+                "tracking_number"
+            ]
+        },
+        "size_help": {
+            "description": "User needs help with sizing or fit",
+            "priority": 2,
+            "examples": [
+                "what size should I get",
+                "how does it fit",
+                "size chart",
+                "is it true to size"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "quelle taille prendre",
+                    "guide des tailles"
+                ],
+                "es": [
+                    "qué talla elegir",
+                    "guía de tallas"
+                ],
+                "de": [
+                    "welche Größe",
+                    "Größentabelle"
+                ]
+            },
+            "keywords": [
+                "size",
+                "fit",
+                "sizing",
+                "measurements"
+            ],
+            "required_entities": [],
+            "optional_entities": [
+                "product_type",
+                "user_height",
+                "user_weight"
+            ]
+        },
+        "quality_question": {
+            "description": "User asks about product quality or materials",
+            "priority": 2,
+            "examples": [
+                "what's the quality like",
+                "tell me about the materials",
+                "is it durable",
+                "what's it made of"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "quelle est la qualité",
+                    "de quoi c'est fait"
+                ],
+                "es": [
+                    "cómo es la calidad",
+                    "de qué está hecho"
+                ],
+                "de": [
+                    "wie ist die Qualität",
+                    "woraus besteht es"
+                ]
+            },
+            "keywords": [
+                "quality",
+                "material",
+                "fabric",
+                "durable",
+                "made of"
+            ],
+            "required_entities": [],
+            "optional_entities": [
+                "product_id",
+                "product_type"
+            ]
+        },
+        "greeting": {
+            "description": "User greets or starts conversation",
+            "priority": 3,
+            "examples": [
+                "hello",
+                "hi",
+                "hey there",
+                "good morning"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "bonjour",
+                    "salut"
+                ],
+                "es": [
+                    "hola",
+                    "buenos días"
+                ],
+                "de": [
+                    "hallo",
+                    "guten Tag"
+                ]
+            },
+            "keywords": [
+                "hello",
+                "hi",
+                "hey",
+                "morning",
+                "evening"
+            ],
+            "required_entities": [],
+            "optional_entities": []
+        },
+        "none": {
+            "description": "Query doesn't match any e-commerce intent",
+            "priority": 999,
+            "examples": [
+                "what's the weather",
+                "tell me a joke",
+                "random question"
+            ],
+            "keywords": [],
+            "required_entities": [],
+            "optional_entities": []
+        }
+    },
+    "classification_settings": {
+        "use_llm": true,
+        "llm_model": "openrouter/openai/gpt-4o-mini",
+        "llm_temperature": 0,
+        "llm_max_tokens": 20,
+        "use_embeddings_fast_path": false,
+        "embedding_model": "text-embedding-3-small",
+        "embedding_confidence_threshold": 0.85,
+        "fallback_to_llm": true,
+        "cache_embeddings": true,
+        "max_examples_in_prompt": 3,
+        "enable_multilingual": true
+    },
+    "output_format": {
+        "include_confidence": true,
+        "include_reasoning": false,
+        "include_entities": true,
+        "return_multiple_intents": false
+    }
+}

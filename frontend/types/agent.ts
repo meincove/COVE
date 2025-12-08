@@ -87,4 +87,15 @@ export type AgentResponse = {
   debug_plan?: Record<string, any>;
   orders?: Order[];  // Week 4
   emailConfirmation?: EmailConfirmationData;
+  suggested_actions?: SuggestedAction[];  // Week 6: Context-aware quick replies
+};
+
+// Week 6: Suggested Actions (Context-aware quick replies)
+export type SuggestedAction = {
+  id: string;
+  text: string;
+  query: string;
+  type: "action" | "question" | "navigation" | "discovery" | "account";
+  icon?: string;
+  priority: number;
 };
