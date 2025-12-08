@@ -19,7 +19,14 @@ def load_config() -> Dict[str, Any]:
     with open(CONFIG_PATH) as f:
         return json.load(f)
 
-CONFIG = load_config()
+def load_cf_config() -> Dict[str, Any]:
+    """Load collaborative filtering configuration"""
+    cf_config_path = Path(__file__).parent.parent.parent.parent / "data" / "cf_config.json"
+    with open(cf_config_path) as f:
+        return json.load(f)
+
+config = load_config()
+cf_config = load_cf_config()
 
 
 @dataclass
@@ -43,14 +50,19 @@ class ProductRecommender:
     - Multi-factor ranking (similarity + popularity + personalization)
     """
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = config or CONFIG
+    def __init__(self, config_override: Optional[Dict[str, Any]] = None):
+        self.config = config_override if config_override is not None else config
         self.embedding_model = self.config["model_config"]["embedding_model"]
-        self.ranking_strategies = self.config["ranking_strategies"]
+        self.ranking_strategies = self.config.get("ranking_strategies", self.config.get("ranking", {}))
         self.filters_config = self.config["filters"]
         self.performance = self.config["performance"]
         
+        # CF configuration
+        self.cf_enabled = cf_config["item_based_cf"]["enabled"]
+        self.hybrid_fusion = cf_config["hybrid_fusion"]
+        
         log.info(f"ProductRecommender initialized with model: {self.embedding_model}")
+        log.info(f"Collaborative filtering: {self.cf_enabled}")
     
     async def recommend(
         self,
@@ -81,6 +93,15 @@ class ProductRecommender:
         hybrid = get_hybrid_search()
         
         base_results = await hybrid.search(query, parsed_filters, limit=top_k * 2)
+        
+        # Apply collaborative filtering if enabled and user_id provided
+        if self.cf_enabled and user_id:
+            base_results = await self._apply_collaborative_filtering(
+                base_results,
+                user_id,
+                top_k
+            )
+            log.info(f"Applied collaborative filtering for user {user_id}")
         
         # Apply personalization if user_id provided
         if user_id:
@@ -221,6 +242,86 @@ class ProductRecommender:
             filtered = [r for r in filtered if r.get("tier") == filters["tier"]]
         
         return filtered
+    
+    async def _apply_collaborative_filtering(
+        self,
+        base_results: List[Dict[str, Any]],
+        user_id: str,
+        top_k: int
+    ) -> List[Dict[str, Any]]:
+        """
+        Apply item-based collaborative filtering to enhance recommendations.
+        
+        Uses hybrid fusion strategy from cf_config:
+        - item_cf_score: from user's interaction history
+        - vector_similarity: from original hybrid search
+        - personalization: from personalization engine (applied separately)
+        
+        Args:
+            base_results: Results from hybrid search
+            user_id: User identifier
+            top_k: Number of results to return
+            
+        Returns:
+            Enhanced results with CF scores
+        """
+        from app.mcp_agents.product_recommender.item_based_cf import get_item_cf
+        
+        cf = get_item_cf()
+        
+        # Check if CF model is trained
+        if not cf.similarity_matrix:
+            log.warning("CF similarity matrix not computed. Skipping CF enhancement.")
+            return base_results
+        
+        # Get fusion weights
+        weights = self.hybrid_fusion["weights"]
+        cf_weight = weights["item_cf"]
+        vector_weight = weights["vector_similarity"]
+        
+        # TODO: Get user's interaction history from database
+        # For now, use empty list (cold start)
+        user_items = []  # TODO: Fetch user's viewed/purchased items
+        
+        if not user_items:
+            log.info(f"No interaction history for user {user_id}. Using vector similarity only.")
+            return base_results
+        
+        # Get CF recommendations based on user history
+        cf_recommendations = cf.recommend_based_on_history(
+            user_items=user_items,
+            top_k=top_k * 3,  # Get more candidates for fusion
+            exclude_items=[r.get("id") for r in base_results]
+        )
+        
+        # Convert CF recommendations to dict for lookup
+        cf_scores = {item_id: score for item_id, score in cf_recommendations}
+        
+        # Apply hybrid fusion
+        for result in base_results:
+            item_id = result.get("id")
+            
+            # Get scores
+            vector_score = result.get("rrf_score", result.get("final_score", 0.5))
+            cf_score = cf_scores.get(item_id, 0.0)
+            
+            # Hybrid fusion
+            fused_score = (
+                cf_weight * cf_score +
+                vector_weight * vector_score
+            )
+            
+            result["cf_score"] = cf_score
+            result["vector_score"] = vector_score
+            result["fused_score"] = fused_score
+            result["final_score"] = fused_score  # Update final score
+        
+        # Re-sort by fused score
+        base_results.sort(key=lambda x: x.get("fused_score", 0), reverse=True)
+        
+        log.info(f"CF fusion applied. Top result score: {base_results[0].get('fused_score', 0):.4f}")
+        
+        return base_results
 
 
 # Global instance
@@ -232,3 +333,4 @@ def get_recommender() -> ProductRecommender:
     if _recommender is None:
         _recommender = ProductRecommender()
     return _recommender
+
