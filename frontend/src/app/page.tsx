@@ -1,285 +1,315 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { useUser, useClerk } from '@clerk/nextjs'
+import { ShoppingCartIcon, TShirtIcon, HangerIcon } from '@/src/components/icons/ShoppingIcons'
+import { LaptopIcon, DollarIcon, RobotIcon } from '@/src/components/icons/PlatformIcons'
 
 export default function WelcomePage() {
   const router = useRouter()
-  const { user, isSignedIn } = useUser()
-  const { signOut } = useClerk()
-  const [hoveredPath, setHoveredPath] = useState<'shop' | 'platform' | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const handlePlatformSelect = () => {
-    localStorage.setItem('cove_selected_path', 'platform')
-    localStorage.setItem('cove_path_timestamp', Date.now().toString())
-    router.push('/partner-onboarding')
+  const [activeSide, setActiveSide] = useState<'left' | 'right' | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [iconPatterns, setIconPatterns] = useState<{ shopping: any[], platform: any[] }>({ shopping: [], platform: [] })
+  const [mousePosition, setMousePosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !containerRef.current) return
+
+    const generatePatterns = () => {
+      if (!containerRef.current) return
+
+      const rect = containerRef.current.getBoundingClientRect()
+      const spacing = 80
+      const rows = Math.ceil(rect.height / spacing) + 2
+      const cols = Math.ceil((rect.width * 0.5) / spacing) + 2
+
+      const shoppingIcons = [ShoppingCartIcon, TShirtIcon, HangerIcon]
+      const platformIcons = [LaptopIcon, DollarIcon, RobotIcon]
+
+      const shoppingPattern = []
+      const platformPattern = []
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const xOffset = row % 2 === 0 ? 0 : spacing / 2
+          const rotation = (row + col) % 4 === 0 ? 15 : (row + col) % 4 === 1 ? -15 : (row + col) % 4 === 2 ? 25 : -20
+
+          shoppingPattern.push({
+            Icon: shoppingIcons[(row * cols + col) % shoppingIcons.length],
+            x: (col * spacing) + xOffset,
+            y: row * spacing,
+            rotation,
+            id: `shopping-${row}-${col}`,
+          })
+
+          platformPattern.push({
+            Icon: platformIcons[(row * cols + col) % platformIcons.length],
+            x: rect.width * 0.55 + (col * spacing) + xOffset,
+            y: row * spacing,
+            rotation,
+            id: `platform-${row}-${col}`,
+          })
+        }
+      }
+
+      setIconPatterns({ shopping: shoppingPattern, platform: platformPattern })
+    }
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 720)
+      generatePatterns()
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+
+      setMousePosition({ x, y })
+
+      if (isMobile) {
+        const midpoint = rect.height / 2
+        setActiveSide(y < midpoint ? 'left' : 'right')
+      } else {
+        const topX = 45
+        const bottomX = 55
+        const lineXAtY = topX + ((bottomX - topX) * (y / rect.height))
+        const mouseXPercent = (x / rect.width) * 100
+
+        setActiveSide(mouseXPercent < lineXAtY ? 'left' : 'right')
+      }
+    }
+
+    generatePatterns()
+    handleResize()
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [mounted, isMobile])
+
+  const partnerBrands = [
+    'GUCCI', 'PRADA', 'VERSACE', 'DIOR', 'CHANEL', 'BALENCIAGA', 'FENDI', 'GIVENCHY',
+    'VALENTINO', 'BURBERRY', 'SAINT LAURENT', 'BOTTEGA VENETA'
+  ]
+
+  // Calculate proximity-based glow intensity
+  const getIconGlowIntensity = (iconX: number, iconY: number) => {
+    const distance = Math.sqrt(
+      Math.pow(mousePosition.x - iconX, 2) + Math.pow(mousePosition.y - iconY, 2)
+    )
+    const maxDistance = 225 // radius in pixels (1.5x larger)
+
+    if (distance > maxDistance) return 0
+
+    // Inverse relationship: closer = stronger glow
+    return 1 - (distance / maxDistance)
   }
 
-  const handleBrowseShop = () => {
-    localStorage.setItem('cove_selected_path', 'shop')
-    localStorage.setItem('cove_shop_mode', 'browse')
-    router.push('/shop')
+  // Generate random tilt for icon on hover
+  const getRandomTilt = () => {
+    const degrees = Math.random() * 4 + 1 // 1-5 degrees
+    const direction = Math.random() > 0.5 ? 1 : -1 // random left or right
+    return degrees * direction
   }
 
-  const handleCurateShop = () => {
-    localStorage.setItem('cove_selected_path', 'shop')
-    localStorage.setItem('cove_shop_mode', 'curate')
-    router.push('/shop/curate')
-  }
+  if (!mounted) return null
+
+  const leftClipDesktop = 'polygon(0 0, 45% 0, 55% 100%, 0 100%)'
+  const rightClipDesktop = 'polygon(45% 0, 100% 0, 100% 100%, 55% 100%)'
+  const leftClipMobile = 'polygon(0 0, 100% 0, 100% 50%, 0 50%)'
+  const rightClipMobile = 'polygon(0 50%, 100% 50%, 100% 100%, 0 100%)'
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white flex flex-col overflow-hidden">
-      {/* HEADER DIV - 20% - GREEN BACKGROUND */}
-      <div className="relative z-10 h-[20vh] flex items-center justify-center px-8 bg-gradient-to-br from-green-400 via-green-500 to-emerald-600">
-        <div className="text-center max-w-4xl">
-          <h1 className="text-6xl font-bold text-white mb-4 drop-shadow-lg">
-            {isSignedIn && user?.firstName
-              ? `Hey ${user.firstName}, great to see you!`
-              : 'Welcome to COVE'
-            }
-          </h1>
-          <p className="text-xl text-white/90 drop-shadow-md">
-            Whether you're here to discover premium products or grow your brand, we've got you covered.
-          </p>
+    <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-neutral-950 flex flex-col">
+      <div className="flex-1 relative">
+        {/* Left Side - CleanPro Pastel Gradient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            clipPath: isMobile ? leftClipMobile : leftClipDesktop,
+          }}
+        >
+          <div className="absolute inset-0">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to right, #a8c5c5 0%, #c8d4d0 25%, #d8d4cc 50%, #e4d0c4 75%, #f0d4c8 100%)',
+              }}
+            />
+
+            <div
+              className="absolute inset-0 opacity-[0.025]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)' /%3E%3C/svg%3E")`,
+              }}
+            />
+
+            <div
+              className="absolute inset-0 opacity-20"
+              style={{
+                background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.08) 100%)',
+              }}
+            />
+          </div>
+
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {iconPatterns.shopping.map((item, idx) => {
+              const glowIntensity = getIconGlowIntensity(item.x, item.y)
+              const hasGlow = glowIntensity > 0
+              const tilt = hasGlow ? getRandomTilt() : 0
+
+              return (
+                <div
+                  key={idx}
+                  className="absolute transition-all duration-300"
+                  style={{
+                    left: `${item.x}px`,
+                    top: `${item.y}px`,
+                    transform: `rotate(${item.rotation + tilt}deg)`,
+                    opacity: hasGlow ? 0.08 + (glowIntensity * 0.5) : 0.08,
+                    filter: hasGlow ? `drop-shadow(0 0 ${4 + glowIntensity * 10}px rgba(219, 39, 119, ${glowIntensity * 0.9}))` : 'none',
+                  }}
+                >
+                  <item.Icon
+                    color={hasGlow ? `rgba(219, 39, 119, ${0.4 + glowIntensity * 0.6})` : "#78716c"}
+                    size={32}
+                    strokeWidth={hasGlow ? 1.5 + (glowIntensity * 0.7) : 1.5}
+                  />
+                </div>
+              )
+            })}
+          </div>
+
+          {activeSide === 'left' && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                border: '3px solid #d4af37',
+                clipPath: isMobile ? leftClipMobile : leftClipDesktop,
+                boxShadow: 'inset 0 0 80px rgba(212, 175, 55, 0.15)',
+              }}
+            />
+          )}
         </div>
 
-        {/* Auth Buttons - Top Right */}
-        <div className="absolute top-6 right-6 flex items-center gap-3 bg-white/95 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-white/50">
-          {isSignedIn ? (
-            <>
-              <a
-                href="/dashboard"
-                className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-colors"
-              >
-                Dashboard
-              </a>
-              <div className="w-px h-4 bg-slate-300"></div>
-              <button
-                onClick={async () => {
-                  await signOut()
-                  window.location.reload()
-                }}
-                className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent hover:from-purple-700 hover:to-pink-700 transition-all"
-              >
-                Sign Out
-              </button>
-            </>
-          ) : (
-            <>
-              <a
-                href="/sign-in"
-                className="text-sm font-semibold text-slate-700 hover:text-purple-600 transition-colors"
-              >
-                Sign In
-              </a>
-              <div className="w-px h-4 bg-slate-300"></div>
-              <a
-                href="/sign-up"
-                className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent hover:from-purple-700 hover:to-pink-700 transition-all"
-              >
-                Sign Up
-              </a>
-            </>
+        {/* Right Side - Darker Richer Gradient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            clipPath: isMobile ? rightClipMobile : rightClipDesktop,
+          }}
+        >
+          <div className="absolute inset-0">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to left, #1a1a1a 0%, #252525 25%, #303030 50%, #3a3a3a 75%, #4a4a4a 100%)',
+              }}
+            />
+
+            <div
+              className="absolute inset-0 opacity-[0.04]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='carbon'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23carbon)' /%3E%3C/svg%3E")`,
+              }}
+            />
+
+            <div
+              className="absolute inset-0 opacity-30"
+              style={{
+                background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.4) 100%)',
+              }}
+            />
+          </div>
+
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {iconPatterns.platform.map((item, idx) => {
+              const glowIntensity = getIconGlowIntensity(item.x, item.y)
+              const hasGlow = glowIntensity > 0
+              const tilt = hasGlow ? getRandomTilt() : 0
+
+              return (
+                <div
+                  key={idx}
+                  className="absolute transition-all duration-300"
+                  style={{
+                    left: `${item.x}px`,
+                    top: `${item.y}px`,
+                    transform: `rotate(${item.rotation + tilt}deg)`,
+                    opacity: hasGlow ? 0.12 + (glowIntensity * 0.6) : 0.12,
+                    filter: hasGlow ? `drop-shadow(0 0 ${4 + glowIntensity * 10}px rgba(16, 185, 129, ${glowIntensity * 0.9}))` : 'none',
+                  }}
+                >
+                  <item.Icon
+                    color={hasGlow ? `rgba(16, 185, 129, ${0.5 + glowIntensity * 0.5})` : "#a3a3a3"}
+                    size={32}
+                    strokeWidth={hasGlow ? 1.5 + (glowIntensity * 0.7) : 1.5}
+                  />
+                </div>
+              )
+            })}
+          </div>
+
+          {activeSide === 'right' && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                border: '3px solid #c0c0c0',
+                clipPath: isMobile ? rightClipMobile : rightClipDesktop,
+                boxShadow: 'inset 0 0 80px rgba(192, 192, 192, 0.12)',
+              }}
+            />
           )}
         </div>
       </div>
 
-      {/* MIDDLE DIV - 60% - CARDS WITH ANIMATED BACKGROUND */}
-      <div className="relative z-10 h-[60vh] flex items-center justify-center px-8 py-6">
-        {/* Split Background Animation */}
-        <div className="absolute inset-0 flex pointer-events-none">
-          <motion.div
-            className="w-1/2 h-full"
-            animate={{
-              background: hoveredPath === 'platform'
-                ? 'linear-gradient(135deg, #d1fae5 0%, #f0fdf4 50%, #f9fafb 100%)'
-                : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'
-            }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="w-1/2 h-full"
-            animate={{
-              background: hoveredPath === 'shop'
-                ? 'linear-gradient(135deg, #fef3c7 0%, #dbeafe 50%, #f0f9ff 100%)'
-                : 'linear-gradient(135deg, #f9fafb 0%, #ffffff 100%)'
-            }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-          />
-        </div>
-
-        {/* Cards Container */}
-        <div className="relative w-full max-w-7xl h-full">
-          <div className="grid md:grid-cols-2 gap-8 h-full">
-            {/* Platform Card */}
+      {/* Footer */}
+      <div className="h-[5vh] bg-neutral-100 relative overflow-hidden flex-shrink-0">
+        <div className="h-full flex items-center justify-center">
+          <div className="relative w-full overflow-hidden">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              onMouseEnter={() => setHoveredPath('platform')}
-              onMouseLeave={() => setHoveredPath(null)}
-              onClick={handlePlatformSelect}
-              className={`
-                relative rounded-3xl bg-white/90 backdrop-blur-sm border-2 cursor-pointer
-                transition-all duration-500 h-full flex flex-col overflow-hidden
-                ${hoveredPath === 'platform'
-                  ? 'border-green-500 shadow-2xl shadow-green-500/20 scale-[1.02]'
-                  : 'border-slate-200 hover:border-green-300 shadow-lg'
-                }
-              `}
+              className="flex gap-12 items-center"
+              animate={{ x: [0, -1920] }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: 30,
+                  ease: "linear",
+                },
+              }}
             >
-              <div className="p-10 h-full flex flex-col">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-slate-50 rounded-full mb-6 w-fit">
-                  <span className="text-2xl">📦</span>
-                  <span className="text-sm font-semibold text-green-700">For Brands</span>
-                </div>
-
-                <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-slate-800 to-black bg-clip-text text-transparent mb-3">
-                  COVE PLATFORM
-                </h2>
-                <p className="text-lg text-slate-600 mb-8">Sell Your Products</p>
-
-                <div className="relative h-48 mb-8 rounded-2xl bg-gradient-to-br from-green-50 via-white to-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  <div className="absolute inset-0 opacity-20">
-                    <div className="absolute top-0 left-0 w-32 h-32 bg-green-300 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 right-0 w-32 h-32 bg-slate-300 rounded-full blur-3xl"></div>
-                  </div>
-                  <div className="relative w-48 h-32 bg-white rounded-xl shadow-lg border border-slate-200 p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="h-2 w-16 bg-green-200 rounded"></div>
-                      <div className="h-2 w-8 bg-slate-200 rounded"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-1.5 w-full bg-slate-100 rounded"></div>
-                      <div className="h-1.5 w-3/4 bg-slate-100 rounded"></div>
-                      <div className="h-1.5 w-5/6 bg-slate-100 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {['Reach Premium Shoppers', 'Easy Product Management', 'Analytics & Insights', 'Marketing Support'].map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-3 text-base text-slate-700">
-                      <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  className={`
-                    w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300
-                    ${hoveredPath === 'platform'
-                      ? 'bg-gradient-to-r from-green-600 to-slate-900 text-white shadow-lg shadow-green-500/30'
-                      : 'bg-gradient-to-r from-green-500 to-slate-700 text-white hover:from-green-600 hover:to-slate-800'
-                    }
-                  `}
+              {[...partnerBrands, ...partnerBrands, ...partnerBrands].map((brand, idx) => (
+                <div
+                  key={idx}
+                  className="text-xl font-bold text-neutral-400 whitespace-nowrap tracking-wider"
                 >
-                  Apply to Sell →
-                </button>
-              </div>
-              {hoveredPath === 'platform' && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-slate-500/5 pointer-events-none rounded-3xl"
-                />
-              )}
-            </motion.div>
-
-            {/* Shop Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              onMouseEnter={() => setHoveredPath('shop')}
-              onMouseLeave={() => setHoveredPath(null)}
-              className={`
-                relative rounded-3xl bg-white/90 backdrop-blur-sm border-2
-                transition-all duration-500 h-full flex flex-col overflow-hidden
-                ${hoveredPath === 'shop'
-                  ? 'border-yellow-400 shadow-2xl shadow-yellow-500/20 scale-[1.02]'
-                  : 'border-slate-200 hover:border-yellow-300 shadow-lg'
-                }
-              `}
-            >
-              <div className="p-10 h-full flex flex-col">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-50 to-blue-50 rounded-full mb-6 w-fit">
-                  <span className="text-2xl">🛍️</span>
-                  <span className="text-sm font-semibold bg-gradient-to-r from-yellow-600 to-blue-600 bg-clip-text text-transparent">
-                    For Shoppers
-                  </span>
+                  {brand}
                 </div>
-
-                <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-blue-500 to-blue-600 bg-clip-text text-transparent mb-3">
-                  COVE SHOP
-                </h2>
-                <p className="text-lg text-slate-600 mb-8">Browse & Buy Premium Products</p>
-
-                <div className="relative h-48 mb-8 rounded-2xl bg-gradient-to-br from-yellow-100 via-blue-100 to-blue-50 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-0 left-0 w-32 h-32 bg-yellow-300 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-300 rounded-full blur-3xl"></div>
-                  </div>
-                  <div className="relative grid grid-cols-3 gap-3 p-4">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className="w-16 h-20 bg-white rounded-lg shadow-sm border border-slate-200" />
-                    ))}
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {['AI-Powered Search & Discovery', 'Curated Premium Collections', 'Secure & Fast Checkout', 'Personalized Recommendations'].map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-3 text-base text-slate-700">
-                      <svg className="w-5 h-5 text-yellow-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Dual Buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={handleBrowseShop}
-                    className="py-4 px-4 rounded-xl font-semibold text-base bg-gradient-to-r from-yellow-400 to-blue-400 text-white hover:from-yellow-500 hover:to-blue-500 transition-all duration-300 shadow-md hover:shadow-lg"
-                  >
-                    Start Browsing
-                  </button>
-                  <button
-                    onClick={handleCurateShop}
-                    className="py-4 px-4 rounded-xl font-semibold text-base bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <span>Curate My Shop</span>
-                    <span className="text-lg">🪄</span>
-                  </button>
-                </div>
-              </div>
-              {hoveredPath === 'shop' && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-blue-500/5 pointer-events-none rounded-3xl"
-                />
-              )}
+              ))}
             </motion.div>
           </div>
         </div>
-      </div>
-
-      {/* FOOTER DIV - 20% - BLUE BACKGROUND */}
-      <div className="relative z-10 h-[20vh] flex flex-col items-center justify-center gap-4 px-8 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
-        <button
-          onClick={handleBrowseShop}
-          className="text-white hover:text-white/80 font-medium transition-colors underline-offset-4 hover:underline text-base drop-shadow-md"
-        >
-          Just Browsing? Skip to Shop →
-        </button>
       </div>
     </div>
   )
