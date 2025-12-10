@@ -20,6 +20,11 @@ export default function WelcomePage() {
   const [waveOrigin, setWaveOrigin] = useState<{ x: number, y: number, timestamp: number, section: 'left' | 'right' } | null>(null)
   const [, forceUpdate] = useState(0)
   const lastMoveTimeRef = useRef(0)
+  const [shoppingColor, setShoppingColor] = useState({ r: 219, g: 39, b: 119 }) // Initial pink
+  const [platformColor, setPlatformColor] = useState({ r: 16, g: 185, b: 129 }) // Initial green
+  const [targetShoppingColor, setTargetShoppingColor] = useState({ r: 219, g: 39, b: 119 })
+  const [targetPlatformColor, setTargetPlatformColor] = useState({ r: 16, g: 185, b: 129 })
+  const colorTransitionRef = useRef(0)
 
   useEffect(() => {
     setMounted(true)
@@ -56,6 +61,53 @@ export default function WelcomePage() {
     return () => clearTimeout(timer)
   }, [activeSide, mounted])
 
+  // Color transition effect - gradually change colors every 10-15 seconds
+  useEffect(() => {
+    if (!mounted) return
+
+    const generateRandomColor = () => ({
+      r: Math.floor(Math.random() * 256),
+      g: Math.floor(Math.random() * 256),
+      b: Math.floor(Math.random() * 256),
+    })
+
+    const interpolateColor = (current: typeof shoppingColor, target: typeof shoppingColor, progress: number) => ({
+      r: Math.round(current.r + (target.r - current.r) * progress),
+      g: Math.round(current.g + (target.g - current.g) * progress),
+      b: Math.round(current.b + (target.b - current.b) * progress),
+    })
+
+    let animationFrameId: number
+    let lastColorChange = Date.now()
+    const colorChangeDuration = 10000 + Math.random() * 5000 // 10-15 seconds
+
+    const animate = () => {
+      const now = Date.now()
+      const timeSinceLastChange = now - lastColorChange
+
+      if (timeSinceLastChange >= colorChangeDuration) {
+        // Generate new target colors
+        setTargetShoppingColor(generateRandomColor())
+        setTargetPlatformColor(generateRandomColor())
+        lastColorChange = now
+        colorTransitionRef.current = 0
+      }
+
+      // Smooth transition over 3 seconds
+      const transitionDuration = 3000
+      const progress = Math.min((now - lastColorChange) / transitionDuration, 1)
+
+      setShoppingColor(interpolateColor(shoppingColor, targetShoppingColor, progress))
+      setPlatformColor(interpolateColor(platformColor, targetPlatformColor, progress))
+
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [mounted, shoppingColor, platformColor, targetShoppingColor, targetPlatformColor])
+
   useEffect(() => {
     if (!mounted || !containerRef.current) return
 
@@ -63,7 +115,7 @@ export default function WelcomePage() {
       if (!containerRef.current) return
 
       const rect = containerRef.current.getBoundingClientRect()
-      const spacing = 120 // Increased from 80 to reduce icon count by ~50%
+      const spacing = 90 // Adjusted for more particles
       const rows = Math.ceil(rect.height / spacing) + 2
       const cols = Math.ceil((rect.width * 0.5) / spacing) + 2
 
@@ -81,7 +133,7 @@ export default function WelcomePage() {
           shoppingPattern.push({
             Icon: shoppingIcons[(row * cols + col) % shoppingIcons.length],
             x: (col * spacing) + xOffset,
-            y: row * spacing,
+            y: row * spacing + 10,
             rotation,
             id: `shopping-${row}-${col}`,
           })
@@ -89,7 +141,7 @@ export default function WelcomePage() {
           platformPattern.push({
             Icon: platformIcons[(row * cols + col) % platformIcons.length],
             x: rect.width * 0.55 + (col * spacing) + xOffset,
-            y: row * spacing,
+            y: row * spacing + 10,
             rotation,
             id: `platform-${row}-${col}`,
           })
@@ -283,12 +335,12 @@ export default function WelcomePage() {
                     left: `${item.x}px`,
                     top: `${item.y}px`,
                     transform: `rotate(${item.rotation + tilt}deg)`,
-                    opacity: hasEffect ? 0.08 + (totalIntensity * 0.7) : 0.08,
-                    filter: hasEffect ? `drop-shadow(0 0 ${6 + totalIntensity * 14}px rgba(219, 39, 119, ${totalIntensity}))` : 'none',
+                    opacity: hasEffect ? 0.104 + (totalIntensity * 0.91) : 0.104,
+                    filter: hasEffect ? `drop-shadow(0 0 ${6 + totalIntensity * 14}px rgba(${shoppingColor.r}, ${shoppingColor.g}, ${shoppingColor.b}, ${totalIntensity}))` : 'none',
                   }}
                 >
                   <item.Icon
-                    color={hasEffect ? `rgba(219, 39, 119, ${0.5 + totalIntensity * 0.5})` : "#78716c"}
+                    color={hasEffect ? `rgba(${shoppingColor.r}, ${shoppingColor.g}, ${shoppingColor.b}, ${0.5 + totalIntensity * 0.5})` : "#78716c"}
                     size={58}
                     strokeWidth={hasEffect ? 1.5 + (totalIntensity * 0.8) : 1.5}
                   />
@@ -360,12 +412,12 @@ export default function WelcomePage() {
                     left: `${item.x}px`,
                     top: `${item.y}px`,
                     transform: `rotate(${item.rotation + tilt}deg)`,
-                    opacity: hasEffect ? 0.12 + (totalIntensity * 0.8) : 0.12,
-                    filter: hasEffect ? `drop-shadow(0 0 ${6 + totalIntensity * 14}px rgba(16, 185, 129, ${totalIntensity}))` : 'none',
+                    opacity: hasEffect ? 0.156 + (totalIntensity * 1.04) : 0.156,
+                    filter: hasEffect ? `drop-shadow(0 0 ${6 + totalIntensity * 14}px rgba(${platformColor.r}, ${platformColor.g}, ${platformColor.b}, ${totalIntensity}))` : 'none',
                   }}
                 >
                   <item.Icon
-                    color={hasEffect ? `rgba(16, 185, 129, ${0.6 + totalIntensity * 0.4})` : "#a3a3a3"}
+                    color={hasEffect ? `rgba(${platformColor.r}, ${platformColor.g}, ${platformColor.b}, ${0.6 + totalIntensity * 0.4})` : "#a3a3a3"}
                     size={58}
                     strokeWidth={hasEffect ? 1.5 + (totalIntensity * 0.8) : 1.5}
                   />
