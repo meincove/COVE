@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ShoppingCartIcon, TShirtIcon, HangerIcon } from '@/src/components/icons/ShoppingIcons'
 import { LaptopIcon, DollarIcon, RobotIcon } from '@/src/components/icons/PlatformIcons'
+import FPSMonitor from '@/src/components/FPSMonitor'
 
 export default function WelcomePage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function WelcomePage() {
   const [mousePosition, setMousePosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 })
   const [waveOrigin, setWaveOrigin] = useState<{ x: number, y: number, timestamp: number, section: 'left' | 'right' } | null>(null)
   const [, forceUpdate] = useState(0)
+  const lastMoveTimeRef = useRef(0)
 
   useEffect(() => {
     setMounted(true)
@@ -61,7 +63,7 @@ export default function WelcomePage() {
       if (!containerRef.current) return
 
       const rect = containerRef.current.getBoundingClientRect()
-      const spacing = 80
+      const spacing = 120 // Increased from 80 to reduce icon count by ~50%
       const rows = Math.ceil(rect.height / spacing) + 2
       const cols = Math.ceil((rect.width * 0.5) / spacing) + 2
 
@@ -103,6 +105,11 @@ export default function WelcomePage() {
     }
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Throttle to 60fps (16.67ms) for performance
+      const now = Date.now()
+      if (now - lastMoveTimeRef.current < 16) return
+      lastMoveTimeRef.current = now
+
       if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       const x = e.clientX - rect.left
@@ -203,6 +210,10 @@ export default function WelcomePage() {
     return degrees * direction
   }
 
+  const handleCardClick = (path: string) => {
+    router.push(`/sign-in?redirect_url=${encodeURIComponent(path)}`)
+  }
+
   const handleSectionClick = (e: React.MouseEvent, section: 'left' | 'right') => {
     if (!containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
@@ -222,6 +233,7 @@ export default function WelcomePage() {
 
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-neutral-950 flex flex-col">
+      <FPSMonitor />
       <div className="flex-1 relative">
         <div
           className="absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
@@ -277,7 +289,7 @@ export default function WelcomePage() {
                 >
                   <item.Icon
                     color={hasEffect ? `rgba(219, 39, 119, ${0.5 + totalIntensity * 0.5})` : "#78716c"}
-                    size={32}
+                    size={58}
                     strokeWidth={hasEffect ? 1.5 + (totalIntensity * 0.8) : 1.5}
                   />
                 </div>
@@ -354,7 +366,7 @@ export default function WelcomePage() {
                 >
                   <item.Icon
                     color={hasEffect ? `rgba(16, 185, 129, ${0.6 + totalIntensity * 0.4})` : "#a3a3a3"}
-                    size={32}
+                    size={58}
                     strokeWidth={hasEffect ? 1.5 + (totalIntensity * 0.8) : 1.5}
                   />
                 </div>
@@ -375,6 +387,71 @@ export default function WelcomePage() {
               }}
             />
           )}
+        </div>
+
+        {/* Elegant Cards - Floating over diagonal sections */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center gap-16 px-16">
+          {/* Shopping Card */}
+          <div
+            onClick={() => handleCardClick('/shop')}
+            className="pointer-events-auto group relative w-[400px] bg-gradient-to-br from-[#f5f0ed]/95 to-[#e8e4e0]/95 backdrop-blur-sm rounded-3xl shadow-2xl hover:shadow-pink-500/20 transition-all duration-500 hover:scale-[1.02] cursor-pointer p-10"
+          >
+            {/* Icon */}
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-pink-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-pink-500/50 transition-all duration-300 group-hover:rotate-3">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl font-semibold text-gray-900 mb-2">
+              Shop on COVE
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-sm leading-relaxed mb-8">
+              Discover curated luxury collections powered by AI recommendations tailored to your style.
+            </p>
+
+            {/* CTA */}
+            <div className="flex items-center gap-2 text-pink-600 font-medium group-hover:gap-3 transition-all">
+              <span>Explore Now</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </div>
+          </div>
+
+          {/* Platform Card */}
+          <div
+            onClick={() => handleCardClick('/partner-onboarding')}
+            className="pointer-events-auto group relative w-[400px] bg-gradient-to-br from-[#2a2a2a]/95 to-[#1a1a1a]/95 backdrop-blur-sm rounded-3xl shadow-2xl hover:shadow-green-500/20 transition-all duration-500 hover:scale-[1.02] cursor-pointer p-10"
+          >
+            {/* Icon */}
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-all duration-300 group-hover:rotate-3">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl font-semibold text-white mb-2">
+              Sell on COVE
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-400 text-sm leading-relaxed mb-8">
+              Grow your brand with AI-powered analytics and access to premium luxury shoppers.
+            </p>
+
+            {/* CTA */}
+            <div className="flex items-center gap-2 text-green-400 font-medium group-hover:gap-3 transition-all">
+              <span>Join Platform</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </div>
+          </div>
         </div>
       </div>
 
