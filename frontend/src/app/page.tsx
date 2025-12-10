@@ -9,16 +9,50 @@ import { LaptopIcon, DollarIcon, RobotIcon } from '@/src/components/icons/Platfo
 export default function WelcomePage() {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
+  const firstEntryPointRef = useRef<{ x: number, y: number, section: 'left' | 'right' } | null>(null)
 
   const [activeSide, setActiveSide] = useState<'left' | 'right' | null>(null)
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [iconPatterns, setIconPatterns] = useState<{ shopping: any[], platform: any[] }>({ shopping: [], platform: [] })
   const [mousePosition, setMousePosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 })
+  const [waveOrigin, setWaveOrigin] = useState<{ x: number, y: number, timestamp: number, section: 'left' | 'right' } | null>(null)
+  const [, forceUpdate] = useState(0)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Animation loop for smooth wave
+  useEffect(() => {
+    if (!waveOrigin) return
+
+    let animationFrameId: number
+    const animate = () => {
+      forceUpdate(n => n + 1)
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [waveOrigin])
+
+  // Auto-trigger wave when section becomes active (from mouse entry point)
+  useEffect(() => {
+    if (!mounted || !containerRef.current || !activeSide) return
+
+    const entryPoint = firstEntryPointRef.current
+    const x = entryPoint?.section === activeSide ? entryPoint.x : (activeSide === 'left' ? window.innerWidth * 0.25 : window.innerWidth * 0.75)
+    const y = entryPoint?.section === activeSide ? entryPoint.y : window.innerHeight * 0.5
+
+    setWaveOrigin({ x, y, timestamp: Date.now(), section: activeSide })
+
+    const timer = setTimeout(() => setWaveOrigin(null), 2000)
+    return () => clearTimeout(timer)
+  }, [activeSide, mounted])
 
   useEffect(() => {
     if (!mounted || !containerRef.current) return
@@ -76,17 +110,24 @@ export default function WelcomePage() {
 
       setMousePosition({ x, y })
 
+      let newActiveSide: 'left' | 'right'
       if (isMobile) {
         const midpoint = rect.height / 2
-        setActiveSide(y < midpoint ? 'left' : 'right')
+        newActiveSide = y < midpoint ? 'left' : 'right'
       } else {
         const topX = 45
         const bottomX = 55
         const lineXAtY = topX + ((bottomX - topX) * (y / rect.height))
         const mouseXPercent = (x / rect.width) * 100
-
-        setActiveSide(mouseXPercent < lineXAtY ? 'left' : 'right')
+        newActiveSide = mouseXPercent < lineXAtY ? 'left' : 'right'
       }
+
+      // Track first entry point when switching sections (using ref to avoid re-renders)
+      if (newActiveSide !== activeSide) {
+        firstEntryPointRef.current = { x, y, section: newActiveSide }
+      }
+
+      setActiveSide(newActiveSide)
     }
 
     generatePatterns()
@@ -99,31 +140,77 @@ export default function WelcomePage() {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
     }
-  }, [mounted, isMobile])
+  }, [mounted, isMobile, activeSide])
 
   const partnerBrands = [
     'GUCCI', 'PRADA', 'VERSACE', 'DIOR', 'CHANEL', 'BALENCIAGA', 'FENDI', 'GIVENCHY',
     'VALENTINO', 'BURBERRY', 'SAINT LAURENT', 'BOTTEGA VENETA'
   ]
 
-  // Calculate proximity-based glow intensity
-  const getIconGlowIntensity = (iconX: number, iconY: number) => {
+  const getIconGlowIntensity = (iconX: number, iconY: number, section: 'left' | 'right') => {
+    if (activeSide !== section) return 0
+
     const distance = Math.sqrt(
       Math.pow(mousePosition.x - iconX, 2) + Math.pow(mousePosition.y - iconY, 2)
     )
-    const maxDistance = 225 // radius in pixels (1.5x larger)
+    const maxDistance = 225
 
     if (distance > maxDistance) return 0
 
-    // Inverse relationship: closer = stronger glow
     return 1 - (distance / maxDistance)
   }
 
-  // Generate random tilt for icon on hover
-  const getRandomTilt = () => {
-    const degrees = Math.random() * 4 + 1 // 1-5 degrees
-    const direction = Math.random() > 0.5 ? 1 : -1 // random left or right
+  const getWaveIntensity = (iconX: number, iconY: number, section: 'left' | 'right') => {
+    if (!waveOrigin || waveOrigin.section !== section) return 0
+
+    const distanceFromOrigin = Math.sqrt(
+      Math.pow(iconX - waveOrigin.x, 2) +
+      Math.pow(iconY - waveOrigin.y, 2)
+    )
+
+    const elapsed = Date.now() - waveOrigin.timestamp
+    const waveSpeed = 900
+    const waveFront = (elapsed / 1000) * waveSpeed
+
+    if (distanceFromOrigin <= waveFront) {
+      const timeSinceHit = waveFront - distanceFromOrigin
+      const fadeOutDuration = 300
+
+      if (timeSinceHit < fadeOutDuration) {
+        const fadeIntensity = 1 - (timeSinceHit / fadeOutDuration)
+
+        // Distance-based falloff: icons farther from cursor glow less
+        const distanceFromCursor = Math.sqrt(
+          Math.pow(iconX - mousePosition.x, 2) +
+          Math.pow(iconY - mousePosition.y, 2)
+        )
+        const maxDistance = 800
+        const distanceFalloff = Math.max(0, 1 - (distanceFromCursor / maxDistance))
+
+        // Reduce intensity to 0.7x
+        return Math.pow(fadeIntensity, 0.4) * (0.3 + distanceFalloff * 0.7) * 0.7
+      }
+    }
+
+    return 0
+  }
+
+  // Get fixed 20 degree tilt for each icon (consistent per icon)
+  const getIconTilt = (idx: number) => {
+    const seed = idx * 137.508
+    const degrees = 20 // Fixed 20 degrees
+    const direction = Math.cos(seed) > 0 ? 1 : -1
     return degrees * direction
+  }
+
+  const handleSectionClick = (e: React.MouseEvent, section: 'left' | 'right') => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    setWaveOrigin({ x, y, timestamp: Date.now(), section })
+    setTimeout(() => setWaveOrigin(null), 2000)
   }
 
   if (!mounted) return null
@@ -136,12 +223,14 @@ export default function WelcomePage() {
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-neutral-950 flex flex-col">
       <div className="flex-1 relative">
-        {/* Left Side - CleanPro Pastel Gradient */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
           style={{
             clipPath: isMobile ? leftClipMobile : leftClipDesktop,
+            transform: activeSide === 'left' ? 'scale(1.02)' : 'scale(1)',
+            boxShadow: activeSide === 'left' ? '0 20px 60px rgba(0, 0, 0, 0.15)' : 'none',
           }}
+          onClick={(e) => handleSectionClick(e, 'left')}
         >
           <div className="absolute inset-0">
             <div
@@ -168,26 +257,28 @@ export default function WelcomePage() {
 
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {iconPatterns.shopping.map((item, idx) => {
-              const glowIntensity = getIconGlowIntensity(item.x, item.y)
-              const hasGlow = glowIntensity > 0
-              const tilt = hasGlow ? getRandomTilt() : 0
+              const glowIntensity = getIconGlowIntensity(item.x, item.y, 'left')
+              const waveIntensity = getWaveIntensity(item.x, item.y, 'left')
+              const totalIntensity = Math.max(glowIntensity, waveIntensity)
+              const hasEffect = totalIntensity > 0
+              const tilt = glowIntensity > 0 ? getIconTilt(idx) : 0
 
               return (
                 <div
                   key={idx}
-                  className="absolute transition-all duration-300"
+                  className="absolute transition-all duration-200"
                   style={{
                     left: `${item.x}px`,
                     top: `${item.y}px`,
                     transform: `rotate(${item.rotation + tilt}deg)`,
-                    opacity: hasGlow ? 0.08 + (glowIntensity * 0.5) : 0.08,
-                    filter: hasGlow ? `drop-shadow(0 0 ${4 + glowIntensity * 10}px rgba(219, 39, 119, ${glowIntensity * 0.9}))` : 'none',
+                    opacity: hasEffect ? 0.08 + (totalIntensity * 0.7) : 0.08,
+                    filter: hasEffect ? `drop-shadow(0 0 ${6 + totalIntensity * 14}px rgba(219, 39, 119, ${totalIntensity}))` : 'none',
                   }}
                 >
                   <item.Icon
-                    color={hasGlow ? `rgba(219, 39, 119, ${0.4 + glowIntensity * 0.6})` : "#78716c"}
+                    color={hasEffect ? `rgba(219, 39, 119, ${0.5 + totalIntensity * 0.5})` : "#78716c"}
                     size={32}
-                    strokeWidth={hasGlow ? 1.5 + (glowIntensity * 0.7) : 1.5}
+                    strokeWidth={hasEffect ? 1.5 + (totalIntensity * 0.8) : 1.5}
                   />
                 </div>
               )
@@ -209,12 +300,14 @@ export default function WelcomePage() {
           )}
         </div>
 
-        {/* Right Side - Darker Richer Gradient */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
           style={{
             clipPath: isMobile ? rightClipMobile : rightClipDesktop,
+            transform: activeSide === 'right' ? 'scale(1.02)' : 'scale(1)',
+            boxShadow: activeSide === 'right' ? '0 20px 60px rgba(0, 0, 0, 0.3)' : 'none',
           }}
+          onClick={(e) => handleSectionClick(e, 'right')}
         >
           <div className="absolute inset-0">
             <div
@@ -241,26 +334,28 @@ export default function WelcomePage() {
 
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {iconPatterns.platform.map((item, idx) => {
-              const glowIntensity = getIconGlowIntensity(item.x, item.y)
-              const hasGlow = glowIntensity > 0
-              const tilt = hasGlow ? getRandomTilt() : 0
+              const glowIntensity = getIconGlowIntensity(item.x, item.y, 'right')
+              const waveIntensity = getWaveIntensity(item.x, item.y, 'right')
+              const totalIntensity = Math.max(glowIntensity, waveIntensity)
+              const hasEffect = totalIntensity > 0
+              const tilt = glowIntensity > 0 ? getIconTilt(idx) : 0
 
               return (
                 <div
                   key={idx}
-                  className="absolute transition-all duration-300"
+                  className="absolute transition-all duration-200"
                   style={{
                     left: `${item.x}px`,
                     top: `${item.y}px`,
                     transform: `rotate(${item.rotation + tilt}deg)`,
-                    opacity: hasGlow ? 0.12 + (glowIntensity * 0.6) : 0.12,
-                    filter: hasGlow ? `drop-shadow(0 0 ${4 + glowIntensity * 10}px rgba(16, 185, 129, ${glowIntensity * 0.9}))` : 'none',
+                    opacity: hasEffect ? 0.12 + (totalIntensity * 0.8) : 0.12,
+                    filter: hasEffect ? `drop-shadow(0 0 ${6 + totalIntensity * 14}px rgba(16, 185, 129, ${totalIntensity}))` : 'none',
                   }}
                 >
                   <item.Icon
-                    color={hasGlow ? `rgba(16, 185, 129, ${0.5 + glowIntensity * 0.5})` : "#a3a3a3"}
+                    color={hasEffect ? `rgba(16, 185, 129, ${0.6 + totalIntensity * 0.4})` : "#a3a3a3"}
                     size={32}
-                    strokeWidth={hasGlow ? 1.5 + (glowIntensity * 0.7) : 1.5}
+                    strokeWidth={hasEffect ? 1.5 + (totalIntensity * 0.8) : 1.5}
                   />
                 </div>
               )
@@ -283,7 +378,6 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="h-[5vh] bg-neutral-100 relative overflow-hidden flex-shrink-0">
         <div className="h-full flex items-center justify-center">
           <div className="relative w-full overflow-hidden">
