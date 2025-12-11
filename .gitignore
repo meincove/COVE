@@ -31,3 +31,11 @@ backend/venv/
 frontend/install.log
 __pycache__/
 *.pyc
+
+# Log files - don't track in git
+*.log
+**/*.log
+ai_server.log
+backend_server.log
+catalog_load.log
+embedding_generation*.log
