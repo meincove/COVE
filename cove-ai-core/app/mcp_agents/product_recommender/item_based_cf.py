@@ -256,8 +256,14 @@ class ItemBasedCF:
         
         return recommendations[:top_k]
     
-    def save_model(self, filepath: str):
-        """Save similarity matrix to disk"""
+    def save_model(self, use_db: bool = True, filepath: str = None):
+        """
+        Save similarity matrix to database or disk.
+        
+        Args:
+            use_db: If True, save to Neon DB (default). If False, save to file.
+            filepath: Path for file storage (only used if use_db=False)
+        """
         model_data = {
             'similarity_matrix': self.similarity_matrix,
             'item_to_idx': self.item_to_idx,
@@ -265,23 +271,90 @@ class ItemBasedCF:
             'config': self.config
         }
         
-        with open(filepath, 'wb') as f:
-            pickle.dump(model_data, f)
-        
-        log.info(f"Model saved to {filepath}")
+        if use_db:
+            # Save to Neon DB (production)
+            try:
+                from .cf_storage import save_cf_model_to_db
+                
+                metadata = {
+                    'num_items': len(self.item_to_idx),
+                    'num_similarities': sum(len(v) for v in self.similarity_matrix.values())
+                }
+                
+                version = save_cf_model_to_db(model_data, metadata=metadata)
+                log.info(f"✅ Model saved to DB (version {version})")
+                
+            except Exception as e:
+                log.error(f"Failed to save to DB, falling back to file: {e}")
+                # Fallback to file if DB fails
+                if filepath:
+                    with open(filepath, 'wb') as f:
+                        pickle.dump(model_data, f)
+                    log.info(f"Model saved to {filepath} (fallback)")
+        else:
+            # Save to file (local development)
+            if not filepath:
+                raise ValueError("filepath required when use_db=False")
+            
+            with open(filepath, 'wb') as f:
+                pickle.dump(model_data, f)
+            
+            log.info(f"Model saved to {filepath}")
     
-    def load_model(self, filepath: str):
-        """Load similarity matrix from disk"""
-        with open(filepath, 'rb') as f:
-            model_data = pickle.load(f)
+    def load_model(self, use_db: bool = True, filepath: str = None, version: int = None):
+        """
+        Load similarity matrix from database or disk.
         
-        self.similarity_matrix = model_data['similarity_matrix']
-        self.item_to_idx = model_data['item_to_idx']
-        self.idx_to_item = model_data['idx_to_item']
-        self.config = model_data.get('config', self.config)
+        Args:
+            use_db: If True, load from Neon DB (default). If False, load from file.
+            filepath: Path for file storage (only used if use_db=False)
+            version: Specific version to load from DB (None = latest)
+        """
+        model_data = None
         
-        log.info(f"Model loaded from {filepath}")
-        log.info(f"Loaded {len(self.similarity_matrix)} item similarities")
+        if use_db:
+            # Load from Neon DB (production)
+            try:
+                from .cf_storage import load_cf_model_from_db
+                
+                model_data = load_cf_model_from_db(version=version)
+                
+                if model_data:
+                    log.info(f"✅ Model loaded from DB")
+                else:
+                    log.warning("No model found in DB")
+                    # Try file fallback
+                    if filepath and Path(filepath).exists():
+                        log.info("Attempting file fallback...")
+                        with open(filepath, 'rb') as f:
+                            model_data = pickle.load(f)
+                        log.info(f"Loaded from file (fallback): {filepath}")
+                
+            except Exception as e:
+                log.error(f"Failed to load from DB: {e}")
+                # Fallback to file
+                if filepath and Path(filepath).exists():
+                    with open(filepath, 'rb') as f:
+                        model_data = pickle.load(f)
+                    log.info(f"Loaded from file (fallback): {filepath}")
+        else:
+            # Load from file (local development)
+            if not filepath:
+                raise ValueError("filepath required when use_db=False")
+            
+            with open(filepath, 'rb') as f:
+                model_data = pickle.load(f)
+            
+            log.info(f"Model loaded from {filepath}")
+        
+        if model_data:
+            self.similarity_matrix = model_data['similarity_matrix']
+            self.item_to_idx = model_data['item_to_idx']
+            self.idx_to_item = model_data['idx_to_item']
+            self.config = model_data.get('config', self.config)
+            log.info(f"Loaded {len(self.similarity_matrix)} item similarities")
+        else:
+            log.warning("No model data loaded")
 
 
 # Global instance

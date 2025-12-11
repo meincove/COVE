@@ -41,55 +41,28 @@ async def generate_embedding(text: str) -> List[float]:
 
 async def generate_product_embedding(product: Dict[str, Any]) -> List[float]:
     """
-    Generate embedding for a product.
-    Combines title, description, type, and tier for semantic search.
+    Generate embedding for a product using brand-aware text.
+    Uses backend_loader transformation for consistency.
     """
-    # Create rich text representation
-    parts = [
-        product.get("title", ""),
-        product.get("description", ""),
-        f"Type: {product.get('type', '')}",
-        f"Tier: {product.get('tier', '')}"
-    ]
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from app.vector.backend_loader import transform_for_embedding
     
-    text = " ".join(p for p in parts if p)
+    text = transform_for_embedding(product)
     return await generate_embedding(text)
 
 
-async def load_products_from_json() -> List[Dict[str, Any]]:
-    """Load products from JSON file (fallback if DB empty)"""
-    data_path = Path(__file__).parent.parent / "data" / "products.json"
+async def load_products_from_api() -> List[Dict[str, Any]]:
+    """Load products from backend API"""
+    # Add parent directory to path to import from app/
+    sys.path.insert(0, str(Path(__file__).parent.parent))
     
-    if data_path.exists():
-        with open(data_path) as f:
-            data = json.load(f)
-            return data.get("products", [])
+    from app.vector.backend_loader import fetch_all_products
     
-    print("⚠️  No products.json found, using sample data...")
-    return [
-        {
-            "id": "prod_hoodie_designer",
-            "slug": "hoodie-designer-fleece-59.99",
-            "title": "Cove Designer Hoodie",
-            "description": "Premium fleece hoodie with modern silhouette and exceptional comfort",
-            "type": "hoodie",
-            "tier": "designer",
-            "price": 59.99,
-            "currency": "EUR",
-            "in_stock": True
-        },
-        {
-            "id": "prod_tee_designer",
-            "slug": "tee-designer-structured-34.99",
-            "title": "Cove Designer Structured Tee",
-            "description": "Structured cotton tee with refined details and perfect fit",
-            "type": "tee",
-            "tier": "designer",
-            "price": 34.99,
-            "currency": "EUR",
-            "in_stock": True
-        }
-    ]
+    print("   Fetching from backend API...")
+    products = await fetch_all_products()
+    print(f"   ✅ Retrieved {len(products)} products from API")
+    
+    return products
 
 
 async def insert_product_with_embedding(
@@ -97,63 +70,80 @@ async def insert_product_with_embedding(
     product: Dict[str, Any],
     embedding: List[float]
 ):
-    """Insert or update product with its embedding"""
+    """Insert or update product with its embedding in ai_core.docs"""
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from app.vector.backend_loader import get_product_metadata, transform_for_embedding
+    
     # Register vector type if not already registered
     await register_vector(conn)
     
+    # Get metadata and text  
+    metadata = get_product_metadata(product)
+    text = transform_for_embedding(product)
+    
+    # Use product variant_id as primary ID
+    doc_id = metadata.get("variant_id") or metadata.get("product_id")
+    title = metadata.get("name")
+    url = metadata.get("url")
+    
     await conn.execute(
         """
-        INSERT INTO ai_products (
-            id, slug, title, description, type, tier, price, currency, in_stock, embedding, metadata
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb)
+        INSERT INTO ai_core.docs (
+            id, kind, title, text, url, meta, embedding
+        ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)
         ON CONFLICT (id) DO UPDATE SET
             title = EXCLUDED.title,
-            description = EXCLUDED.description,
-            type = EXCLUDED.type,
-            tier = EXCLUDED.tier,
-            price = EXCLUDED.price,
-            embedding = EXCLUDED.embedding,
-            updated_at = NOW()
+            text = EXCLUDED.text,
+            url = EXCLUDED.url,
+            meta = EXCLUDED.meta,
+            embedding = EXCLUDED.embedding
         """,
-        product.get("id"),
-        product.get("slug"),
-        product.get("title"),
-        product.get("description", ""),
-        product.get("type"),
-        product.get("tier"),
-        product.get("price"),
-        product.get("currency", "EUR"),
-        product.get("in_stock", True),
-        embedding,  # pgvector will handle the list -> vector conversion
-        json.dumps(product.get("metadata", {}))
+        doc_id,
+        "product",  # kind
+        title,
+        text,
+        url,
+        json.dumps(metadata),
+        embedding
     )
 
 
 async def generate_embeddings_for_products():
-    """Main pipeline to generate and store embeddings"""
+    """Main pipeline to generate and store embeddings from backend API"""  
     
     print("\n" + "="*60)
-    print("🔢 Product Embedding Generation Pipeline")
+    print("🔢 Product Embedding Generation Pipeline (Backend API)")
     print("="*60 + "\n")
     
     if not DATABASE_URL:
         print("❌ DATABASE_URL not set")
         sys.exit(1)
     
-    # Load products
-    print("📦 Loading products...")
-    products = await load_products_from_json()
-    print(f"   Found {len(products)} products\n")
+    # Load products from backend API
+    print("📦 Loading products from backend API...")
+    products = await load_products_from_api()
+    
+    # Show brand distribution
+    brands = {}
+    for p in products:
+        brand = p.get("brand_id", "Unknown")
+        brands[brand] = brands.get(brand, 0) + 1
+    
+    print(f"   Found {len(products)} products across {len(brands)} brands:")
+    for brand, count in sorted(brands.items()):
+        print(f"     - {brand}: {count} products")
+    print()
     
     # Connect to Neon
     print("🔌 Connecting to Neon database...")
     conn = await asyncpg.connect(DATABASE_URL)
     
     try:
-        # Register vector type
+        # Ensure schema and extension exist
         await conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+        await conn.execute("CREATE SCHEMA IF NOT EXISTS ai_core")
         
-        # Process products in batches
+        # Process products
         total = len(products)
         success_count = 0
         
@@ -168,22 +158,28 @@ async def generate_embeddings_for_products():
                 await insert_product_with_embedding(conn, product, embedding)
                 
                 success_count += 1
-                print(f"   [{i}/{total}] ✅ {product.get('title')}")
+                
+                # Progress indicator (every 50 products)
+                if i % 50 == 0 or i == total:
+                    print(f"   [{i}/{total}] {product.get('brand_id')} - {product.get('name')}")
                 
                 # Small delay to avoid rate limits
                 if i % BATCH_SIZE == 0:
                     await asyncio.sleep(1)
                     
             except Exception as e:
-                print(f"   [{i}/{total}] ❌ {product.get('title')}: {e}")
+                print(f"   [{i}/{total}] ❌ {product.get('name')}: {e}")
         
         # Verify
-        count = await conn.fetchval("SELECT COUNT(*) FROM ai_products WHERE embedding IS NOT NULL")
+        count = await conn.fetchval(
+            "SELECT COUNT(*) FROM ai_core.docs WHERE kind = 'product' AND embedding IS NOT NULL"
+        )
         
         print(f"\n{'='*60}")
         print(f"✅ Embedding generation complete!")
         print(f"   Processed: {success_count}/{total}")
-        print(f"   In database: {count} products with embeddings")
+        print(f"   In database: {count} product embeddings")
+        print(f"   Brands: {len(brands)}")
         print(f"{'='*60}\n")
         
     except Exception as e:

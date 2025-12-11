@@ -654,6 +654,25 @@ export default function CoveChatWidget() {
       email: cp.email ?? null,
     };
 
+    // ✅ VALIDATION: Check if we have required fields
+    if (!payload.variantId) {
+      console.error("[CART_ADD] Missing variantId!", { cp, firstItem });
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? { ...m, content: "❌ Can't add - missing product variant. Please try selecting a specific product." }
+            : m,
+        ),
+      );
+      return;
+    }
+
+    if (!payload.size) {
+      console.warn("[CART_ADD] Missing size, may fail");
+    }
+
+    console.log("[CART_ADD] Sending payload:", payload);
+
     try {
       setMessages((prev) =>
         prev.map((m) =>
@@ -670,10 +689,12 @@ export default function CoveChatWidget() {
         body: JSON.stringify(payload),
       });
 
+      const responseData = await cartAddRes.json().catch(() => ({}));
+      console.log("[CART_ADD] Response:", { status: cartAddRes.status, data: responseData });
+
       if (!cartAddRes.ok) {
-        const errorData = await cartAddRes.json().catch(() => ({}));
-        console.error("Cart add failed:", errorData);
-        throw new Error(`Cart add failed: ${cartAddRes.status}`);
+        console.error("Cart add failed:", responseData);
+        throw new Error(responseData.message || `Cart add failed: ${cartAddRes.status}`);
       }
 
 
@@ -688,7 +709,7 @@ export default function CoveChatWidget() {
         colorName: firstItem.color ?? "",
         quantity: cp.quantity,
         price: firstItem.price ?? 0,  // Week 4: Use real price if available
-        imageUrl: "/clothing-images/placeholder.png",
+        imageUrl: firstItem.imageUrl || undefined,  // Use image from AI response
         material: "",
       };
 

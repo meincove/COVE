@@ -12,6 +12,7 @@ INTENT_MAPPING = {
     "order_history": "order_query",  # Order tracking
     "size_help": "size_fit",        # Sizing questions
     "quality_question": "generic",   # Product quality/materials
+    "answer": "generic",            # General questions
     "greeting": "greeting",         # Greetings
     "none": "unknown",              # Off-topic/unknown
 }

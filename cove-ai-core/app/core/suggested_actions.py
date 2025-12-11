@@ -162,10 +162,22 @@ class SuggestedActionsEngine:
         items = context.get("items", [])
         first_item = items[0] if items else {}
         
-        # Variable replacements
+        # Get item title using helper
+        item_title = self._get_item_title(first_item)
+        
+        # Get variantId (try both camelCase and snake_case)
+        variant_id = (
+            first_item.get("variantId") or 
+            first_item.get("variant_id") or 
+            first_item.get("slug") or 
+            ""
+        )
+        
+        # Variable replacements - map config names to actual values
         replacements = {
-            "{item_title}": self._get_item_title(first_item),
-            "{variant_id}": first_item.get("variantId", first_item.get("variant_id", "")),
+            "{item_title}": item_title,
+            "{variant_id}": variant_id,  # Config uses snake_case
+            "{variantId}": variant_id,   # Also support camelCase
             "{default_size}": context.get("user_size", "M"),
             "{item_type}": first_item.get("type", "item"),
             "{item_color}": first_item.get("color", ""),
@@ -178,8 +190,24 @@ class SuggestedActionsEngine:
         return result
     
     def _get_item_title(self, item: Dict) -> str:
-        """Extract item title with fallback"""
-        return item.get("title", item.get("name", "this item"))
+        """Extract item title with fallback - handles AgentItem dict structure"""
+        # Try all possible title keys
+        title = (
+            item.get("title") or 
+            item.get("name") or 
+            item.get("productName") or
+            ""
+        )
+        
+        # If still empty, build from slug
+        if not title:
+            slug = item.get("slug", "")
+            if slug:
+                # "nordic-tee-black" -> "Nordic Tee Black"
+                title = slug.replace("-", " ").replace("_", " ").title()
+        
+        # Final fallback
+        return title or "this item"
 
 
 # Singleton instance

@@ -7,10 +7,12 @@ import sys
 import re
 import json
 from typing import Any, Dict, List, Optional
+from pathlib import Path
 import time
 import httpx
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+from typing import ClassVar
 from typing_extensions import Literal
 
 from app.vector.store import connect
@@ -67,7 +69,64 @@ class AgentIn(BaseModel):
 
     # how much per-user history to use in the LLM fallback
     # "user" = normal behavior, "none" = treat as fresh chat turn
-    historyScope: Literal["user", "none"] = "user"
+    historyScope: Literal["user", "session", "none"] = "user"
+    
+    # Config-driven validation (cached)
+    _validation_config: ClassVar[Optional[dict]] = None
+    
+    @classmethod
+    def get_validation_config(cls) -> dict:
+        """Load validation config once and cache it"""
+        if cls._validation_config is None:
+            # Path from agent.py: .../cove-ai-core/app/routes/agent.py
+            # Need to go up 3 levels: routes -> app -> cove-ai-core -> data
+            config_path = Path(__file__).resolve().parent.parent.parent / "data" / "validation_config.json"
+            with open(config_path) as f:
+                cls._validation_config = json.load(f)
+        return cls._validation_config
+    
+    @validator('message')
+    def validate_message(cls, v: str) -> str:
+        """Config-driven message validation - no hardcoded rules"""
+        config = cls.get_validation_config()['query_validation']['message']
+        errors = cls.get_validation_config()['error_messages']
+        
+        # Handle None explicitly (config-driven)
+        if v is None:
+            if not config.get('allow_null', False):
+                raise ValueError(errors['empty_message'])
+            return None
+        
+        # Trim if configured
+        if config.get('trim_before_validation', True) and v:
+            v = v.strip()
+        
+        # Check empty/whitespace (config-driven)
+        if not config.get('allow_whitespace_only', False):
+            if not v or not v.strip():
+                raise ValueError(errors['empty_message'])
+        
+        # Check length (config-driven limits)
+        max_len = config.get('max_length', 5000)
+        if len(v) > max_len:
+            raise ValueError(errors['message_too_long'].format(max_length=max_len))
+        
+        return v
+    
+    @validator('top_k')
+    def validate_top_k(cls, v: int) -> int:
+        """Config-driven top_k validation - no hardcoded limits"""
+        config = cls.get_validation_config()['query_validation']['top_k']
+        errors = cls.get_validation_config()['error_messages']
+        
+        min_val = config.get('min', 1)
+        max_val = config.get('max', 100)
+        
+        # Config-driven boundary check
+        if v < min_val or v > max_val:
+            raise ValueError(errors['invalid_top_k'].format(min=min_val, max=max_val))
+        
+        return v
 
 
 async def _summarise_history_chunk(
@@ -1038,10 +1097,27 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     confidence = classification_result.get("confidence", 0.95)
     intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
     
-    # Production monitoring - using print for immediate visibility
-    print(f"🔍 [INTENT_MONITOR] query='{q[:80]}' | semantic='{semantic_intent}' | mapped='{intent_kind}' | conf={confidence:.2%}")
+    # Map orchestrator intent back to API response kind for AgentOut
+    # AgentOut only accepts: 'answer', 'recommendations', 'cart_proposal', 'checkout_ready'
+    ORCHESTRATOR_TO_API_KIND = {
+        "discover": "recommendations",
+        "cart_add": "cart_proposal",
+        "checkout_start": "checkout_ready",
+        "generic": "answer",
+        "policy": "answer",
+        "size_fit": "answer",
+        "greeting": "answer",
+        "unknown": "answer",
+        "order_query": "answer",
+    }
+    api_response_kind = ORCHESTRATOR_TO_API_KIND.get(intent_kind, "answer")
     
-    wants_cart = _looks_like_cart_add(q) and intent_kind != "checkout_start"
+    # Production monitoring - using print for immediate visibility
+    print(f"🔍 [INTENT_MONITOR] query='{q[:80]}' | semantic='{semantic_intent}' | orchestrator='{intent_kind}' | api_kind='{api_response_kind}' | conf={confidence:.2%}")
+    
+    # ✅ USE INTELLIGENT CLASSIFIER - No hardcoding!
+    # Trust the LLM-based semantic classification
+    wants_cart = (semantic_intent == "cart_proposal") and intent_kind != "checkout_start"
     wants_recs = (not wants_cart) and (intent_kind == "discover")
     
     # Keep backward compatibility - still use old classify for price_filter detection
@@ -1138,6 +1214,7 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
     # --- Branch 1: cart_proposal -------------------------------------------------
     if wants_cart:
+        print(f"🛒 [DEBUG] CART BRANCH TRIGGERED: wants_cart={wants_cart}, intent_kind={intent_kind}")
         last_recs = _get_session_recs(body)
         debug_plan["last_recs_count"] = len(last_recs)
 
@@ -1295,14 +1372,13 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                     cart_payload=cart_payload,
                     debug_plan=debug_plan,
                 )
-
             debug_plan["cart_add_note"] = "no_matching_item_from_recs"
 
         debug_plan["cart_add_note"] = "cart_intent_but_no_resolvable_item"
         return AgentOut(
-            kind="answer",
+            kind=api_response_kind,  # Use mapped API kind for Pydantic validation
             answer=(
-                "I’m not sure which item you want me to add. "
+                "I'm not sure which item you want me to add. "
                 "Please either click a specific product or say something like "
                 "“Add the black hoodie in size M to my cart” or "
                 "“Add the second hoodie to my cart.”"
@@ -1565,8 +1641,9 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 debug_plan=debug_plan,
             )
 
-    # --- Branch 3: recommendations (browse products) ---------------------------
+    # --- Branch 2: recommendations (discover) ------------------------------------
     if wants_recs:
+        print(f"🔍 [DEBUG] RECS BRANCH TRIGGERED: wants_recs={wants_recs}, intent_kind={intent_kind}")
         # Event: Searching catalog
         emit_event('thinking:step', {
             'icon': '🔍',
@@ -1639,13 +1716,14 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         # no items → fall through to RAG / chat below
 
     # --- Branch 4: generic fallback (LLM chat or RAG) --------------------------
+    print(f"💬 [DEBUG] FALLBACK BRANCH: wants_cart={wants_cart}, wants_recs={wants_recs}, intent_kind={intent_kind}")
     use_llm_chat = intent_kind in (
         "generic",
         "policy",
         "history_meta",
         "unknown",
         "greeting",
-        "small_talk",
+        "size_fit",
     )
 
     if use_llm_chat and not wants_cart and not wants_recs:
@@ -1657,7 +1735,7 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 debug_plan["cache_used"] = True
                 
                 return AgentOut(
-                    kind="answer",
+                    kind=api_response_kind,  # Use mapped API kind for Pydantic validation
                     answer=policy_answer,
                     citations=[],
                     items=[],
@@ -1673,7 +1751,7 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         debug_plan["history_scope"] = llm_resp.get("history_scope", body.historyScope)
 
         return AgentOut(
-            kind="answer",
+            kind=api_response_kind,  # Use mapped API kind for Pydantic validation
             answer=llm_resp.get("answer") or "Sorry, I couldn’t generate a response.",
             citations=[],
             items=[],
@@ -1687,7 +1765,7 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     citations = rag_resp.get("citations") or []
 
     return AgentOut(
-        kind="answer",
+        kind=api_response_kind,  # Use mapped API kind for Pydantic validation
         answer=answer,
         citations=citations,
         items=[],

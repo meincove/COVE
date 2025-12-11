@@ -15,5 +15,25 @@
         "type": "type",
         "tier": "tier",
         "color": "colorName"
+    },
+    "retrieval": {
+        "overfetch_multiplier": 4,
+        "description": "Fetch 4x results for better reranking - NO hardcoding!"
+    },
+    "defaults": {
+        "agent_top_k": 6,
+        "recs_top_k": 8,
+        "description": "Default top_k values - configurable!"
+    },
+    "limits": {
+        "min_top_k": 1,
+        "max_top_k": 100,
+        "max_agent_top_k": 24,
+        "max_recs_top_k": 24,
+        "description": "Hard limits for validation"
+    },
+    "cart": {
+        "max_items_to_show": 4,
+        "description": "Max items in cart proposals"
     }
 }

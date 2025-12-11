@@ -117,13 +117,17 @@ def _fmt_product_row(row: dict, slug: str) -> dict:
 # LOGIC HELPERS
 # ---------------------------------------------------------------------
 
+
+
 def pick_variant_id(meta: Dict[str, Any], preferred_color: Optional[str] = None) -> Optional[str]:
     """
     Resolve a variantId from product meta.
-    Handles both flat variant docs (meta.variantId) and nested product docs (meta.colors[].variantId).
+    Handles both flat variant docs (meta.variant_id) and nested product docs (meta.colors[].variantId).
     """
-    # 1. Flat variant doc
-    if meta.get("variantId"):
+    # 1. Flat variant doc - check snake_case FIRST (what we store in embeddings)
+    if meta.get("variant_id"):
+        return meta["variant_id"]
+    if meta.get("variantId"):  # Fallback to camelCase
         return meta["variantId"]
         
     # 2. Nested product doc

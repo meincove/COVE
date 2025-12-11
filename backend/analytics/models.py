@@ -231,3 +231,112 @@ class UserInteraction(models.Model):
         ).select_related().order_by('timestamp')
         
         return [i.to_cf_dict() for i in interactions]
+
+
+class CFModel(models.Model):
+    """
+    Stores trained collaborative filtering models in the database.
+    
+    This allows CF models to persist across container restarts in production.
+    All model data is pickled and stored as binary.
+    """
+    
+    MODEL_TYPES = [
+        ('item_similarity', 'Item-Item Similarity Matrix'),
+        ('user_similarity', 'User-User Similarity Matrix'),
+        ('matrix_factorization', 'Matrix Factorization Model'),
+    ]
+    
+    model_type = models.CharField(
+        max_length=50,
+        choices=MODEL_TYPES,
+        db_index=True,
+        help_text="Type of CF model"
+    )
+    
+    version = models.IntegerField(
+        default=1,
+        help_text="Model version number (auto-incremented)"
+    )
+    
+    model_data = models.BinaryField(
+        help_text="Pickled model data (similarity matrix, mappings, etc.)"
+    )
+    
+    metadata = models.JSONField(
+        default=dict,
+        help_text="Model training metadata (num_users, num_items, training_time, etc.)"
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        help_text="When this model was trained and saved"
+    )
+    
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text="Whether this is the currently active model"
+    )
+    
+    file_size_bytes = models.IntegerField(
+        default=0,
+        help_text="Size of pickled model in bytes"
+    )
+    
+    class Meta:
+        db_table = 'cf_models'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['model_type', 'is_active']),
+            models.Index(fields=['-created_at']),
+        ]
+        verbose_name = 'CF Model'
+        verbose_name_plural = 'CF Models'
+    
+    def __str__(self):
+        return f"{self.get_model_type_display()} v{self.version} ({'active' if self.is_active else 'inactive'})"
+    
+    def save(self, *args, **kwargs):
+        """Auto-increment version and calculate file size"""
+        if not self.pk:
+            # New model - increment version
+            last_version = CFModel.objects.filter(
+                model_type=self.model_type
+            ).aggregate(models.Max('version'))['version__max']
+            
+            self.version = (last_version or 0) + 1
+            
+            # Calculate file size
+            if self.model_data:
+                self.file_size_bytes = len(self.model_data)
+        
+        # Deactivate other models of same type if this one is active
+        if self.is_active:
+            CFModel.objects.filter(
+                model_type=self.model_type,
+                is_active=True
+            ).exclude(pk=self.pk).update(is_active=False)
+        
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_active_model(cls, model_type='item_similarity'):
+        """Get the currently active model of a given type"""
+        return cls.objects.filter(
+            model_type=model_type,
+            is_active=True
+        ).first()
+    
+    @classmethod
+    def cleanup_old_versions(cls, model_type='item_similarity', keep_last_n=5):
+        """Delete old model versions, keeping only the last N"""
+        models_to_delete = cls.objects.filter(
+            model_type=model_type,
+            is_active=False
+        ).order_by('-created_at')[keep_last_n:]
+        
+        count = models_to_delete.count()
+        models_to_delete.delete()
+        return count

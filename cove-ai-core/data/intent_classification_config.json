@@ -39,13 +39,32 @@
             ]
         },
         "cart_proposal": {
-            "description": "User wants to add specific item to cart",
+            "description": "User wants to add specific item to cart or expresses clear purchase intent",
             "priority": 1,
             "examples": [
                 "add this to cart",
                 "I want the black hoodie",
                 "put it in my cart",
-                "I'll take the large"
+                "I'll take the large",
+                "add hoodie to cart",
+                "I want this",
+                "throw that jacket in my bag",
+                "add the second one to cart in large",
+                "cop this",
+                "lemme get that",
+                "I'll grab it",
+                "add to bag",
+                "ad hoodie too cart",
+                "add this one",
+                "get me that",
+                "I need this",
+                "take this",
+                "add it",
+                "I'll buy it",
+                "make it medium",
+                "change to large",
+                "add the first one to cart",
+                "put the third item in my cart"
             ],
             "multilingual_examples": {
                 "fr": [
@@ -67,14 +86,19 @@
                 "buy",
                 "purchase",
                 "want",
-                "take"
+                "take",
+                "bag",
+                "cop",
+                "grab",
+                "get"
             ],
             "required_entities": [],
             "optional_entities": [
                 "product_id",
                 "size",
                 "color",
-                "quantity"
+                "quantity",
+                "position"
             ]
         },
         "checkout_ready": {
@@ -217,6 +241,50 @@
                 "product_id",
                 "product_type"
             ]
+        },
+        "answer": {
+            "description": "User asks a general question requiring informational answer",
+            "priority": 2,
+            "examples": [
+                "what do you think about sizing",
+                "how does this work",
+                "tell me about your return policy",
+                "what sizes do you have",
+                "???",
+                "what about colors",
+                "can you explain this",
+                "what is this",
+                "how much is shipping",
+                "when will it arrive"
+            ],
+            "multilingual_examples": {
+                "fr": [
+                    "comment ça marche",
+                    "quelles tailles"
+                ],
+                "es": [
+                    "cómo funciona",
+                    "qué tallas hay"
+                ],
+                "de": [
+                    "wie funktioniert das",
+                    "welche Größen"
+                ]
+            },
+            "keywords": [
+                "what",
+                "how",
+                "why",
+                "when",
+                "where",
+                "explain",
+                "tell me",
+                "???",
+                "info",
+                "について"
+            ],
+            "required_entities": [],
+            "optional_entities": []
         },
         "greeting": {
             "description": "User greets or starts conversation",

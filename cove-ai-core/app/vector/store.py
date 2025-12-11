@@ -80,58 +80,50 @@ async def search_hybrid(
     top_k: int = 6,
 ) -> List[Dict[str, Any]]:
     """
-    Async wrapper for hybrid search.
+    Async wrapper for TRUE hybrid search (BM25 + Vector + RRF).
+    
+    This is the main search entrypoint used throughout the app.
     1. Generates embedding asynchronously.
-    2. Runs DB query in threadpool to avoid blocking event loop.
+    2. Runs hybrid search (BM25 + Vector + RRF) in threadpool.
+    
+    Returns results with RRF-fused scores for best accuracy.
     """
     # 1. Async embedding
     q_emb = await async_embed_query(query)
     
-    # 2. DB operation in threadpool
+    # 2. Hybrid search in threadpool
     return await run_in_threadpool(
-        _search_hybrid_sync, 
+        _search_hybrid_rrf_sync, 
         query=query, 
         q_emb=q_emb, 
         kind=kind, 
         top_k=top_k
     )
 
-def _search_hybrid_sync(query: str, q_emb: List[float], kind: str, top_k: int) -> List[Dict[str, Any]]:
+def _search_hybrid_rrf_sync(query: str, q_emb: List[float], kind: str, top_k: int) -> List[Dict[str, Any]]:
     """
-    Synchronous implementation of hybrid search.
-    """
-    # For now, we'll use a direct dense fallback implementation to break circular dependency
-    # on app.vector.hybrid which might import store
+    Synchronous implementation of hybrid search with RRF fusion.
     
-    # TODO: Re-integrate full hybrid search logic if needed
-    # Falling back to dense-only for stability in this refactor step
+    Uses industry-standard approach:
+    - BM25 for keyword matching
+    - Vector for semantic similarity  
+    - RRF (k=60) for fusion
+    """
+    from app.vector.hybrid_search import search_hybrid_rrf, search_results_to_dict
     
     with get_conn_sync() as conn:
-        with conn.cursor(row_factory=tuple_row) as cur:
-            cur.execute(
-                """
-                SELECT id, kind, title, text, url, meta,
-                       (1.0 - (embedding <=> %s::vector)) AS dense_score
-                FROM ai_core.docs
-                WHERE kind = %s
-                ORDER BY embedding <=> %s::vector
-                LIMIT %s
-                """,
-                (q_emb, kind, q_emb, top_k),
-            )
-            rows = cur.fetchall()
-
-    return [
-        {
-            "id": r[0],
-            "title": r[2] or "",
-            "text": r[3] or "",
-            "url": r[4] or "",
-            "meta": r[5] or {},
-            "score": float(r[6] or 0.0),
-        }
-        for r in rows
-    ]
+        results = search_hybrid_rrf(
+            conn=conn,
+            query=query,
+            query_embedding=q_emb,
+            kind=kind,
+            top_k=top_k,
+            bm25_k=20,      # Candidate pool for BM25
+            vector_k=20,     # Candidate pool for vector
+            rrf_constant=60  # Industry standard
+        )
+        
+        return search_results_to_dict(results)
 
 async def search_keyword(
     query: str,

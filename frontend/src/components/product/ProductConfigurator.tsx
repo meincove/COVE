@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { useCartStore } from '@/src/store/cartStore'
 import ProductDescription from '@/src/components/product/ProductDescription'
+import { trackAddToCart } from '@/src/utils/analytics' // Analytics tracking (Dec 8)
 
 type Color = {
   colorName: string
@@ -108,8 +109,19 @@ export default function ProductConfigurator({
       colorName: selectedColor.colorName,
       quantity,
       price,
-      imageUrl: `/clothing-images/${selectedColor.images[1]}`,
+      imageUrl: selectedColor.images[1] || selectedColor.images[0],
       material,
+    })
+
+    // Track add to cart event
+    trackAddToCart(selectedColor.variantId, {
+      product_name: name,
+      color: selectedColor.colorName,
+      size: selectedSize,
+      quantity,
+      price,
+      tier,
+      type,
     })
 
     setStockAlert('')

@@ -28,6 +28,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "product_id",
             "name",
             "slug",
+            "brand_id",  # NEW: Brand identifier for multi-brand support
             "tier",
             "type",
             "material",
