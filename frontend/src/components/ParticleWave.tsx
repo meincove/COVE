@@ -220,7 +220,7 @@
 //         this.depthOffset = Math.random() * Math.PI * 2
 //         this.depth = 0
 //         this.depthBrightness = 1
-//    
+//
 
 //     /**
 //      * introFactor: 0 → start (no waves, no depth), 1 → full motion / depth.
@@ -511,6 +511,26 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 'use client'
 
 import { useEffect, useRef } from 'react'
@@ -660,8 +680,8 @@ const randomGlobalColor = (): Color => {
 
 export default function ParticleWave({
     // +25% particles: 214 → 268
-    particleCount = 268,
-    radiusBase = 375,
+    particleCount = 288,
+    radiusBase = 355,
     className = ''
 }: ParticleWaveProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -714,9 +734,9 @@ export default function ParticleWave({
         let globalInterval = 10 + Math.random() * 2 // 10–12 seconds
 
         // 🔹 intro + lines timing (longer, smoother)
-        const INTRO_DURATION = 4.5 // was 2.0
-        const LINES_DELAY = 6    // was 2.0
-        const LINES_FADE_DURATION = 7.0 // was 4.0
+        const INTRO_DURATION = 6 // was 2.0
+        const LINES_DELAY = 9    // was 2.0
+        const LINES_FADE_DURATION = 10 // was 4.0
 
         // use real time in seconds from requestAnimationFrame
         let lastTimestamp: number | null = null
