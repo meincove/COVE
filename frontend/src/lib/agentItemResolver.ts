@@ -188,8 +188,10 @@ export async function resolveAgentItemForChat(
 
   const imgName =
     v.images && v.images.length > 0 ? v.images[0] : undefined;
-  const imageUrl = imgName
-    ? `/clothing-images/${imgName}`
+
+  // Use external URL directly if it's a full URL, otherwise undefined
+  const imageUrl = imgName && (imgName.startsWith('http://') || imgName.startsWith('https://'))
+    ? imgName
     : undefined;
 
   const subtitle = `${product.tier ?? ""}${product.type ? ` • ${product.type}` : ""

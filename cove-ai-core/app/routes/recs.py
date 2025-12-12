@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
+import json
+from typing import Any, Dict, List, Optional, Tuple, ClassVar
+from pathlib import Path
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from app.vector.store import get_conn, get_conn_sync, search_hybrid, search_keyword
 from app.telemetry.trace import new_trace_id, emit
@@ -41,6 +43,64 @@ class RecsIn(BaseModel):
     query: Optional[str] = None
     filters: RecsFilters = RecsFilters()
     top_k: int = 8
+    
+    # Config-driven validation (cached) - shared with AgentIn
+    _validation_config: ClassVar[Optional[dict]] = None
+    
+    @classmethod
+    def get_validation_config(cls) -> dict:
+        """Load validation config once and cache it"""
+        if cls._validation_config is None:
+            # Path from recs.py: .../cove-ai-core/app/routes/recs.py
+            # Need to go up 3 levels: routes -> app -> cove-ai-core -> data
+            config_path = Path(__file__).resolve().parent.parent.parent / "data" / "validation_config.json"
+            with open(config_path) as f:
+                cls._validation_config = json.load(f)
+        return cls._validation_config
+    
+    @validator('query')
+    def validate_query(cls, v: Optional[str]) -> Optional[str]:
+        """Config-driven query validation - skip if None (unless disallowed)"""
+        config = cls.get_validation_config()['query_validation']['message']
+        errors = cls.get_validation_config()['error_messages']
+        
+        # Handle None explicitly based on config
+        if v is None:
+            # Check if null is allowed in config
+            if not config.get('allow_null', False):
+                raise ValueError(errors['empty_message'])
+            return None  # Allow if config permits
+        
+        # Trim if configured
+        if config.get('trim_before_validation', True) and v:
+            v = v.strip()
+        
+        # Check empty/whitespace (config-driven)
+        if not config.get('allow_whitespace_only', False):
+            if not v or not v.strip():
+                raise ValueError(errors['empty_message'])
+        
+        # Check length (config-driven limits)
+        max_len = config.get('max_length', 5000)
+        if len(v) > max_len:
+            raise ValueError(errors['message_too_long'].format(max_length=max_len))
+        
+        return v
+    
+    @validator('top_k')
+    def validate_top_k(cls, v: int) -> int:
+        """Config-driven top_k validation - no hardcoded limits"""
+        config = cls.get_validation_config()['query_validation']['top_k']
+        errors = cls.get_validation_config()['error_messages']
+        
+        min_val = config.get('min', 1)
+        max_val = config.get('max', 100)
+        
+        # Config-driven boundary check
+        if v < min_val or v > max_val:
+            raise ValueError(errors['invalid_top_k'].format(min=min_val, max=max_val))
+        
+        return v
 
 class RecItem(BaseModel):
     title: str
@@ -91,7 +151,24 @@ def _build_anchor_query_text(meta: dict) -> str:
 async def recs_suggest(body: RecsIn) -> RecsOut:
     trace_id = new_trace_id()
     filters = body.filters or RecsFilters()
-    top_k = max(1, min(body.top_k or 8, 24))
+    
+    # Load search config - NO hardcoded limits!
+    from app.core.config_loader import get_search_config
+    search_config = get_search_config()
+    
+    # Apply config-driven limits (was: max(1, min(body.top_k or 8, 24)))
+    top_k = max(
+        search_config['limits']['min_top_k'],
+        min(
+            body.top_k or search_config['defaults']['recs_top_k'],
+            search_config['limits']['max_recs_top_k']
+        )
+    )
+    
+    # Apply config-driven fuzzy matching for typo tolerance (NO hardcoded corrections!)
+    from app.core.fuzzy import apply_fuzzy_matching
+    original_query = body.query or ""
+    processed_query = apply_fuzzy_matching(original_query) if original_query else ""
 
     # Track if we had any non-price filters
     had_filters = any([
@@ -127,7 +204,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
         if anchor_meta:
             retrieval_query = _build_anchor_query_text(anchor_meta.get("meta") or {})
         if not retrieval_query:
-            retrieval_query = (body.query or "").strip()
+            retrieval_query = processed_query.strip() if processed_query else ""  # Use fuzzy-matched query
         if not retrieval_query:
             emit(
                 "recs_empty_query",
@@ -138,20 +215,24 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
 
         # 3) Run search using existing helpers
         USE_KEYWORD_ONLY = os.getenv("DISABLE_EMBEDDING", "false").lower() == "true"
+        
+        # Use config-driven overfetch multiplier (was: top_k * 4)
+        overfetch = top_k * search_config['retrieval']['overfetch_multiplier']
 
         if USE_KEYWORD_ONLY:
             docs = search_keyword(
                 conn,
                 query=retrieval_query,
                 kind="product",
-                top_k=top_k * 4,
+                top_k=overfetch,  # Config-driven!
             )
         else:
             docs = await search_hybrid(
                 query=retrieval_query,
                 kind="product",
-                top_k=top_k * 4,
+                top_k=overfetch,  # Config-driven!
             )
+
 
         emit(
             "recs_retrieval_done",

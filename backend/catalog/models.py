@@ -7,6 +7,7 @@ class ProductMasterGroup(models.Model):
     product_id = models.CharField(max_length=100, primary_key=True)  # e.g., G-HOODIE-CASUAL-BRUSHEDFLEECE-19.99
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, db_index=True)
+    brand_id = models.CharField(max_length=50, db_index=True, default='COVE')  # NEW: Brand identifier
     tier = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
     material = models.CharField(max_length=100)
@@ -22,6 +23,7 @@ class ProductMasterGroup(models.Model):
             models.Index(fields=['slug']),
             models.Index(fields=['type']),
             models.Index(fields=['tier']),
+            models.Index(fields=['brand_id']),  # NEW: Index for brand filtering
         ]
 
     def __str__(self):
@@ -51,8 +53,10 @@ class ColorGroup(models.Model):
 
 
 class ProductImage(models.Model):
-    variant = models.ForeignKey(ColorGroup, on_delete=models.CASCADE, related_name='images')
-    image_name = models.CharField(max_length=100, db_index=True)  # e.g., CUHD001-front.png
+    variant = models.ForeignKey(
+        ColorGroup, on_delete=models.CASCADE, related_name='images'
+    )
+    image_name = models.CharField(max_length=500, db_index=True)  # Increased for external URLs like Pexels
 
     class Meta:
         verbose_name = "Product Image"
@@ -60,6 +64,7 @@ class ProductImage(models.Model):
         indexes = [
             models.Index(fields=['image_name']),
         ]
+        ordering = ['id']
 
     def __str__(self):
         return f"{self.variant.variant_id} - {self.image_name}"

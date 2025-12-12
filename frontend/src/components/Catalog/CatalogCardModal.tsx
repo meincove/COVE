@@ -102,7 +102,7 @@
 //         onClick={(e) => e.stopPropagation()}
 //       >
 //         <div className="w-full h-full flex">
-          
+
 //           {/* Image section */}
 //           <div className="w-1/2 flex flex-col items-center justify-center p-4 relative ">
 //   {hasImages ? (
@@ -458,10 +458,14 @@ export default function CatalogCardModal({
         >
           {hasImages ? (
             <>
-              <img
-                src={`/clothing-images/${currentImage}`}
-                alt="Product"
-                className="max-h-full max-w-full object-contain"
+              <Image
+                src={currentImage}
+                alt={`${name} - ${selectedColor.colorName}`}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 60vw, 90vw"
+                priority
+                unoptimized={true}
               />
 
               {/* Prev / next arrows */}
@@ -587,10 +591,9 @@ export default function CatalogCardModal({
                       setCurrentImageIndex(0)
                     }}
                     className={`w-6 h-6 rounded-full border-2 cursor-pointer transition
-                      ${
-                        selectedColorIndex === i
-                          ? 'ring-2 ring-slate-900 border-white'
-                          : 'border-slate-300 hover:border-slate-900'
+                      ${selectedColorIndex === i
+                        ? 'ring-2 ring-slate-900 border-white'
+                        : 'border-slate-300 hover:border-slate-900'
                       }`}
                     style={{ backgroundColor: c.hex ?? '#000000' }}
                   />

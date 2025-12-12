@@ -1,0 +1,14 @@
+🏭 Generating Multi-Brand Product Catalog...
+📊 Target: ~2040 products across 15 brands
+
+Brands:   0%|          | 0/15 [00:00<?, ?it/s]Brands:   0%|          | 0/15 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/Users/ssg/Desktop/COVE/cove-ai-core/scripts/catalog_generator/generate_catalog.py", line 420, in <module>
+    main()
+  File "/Users/ssg/Desktop/COVE/cove-ai-core/scripts/catalog_generator/generate_catalog.py", line 383, in main
+    variants = generator.generate_catalog()
+  File "/Users/ssg/Desktop/COVE/cove-ai-core/scripts/catalog_generator/generate_catalog.py", line 293, in generate_catalog
+    variant = self.generate_variant(brand_name, brand_data, product_type, "female", i)
+  File "/Users/ssg/Desktop/COVE/cove-ai-core/scripts/catalog_generator/generate_catalog.py", line 159, in generate_variant
+    "washTemp": template["care"]["wash_temp"],
+KeyError: 'wash_temp'

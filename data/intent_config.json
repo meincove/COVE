@@ -2,6 +2,29 @@
   "version": 1,
   "intents": [
     {
+      "name": "cart_add",
+      "priority": 110,
+      "keywords": [
+        "add to cart",
+        "add this to cart",
+        "add that to cart",
+        "add to my cart",
+        "put in cart",
+        "put this in cart",
+        "add hoodie to cart",
+        "add tee to cart",
+        "add jacket to cart",
+        "add the hoodie",
+        "add the tee",
+        "add the jacket",
+        "add the",
+        "i want this",
+        "i'll take this",
+        "i'll take that",
+        "add it to cart"
+      ]
+    },
+    {
       "name": "checkout_start",
       "priority": 105,
       "keywords": [

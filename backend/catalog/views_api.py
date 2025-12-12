@@ -24,6 +24,7 @@ def product_queryset():
         "Filter by tier, type, gender, color (color slug), size, and price range."
     ),
     parameters=[
+        OpenApiParameter(name="brand_id", description="Brand ID to filter (e.g., COVE, UrbanPulse)", required=False, type=str),
         OpenApiParameter(name="tier", description="e.g., casual | originals | designer", required=False, type=str),
         OpenApiParameter(name="type", description="e.g., hoodie | bomber | jeans | jacket", required=False, type=str),
         OpenApiParameter(name="gender", description="e.g., unisex", required=False, type=str),
@@ -44,6 +45,7 @@ class ProductListView(ListAPIView):
         qs = product_queryset()
         qp = self.request.query_params
 
+        brand_id = qp.get("brand_id")
         tier = qp.get("tier")
         typ = qp.get("type")
         gender = qp.get("gender")
@@ -52,6 +54,8 @@ class ProductListView(ListAPIView):
         price_min = qp.get("price_min")
         price_max = qp.get("price_max")
 
+        if brand_id:
+            qs = qs.filter(brand_id__iexact=brand_id)
         if tier:
             qs = qs.filter(tier__iexact=tier)
         if typ:

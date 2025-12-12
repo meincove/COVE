@@ -1,193 +1,127 @@
 """
-Test Hybrid Search System with Real Queries.
-Validates vector search, keyword search, and RRF fusion.
+Test script for hybrid search (BM25 + Vector + RRF)
+
+Compares:
+1. Dense-only search (old way)
+2. Hybrid search with RRF (new way)
+
+Expected improvements:
+- Better exact brand matching ("COVE hoodie" ranks COVE first)
+- Better keyword precision ("black hoodie" finds black ones)
+- Semantic understanding still works
 """
 
 import asyncio
-import sys
-from pathlib import Path
+import os
+from dotenv import load_dotenv
 
-# Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+load_dotenv()
 
-from app.mcp_agents.product_recommender.hybrid_search import get_hybrid_search
-from app.mcp_agents.product_recommender.vector_db import get_vector_db
+from app.providers.embedding import embed_query
+from app.vector.hybrid_search import search_hybrid_rrf, search_results_to_dict, search_bm25, search_vector
+from app.vector.store import get_conn_sync, init_pool
 
-
-async def test_vector_search():
-    """Test pure vector similarity search"""
-    print("\n" + "="*60)
-    print("🔍 TEST 1: Vector Similarity Search")
-    print("="*60)
-    
-    vector_db = await get_vector_db()
-    hybrid = get_hybrid_search()
-    
-    # Generate embedding for query
-    test_query = "comfortable hoodie"
-    print(f"\nQuery: '{test_query}'")
-    print("Generating embedding...")
-    
-    embedding = await hybrid._get_embedding(test_query)
-    print(f"✅ Embedding generated ({len(embedding)} dimensions)")
-    
-    # Search
-    print("\nSearching with vector similarity...")
-    results = await vector_db.vector_search(embedding, filters=None, limit=5)
-    
-    print(f"\n📊 Results: {len(results)} products found")
-    for i, product in enumerate(results, 1):
-        print(f"   {i}. {product['title']}")
-        print(f"      Similarity: {product['similarity_score']:.3f}")
-        print(f"      Type: {product['type']} | Tier: {product['tier']} | Price: €{product['price']}")
-    
-    return results
-
-
-async def test_keyword_search():
-    """Test keyword/full-text search"""
-    print("\n" + "="*60)
-    print("🔤 TEST 2: Keyword Search (Full-Text)")
-    print("="*60)
-    
-    vector_db = await get_vector_db()
-    
-    test_query = "designer hoodie"
-    print(f"\nQuery: '{test_query}'")
-    print("Searching with keyword matching...")
-    
-    results = await vector_db.keyword_search(test_query, filters=None, limit=5)
-    
-    print(f"\n📊 Results: {len(results)} products found")
-    for i, product in enumerate(results, 1):
-        print(f"   {i}. {product['title']}")
-        print(f"      Keyword Score: {product['keyword_score']:.3f}")
-        print(f"      Type: {product['type']} | Price: €{product['price']}")
-    
-    return results
+# Initialize connection pool
+init_pool()
 
 
 async def test_hybrid_search():
-    """Test hybrid search with RRF fusion"""
-    print("\n" + "="*60)
-    print("🎯 TEST 3: Hybrid Search (Vector + Keyword + RRF)")
-    print("="*60)
-    
-    hybrid = get_hybrid_search()
+    """Test hybrid search with various queries"""
     
     test_queries = [
-        "comfortable designer hoodie",
-        "structured tee",
-        "premium fleece"
+        "COVE black hoodie",
+        "UrbanPulse tee",
+        "designer jacket for women",
+        "casual sweater",
+        "BoldHues accessories"
     ]
+    
+    print("\n" + "="*80)
+    print("🔍 HYBRID SEARCH TEST (BM25 + Vector + RRF)")
+    print("="*80 + "\n")
     
     for query in test_queries:
-        print(f"\n📝 Query: '{query}'")
-        print("-" * 60)
+        print(f"\n{'─'*80}")
+        print(f"Query: \"{query}\"")
+        print(f"{'─'*80}\n")
         
-        results = await hybrid.search(query, filters=None, limit=3)
+        # Generate embedding
+        embedding = await embed_query(query)
         
-        print(f"✅ {len(results)} results (after RRF fusion)")
-        for i, product in enumerate(results, 1):
-            print(f"\n   {i}. {product['title']}")
-            print(f"      RRF Score: {product['rrf_score']:.4f}")
-            print(f"      Type: {product['type']} | Tier: {product['tier']}")
-            print(f"      Price: €{product['price']}")
+        with get_conn_sync() as conn:
+            # 1. BM25 only
+            bm25_results = search_bm25(conn, query, kind="product", top_k=5)
+            print("📝 BM25 Keyword Search (Top 5):")
+            for idx, r in enumerate(bm25_results, 1):
+                brand = r.meta.get('brand_id', 'Unknown')
+                print(f"   {idx}. [{brand}] {r.title} (score: {r.score:.4f})")
+            
+            # 2. Vector only
+            vector_results = search_vector(conn, embedding, kind="product", top_k=5)
+            print(f"\n🎯 Vector Semantic Search (Top 5):")
+            for idx, r in enumerate(vector_results, 1):
+                brand = r.meta.get('brand_id', 'Unknown')
+                print(f"   {idx}. [{brand}] {r.title} (score: {r.score:.4f})")
+            
+            # 3. Hybrid (RRF fusion)
+            hybrid_results = search_hybrid_rrf(
+                conn, query, embedding, 
+                kind="product", top_k=5,
+                bm25_k=20, vector_k=20, rrf_constant=60
+            )
+            print(f"\n🔥 HYBRID (RRF Fusion, k=60) (Top 5):")
+            for idx, r in enumerate(hybrid_results, 1):
+                brand = r.meta.get('brand_id', 'Unknown')
+                product_type = r.meta.get('type', 'unknown')
+                print(f"   {idx}. [{brand}] {r.title} - {product_type} (RRF: {r.score:.4f})")
+    
+    print(f"\n{'='*80}")
+    print("✅ Hybrid search test complete!")
+    print("="*80 + "\n")
 
 
-async def test_with_filters():
-    """Test hybrid search with filters"""
-    print("\n" + "="*60)
-    print("🎚️  TEST 4: Hybrid Search with Filters")
-    print("="*60)
+async def test_brand_precision():
+    """Test that brand-specific queries work correctly"""
     
-    hybrid = get_hybrid_search()
+    print("\n" + "="*80)
+    print("🎯 BRAND PRECISION TEST")
+    print("="*80 + "\n")
     
-    # Test with type filter
-    print("\n📝 Query: 'designer clothing'")
-    print("Filter: type='hoodie'")
-    print("-" * 60)
-    
-    results = await hybrid.search(
-        query="designer clothing",
-        filters={"type": "hoodie"},
-        limit=5
-    )
-    
-    print(f"✅ {len(results)} hoodies found")
-    for i, product in enumerate(results, 1):
-        print(f"   {i}. {product['title']} - €{product['price']}")
-    
-    # Test with price filter
-    print("\n📝 Query: 'designer clothing'")
-    print("Filter: price <= €40")
-    print("-" * 60)
-    
-    results = await hybrid.search(
-        query="designer clothing",
-        filters={"price_max": 40.0},
-        limit=5
-    )
-    
-    print(f"✅ {len(results)} products under €40 found")
-    for i, product in enumerate(results, 1):
-        print(f"   {i}. {product['title']} - €{product['price']}")
-
-
-async def test_edge_cases():
-    """Test edge cases and robustness"""
-    print("\n" + "="*60)
-    print("⚡ TEST 5: Edge Cases & Robustness")
-    print("="*60)
-    
-    hybrid = get_hybrid_search()
-    
-    edge_cases = [
-        "nonexistent product xyz123",
-        "tee",  # Very short query
-        "I need something comfortable for winter casual wear",  # Long semantic query
+    brand_queries = [
+        ("COVE hoodie", "COVE"),
+        ("UrbanPulse jacket", "UrbanPulse"),
+        ("BoldHues tee", "BoldHues"),
     ]
     
-    for query in edge_cases:
-        print(f"\n📝 Query: '{query}'")
-        results = await hybrid.search(query, limit=2)
-        print(f"   → {len(results)} results")
-        if results:
-            print(f"   Top: {results[0]['title']} (RRF: {results[0]['rrf_score']:.4f})")
-
-
-async def run_all_tests():
-    """Run complete test suite"""
-    print("\n" + "="*70)
-    print("🧪 HYBRID SEARCH SYSTEM - COMPREHENSIVE TEST SUITE")
-    print("="*70)
+    for query, expected_brand in brand_queries:
+        print(f"\nQuery: \"{query}\" (Expected brand: {expected_brand})")
+        
+        embedding = await embed_query(query)
+        
+        with get_conn_sync() as conn:
+            results = search_hybrid_rrf(
+                conn, query, embedding,
+                kind="product", top_k=3
+            )
+            
+            if results:
+                top_result = results[0]
+                actual_brand = top_result.meta.get('brand_id', 'Unknown')
+                
+                if actual_brand == expected_brand:
+                    print(f"   ✅ CORRECT: Top result is {actual_brand}")
+                else:
+                    print(f"   ❌ WRONG: Top result is {actual_brand} (expected {expected_brand})")
+                
+                print(f"   Top 3 brands: {[r.meta.get('brand_id') for r in results[:3]]}")
+            else:
+                print(f"   ❌ No results found!")
     
-    try:
-        # Individual tests
-        await test_vector_search()
-        await test_keyword_search()
-        await test_hybrid_search()
-        await test_with_filters()
-        await test_edge_cases()
-        
-        # Summary
-        print("\n" + "="*70)
-        print("✅ ALL TESTS COMPLETED SUCCESSFULLY")
-        print("="*70)
-        print("\n🎉 Hybrid Search System: VALIDATED")
-        print("   - Vector search: Working")
-        print("   - Keyword search: Working")
-        print("   - RRF fusion: Working")
-        print("   - Filters: Working")
-        print("   - Edge cases: Handled")
-        print("\n" + "="*70 + "\n")
-        
-    except Exception as e:
-        print(f"\n❌ Error during testing: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+    print("\n" + "="*80)
+    print("✅ Brand precision test complete!")
+    print("="*80 + "\n")
 
 
 if __name__ == "__main__":
-    asyncio.run(run_all_tests())
+    asyncio.run(test_hybrid_search())
+    asyncio.run(test_brand_precision())

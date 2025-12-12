@@ -1,0 +1,30 @@
+{
+    "query_validation": {
+        "message": {
+            "min_length": 1,
+            "max_length": 5000,
+            "allow_whitespace_only": false,
+            "allow_null": false,
+            "trim_before_validation": true
+        },
+        "top_k": {
+            "min": 1,
+            "max": 100,
+            "default": 5
+        },
+        "historyScope": {
+            "allowed_values": [
+                "user",
+                "session",
+                "none"
+            ],
+            "default": "user"
+        }
+    },
+    "error_messages": {
+        "empty_message": "Query cannot be empty or whitespace-only",
+        "message_too_long": "Query exceeds maximum length of {max_length} characters",
+        "invalid_top_k": "top_k must be between {min} and {max}",
+        "invalid_history_scope": "historyScope must be one of: {allowed_values}"
+    }
+}

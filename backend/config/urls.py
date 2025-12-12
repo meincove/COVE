@@ -14,7 +14,8 @@ def healthz(_request):
 ADMIN_URL = os.getenv("ADMIN_URL", "super-admin/")
 
 urlpatterns = [
-    path(ADMIN_URL, admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),  # /super-admin/ (from env)
+    path("admin/", admin.site.urls),    # Standard /admin/ path
     # health/readiness
     path("healthz/", healthz),
     path("readiness/", api_views.readiness),
@@ -25,6 +26,7 @@ urlpatterns = [
     path("api/", include("accounts.urls")),
     path("api/", include("orders.urls")),
     path("api/payments/", include("payments.urls")),
+    path("api/analytics/", include("analytics.urls")),  # User tracking (Dec 8, 2025)
 
     # docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

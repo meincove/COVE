@@ -208,12 +208,13 @@ export default function CatalogCardBase({
           {hasImages ? (
             <div className="relative h-full w-full">
               <Image
-                src={`/clothing-images/${heroImage}`}
+                src={heroImage}
                 alt={name}
                 fill
                 sizes="(min-width: 1024px) 26vw, 80vw"
                 className="object-contain"
                 priority={isActive}
+                unoptimized={true}
               />
             </div>
           ) : (

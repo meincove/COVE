@@ -1,0 +1,4756 @@
+[
+  {
+    "variantId": "COVE-T-0000",
+    "groupId": "PG_TEE_COVE_0",
+    "groupSlug": "purpose-brother-ago",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "tee_unisex_regular",
+    "tier": "basic",
+    "type": "tee",
+    "gender": "female",
+    "fit": "oversized",
+    "material": "Cotton Poly",
+    "price": 40.78,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 2,
+      "S": 12,
+      "M": 14,
+      "L": 13,
+      "XL": 11,
+      "XXL": 2
+    },
+    "images": [
+      "https://images.pexels.com/photos/3578586/pexels-photo-3578586.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/12732925/pexels-photo-12732925.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4593422/pexels-photo-4593422.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Tee",
+    "description": "Contemporary tee in sand, featuring Cotton Poly construction. Oversized fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Cotton Poly",
+      "materialBlend": "Cotton blend",
+      "gsm": 219,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "tee",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "layering",
+        "gym",
+        "daily wear"
+      ],
+      "pattern": "graphic",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "oversized",
+      "length": "regular",
+      "bodyShapes": [
+        "athletic",
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Sand is timelessly versatile.",
+    "fitNotes": "Relaxed oversized silhouette. Order usual size for intended drape, or size down for fitted oversized.",
+    "tags": [
+      "cotton poly",
+      "medium",
+      "sand",
+      "minimal",
+      "oversized",
+      "tee",
+      "clean",
+      "timeless",
+      "gym",
+      "daily wear",
+      "layering",
+      "essential",
+      "warm-weather"
+    ]
+  },
+  {
+    "variantId": "COVE-T-0001",
+    "groupId": "PG_TEE_COVE_1",
+    "groupSlug": "face-election-dog",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "tee_unisex_regular",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Cotton Jersey",
+    "price": 43.25,
+    "colorName": "forest green",
+    "hex": "#228B22",
+    "sizes": {
+      "XS": 2,
+      "S": 15,
+      "M": 17,
+      "L": 12,
+      "XL": 11,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/35116555/pexels-photo-35116555.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35124033/pexels-photo-35124033.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35058374/pexels-photo-35058374.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Tee",
+    "description": "Forest Green tee crafted from premium Cotton Jersey with a slim fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Cotton Jersey",
+      "materialBlend": "100% cotton",
+      "gsm": 208,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "athleisure",
+      "styleTags": [
+        "tee",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "layering",
+        "gym",
+        "daily wear"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "regular",
+      "bodyShapes": [
+        "stocky",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Forest Green is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "minimal",
+      "forest green",
+      "tee",
+      "cotton jersey",
+      "clean",
+      "timeless",
+      "gym",
+      "daily wear",
+      "layering",
+      "essential",
+      "warm-weather",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0002",
+    "groupId": "PG_JACKET_COVE_2",
+    "groupSlug": "since-blue-require",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "premium",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Softshell",
+    "price": 90.99,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 1,
+      "S": 13,
+      "M": 15,
+      "L": 17,
+      "XL": 12,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/35113910/pexels-photo-35113910.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30109638/pexels-photo-30109638.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7394602/pexels-photo-7394602.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "Essential white jacket from COVE. Softshell fabric with slim silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Softshell",
+      "materialBlend": "Cotton blend",
+      "gsm": 536,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "outdoor",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "layering",
+        "outdoor",
+        "travel"
+      ],
+      "pattern": "paneled",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "cropped",
+      "bodyShapes": [
+        "slim",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The white adds subtle character.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "minimal",
+      "white",
+      "clean",
+      "timeless",
+      "travel",
+      "cold-weather",
+      "jacket",
+      "layering",
+      "white-core",
+      "essential",
+      "softshell",
+      "slim",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0003",
+    "groupId": "PG_SKIRT_COVE_3",
+    "groupSlug": "wait-offer-begin",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "skirt_women_regular",
+    "tier": "basic",
+    "type": "skirt",
+    "gender": "female",
+    "fit": "a-line",
+    "material": "Cotton Blend",
+    "price": 54.65,
+    "colorName": "grey heather",
+    "hex": "#8C8C8C",
+    "sizes": {
+      "XS": 3,
+      "S": 14,
+      "M": 19,
+      "L": 18,
+      "XL": 10,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051824/pexels-photo-35051824.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/11665253/pexels-photo-11665253.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8436954/pexels-photo-8436954.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Skirt",
+    "description": "Clean Minimal Essential Timeless skirt in grey heather. Cotton Blend construction with a-line fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 217,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "skirt",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "office-casual",
+        "summer",
+        "daily wear"
+      ],
+      "pattern": "plaid",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "a-line",
+      "length": "mini",
+      "bodyShapes": [
+        "athletic",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on medium heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The grey heather adds subtle character.",
+    "fitNotes": "A-Line fit. True to size.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "summer",
+      "a-line",
+      "clean",
+      "timeless",
+      "all-season",
+      "grey heather",
+      "daily wear",
+      "essential",
+      "cotton blend",
+      "skirt"
+    ]
+  },
+  {
+    "variantId": "COVE-H-0004",
+    "groupId": "PG_HOODIE_COVE_4",
+    "groupSlug": "knowledge-almost",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "hoodie_unisex_regular",
+    "tier": "premium",
+    "type": "hoodie",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Heavyweight Cotton",
+    "price": 38.9,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 4,
+      "S": 13,
+      "M": 19,
+      "L": 10,
+      "XL": 7,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/6811257/pexels-photo-6811257.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8005514/pexels-photo-8005514.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8063396/pexels-photo-8063396.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Hoodie",
+    "description": "COVE hoodie featuring Heavyweight Cotton in white. Relaxed fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Heavyweight Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 411,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "hoodie",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "travel",
+        "street fashion",
+        "layering"
+      ],
+      "pattern": "tie-dye",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "regular",
+      "bodyShapes": [
+        "athletic",
+        "slim",
+        "broad-shoulder"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The white adds subtle character.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "medium",
+      "street fashion",
+      "minimal",
+      "white",
+      "clean",
+      "heavyweight cotton",
+      "timeless",
+      "travel",
+      "hoodie",
+      "relaxed",
+      "layering",
+      "white-core",
+      "essential",
+      "warm-weather"
+    ]
+  },
+  {
+    "variantId": "COVE-P-0005",
+    "groupId": "PG_PANTS_COVE_5",
+    "groupSlug": "better-discover",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "pants_unisex_regular",
+    "tier": "basic",
+    "type": "pants",
+    "gender": "female",
+    "fit": "tapered",
+    "material": "Cotton Blend",
+    "price": 58.0,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 3,
+      "S": 15,
+      "M": 13,
+      "L": 13,
+      "XL": 9,
+      "XXL": 2
+    },
+    "images": [
+      "https://images.pexels.com/photos/5836325/pexels-photo-5836325.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2884380/pexels-photo-2884380.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15047963/pexels-photo-15047963.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Pants",
+    "description": "Clean Minimal Essential Timeless pants in sand. Cotton Blend construction with tapered fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 324,
+      "stretchLevel": "low",
+      "thickness": "heavy",
+      "warmth": "warm-weather",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "pants",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "travel",
+        "daily wear",
+        "office-casual"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "tapered",
+      "length": "cropped",
+      "bodyShapes": [
+        "athletic",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Sand provides clean minimal essential timeless foundation.",
+    "fitNotes": "Tapered fit. True to size.",
+    "tags": [
+      "sand",
+      "office-casual",
+      "minimal",
+      "clean",
+      "timeless",
+      "tapered",
+      "travel",
+      "daily wear",
+      "heavy",
+      "essential",
+      "warm-weather",
+      "cotton blend",
+      "pants"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0006",
+    "groupId": "PG_SHORTS_COVE_6",
+    "groupSlug": "mouth-play",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "shorts_unisex_regular",
+    "tier": "basic",
+    "type": "shorts",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Cotton Blend",
+    "price": 49.77,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 0,
+      "S": 9,
+      "M": 18,
+      "L": 15,
+      "XL": 12,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/13005348/pexels-photo-13005348.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8734264/pexels-photo-8734264.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8734406/pexels-photo-8734406.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Shorts",
+    "description": "Clean Minimal Essential Timeless shorts in sand. Cotton Blend construction with regular fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 187,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "resort",
+      "styleTags": [
+        "shorts",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "beach",
+        "travel",
+        "gym"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "at-knee",
+      "bodyShapes": [
+        "broad-shoulder",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile sand works across seasons.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "sand",
+      "minimal",
+      "regular",
+      "clean",
+      "timeless",
+      "light",
+      "beach",
+      "travel",
+      "gym",
+      "shorts",
+      "essential",
+      "warm-weather",
+      "cotton blend"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0007",
+    "groupId": "PG_SKIRT_COVE_7",
+    "groupSlug": "option-decide-sense",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "skirt_women_regular",
+    "tier": "premium",
+    "type": "skirt",
+    "gender": "female",
+    "fit": "fitted",
+    "material": "Silk",
+    "price": 60.49,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 0,
+      "S": 11,
+      "M": 14,
+      "L": 16,
+      "XL": 13,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051824/pexels-photo-35051824.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17243573/pexels-photo-17243573.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17244623/pexels-photo-17244623.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Skirt",
+    "description": "White skirt crafted from premium Silk with a fitted fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Silk",
+      "materialBlend": "Cotton blend",
+      "gsm": 177,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "skirt",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "daily wear",
+        "summer",
+        "office-casual"
+      ],
+      "pattern": "print",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "fitted",
+      "length": "mini",
+      "bodyShapes": [
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on medium heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The white adds subtle character.",
+    "fitNotes": "Fitted fit. True to size.",
+    "tags": [
+      "skirt",
+      "office-casual",
+      "silk",
+      "minimal",
+      "summer",
+      "white",
+      "clean",
+      "timeless",
+      "light",
+      "daily wear",
+      "white-core",
+      "essential",
+      "warm-weather",
+      "fitted"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0008",
+    "groupId": "PG_JACKET_COVE_8",
+    "groupSlug": "science-offer-kind",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "casual",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "oversized",
+    "material": "Denim",
+    "price": 119.49,
+    "colorName": "grey heather",
+    "hex": "#8C8C8C",
+    "sizes": {
+      "XS": 0,
+      "S": 9,
+      "M": 14,
+      "L": 11,
+      "XL": 7,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/4132651/pexels-photo-4132651.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1644948/pexels-photo-1644948.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9984580/pexels-photo-9984580.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "COVE jacket featuring Denim in grey heather. Oversized fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Denim",
+      "materialBlend": "98% cotton / 2% elastane",
+      "gsm": 417,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "low"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "outdoor",
+        "winter",
+        "travel"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "oversized",
+      "length": "longline",
+      "bodyShapes": [
+        "slim",
+        "broad-shoulder",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile grey heather works across seasons.",
+    "fitNotes": "Relaxed oversized silhouette. Order usual size for intended drape, or size down for fitted oversized.",
+    "tags": [
+      "minimal",
+      "oversized",
+      "winter",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "grey heather",
+      "heavy",
+      "denim",
+      "jacket",
+      "essential",
+      "travel",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0009",
+    "groupId": "PG_JACKET_COVE_9",
+    "groupSlug": "list-perform-fall",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "casual",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Denim",
+    "price": 86.39,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 3,
+      "S": 9,
+      "M": 13,
+      "L": 18,
+      "XL": 9,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/5836338/pexels-photo-5836338.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5119931/pexels-photo-5119931.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6073791/pexels-photo-6073791.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "Sand jacket crafted from premium Denim with a slim fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Denim",
+      "materialBlend": "98% cotton / 2% elastane",
+      "gsm": 370,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "winter",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "outdoor",
+        "winter",
+        "layering"
+      ],
+      "pattern": "paneled",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "cropped",
+      "bodyShapes": [
+        "stocky",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The sand adds subtle character.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "sand",
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "very-heavy",
+      "denim",
+      "jacket",
+      "layering",
+      "essential",
+      "slim",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-P-0010",
+    "groupId": "PG_PANTS_COVE_10",
+    "groupSlug": "true-according-song",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "pants_unisex_regular",
+    "tier": "basic",
+    "type": "pants",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Poly Cotton",
+    "price": 64.97,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 2,
+      "S": 11,
+      "M": 17,
+      "L": 13,
+      "XL": 10,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/15987195/pexels-photo-15987195.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7202777/pexels-photo-7202777.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6786894/pexels-photo-6786894.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Pants",
+    "description": "Contemporary pants in white, featuring Poly Cotton construction. Slim fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Poly Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 312,
+      "stretchLevel": "high",
+      "thickness": "heavy",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "pants",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "office-casual",
+        "daily wear",
+        "travel"
+      ],
+      "pattern": "pinstripe",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "full-length",
+      "bodyShapes": [
+        "slim",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. White provides clean minimal essential timeless foundation.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "office-casual",
+      "minimal",
+      "white",
+      "clean",
+      "essential",
+      "timeless",
+      "all-season",
+      "daily wear",
+      "heavy",
+      "white-core",
+      "poly cotton",
+      "travel",
+      "slim",
+      "pants"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0011",
+    "groupId": "PG_SKIRT_COVE_11",
+    "groupSlug": "collection-save",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "skirt_women_regular",
+    "tier": "casual",
+    "type": "skirt",
+    "gender": "female",
+    "fit": "wrap",
+    "material": "Cotton",
+    "price": 36.54,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 3,
+      "S": 10,
+      "M": 12,
+      "L": 14,
+      "XL": 11,
+      "XXL": 8
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051824/pexels-photo-35051824.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17243573/pexels-photo-17243573.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17244623/pexels-photo-17244623.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Skirt",
+    "description": "COVE skirt featuring Cotton in white. Wrap fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 235,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "skirt",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "office-casual",
+        "daily wear",
+        "summer"
+      ],
+      "pattern": "print",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "wrap",
+      "length": "maxi",
+      "bodyShapes": [
+        "slim",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on medium heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile white works across seasons.",
+    "fitNotes": "Wrap fit. True to size.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "summer",
+      "white",
+      "clean",
+      "timeless",
+      "wrap",
+      "daily wear",
+      "white-core",
+      "essential",
+      "warm-weather",
+      "cotton",
+      "skirt"
+    ]
+  },
+  {
+    "variantId": "COVE-H-0012",
+    "groupId": "PG_HOODIE_COVE_12",
+    "groupSlug": "grow-fall-clearly",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "hoodie_unisex_regular",
+    "tier": "casual",
+    "type": "hoodie",
+    "gender": "female",
+    "fit": "regular",
+    "material": "French Terry",
+    "price": 62.3,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 0,
+      "S": 15,
+      "M": 15,
+      "L": 13,
+      "XL": 13,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/17664142/pexels-photo-17664142.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13005348/pexels-photo-13005348.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10384461/pexels-photo-10384461.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Hoodie",
+    "description": "Sand hoodie crafted from premium French Terry with a regular fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "French Terry",
+      "materialBlend": "Cotton blend",
+      "gsm": 404,
+      "stretchLevel": "high",
+      "thickness": "heavy",
+      "warmth": "warm-weather",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "hoodie",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "winter",
+        "daily wear",
+        "travel"
+      ],
+      "pattern": "tie-dye",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "longline",
+      "bodyShapes": [
+        "athletic",
+        "broad-shoulder",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Sand is timelessly versatile.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "sand",
+      "minimal",
+      "winter",
+      "regular",
+      "clean",
+      "timeless",
+      "travel",
+      "hoodie",
+      "french terry",
+      "heavy",
+      "daily wear",
+      "essential",
+      "warm-weather"
+    ]
+  },
+  {
+    "variantId": "COVE-P-0013",
+    "groupId": "PG_PANTS_COVE_13",
+    "groupSlug": "source-great-blue",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "pants_unisex_regular",
+    "tier": "basic",
+    "type": "pants",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Cotton Blend",
+    "price": 66.49,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 2,
+      "S": 13,
+      "M": 18,
+      "L": 18,
+      "XL": 7,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/15987195/pexels-photo-15987195.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3756030/pexels-photo-3756030.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6786894/pexels-photo-6786894.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Pants",
+    "description": "COVE pants featuring Cotton Blend in black. Slim fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 217,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "cold-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "pants",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "office-casual",
+        "daily wear",
+        "travel"
+      ],
+      "pattern": "pinstripe",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "regular",
+      "bodyShapes": [
+        "stocky",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Black is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "black-core",
+      "slim",
+      "black",
+      "daily wear",
+      "essential",
+      "travel",
+      "cotton blend",
+      "pants"
+    ]
+  },
+  {
+    "variantId": "COVE-A-0014",
+    "groupId": "PG_ACCESSORIES_COVE_14",
+    "groupSlug": "husband-bill-her",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "onesize",
+    "tier": "basic",
+    "type": "accessories",
+    "gender": "female",
+    "fit": "standard",
+    "material": "Poly Blend",
+    "price": 28.2,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 1,
+      "S": 14,
+      "M": 18,
+      "L": 12,
+      "XL": 10,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/35116555/pexels-photo-35116555.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31129837/pexels-photo-31129837.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35075897/pexels-photo-35075897.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Accessories",
+    "description": "COVE accessories featuring Poly Blend in black. Standard fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 237,
+      "stretchLevel": "high",
+      "thickness": "light",
+      "warmth": "cold-weather",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "accessory",
+      "styleTags": [
+        "accessories",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "style accent",
+        "winter",
+        "daily wear"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "standard",
+      "length": "standard",
+      "bodyShapes": [
+        "broad-shoulder",
+        "athletic",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile black works across seasons.",
+    "fitNotes": "Standard fit. True to size.",
+    "tags": [
+      "style accent",
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "light",
+      "cold-weather",
+      "poly blend",
+      "black-core",
+      "black",
+      "standard",
+      "daily wear",
+      "essential",
+      "accessories"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0015",
+    "groupId": "PG_SWEATER_COVE_15",
+    "groupSlug": "guy-pm-everything",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweater_unisex_regular",
+    "tier": "basic",
+    "type": "sweater",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Poly Blend",
+    "price": 72.5,
+    "colorName": "navy",
+    "hex": "#000080",
+    "sizes": {
+      "XS": 1,
+      "S": 8,
+      "M": 12,
+      "L": 13,
+      "XL": 13,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/2802107/pexels-photo-2802107.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5467054/pexels-photo-5467054.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1927311/pexels-photo-1927311.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweater",
+    "description": "Contemporary sweater in navy, featuring Poly Blend construction. Regular fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 332,
+      "stretchLevel": "high",
+      "thickness": "heavy",
+      "warmth": "winter",
+      "breathability": "low",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "sweater",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "office-casual",
+        "winter",
+        "layering"
+      ],
+      "pattern": "cable knit",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "cropped",
+      "bodyShapes": [
+        "athletic",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash or dry clean",
+      "dryer": "no",
+      "iron": "low or steam",
+      "careNotes": "Wash inside out. Hand wash or dry clean. Do not bleach. Air dry recommended. Iron on low or steam heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile navy works across seasons.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "office-casual",
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "poly blend",
+      "layering",
+      "heavy",
+      "navy",
+      "essential",
+      "regular",
+      "sweater"
+    ]
+  },
+  {
+    "variantId": "COVE-T-0016",
+    "groupId": "PG_TEE_COVE_16",
+    "groupSlug": "animal-show-machine",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "tee_unisex_regular",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Cotton Blend",
+    "price": 28.99,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 4,
+      "S": 15,
+      "M": 14,
+      "L": 17,
+      "XL": 13,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/3578586/pexels-photo-3578586.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/12732925/pexels-photo-12732925.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4593422/pexels-photo-4593422.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Tee",
+    "description": "COVE tee featuring Cotton Blend in sand. Relaxed fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 168,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "athleisure",
+      "styleTags": [
+        "tee",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "summer",
+        "daily wear",
+        "gym"
+      ],
+      "pattern": "tie-dye",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "cropped",
+      "bodyShapes": [
+        "athletic",
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Sand is timelessly versatile.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "sand",
+      "minimal",
+      "summer",
+      "tee",
+      "clean",
+      "timeless",
+      "light",
+      "all-season",
+      "gym",
+      "relaxed",
+      "daily wear",
+      "essential",
+      "cotton blend"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0017",
+    "groupId": "PG_JACKET_COVE_17",
+    "groupSlug": "capital-win-human",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "premium",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Softshell",
+    "price": 94.61,
+    "colorName": "deep navy",
+    "hex": "#00008B",
+    "sizes": {
+      "XS": 2,
+      "S": 15,
+      "M": 18,
+      "L": 10,
+      "XL": 9,
+      "XXL": 8
+    },
+    "images": [
+      "https://images.pexels.com/photos/1706776/pexels-photo-1706776.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13412471/pexels-photo-13412471.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/15577053/pexels-photo-15577053.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "Clean Minimal Essential Timeless jacket in deep navy. Softshell construction with slim fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Softshell",
+      "materialBlend": "Cotton blend",
+      "gsm": 369,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "outdoor",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "winter",
+        "travel",
+        "outdoor"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "regular",
+      "bodyShapes": [
+        "athletic",
+        "stocky",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Deep Navy is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "minimal",
+      "winter",
+      "deep navy",
+      "clean",
+      "timeless",
+      "travel",
+      "cold-weather",
+      "jacket",
+      "essential",
+      "softshell",
+      "slim",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-D-0018",
+    "groupId": "PG_DRESS_COVE_18",
+    "groupSlug": "old-finally",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "dress_women_regular",
+    "tier": "casual",
+    "type": "dress",
+    "gender": "female",
+    "fit": "wrap",
+    "material": "Cotton Blend",
+    "price": 65.21,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 1,
+      "S": 8,
+      "M": 18,
+      "L": 10,
+      "XL": 7,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/35116555/pexels-photo-35116555.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35050620/pexels-photo-35050620.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/987627/pexels-photo-987627.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Dress",
+    "description": "Contemporary dress in black, featuring Cotton Blend construction. Wrap fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 240,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "dress",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "summer",
+        "evening",
+        "events"
+      ],
+      "pattern": "abstract",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "wrap",
+      "length": "maxi",
+      "bodyShapes": [
+        "stocky",
+        "broad-shoulder",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Black is timelessly versatile.",
+    "fitNotes": "Wrap fit. True to size.",
+    "tags": [
+      "medium",
+      "minimal",
+      "summer",
+      "clean",
+      "timeless",
+      "events",
+      "all-season",
+      "wrap",
+      "black-core",
+      "evening",
+      "black",
+      "essential",
+      "dress",
+      "cotton blend"
+    ]
+  },
+  {
+    "variantId": "COVE-D-0019",
+    "groupId": "PG_DRESS_COVE_19",
+    "groupSlug": "production-present",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "dress_women_regular",
+    "tier": "basic",
+    "type": "dress",
+    "gender": "female",
+    "fit": "fitted",
+    "material": "Jersey Knit",
+    "price": 78.27,
+    "colorName": "grey heather",
+    "hex": "#8C8C8C",
+    "sizes": {
+      "XS": 0,
+      "S": 11,
+      "M": 15,
+      "L": 10,
+      "XL": 8,
+      "XXL": 3
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051812/pexels-photo-35051812.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8452053/pexels-photo-8452053.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18783348/pexels-photo-18783348.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Dress",
+    "description": "Grey Heather dress crafted from premium Jersey Knit with a fitted fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Jersey Knit",
+      "materialBlend": "Cotton blend",
+      "gsm": 204,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "dress",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "summer",
+        "daily wear",
+        "evening"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "fitted",
+      "length": "maxi",
+      "bodyShapes": [
+        "stocky",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The grey heather adds subtle character.",
+    "fitNotes": "Fitted fit. True to size.",
+    "tags": [
+      "medium",
+      "minimal",
+      "summer",
+      "clean",
+      "timeless",
+      "jersey knit",
+      "all-season",
+      "evening",
+      "grey heather",
+      "daily wear",
+      "essential",
+      "dress",
+      "fitted"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0020",
+    "groupId": "PG_SWEATSHIRT_COVE_20",
+    "groupSlug": "training-high",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweatshirt_unisex_regular",
+    "tier": "casual",
+    "type": "sweatshirt",
+    "gender": "female",
+    "fit": "oversized",
+    "material": "Cotton Fleece",
+    "price": 48.97,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 4,
+      "S": 8,
+      "M": 17,
+      "L": 18,
+      "XL": 12,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/5202530/pexels-photo-5202530.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7148405/pexels-photo-7148405.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31869475/pexels-photo-31869475.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweatshirt",
+    "description": "COVE sweatshirt featuring Cotton Fleece in sand. Oversized fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Cotton Fleece",
+      "materialBlend": "Cotton blend",
+      "gsm": 327,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "sweatshirt",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "layering",
+        "winter",
+        "daily wear"
+      ],
+      "pattern": "color-block",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "oversized",
+      "length": "cropped",
+      "bodyShapes": [
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The sand adds subtle character.",
+    "fitNotes": "Relaxed oversized silhouette. Order usual size for intended drape, or size down for fitted oversized.",
+    "tags": [
+      "medium",
+      "sand",
+      "cotton fleece",
+      "minimal",
+      "oversized",
+      "winter",
+      "clean",
+      "timeless",
+      "all-season",
+      "daily wear",
+      "layering",
+      "sweatshirt",
+      "essential"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0021",
+    "groupId": "PG_SHORTS_COVE_21",
+    "groupSlug": "dark-sea-available",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "shorts_unisex_regular",
+    "tier": "basic",
+    "type": "shorts",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Poly Cotton",
+    "price": 28.69,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 1,
+      "S": 15,
+      "M": 18,
+      "L": 15,
+      "XL": 6,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/8433464/pexels-photo-8433464.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/25560152/pexels-photo-25560152.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4556921/pexels-photo-4556921.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Shorts",
+    "description": "Essential black shorts from COVE. Poly Cotton fabric with slim silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Poly Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 226,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "resort",
+      "styleTags": [
+        "shorts",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "gym",
+        "travel",
+        "beach"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "above-knee",
+      "bodyShapes": [
+        "stocky",
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Black is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "minimal",
+      "clean",
+      "essential",
+      "timeless",
+      "travel",
+      "beach",
+      "black-core",
+      "shorts",
+      "gym",
+      "black",
+      "poly cotton",
+      "warm-weather",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0022",
+    "groupId": "PG_SHORTS_COVE_22",
+    "groupSlug": "recently-drive",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "shorts_unisex_regular",
+    "tier": "basic",
+    "type": "shorts",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Poly Cotton",
+    "price": 36.91,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 5,
+      "S": 11,
+      "M": 16,
+      "L": 15,
+      "XL": 13,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/13005348/pexels-photo-13005348.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8734264/pexels-photo-8734264.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8734406/pexels-photo-8734406.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Shorts",
+    "description": "Contemporary shorts in sand, featuring Poly Cotton construction. Slim fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Poly Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 292,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "shorts",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "travel",
+        "beach",
+        "summer"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "at-knee",
+      "bodyShapes": [
+        "broad-shoulder",
+        "slim",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Sand is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "sand",
+      "minimal",
+      "summer",
+      "clean",
+      "essential",
+      "timeless",
+      "travel",
+      "beach",
+      "shorts",
+      "poly cotton",
+      "warm-weather",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0023",
+    "groupId": "PG_SWEATER_COVE_23",
+    "groupSlug": "figure-base-top",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweater_unisex_regular",
+    "tier": "casual",
+    "type": "sweater",
+    "gender": "female",
+    "fit": "oversized",
+    "material": "Acrylic Blend",
+    "price": 60.88,
+    "colorName": "forest green",
+    "hex": "#228B22",
+    "sizes": {
+      "XS": 1,
+      "S": 13,
+      "M": 14,
+      "L": 14,
+      "XL": 6,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/2837577/pexels-photo-2837577.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5966900/pexels-photo-5966900.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2837571/pexels-photo-2837571.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweater",
+    "description": "Contemporary sweater in forest green, featuring Acrylic Blend construction. Oversized fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Acrylic Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 328,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "cold-weather",
+      "breathability": "low",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "sweater",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "office-casual",
+        "winter",
+        "layering"
+      ],
+      "pattern": "fair isle",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "oversized",
+      "length": "regular",
+      "bodyShapes": [
+        "stocky",
+        "broad-shoulder",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash or dry clean",
+      "dryer": "no",
+      "iron": "low or steam",
+      "careNotes": "Wash inside out. Hand wash or dry clean. Do not bleach. Air dry recommended. Iron on low or steam heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Forest Green provides clean minimal essential timeless foundation.",
+    "fitNotes": "Relaxed oversized silhouette. Order usual size for intended drape, or size down for fitted oversized.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "oversized",
+      "winter",
+      "forest green",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "layering",
+      "essential",
+      "sweater",
+      "acrylic blend"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0024",
+    "groupId": "PG_SWEATER_COVE_24",
+    "groupSlug": "trial-blood-husband",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweater_unisex_regular",
+    "tier": "basic",
+    "type": "sweater",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Poly Blend",
+    "price": 55.22,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 4,
+      "S": 8,
+      "M": 14,
+      "L": 12,
+      "XL": 10,
+      "XXL": 2
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051824/pexels-photo-35051824.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3746214/pexels-photo-3746214.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/31166535/pexels-photo-31166535.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweater",
+    "description": "Clean Minimal Essential Timeless sweater in black. Poly Blend construction with regular fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 282,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "very-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "sweater",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "layering",
+        "office-casual",
+        "winter"
+      ],
+      "pattern": "fair isle",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "cropped",
+      "bodyShapes": [
+        "broad-shoulder",
+        "slim",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash or dry clean",
+      "dryer": "no",
+      "iron": "low or steam",
+      "careNotes": "Wash inside out. Hand wash or dry clean. Do not bleach. Air dry recommended. Iron on low or steam heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The black adds subtle character.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "poly blend",
+      "black-core",
+      "black",
+      "layering",
+      "essential",
+      "regular",
+      "sweater"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0025",
+    "groupId": "PG_JACKET_COVE_25",
+    "groupSlug": "long-prove-they-his",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "basic",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Cotton Blend",
+    "price": 100.77,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 1,
+      "S": 8,
+      "M": 18,
+      "L": 17,
+      "XL": 13,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/5836338/pexels-photo-5836338.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5119931/pexels-photo-5119931.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6073791/pexels-photo-6073791.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "COVE jacket featuring Cotton Blend in sand. Slim fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 463,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "low"
+    },
+    "style": {
+      "dressCode": "outdoor",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "winter",
+        "travel",
+        "outdoor"
+      ],
+      "pattern": "quilted",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "regular",
+      "bodyShapes": [
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The sand adds subtle character.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "sand",
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "very-heavy",
+      "cold-weather",
+      "slim",
+      "jacket",
+      "essential",
+      "travel",
+      "cotton blend",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-H-0026",
+    "groupId": "PG_HOODIE_COVE_26",
+    "groupSlug": "hospital-hear",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "hoodie_unisex_regular",
+    "tier": "basic",
+    "type": "hoodie",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Cotton Poly Blend",
+    "price": 59.06,
+    "colorName": "navy",
+    "hex": "#000080",
+    "sizes": {
+      "XS": 3,
+      "S": 9,
+      "M": 19,
+      "L": 14,
+      "XL": 12,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/33934068/pexels-photo-33934068.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/1457983/pexels-photo-1457983.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/3409713/pexels-photo-3409713.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Hoodie",
+    "description": "Essential navy hoodie from COVE. Cotton Poly Blend fabric with slim silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Cotton Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 367,
+      "stretchLevel": "high",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "low",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "hoodie",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "travel",
+        "street fashion",
+        "layering"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "regular",
+      "bodyShapes": [
+        "athletic",
+        "slim",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Navy provides clean minimal essential timeless foundation.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "street fashion",
+      "minimal",
+      "cotton poly blend",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "hoodie",
+      "layering",
+      "heavy",
+      "navy",
+      "essential",
+      "travel",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0027",
+    "groupId": "PG_SWEATER_COVE_27",
+    "groupSlug": "religious-example",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweater_unisex_regular",
+    "tier": "premium",
+    "type": "sweater",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Cashmere",
+    "price": 46.4,
+    "colorName": "deep navy",
+    "hex": "#00008B",
+    "sizes": {
+      "XS": 3,
+      "S": 13,
+      "M": 18,
+      "L": 15,
+      "XL": 11,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/4171757/pexels-photo-4171757.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/33163519/pexels-photo-33163519.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19025841/pexels-photo-19025841.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweater",
+    "description": "Clean Minimal Essential Timeless sweater in deep navy. Cashmere construction with regular fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Cashmere",
+      "materialBlend": "100% cashmere",
+      "gsm": 360,
+      "stretchLevel": "high",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "low",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "sweater",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "office-casual",
+        "layering",
+        "winter"
+      ],
+      "pattern": "fair isle",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "cropped",
+      "bodyShapes": [
+        "broad-shoulder",
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash or dry clean",
+      "dryer": "no",
+      "iron": "low or steam",
+      "careNotes": "Wash inside out. Hand wash or dry clean. Do not bleach. Air dry recommended. Iron on low or steam heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The deep navy adds subtle character.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "office-casual",
+      "minimal",
+      "winter",
+      "deep navy",
+      "clean",
+      "cashmere",
+      "timeless",
+      "cold-weather",
+      "layering",
+      "heavy",
+      "essential",
+      "regular",
+      "sweater"
+    ]
+  },
+  {
+    "variantId": "COVE-T-0028",
+    "groupId": "PG_TEE_COVE_28",
+    "groupSlug": "write-result-raise",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "tee_unisex_regular",
+    "tier": "basic",
+    "type": "tee",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Cotton Poly",
+    "price": 38.19,
+    "colorName": "burgundy",
+    "hex": "#58151C",
+    "sizes": {
+      "XS": 0,
+      "S": 11,
+      "M": 16,
+      "L": 18,
+      "XL": 8,
+      "XXL": 4
+    },
+    "images": [
+      "https://images.pexels.com/photos/34862015/pexels-photo-34862015.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35075695/pexels-photo-35075695.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30749329/pexels-photo-30749329.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Tee",
+    "description": "Clean Minimal Essential Timeless tee in burgundy. Cotton Poly construction with relaxed fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Cotton Poly",
+      "materialBlend": "Cotton blend",
+      "gsm": 201,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "tee",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "daily wear",
+        "layering",
+        "summer"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "longline",
+      "bodyShapes": [
+        "slim",
+        "broad-shoulder",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Burgundy is timelessly versatile.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "cotton poly",
+      "medium",
+      "minimal",
+      "summer",
+      "tee",
+      "clean",
+      "timeless",
+      "burgundy",
+      "relaxed",
+      "daily wear",
+      "layering",
+      "essential",
+      "warm-weather"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0029",
+    "groupId": "PG_SKIRT_COVE_29",
+    "groupSlug": "politics-prove",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "skirt_women_regular",
+    "tier": "premium",
+    "type": "skirt",
+    "gender": "female",
+    "fit": "fitted",
+    "material": "Linen",
+    "price": 56.31,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 3,
+      "S": 15,
+      "M": 19,
+      "L": 13,
+      "XL": 13,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051824/pexels-photo-35051824.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17243573/pexels-photo-17243573.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17244623/pexels-photo-17244623.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Skirt",
+    "description": "Essential white skirt from COVE. Linen fabric with fitted silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Linen",
+      "materialBlend": "Cotton blend",
+      "gsm": 211,
+      "stretchLevel": "high",
+      "thickness": "light",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "skirt",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "daily wear",
+        "office-casual",
+        "summer"
+      ],
+      "pattern": "plaid",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "fitted",
+      "length": "maxi",
+      "bodyShapes": [
+        "athletic",
+        "broad-shoulder"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. White provides clean minimal essential timeless foundation.",
+    "fitNotes": "Fitted fit. True to size.",
+    "tags": [
+      "skirt",
+      "office-casual",
+      "minimal",
+      "summer",
+      "white",
+      "clean",
+      "timeless",
+      "light",
+      "all-season",
+      "daily wear",
+      "white-core",
+      "linen",
+      "essential",
+      "fitted"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0030",
+    "groupId": "PG_SWEATSHIRT_COVE_30",
+    "groupSlug": "none-shoulder",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweatshirt_unisex_regular",
+    "tier": "casual",
+    "type": "sweatshirt",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Cotton Fleece",
+    "price": 67.04,
+    "colorName": "grey heather",
+    "hex": "#8C8C8C",
+    "sizes": {
+      "XS": 5,
+      "S": 11,
+      "M": 18,
+      "L": 13,
+      "XL": 12,
+      "XXL": 2
+    },
+    "images": [
+      "https://images.pexels.com/photos/10481315/pexels-photo-10481315.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6311647/pexels-photo-6311647.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6995866/pexels-photo-6995866.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweatshirt",
+    "description": "Essential grey heather sweatshirt from COVE. Cotton Fleece fabric with regular silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Cotton Fleece",
+      "materialBlend": "Cotton blend",
+      "gsm": 389,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "low",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "sweatshirt",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "winter",
+        "layering",
+        "daily wear"
+      ],
+      "pattern": "heather",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "cropped",
+      "bodyShapes": [
+        "stocky",
+        "athletic",
+        "broad-shoulder"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile grey heather works across seasons.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "cotton fleece",
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "grey heather",
+      "layering",
+      "heavy",
+      "daily wear",
+      "sweatshirt",
+      "regular",
+      "essential"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0031",
+    "groupId": "PG_SHORTS_COVE_31",
+    "groupSlug": "common-maintain",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "shorts_unisex_regular",
+    "tier": "premium",
+    "type": "shorts",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Premium Cotton",
+    "price": 52.73,
+    "colorName": "burgundy",
+    "hex": "#58151C",
+    "sizes": {
+      "XS": 2,
+      "S": 13,
+      "M": 18,
+      "L": 11,
+      "XL": 11,
+      "XXL": 8
+    },
+    "images": [
+      "https://images.pexels.com/photos/6094375/pexels-photo-6094375.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18749369/pexels-photo-18749369.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18749363/pexels-photo-18749363.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Shorts",
+    "description": "Burgundy shorts crafted from premium Premium Cotton with a slim fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Premium Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 263,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "shorts",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "travel",
+        "summer",
+        "beach"
+      ],
+      "pattern": "check",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "above-knee",
+      "bodyShapes": [
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Burgundy is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "minimal",
+      "summer",
+      "premium cotton",
+      "clean",
+      "timeless",
+      "burgundy",
+      "travel",
+      "beach",
+      "shorts",
+      "essential",
+      "warm-weather",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0032",
+    "groupId": "PG_SWEATER_COVE_32",
+    "groupSlug": "expect-wish-push",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweater_unisex_regular",
+    "tier": "casual",
+    "type": "sweater",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Acrylic Blend",
+    "price": 66.61,
+    "colorName": "deep navy",
+    "hex": "#00008B",
+    "sizes": {
+      "XS": 3,
+      "S": 10,
+      "M": 15,
+      "L": 18,
+      "XL": 12,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/4171757/pexels-photo-4171757.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/33163519/pexels-photo-33163519.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19025841/pexels-photo-19025841.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweater",
+    "description": "Essential deep navy sweater from COVE. Acrylic Blend fabric with slim silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Acrylic Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 310,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "sweater",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "layering",
+        "winter",
+        "office-casual"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "cropped",
+      "bodyShapes": [
+        "stocky",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash or dry clean",
+      "dryer": "no",
+      "iron": "low or steam",
+      "careNotes": "Wash inside out. Hand wash or dry clean. Do not bleach. Air dry recommended. Iron on low or steam heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Deep Navy provides clean minimal essential timeless foundation.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "winter",
+      "deep navy",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "layering",
+      "essential",
+      "sweater",
+      "acrylic blend",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0033",
+    "groupId": "PG_SWEATSHIRT_COVE_33",
+    "groupSlug": "onto-discuss-reveal",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweatshirt_unisex_regular",
+    "tier": "basic",
+    "type": "sweatshirt",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Fleece",
+    "price": 61.69,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 5,
+      "S": 14,
+      "M": 16,
+      "L": 17,
+      "XL": 10,
+      "XXL": 3
+    },
+    "images": [
+      "https://images.pexels.com/photos/4620623/pexels-photo-4620623.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7193538/pexels-photo-7193538.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7193462/pexels-photo-7193462.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweatshirt",
+    "description": "COVE sweatshirt featuring Fleece in white. Relaxed fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Fleece",
+      "materialBlend": "Cotton blend",
+      "gsm": 310,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "sweatshirt",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "layering",
+        "daily wear",
+        "winter"
+      ],
+      "pattern": "heather",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "cropped",
+      "bodyShapes": [
+        "slim",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. White provides clean minimal essential timeless foundation.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "medium",
+      "minimal",
+      "winter",
+      "fleece",
+      "white",
+      "clean",
+      "timeless",
+      "all-season",
+      "relaxed",
+      "layering",
+      "daily wear",
+      "white-core",
+      "sweatshirt",
+      "essential"
+    ]
+  },
+  {
+    "variantId": "COVE-D-0034",
+    "groupId": "PG_DRESS_COVE_34",
+    "groupSlug": "threat-special",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "dress_women_regular",
+    "tier": "casual",
+    "type": "dress",
+    "gender": "female",
+    "fit": "wrap",
+    "material": "Cotton",
+    "price": 85.12,
+    "colorName": "sand",
+    "hex": "#E4D1B9",
+    "sizes": {
+      "XS": 5,
+      "S": 8,
+      "M": 16,
+      "L": 17,
+      "XL": 6,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/35117955/pexels-photo-35117955.png?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35117947/pexels-photo-35117947.png?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/13727962/pexels-photo-13727962.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Dress",
+    "description": "Contemporary dress in sand, featuring Cotton construction. Wrap fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Cotton",
+      "materialBlend": "Cotton blend",
+      "gsm": 225,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "bohemian",
+      "styleTags": [
+        "dress",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "events",
+        "evening",
+        "daily wear"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "wrap",
+      "length": "midi",
+      "bodyShapes": [
+        "athletic",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "Cold wash or hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The sand adds subtle character.",
+    "fitNotes": "Wrap fit. True to size.",
+    "tags": [
+      "medium",
+      "sand",
+      "minimal",
+      "dress",
+      "clean",
+      "timeless",
+      "events",
+      "wrap",
+      "all-season",
+      "evening",
+      "daily wear",
+      "essential",
+      "cotton"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0035",
+    "groupId": "PG_SHORTS_COVE_35",
+    "groupSlug": "arrive-drop-term",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "shorts_unisex_regular",
+    "tier": "premium",
+    "type": "shorts",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Linen",
+    "price": 51.16,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 0,
+      "S": 14,
+      "M": 12,
+      "L": 14,
+      "XL": 14,
+      "XXL": 2
+    },
+    "images": [
+      "https://images.pexels.com/photos/14519181/pexels-photo-14519181.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8420955/pexels-photo-8420955.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/10217697/pexels-photo-10217697.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Shorts",
+    "description": "Clean Minimal Essential Timeless shorts in white. Linen construction with slim fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Linen",
+      "materialBlend": "Cotton blend",
+      "gsm": 202,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "summer",
+      "breathability": "medium-high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "athletic",
+      "styleTags": [
+        "shorts",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "travel",
+        "beach",
+        "gym"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "bermuda",
+      "bodyShapes": [
+        "slim",
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. White provides clean minimal essential timeless foundation.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "minimal",
+      "summer",
+      "white",
+      "clean",
+      "essential",
+      "timeless",
+      "light",
+      "beach",
+      "gym",
+      "shorts",
+      "white-core",
+      "linen",
+      "travel",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0036",
+    "groupId": "PG_SKIRT_COVE_36",
+    "groupSlug": "support-four",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "skirt_women_regular",
+    "tier": "casual",
+    "type": "skirt",
+    "gender": "female",
+    "fit": "wrap",
+    "material": "Twill",
+    "price": 67.91,
+    "colorName": "navy",
+    "hex": "#000080",
+    "sizes": {
+      "XS": 3,
+      "S": 9,
+      "M": 13,
+      "L": 13,
+      "XL": 14,
+      "XXL": 3
+    },
+    "images": [
+      "https://images.pexels.com/photos/18020714/pexels-photo-18020714.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/593754/pexels-photo-593754.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4690501/pexels-photo-4690501.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Skirt",
+    "description": "Navy skirt crafted from premium Twill with a wrap fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Twill",
+      "materialBlend": "Cotton blend",
+      "gsm": 177,
+      "stretchLevel": "high",
+      "thickness": "light",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "skirt",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "office-casual",
+        "daily wear",
+        "summer"
+      ],
+      "pattern": "plaid",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "wrap",
+      "length": "mini",
+      "bodyShapes": [
+        "broad-shoulder",
+        "slim",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Navy provides clean minimal essential timeless foundation.",
+    "fitNotes": "Wrap fit. True to size.",
+    "tags": [
+      "office-casual",
+      "minimal",
+      "twill",
+      "summer",
+      "clean",
+      "timeless",
+      "light",
+      "wrap",
+      "all-season",
+      "daily wear",
+      "navy",
+      "essential",
+      "skirt"
+    ]
+  },
+  {
+    "variantId": "COVE-D-0037",
+    "groupId": "PG_DRESS_COVE_37",
+    "groupSlug": "executive-attorney",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "dress_women_regular",
+    "tier": "casual",
+    "type": "dress",
+    "gender": "female",
+    "fit": "a-line",
+    "material": "Jersey",
+    "price": 87.92,
+    "colorName": "burgundy",
+    "hex": "#58151C",
+    "sizes": {
+      "XS": 3,
+      "S": 12,
+      "M": 15,
+      "L": 11,
+      "XL": 13,
+      "XXL": 2
+    },
+    "images": [
+      "https://images.pexels.com/photos/35075695/pexels-photo-35075695.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9942927/pexels-photo-9942927.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/14578261/pexels-photo-14578261.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Dress",
+    "description": "Essential burgundy dress from COVE. Jersey fabric with a-line silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Jersey",
+      "materialBlend": "Cotton blend",
+      "gsm": 275,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "dress",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "events",
+        "evening",
+        "daily wear"
+      ],
+      "pattern": "abstract",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "a-line",
+      "length": "maxi",
+      "bodyShapes": [
+        "stocky",
+        "broad-shoulder"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The burgundy adds subtle character.",
+    "fitNotes": "A-Line fit. True to size.",
+    "tags": [
+      "medium",
+      "minimal",
+      "a-line",
+      "clean",
+      "timeless",
+      "burgundy",
+      "events",
+      "all-season",
+      "evening",
+      "daily wear",
+      "essential",
+      "dress",
+      "jersey"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0038",
+    "groupId": "PG_JACKET_COVE_38",
+    "groupSlug": "white-yes-our-under",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "premium",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "oversized",
+    "material": "Leather",
+    "price": 119.61,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 5,
+      "S": 8,
+      "M": 14,
+      "L": 10,
+      "XL": 11,
+      "XXL": 8
+    },
+    "images": [
+      "https://images.pexels.com/photos/21939619/pexels-photo-21939619.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7585607/pexels-photo-7585607.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/27348978/pexels-photo-27348978.png?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "Contemporary jacket in black, featuring Leather construction. Oversized fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Leather",
+      "materialBlend": "Cotton blend",
+      "gsm": 551,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "winter",
+      "breathability": "low",
+      "softness": "low"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "outdoor",
+        "winter",
+        "travel"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "oversized",
+      "length": "cropped",
+      "bodyShapes": [
+        "athletic",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The black adds subtle character.",
+    "fitNotes": "Relaxed oversized silhouette. Order usual size for intended drape, or size down for fitted oversized.",
+    "tags": [
+      "medium",
+      "minimal",
+      "winter",
+      "leather",
+      "oversized",
+      "clean",
+      "timeless",
+      "black-core",
+      "black",
+      "jacket",
+      "essential",
+      "travel",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-J-0039",
+    "groupId": "PG_JACKET_COVE_39",
+    "groupSlug": "forward-difference",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "jacket_unisex_regular",
+    "tier": "premium",
+    "type": "jacket",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Softshell",
+    "price": 86.83,
+    "colorName": "black",
+    "hex": "#000000",
+    "sizes": {
+      "XS": 3,
+      "S": 8,
+      "M": 12,
+      "L": 17,
+      "XL": 12,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/21939619/pexels-photo-21939619.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/7585607/pexels-photo-7585607.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/27348978/pexels-photo-27348978.png?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Jacket",
+    "description": "COVE jacket featuring Softshell in black. Regular fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Softshell",
+      "materialBlend": "Cotton blend",
+      "gsm": 539,
+      "stretchLevel": "medium",
+      "thickness": "very-heavy",
+      "warmth": "all-season",
+      "breathability": "low",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "jacket",
+        "minimal",
+        "clean",
+        "minimal",
+        "black-core"
+      ],
+      "useCases": [
+        "outdoor",
+        "travel",
+        "winter"
+      ],
+      "pattern": "quilted",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "longline",
+      "bodyShapes": [
+        "slim",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or dry clean",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or dry clean. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Black provides clean minimal essential timeless foundation.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "minimal",
+      "winter",
+      "clean",
+      "timeless",
+      "very-heavy",
+      "travel",
+      "softshell",
+      "all-season",
+      "black-core",
+      "black",
+      "jacket",
+      "essential",
+      "regular",
+      "outdoor"
+    ]
+  },
+  {
+    "variantId": "COVE-T-0040",
+    "groupId": "PG_TEE_COVE_40",
+    "groupSlug": "money-individual",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "tee_unisex_regular",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Cotton Blend",
+    "price": 36.29,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 3,
+      "S": 9,
+      "M": 17,
+      "L": 16,
+      "XL": 11,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/5418618/pexels-photo-5418618.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9558937/pexels-photo-9558937.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/9882897/pexels-photo-9882897.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Tee",
+    "description": "Clean Minimal Essential Timeless tee in white. Cotton Blend construction with regular fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 158,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "tee",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "summer",
+        "daily wear",
+        "gym"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "cropped",
+      "bodyShapes": [
+        "broad-shoulder",
+        "slim",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. White is timelessly versatile.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "medium",
+      "minimal",
+      "summer",
+      "tee",
+      "white",
+      "clean",
+      "timeless",
+      "all-season",
+      "gym",
+      "daily wear",
+      "white-core",
+      "essential",
+      "regular",
+      "cotton blend"
+    ]
+  },
+  {
+    "variantId": "COVE-P-0041",
+    "groupId": "PG_PANTS_COVE_41",
+    "groupSlug": "who-question-low",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "pants_unisex_regular",
+    "tier": "casual",
+    "type": "pants",
+    "gender": "female",
+    "fit": "regular",
+    "material": "Cotton Twill",
+    "price": 84.11,
+    "colorName": "deep navy",
+    "hex": "#00008B",
+    "sizes": {
+      "XS": 2,
+      "S": 9,
+      "M": 20,
+      "L": 13,
+      "XL": 8,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/31278530/pexels-photo-31278530.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/17657143/pexels-photo-17657143.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6232812/pexels-photo-6232812.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Pants",
+    "description": "COVE pants featuring Cotton Twill in deep navy. Regular fit for clean minimal essential timeless appeal.",
+    "fabric": {
+      "materialMain": "Cotton Twill",
+      "materialBlend": "Cotton blend",
+      "gsm": 223,
+      "stretchLevel": "medium",
+      "thickness": "light",
+      "warmth": "cold-weather",
+      "breathability": "high",
+      "softness": "low"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "pants",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "daily wear",
+        "office-casual",
+        "travel"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "regular",
+      "length": "cropped",
+      "bodyShapes": [
+        "broad-shoulder",
+        "stocky",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Deep Navy provides clean minimal essential timeless foundation.",
+    "fitNotes": "True to size regular fit. Order your usual size for intended proportions.",
+    "tags": [
+      "office-casual",
+      "minimal",
+      "cotton twill",
+      "deep navy",
+      "clean",
+      "timeless",
+      "light",
+      "cold-weather",
+      "travel",
+      "daily wear",
+      "essential",
+      "regular",
+      "pants"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0042",
+    "groupId": "PG_SKIRT_COVE_42",
+    "groupSlug": "evidence-chair",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "skirt_women_regular",
+    "tier": "basic",
+    "type": "skirt",
+    "gender": "female",
+    "fit": "pleated",
+    "material": "Poly Blend",
+    "price": 61.69,
+    "colorName": "forest green",
+    "hex": "#228B22",
+    "sizes": {
+      "XS": 1,
+      "S": 8,
+      "M": 13,
+      "L": 18,
+      "XL": 9,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/2122290/pexels-photo-2122290.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2384869/pexels-photo-2384869.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/19683307/pexels-photo-19683307.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Skirt",
+    "description": "Clean Minimal Essential Timeless skirt in forest green. Poly Blend construction with pleated fit delivers comfort and style.",
+    "fabric": {
+      "materialMain": "Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 296,
+      "stretchLevel": "low",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "medium-high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "skirt",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "summer",
+        "office-casual",
+        "daily wear"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "front-small"
+    },
+    "fitProfile": {
+      "fit": "pleated",
+      "length": "maxi",
+      "bodyShapes": [
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on medium heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The forest green adds subtle character.",
+    "fitNotes": "Pleated fit. True to size.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "forest green",
+      "summer",
+      "clean",
+      "timeless",
+      "poly blend",
+      "pleated",
+      "daily wear",
+      "essential",
+      "warm-weather",
+      "skirt"
+    ]
+  },
+  {
+    "variantId": "COVE-D-0043",
+    "groupId": "PG_DRESS_COVE_43",
+    "groupSlug": "size-option-nothing",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "dress_women_regular",
+    "tier": "casual",
+    "type": "dress",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Jersey",
+    "price": 90.26,
+    "colorName": "grey heather",
+    "hex": "#8C8C8C",
+    "sizes": {
+      "XS": 3,
+      "S": 9,
+      "M": 16,
+      "L": 17,
+      "XL": 14,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/35051812/pexels-photo-35051812.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8452053/pexels-photo-8452053.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/18783348/pexels-photo-18783348.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Dress",
+    "description": "Grey Heather dress crafted from premium Jersey with a relaxed fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Jersey",
+      "materialBlend": "Cotton blend",
+      "gsm": 171,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "dress",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "events",
+        "summer",
+        "evening"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "maxi",
+      "bodyShapes": [
+        "broad-shoulder",
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "Cold wash or hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Grey Heather provides clean minimal essential timeless foundation.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "minimal",
+      "summer",
+      "clean",
+      "timeless",
+      "events",
+      "light",
+      "evening",
+      "grey heather",
+      "relaxed",
+      "essential",
+      "warm-weather",
+      "dress",
+      "jersey"
+    ]
+  },
+  {
+    "variantId": "COVE-P-0044",
+    "groupId": "PG_PANTS_COVE_44",
+    "groupSlug": "skin-pattern-later",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "pants_unisex_regular",
+    "tier": "basic",
+    "type": "pants",
+    "gender": "female",
+    "fit": "tapered",
+    "material": "Cotton Blend",
+    "price": 55.27,
+    "colorName": "burgundy",
+    "hex": "#58151C",
+    "sizes": {
+      "XS": 0,
+      "S": 14,
+      "M": 12,
+      "L": 16,
+      "XL": 6,
+      "XXL": 5
+    },
+    "images": [
+      "https://images.pexels.com/photos/25872487/pexels-photo-25872487.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/28982319/pexels-photo-28982319.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2865977/pexels-photo-2865977.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Pants",
+    "description": "Contemporary pants in burgundy, featuring Cotton Blend construction. Tapered fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 277,
+      "stretchLevel": "low",
+      "thickness": "light",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "pants",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "daily wear",
+        "office-casual",
+        "travel"
+      ],
+      "pattern": "solid",
+      "logoPlacement": "chest-small"
+    },
+    "fitProfile": {
+      "fit": "tapered",
+      "length": "full-length",
+      "bodyShapes": [
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": false
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Burgundy provides clean minimal essential timeless foundation.",
+    "fitNotes": "Tapered fit. True to size.",
+    "tags": [
+      "office-casual",
+      "minimal",
+      "clean",
+      "timeless",
+      "burgundy",
+      "tapered",
+      "light",
+      "all-season",
+      "daily wear",
+      "essential",
+      "travel",
+      "cotton blend",
+      "pants"
+    ]
+  },
+  {
+    "variantId": "COVE-T-0045",
+    "groupId": "PG_TEE_COVE_45",
+    "groupSlug": "past-inside-high",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "tee_unisex_regular",
+    "tier": "casual",
+    "type": "tee",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Cotton Blend",
+    "price": 19.03,
+    "colorName": "burgundy",
+    "hex": "#58151C",
+    "sizes": {
+      "XS": 2,
+      "S": 10,
+      "M": 13,
+      "L": 18,
+      "XL": 7,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/34862015/pexels-photo-34862015.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/35075695/pexels-photo-35075695.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/30749329/pexels-photo-30749329.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Tee",
+    "description": "Essential burgundy tee from COVE. Cotton Blend fabric with relaxed silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Cotton Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 152,
+      "stretchLevel": "medium",
+      "thickness": "light",
+      "warmth": "all-season",
+      "breathability": "medium-high",
+      "softness": "medium-high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "tee",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "daily wear",
+        "summer",
+        "layering"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "longline",
+      "bodyShapes": [
+        "broad-shoulder",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C machine wash",
+      "dryer": "yes-low",
+      "iron": "medium",
+      "careNotes": "Wash inside out. 30\u00b0C machine wash. Do not bleach. Tumble dry low. Iron on medium heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile burgundy works across seasons.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "minimal",
+      "summer",
+      "tee",
+      "clean",
+      "timeless",
+      "burgundy",
+      "light",
+      "all-season",
+      "relaxed",
+      "daily wear",
+      "layering",
+      "essential",
+      "cotton blend"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0046",
+    "groupId": "PG_SWEATER_COVE_46",
+    "groupSlug": "certainly-mr-minute",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweater_unisex_regular",
+    "tier": "basic",
+    "type": "sweater",
+    "gender": "female",
+    "fit": "slim",
+    "material": "Poly Blend",
+    "price": 73.53,
+    "colorName": "forest green",
+    "hex": "#228B22",
+    "sizes": {
+      "XS": 0,
+      "S": 15,
+      "M": 19,
+      "L": 14,
+      "XL": 10,
+      "XXL": 6
+    },
+    "images": [
+      "https://images.pexels.com/photos/2837577/pexels-photo-2837577.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5966900/pexels-photo-5966900.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/2837571/pexels-photo-2837571.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweater",
+    "description": "Contemporary sweater in forest green, featuring Poly Blend construction. Slim fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 310,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "winter",
+      "breathability": "low",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "casual",
+      "styleTags": [
+        "sweater",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "office-casual",
+        "winter",
+        "layering"
+      ],
+      "pattern": "fair isle",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "slim",
+      "length": "cropped",
+      "bodyShapes": [
+        "broad-shoulder",
+        "stocky",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Hand wash or dry clean",
+      "dryer": "no",
+      "iron": "low or steam",
+      "careNotes": "Wash inside out. Hand wash or dry clean. Do not bleach. Air dry recommended. Iron on low or steam heat if needed."
+    },
+    "styleNotes": "Elevated basic that complements any wardrobe. Forest Green is timelessly versatile.",
+    "fitNotes": "Slim tailored fit. Size up if you prefer more room.",
+    "tags": [
+      "medium",
+      "office-casual",
+      "minimal",
+      "winter",
+      "forest green",
+      "clean",
+      "timeless",
+      "poly blend",
+      "layering",
+      "essential",
+      "sweater",
+      "slim"
+    ]
+  },
+  {
+    "variantId": "COVE-H-0047",
+    "groupId": "PG_HOODIE_COVE_47",
+    "groupSlug": "someone-anyone",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "hoodie_unisex_regular",
+    "tier": "casual",
+    "type": "hoodie",
+    "gender": "female",
+    "fit": "relaxed",
+    "material": "Fleece",
+    "price": 50.82,
+    "colorName": "white",
+    "hex": "#FFFFFF",
+    "sizes": {
+      "XS": 3,
+      "S": 9,
+      "M": 17,
+      "L": 11,
+      "XL": 14,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/6811257/pexels-photo-6811257.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8005514/pexels-photo-8005514.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/8063396/pexels-photo-8063396.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Hoodie",
+    "description": "Contemporary hoodie in white, featuring Fleece construction. Relaxed fit embodies COVE aesthetic.",
+    "fabric": {
+      "materialMain": "Fleece",
+      "materialBlend": "Cotton blend",
+      "gsm": 314,
+      "stretchLevel": "medium",
+      "thickness": "medium",
+      "warmth": "warm-weather",
+      "breathability": "high",
+      "softness": "medium"
+    },
+    "style": {
+      "dressCode": "athleisure",
+      "styleTags": [
+        "hoodie",
+        "minimal",
+        "clean",
+        "minimal",
+        "white-core"
+      ],
+      "useCases": [
+        "travel",
+        "winter",
+        "street fashion"
+      ],
+      "pattern": "color-block",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "relaxed",
+      "length": "longline",
+      "bodyShapes": [
+        "athletic",
+        "broad-shoulder",
+        "stocky"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Pairs perfectly with neutral tones for a balanced look. The white adds subtle character.",
+    "fitNotes": "Easy relaxed fit with room to move. True to size for intended comfort.",
+    "tags": [
+      "medium",
+      "street fashion",
+      "minimal",
+      "winter",
+      "fleece",
+      "white",
+      "clean",
+      "timeless",
+      "travel",
+      "hoodie",
+      "relaxed",
+      "white-core",
+      "essential",
+      "warm-weather"
+    ]
+  },
+  {
+    "variantId": "COVE-S-0048",
+    "groupId": "PG_SWEATSHIRT_COVE_48",
+    "groupSlug": "break-claim-product",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "sweatshirt_unisex_regular",
+    "tier": "basic",
+    "type": "sweatshirt",
+    "gender": "female",
+    "fit": "oversized",
+    "material": "Fleece",
+    "price": 58.3,
+    "colorName": "deep navy",
+    "hex": "#00008B",
+    "sizes": {
+      "XS": 2,
+      "S": 9,
+      "M": 14,
+      "L": 15,
+      "XL": 10,
+      "XXL": 7
+    },
+    "images": [
+      "https://images.pexels.com/photos/19472918/pexels-photo-19472918.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/5727047/pexels-photo-5727047.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/6232812/pexels-photo-6232812.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Sweatshirt",
+    "description": "Essential deep navy sweatshirt from COVE. Fleece fabric with oversized silhouette for effortless style.",
+    "fabric": {
+      "materialMain": "Fleece",
+      "materialBlend": "Cotton blend",
+      "gsm": 300,
+      "stretchLevel": "medium",
+      "thickness": "heavy",
+      "warmth": "cold-weather",
+      "breathability": "medium",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "streetwear",
+      "styleTags": [
+        "sweatshirt",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "winter",
+        "daily wear",
+        "layering"
+      ],
+      "pattern": "color-block",
+      "logoPlacement": "none"
+    },
+    "fitProfile": {
+      "fit": "oversized",
+      "length": "cropped",
+      "bodyShapes": [
+        "slim",
+        "stocky",
+        "athletic"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "30\u00b0C gentle wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. 30\u00b0C gentle wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Layer under outerwear or wear solo. Versatile deep navy works across seasons.",
+    "fitNotes": "Relaxed oversized silhouette. Order usual size for intended drape, or size down for fitted oversized.",
+    "tags": [
+      "minimal",
+      "oversized",
+      "deep navy",
+      "fleece",
+      "winter",
+      "clean",
+      "timeless",
+      "cold-weather",
+      "daily wear",
+      "heavy",
+      "layering",
+      "sweatshirt",
+      "essential"
+    ]
+  },
+  {
+    "variantId": "COVE-D-0049",
+    "groupId": "PG_DRESS_COVE_49",
+    "groupSlug": "structure-response",
+    "brandId": "COVE",
+    "merchantId": "COVE_DTC",
+    "tenantId": "cove-marketplace",
+    "currency": "EUR",
+    "taxCategory": "standard",
+    "status": "active",
+    "sizingKey": "dress_women_regular",
+    "tier": "basic",
+    "type": "dress",
+    "gender": "female",
+    "fit": "wrap",
+    "material": "Poly Blend",
+    "price": 93.46,
+    "colorName": "navy",
+    "hex": "#000080",
+    "sizes": {
+      "XS": 0,
+      "S": 8,
+      "M": 17,
+      "L": 12,
+      "XL": 12,
+      "XXL": 3
+    },
+    "images": [
+      "https://images.pexels.com/photos/10944886/pexels-photo-10944886.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/22221770/pexels-photo-22221770.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "https://images.pexels.com/photos/4115977/pexels-photo-4115977.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+    ],
+    "name": "COVE Dress",
+    "description": "Navy dress crafted from premium Poly Blend with a wrap fit. clean minimal essential timeless design for modern living.",
+    "fabric": {
+      "materialMain": "Poly Blend",
+      "materialBlend": "Cotton blend",
+      "gsm": 173,
+      "stretchLevel": "high",
+      "thickness": "medium",
+      "warmth": "all-season",
+      "breathability": "high",
+      "softness": "high"
+    },
+    "style": {
+      "dressCode": "smart-casual",
+      "styleTags": [
+        "dress",
+        "minimal",
+        "clean",
+        "minimal"
+      ],
+      "useCases": [
+        "evening",
+        "daily wear",
+        "events"
+      ],
+      "pattern": "stripe",
+      "logoPlacement": "back-large"
+    },
+    "fitProfile": {
+      "fit": "wrap",
+      "length": "mini",
+      "bodyShapes": [
+        "athletic",
+        "slim"
+      ],
+      "recommendedGender": "female",
+      "stretchHelpsFit": true
+    },
+    "care": {
+      "washTemp": "Cold wash or hand wash",
+      "dryer": "no",
+      "iron": "low",
+      "careNotes": "Wash inside out. Cold wash or hand wash. Do not bleach. Air dry recommended. Iron on low heat if needed."
+    },
+    "styleNotes": "Style with denim or tailored pants. Navy provides clean minimal essential timeless foundation.",
+    "fitNotes": "Wrap fit. True to size.",
+    "tags": [
+      "medium",
+      "minimal",
+      "clean",
+      "timeless",
+      "events",
+      "wrap",
+      "poly blend",
+      "all-season",
+      "evening",
+      "daily wear",
+      "navy",
+      "essential",
+      "dress"
+    ]
+  }
+]

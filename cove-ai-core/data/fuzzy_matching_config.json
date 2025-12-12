@@ -1,0 +1,124 @@
+{
+    "typo_tolerance": {
+        "enabled": true,
+        "edit_distance_threshold": 2,
+        "min_word_length": 4,
+        "apply_to_fields": [
+            "type",
+            "brand",
+            "query"
+        ],
+        "algorithms": {
+            "primary": "levenshtein",
+            "fallback": "token_sort"
+        }
+    },
+    "common_corrections": {
+        "hoodie": [
+            "hodie",
+            "hoddie",
+            "hoodee",
+            "hudie"
+        ],
+        "jacket": [
+            "jackett",
+            "jaket",
+            "jakket"
+        ],
+        "tee": [
+            "te",
+            "teee",
+            "teeee"
+        ],
+        "sweater": [
+            "swetr",
+            "sweatr",
+            "sweter"
+        ],
+        "shirt": [
+            "shrt",
+            "shrts"
+        ],
+        "bomber": [
+            "bommer",
+            "bombar"
+        ],
+        "pants": [
+            "pant",
+            "pnts"
+        ],
+        "jeans": [
+            "jean",
+            "jens"
+        ]
+    },
+    "brand_corrections": {
+        "COVE": [
+            "cove",
+            "COV",
+            "cov"
+        ],
+        "UrbanPulse": [
+            "UrbanPuls",
+            "urbanpulse",
+            "urban pulse",
+            "urbanpuls"
+        ],
+        "BoldHues": [
+            "boldhues",
+            "bold hues"
+        ],
+        "ModernHeritage": [
+            "modernheritage",
+            "modern heritage"
+        ],
+        "SimpleStack": [
+            "simplestack",
+            "simple stack"
+        ],
+        "TimelessCo": [
+            "timelessco",
+            "timeless co"
+        ],
+        "NordicThread": [
+            "nordicthread",
+            "nordic thread"
+        ],
+        "StreetVibe": [
+            "streetvibe",
+            "street vibe"
+        ],
+        "FlexFit": [
+            "flexfit",
+            "flex fit"
+        ],
+        "ComfortZone": [
+            "comfortzone",
+            "comfort zone"
+        ],
+        "FreeSpirit": [
+            "freespirit",
+            "free spirit"
+        ],
+        "EcoHaven": [
+            "ecohaven",
+            "eco haven"
+        ],
+        "TechUrban": [
+            "techurban",
+            "tech urban"
+        ]
+    },
+    "brand_pattern_rules": {
+        "remove_spaces_between_brand_product": true,
+        "split_camelcase": true,
+        "case_insensitive": true,
+        "max_brand_word_length": 2,
+        "description": "Rules for parsing brands from queries like 'COVEhoodie'"
+    },
+    "preprocessing": {
+        "lowercase": true,
+        "remove_extra_whitespace": true,
+        "remove_punctuation": false
+    }
+}

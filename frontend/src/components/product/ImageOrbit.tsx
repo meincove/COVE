@@ -1,6 +1,7 @@
 
 'use client'
 
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -30,16 +31,23 @@ export default function ImageOrbit({
       {/* Image Viewer */}
       <div className="relative z-10 w-full max-w-[90vw] h-full flex items-center justify-center  mt-15">
         <AnimatePresence mode="wait">
-          <motion.img
-            key={images[currentIndex]}
-            src={`/clothing-images/${images[currentIndex]}`}
-            alt={`Product ${currentIndex + 1}`}
+          <motion.div
+            key={currentIndex}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.5 }}
-            className="object-contain w-full h-full"
-          />
+            className="relative w-full h-full"
+          >
+            <Image
+              src={images[currentIndex]}
+              alt={`Product ${currentIndex + 1}`}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              unoptimized={true}
+            />
+          </motion.div>
         </AnimatePresence>
       </div>
 

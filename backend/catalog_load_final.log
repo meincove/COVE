@@ -1,0 +1,15 @@
+System check identified some issues:
+
+WARNINGS:
+?: (urls.W005) URL namespace 'admin' isn't unique. You may not be able to reverse all URLs in this namespace
+📂 Loading catalog from data/productVariantsFlat.json
+✅ Loaded 1933 products
+🗑️  Clearing existing products...
+✅ Cleared existing data
+💾 Loading products to database...
+
+✅ CATALOG LOADED SUCCESSFULLY
+   Product Groups: 1933
+   Color Variants: 1933
+   Images: 5799
+   Size/Stock Records: 11598

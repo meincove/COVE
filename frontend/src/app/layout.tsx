@@ -8,6 +8,8 @@ import ModalHost from "@/src/components/ModalHost";
 import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
 import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot";
+import AnalyticsInit from "@/src/components/AnalyticsInit"; // Analytics tracking
+
 
 import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
 import NavbarController from "@/src/components/Navbar/NavbarController";
@@ -23,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en" suppressHydrationWarning>
         <body className="antialiased" suppressHydrationWarning>
           <ThemeProvider>
+            <AnalyticsInit /> {/* Initialize analytics tracking */}
             <ModalProvider>
               {/* <RootOverlay /> */}
 

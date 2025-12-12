@@ -1,0 +1,75 @@
+
+============================================================
+🔢 Product Embedding Generation Pipeline (Backend API)
+============================================================
+
+📦 Loading products from backend API...
+   Fetching from backend API...
+   ✅ Retrieved 1933 products from API
+   Found 1933 products across 15 brands:
+     - BoldHues: 89 products
+     - COVE: 200 products
+     - ComfortZone: 150 products
+     - CoreBasics: 140 products
+     - EcoHaven: 129 products
+     - FlexFit: 149 products
+     - FreeSpirit: 100 products
+     - LuxeLine: 120 products
+     - ModernHeritage: 100 products
+     - NordicThread: 140 products
+     - SimpleStack: 109 products
+     - StreetVibe: 120 products
+     - TechUrban: 109 products
+     - TimelessCo: 129 products
+     - UrbanPulse: 149 products
+
+🔌 Connecting to Neon database...
+🚀 Generating embeddings (model: openai/text-embedding-3-small)...
+
+   [50/1933] BoldHues - BoldHues Shorts
+   [100/1933] COVE - COVE Accessories
+   [150/1933] COVE - COVE Jacket
+   [200/1933] COVE - COVE Shorts
+   [250/1933] COVE - COVE Sweatshirt
+   [300/1933] ComfortZone - ComfortZone Dress
+   [350/1933] ComfortZone - ComfortZone Pants
+   [400/1933] ComfortZone - ComfortZone Sweater
+   [450/1933] CoreBasics - CoreBasics Accessories
+   [500/1933] CoreBasics - CoreBasics Pants
+   [550/1933] CoreBasics - CoreBasics Sweatshirt
+   [600/1933] EcoHaven - EcoHaven Hoodie
+   [650/1933] EcoHaven - EcoHaven Shorts
+   [700/1933] EcoHaven - EcoHaven Tee
+   [750/1933] FlexFit - FlexFit Hoodie
+   [800/1933] FlexFit - FlexFit Shorts
+   [850/1933] FlexFit - FlexFit Tee
+   [900/1933] FreeSpirit - FreeSpirit Pants
+   [950/1933] FreeSpirit - FreeSpirit Tee
+   [1000/1933] LuxeLine - LuxeLine Jacket
+   [1050/1933] LuxeLine - LuxeLine Sweatshirt
+   [1100/1933] ModernHeritage - ModernHeritage Hoodie
+   [1150/1933] ModernHeritage - ModernHeritage Sweater
+   [1200/1933] NordicThread - NordicThread Hoodie
+   [1250/1933] NordicThread - NordicThread Shorts
+   [1300/1933] NordicThread - NordicThread Tee
+   [1350/1933] SimpleStack - SimpleStack Hoodie
+   [1400/1933] SimpleStack - SimpleStack Sweater
+   [1450/1933] StreetVibe - StreetVibe Hoodie
+   [1500/1933] StreetVibe - StreetVibe Shorts
+   [1550/1933] TechUrban - TechUrban Accessories
+   [1600/1933] TechUrban - TechUrban Pants
+   [1650/1933] TechUrban - TechUrban Tee
+   [1700/1933] TimelessCo - TimelessCo Jacket
+   [1750/1933] TimelessCo - TimelessCo Sweater
+   [1800/1933] UrbanPulse - UrbanPulse Accessories
+   [1850/1933] UrbanPulse - UrbanPulse Jacket
+   [1900/1933] UrbanPulse - UrbanPulse Sweater
+   [1933/1933] UrbanPulse - UrbanPulse Tee
+
+============================================================
+✅ Embedding generation complete!
+   Processed: 1933/1933
+   In database: 1931 product embeddings
+   Brands: 15
+============================================================
+

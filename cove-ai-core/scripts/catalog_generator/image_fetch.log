@@ -1,0 +1,4 @@
+📸 Fetching product images from Pexels...
+   API Rate Limit: 200 requests/hour
+   Processing first 100 products (sample mode)
+Fetching images:   0%|          | 0/100 [00:00<?, ?it/s]Fetching images:   1%|          | 1/100 [00:01<01:50,  1.12s/it]Fetching images:   2%|▏         | 2/100 [00:02<02:25,  1.48s/it]Fetching images:   3%|▎         | 3/100 [00:03<02:05,  1.29s/it]Fetching images:   4%|▍         | 4/100 [00:04<01:48,  1.13s/it]Fetching images:   5%|▌         | 5/100 [00:05<01:43,  1.09s/it]Fetching images:   6%|▌         | 6/100 [00:06<01:37,  1.03s/it]Fetching images:   7%|▋         | 7/100 [00:07<01:38,  1.06s/it]Fetching images:   8%|▊         | 8/100 [00:09<01:39,  1.08s/it]Fetching images:   9%|▉         | 9/100 [00:09<01:34,  1.03s/it]Fetching images:  10%|█         | 10/100 [00:10<01:33,  1.03s/it]Fetching images:  11%|█         | 11/100 [00:12<01:33,  1.05s/it]Fetching images:  13%|█▎        | 13/100 [00:13<01:11,  1.22it/s]

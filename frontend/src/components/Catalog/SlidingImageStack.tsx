@@ -22,10 +22,10 @@ export default function SlidingImageStack({
 }: SlidingImageStackProps) {
   const stackRef = useRef<HTMLDivElement | null>(null)
   const cardsRef = useRef<HTMLDivElement[]>([])
-//   const advanceRef = useRef<((dir: 1 | -1) => void) | null>(null)
+  //   const advanceRef = useRef<((dir: 1 | -1) => void) | null>(null)
 
-// which image is currently in front (0 = first image)
-const [activeIndex, setActiveIndex] = useState(0)
+  // which image is currently in front (0 = first image)
+  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     const stack = stackRef.current
@@ -44,38 +44,38 @@ const [activeIndex, setActiveIndex] = useState(0)
 
     const getDuration = () => 300
 
-const getActiveCard = () => {
-  const cards = cardsRef.current
-  if (!cards.length) return null
-  return cards[activeIndex] ?? cards[0]
-}
+    const getActiveCard = () => {
+      const cards = cardsRef.current
+      if (!cards.length) return null
+      return cards[activeIndex] ?? cards[0]
+    }
 
-const updatePositions = () => {
-  const cards = cardsRef.current
-  const n = cards.length
-  if (!n) return
+    const updatePositions = () => {
+      const cards = cardsRef.current
+      const n = cards.length
+      if (!n) return
 
-  cards.forEach((card, i) => {
-    if (!card) return
+      cards.forEach((card, i) => {
+        if (!card) return
 
-    // relative position to the active card
-    let rel = i - activeIndex
-    if (rel < 0) rel += n
+        // relative position to the active card
+        let rel = i - activeIndex
+        if (rel < 0) rel += n
 
-    const offset = rel + 1
-    const isFront = rel === 0
+        const offset = rel + 1
+        const isFront = rel === 0
 
-    card.style.zIndex = String(200 - offset)
-    card.style.opacity = isFront ? '1' : '0.95'
-    card.style.transform = `perspective(700px)
+        card.style.zIndex = String(200 - offset)
+        card.style.opacity = isFront ? '1' : '0.95'
+        card.style.transform = `perspective(700px)
       translateZ(${-12 * offset}px)
       translateY(${7 * offset}px)
       translateX(0px)
       rotateY(0deg)`
-    card.style.transition =
-      'transform 220ms ease-out, opacity 220ms ease-out'
-  })
-}
+        card.style.transition =
+          'transform 220ms ease-out, opacity 220ms ease-out'
+      })
+    }
 
 
     // const getDuration = () => 300
@@ -134,48 +134,48 @@ const updatePositions = () => {
       })
     }
 
-   const finishSwipe = (deltaX: number) => {
-  const threshold = 50
-  const duration = getDuration()
-  const card = getActiveCard()
-  if (!card) return
+    const finishSwipe = (deltaX: number) => {
+      const threshold = 50
+      const duration = getDuration()
+      const card = getActiveCard()
+      if (!card) return
 
-  card.style.transition = `transform ${duration}ms ease, opacity ${duration}ms ease`
+      card.style.transition = `transform ${duration}ms ease, opacity ${duration}ms ease`
 
-  if (Math.abs(deltaX) > threshold) {
-    // swipe left => move card left, go to NEXT image
-    // swipe right => move card right, go to PREVIOUS image
-    const direction: 1 | -1 = deltaX < 0 ? -1 : 1
+      if (Math.abs(deltaX) > threshold) {
+        // swipe left => move card left, go to NEXT image
+        // swipe right => move card right, go to PREVIOUS image
+        const direction: 1 | -1 = deltaX < 0 ? -1 : 1
 
-    card.style.transform = `perspective(700px)
+        card.style.transform = `perspective(700px)
       translateZ(-12px)
       translateY(7px)
       translateX(${direction * 300}px)
       rotateY(${direction * 20}deg)`
 
-    setTimeout(() => {
-      const n = cardsRef.current.length
-      if (!n) return
+        setTimeout(() => {
+          const n = cardsRef.current.length
+          if (!n) return
 
-      setActiveIndex((prev) => {
-        let next: number
-        if (direction === -1) {
-          // dragged left → show next image
-          next = (prev + 1) % n
-        } else {
-          // dragged right → show previous image
-          next = (prev - 1 + n) % n
-        }
-        onImageChange?.()
-        return next
-      })
-    }, duration)
-  } else {
-    // snap back to center if below threshold
-    applySwipeStyles(0)
-    setTimeout(updatePositions, duration)
-  }
-}
+          setActiveIndex((prev) => {
+            let next: number
+            if (direction === -1) {
+              // dragged left → show next image
+              next = (prev + 1) % n
+            } else {
+              // dragged right → show previous image
+              next = (prev - 1 + n) % n
+            }
+            onImageChange?.()
+            return next
+          })
+        }, duration)
+      } else {
+        // snap back to center if below threshold
+        applySwipeStyles(0)
+        setTimeout(updatePositions, duration)
+      }
+    }
 
 
 
@@ -227,7 +227,7 @@ const updatePositions = () => {
 
     updatePositions()
 
-   
+
 
     return () => {
       if (frameId) cancelAnimationFrame(frameId)
@@ -236,7 +236,7 @@ const updatePositions = () => {
       stack.removeEventListener('pointerup', handlePointerUp)
       stack.removeEventListener('pointerleave', handlePointerUp)
     }
-  }, [images.length, isActive, onImageChange,activeIndex])
+  }, [images.length, isActive, onImageChange, activeIndex])
 
   const handleWrapperPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     // just to avoid text/image selection glitches
@@ -244,7 +244,7 @@ const updatePositions = () => {
     e.stopPropagation()
   }
 
-  
+
 
   return (
     <>
@@ -259,23 +259,24 @@ const updatePositions = () => {
           cursor-grab active:cursor-grabbing
         "
       >
-        {images.map((img) => (
+        {images.map((img, idx) => (
           <article
             key={img}
             className="image-card absolute inset-0 rounded-[28px] "
           >
-            <img
-              src={`/clothing-images/${img}`}
-              alt={name}
-              className="w-full h-full object-contain"
+            <Image
+              src={img}
+              alt={`Image ${idx + 1}`}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 26vw, 80vw"
+              unoptimized={true}
             />
           </article>
         ))}
       </div>
     </>
   )
-}
-
 
 
 

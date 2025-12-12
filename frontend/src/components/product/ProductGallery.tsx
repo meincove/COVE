@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 interface ProductGalleryProps {
   images: string[]
   selectedIndex: number
@@ -42,10 +44,13 @@ export default function ProductGallery({
               />
             )}
 
-            <img
-              src={`/clothing-images/${img}`}
-              alt={`Thumbnail ${i + 1}`}
-              className="object-contain w-full h-full relative z-10"
+            <Image
+              src={img}
+              alt={`Product ${i + 1}`}
+              fill
+              className="object-cover"
+              sizes="120px"
+              unoptimized={true}
             />
           </button>
         )

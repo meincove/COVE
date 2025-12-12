@@ -89,7 +89,7 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
         name: title,
         price: 0, // TODO: Get real price if available
         quantity: 1,
-        imageUrl: imageUrl || '/clothing-images/placeholder.png',
+        imageUrl: imageUrl,  // Use external URL from catalog, no fallback needed
         size: item.size || 'M', // Default or from item
         color: item.color || 'Black',
         colorName: colorName || item.color || 'Black',
@@ -140,6 +140,7 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
           src={imageUrl}
           alt={title}
           fill
+          unoptimized
           className={`
             object-cover transition-transform duration-700
             ${isHovered ? 'scale-110' : 'scale-100'}

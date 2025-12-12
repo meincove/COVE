@@ -9,6 +9,7 @@ import ProductInfo from '@/src/components/product/ProductInfo'
 import ProductConfigurator from '@/src/components/product/ProductConfigurator'
 import ImageOrbit from '@/src/components/product/ImageOrbit'
 import { useProductStore } from '@/src/store/productStore'
+import { trackProductView } from '@/src/utils/analytics' // Analytics tracking (Dec 8)
 
 // --- Types matching the UI shape we already use -----------------------------
 
@@ -177,6 +178,23 @@ export default function ProductPage() {
     fetchProduct()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slugParam, storedProduct, urlVariantId, urlSize, urlQty])
+
+  // Track product view when product loads
+  useEffect(() => {
+    if (product && selectedColorIndex >= 0 && !isLoading) {
+      const selectedColor = product.colors[selectedColorIndex]
+      if (selectedColor?.variantId) {
+        trackProductView(selectedColor.variantId, {
+          product_name: product.name,
+          product_slug: product.slug,
+          color: selectedColor.colorName,
+          price: product.price,
+          tier: product.tier,
+          type: product.type,
+        })
+      }
+    }
+  }, [product, selectedColorIndex, isLoading])
 
   // reset main image on product / color change
   useEffect(() => {

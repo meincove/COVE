@@ -1,0 +1,26 @@
+{
+  "total_products": 1933,
+  "brands": 15,
+  "categories": {
+    "tee": 226,
+    "jacket": 226,
+    "skirt": 95,
+    "hoodie": 242,
+    "pants": 229,
+    "shorts": 214,
+    "accessories": 198,
+    "sweater": 207,
+    "dress": 97,
+    "sweatshirt": 199
+  },
+  "gender_split": {
+    "female": 907,
+    "male": 363,
+    "unisex": 663
+  },
+  "price_range": {
+    "min": 8.3,
+    "max": 401.78,
+    "avg": 93.69105535437157
+  }
+}
