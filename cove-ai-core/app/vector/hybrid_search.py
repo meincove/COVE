@@ -225,6 +225,8 @@ def reciprocal_rank_fusion(
         ))
     
     return results
+    
+    return results
 
 
 def search_hybrid_rrf(

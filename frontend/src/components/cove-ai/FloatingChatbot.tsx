@@ -1,7 +1,7 @@
 // src/components/cove-ai/FloatingChatbot.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Sparkles, Send, ShoppingBag, Package, HelpCircle, Shirt, TrendingUp, Heart, ShoppingCart } from "lucide-react";
 import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
 
@@ -10,6 +10,9 @@ export default function FloatingChatbot() {
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasUnread, setHasUnread] = useState(false);
     const [activeView, setActiveView] = useState<'chat' | 'products' | 'cart'>('chat');
+
+    // Ref to chat widget for triggering messages
+    const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string) => void }>(null);
 
     // Bounce animation on mount
     useEffect(() => {
@@ -23,6 +26,17 @@ export default function FloatingChatbot() {
         if (!newState) setHasUnread(false);
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('cove_chat_open', String(newState));
+        }
+    };
+
+    // Handle quick action clicks
+    const handleQuickAction = (action: string) => {
+        // Ensure chat view is active
+        setActiveView('chat');
+
+        // Send message via chat widget
+        if (chatWidgetRef.current) {
+            chatWidgetRef.current.sendQuickMessage(action);
         }
     };
 
@@ -133,16 +147,13 @@ export default function FloatingChatbot() {
                             <div className="mt-4 flex gap-2 overflow-x-auto hide-scrollbar">
                                 {[
                                     { icon: ShoppingBag, label: "Discover Styles", action: "Show me trending styles", gradient: "from-purple-500 to-pink-500" },
-                                    { icon: Shirt, label: "Build Outfit", action: "Help me create an outfit", gradient: "from-blue-500 to-cyan-500" },
+                                    { icon: Shirt, label: "Build Outfit", action: "I want to build an outfit", gradient: "from-blue-500 to-cyan-500" },
                                     { icon: Package, label: "My Orders", action: "Show my orders", gradient: "from-green-500 to-emerald-500" },
                                     { icon: Heart, label: "Get Inspired", action: "Inspire me", gradient: "from-red-500 to-pink-500" }
                                 ].map((chip, idx) => (
                                     <button
                                         key={idx}
-                                        onClick={() => {
-                                            // TODO: Send quick action message
-                                            console.log('Quick action:', chip.action);
-                                        }}
+                                        onClick={() => handleQuickAction(chip.action)}
                                         className={`
                       flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full
                       bg-gradient-to-r ${chip.gradient} bg-opacity-10
@@ -187,7 +198,7 @@ export default function FloatingChatbot() {
                         {/* Chat Content Area - Now with view switching */}
                         <div className="relative h-[calc(100%-200px)]">
                             {activeView === 'chat' && (
-                                <CoveChatWidget />
+                                <CoveChatWidget ref={chatWidgetRef} />
                             )}
                             {activeView === 'products' && (
                                 <div className="h-full flex items-center justify-center text-neutral-500">
