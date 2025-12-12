@@ -580,6 +580,7 @@ import {
 } from "@/src/components/icons/ShoppingIcons"
 import FPSMonitor from "@/src/components/FPSMonitor"
 import PlatformParticles from "../components/PlatformParticles"
+import AuthDialog from "@/src/components/auth/AuthDialog"
 
 interface RGBColor {
   r: number
@@ -619,6 +620,13 @@ export default function WelcomePage() {
     x: 0,
     y: 0,
   })
+
+  // ✅ Auth Dialog State
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogConfig, setDialogConfig] = useState<{
+    destination: '/shop' | '/partner-onboarding'
+    pathType: 'shopping' | 'platform'
+  }>({ destination: '/shop', pathType: 'shopping' })
 
   const [shoppingColor, setShoppingColor] = useState<RGBColor>({
     r: 219,
@@ -772,7 +780,13 @@ export default function WelcomePage() {
   }
 
   const handleCardClick = (path: string) => {
-    router.push(`/sign-in?redirect_url=${encodeURIComponent(path)}`)
+    // ✅ Open auth dialog instead of direct navigation
+    if (path === '/shop') {
+      setDialogConfig({ destination: '/shop', pathType: 'shopping' })
+    } else {
+      setDialogConfig({ destination: '/partner-onboarding', pathType: 'platform' })
+    }
+    setDialogOpen(true)
   }
 
   const handleSectionClick = (section: "left" | "right") => {
@@ -1059,6 +1073,14 @@ export default function WelcomePage() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Auth Dialog */}
+      <AuthDialog
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        destination={dialogConfig.destination}
+        pathType={dialogConfig.pathType}
+      />
     </div>
   )
 }

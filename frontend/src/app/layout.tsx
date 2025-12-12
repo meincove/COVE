@@ -3,7 +3,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 
-import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
+// import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
 import ModalHost from "@/src/components/ModalHost";
 import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
@@ -24,11 +24,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body className="antialiased" suppressHydrationWarning>
           <ThemeProvider>
             <ModalProvider>
-              <RootOverlay />
+              {/* <RootOverlay /> */}
 
               {/* SINGLE scroll container for everything */}
               <div className="tester-frame h-screen w-full overflow-y-auto overflow-x-hidden">
-                <NavbarController />
+                {/* <NavbarController /> */}
                 <main>{children}</main>
               </div>
 
