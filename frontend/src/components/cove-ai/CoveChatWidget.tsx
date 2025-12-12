@@ -24,6 +24,7 @@ import { useAgentStream } from "@/src/hooks/useAgentStream";
 import { useChatHistory } from "@/src/hooks/useChatHistory";
 import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/TypingIndicator";
 import ThinkingSteps from "@/src/components/cove-ai/ThinkingSteps";
+import EnhancedThinking from "@/src/components/cove-ai/EnhancedThinking";  // Phase 1
 import PersonalizedGreeting from "@/src/components/cove-ai/PersonalizedGreeting";
 
 // ---------- TYPES ----------
@@ -45,6 +46,9 @@ type RecommendationsMeta = {
   kind: "recommendations";
   items: AgentItem[];
   thinking_steps?: Array<{ icon: string; status: string; detail?: string }>;  // Week 4: Agentic
+  // Phase 1: Enhanced thinking
+  thinking_events?: AgentResponse["thinking_events"];
+  tools_used?: AgentResponse["tools_used"];
 };
 
 // Week 4: New metadata types
@@ -161,6 +165,8 @@ export default function CoveChatWidget() {
     answer,
     kind,
     suggestedActions,
+    thinking_events: streamThinkingEvents,
+    tools_used: streamToolsUsed,
   } = useAgentStream();
 
   // Week 6: Chat history persistence
@@ -395,6 +401,8 @@ export default function CoveChatWidget() {
             kind: "recommendations",
             items,
             thinking_steps: data.thinking_steps,  // Week 4: FIX - Include thinking steps!
+            thinking_events: data.thinking_events,  // Phase 1: Enhanced thinking
+            tools_used: data.tools_used,  // Phase 1: Tool tracking
           } as RecommendationsMeta)
           : undefined,
       };
@@ -504,6 +512,9 @@ export default function CoveChatWidget() {
             meta: {
               kind: 'recommendations',
               items: streamedItems,
+              // Phase 1: Include thinking_events and tools_used from streaming
+              thinking_events: streamThinkingEvents,
+              tools_used: streamToolsUsed,
             },
             suggestedActions: suggestedActions || [],
           }
@@ -518,10 +529,12 @@ export default function CoveChatWidget() {
         meta: {
           kind: 'recommendations',
           items: streamedItems,
+          thinking_events: streamThinkingEvents,
+          tools_used: streamToolsUsed,
         },
       });
     }
-  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage]);
+  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage, streamThinkingEvents, streamToolsUsed]);
 
   // Week 6: Handle cart proposal from streaming
   useEffect(() => {
@@ -807,25 +820,23 @@ export default function CoveChatWidget() {
                 className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm text-neutral-50 overflow-hidden ${isUser ? "chat-msg-user" : "chat-msg-assistant"
                   }`}
               >
-                {/* Week 6: Show thinking steps inline for temp message */}
-                {!isUser && m.id === 'thinking-temp' && isStreamingProgress && (
-                  <div className="flex flex-wrap gap-2">
-                    {thinkingSteps.map((step, i) => (
-                      <div
-                        key={i}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-xs"
-                        style={{ animationDelay: `${i * 100}ms` }}
-                      >
-                        <span className="text-base">{step.icon}</span>
-                        <span className="text-purple-200">{step.status}</span>
-                        {step.done && <Check className="h-3 w-3 text-green-400" />}
-                      </div>
-                    ))}
-                  </div>
+                {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
+
+                {/* Phase 1: Show enhanced thinking OR old content, not both */}
+                {recMeta && (recMeta.thinking_events || recMeta.tools_used) ? (
+                  <EnhancedThinking
+                    thinking_events={recMeta.thinking_events}
+                    tools_used={recMeta.tools_used}
+                  />
+                ) : (
+                  <>
+                    {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
+                    {/* Week 4: Original thinking steps (backward compatibility) */}
+                    {recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
+                      <AgentThinkingSteps steps={recMeta.thinking_steps} />
+                    )}
+                  </>
                 )}
-
-                {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
-
 
                 {/* Recommendations */}
                 {recMeta?.items && recMeta.items.length > 0 && (

@@ -41,6 +41,10 @@ from app.core.policy_cache import get_policy_answer
 from app.core.performance import measure_time
 # Week 5-6: Intelligent LLM-based intent classification
 from app.mcp_agents.intent_classifier import get_classifier
+# Phase 1: Agentic enhancements - Thinking display (feature-flagged)
+from app.core.thinking_tracker import ThinkingTracker
+from app.core.tool_tracker import ToolTracker
+from app.core.performance_monitor import get_monitor
 
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
@@ -283,6 +287,9 @@ class AgentOut(BaseModel):
     checkout: Optional[Dict[str, Any]] = None  # Week 4: For checkout_ready responses
     thinking_steps: Optional[List[Dict[str, str]]] = None  # Week 4: Agentic - Show reasoning
     debug_plan: Optional[Dict[str, Any]] = None
+    # Phase 1: Agentic enhancements - Detailed thinking display (feature-flagged)
+    thinking_events: Optional[List[Dict[str, Any]]] = None  # Detailed AI reasoning steps
+    tools_used: Optional[List[Dict[str, Any]]] = None  # Tools called with duration/results
 
 
 class AgentCartAddIn(BaseModel):
@@ -406,6 +413,10 @@ _SESSION_RECS: Dict[str, List[Dict[str, Any]]] = {}
 _SESSION_LAST_USER_MSG: Dict[str, str] = {}
 # Week 4: Track when we asked user for size
 _SESSION_AWAITING_SIZE: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, ...}}
+_SESSION_AWAITING_COLOR: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, available_colors, ...}}
+_SESSION_AWAITING_QUANTITY: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, color, size, ...}}
+# Phase 1: Track what products user has already seen (for "show more" queries)
+_SESSION_SHOWN_SLUGS: Dict[str, set] = {}  # {session_key: {slug1, slug2, ...}}
 
 
 def _session_key_from_body(body: AgentIn) -> Optional[str]:
@@ -454,6 +465,50 @@ def _clear_awaiting_size(body: AgentIn) -> None:
         del _SESSION_AWAITING_SIZE[key]
 
 
+def _set_awaiting_color(body: AgentIn, product_info: Dict[str, Any]) -> None:
+    """Store that we're waiting for color input from this session."""
+    key = _session_key_from_body(body)
+    if key:
+        _SESSION_AWAITING_COLOR[key] = product_info
+
+
+def _get_awaiting_color(body: AgentIn) -> Optional[Dict[str, Any]]:
+    """Get product info if we're waiting for color from this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_AWAITING_COLOR.get(key)
+
+
+def _clear_awaiting_color(body: AgentIn) -> None:
+    """Clear color-awaiting state."""
+    key = _session_key_from_body(body)
+    if key and key in _SESSION_AWAITING_COLOR:
+        del _SESSION_AWAITING_COLOR[key]
+
+
+def _set_awaiting_quantity(body: AgentIn, product_info: Dict[str, Any]) -> None:
+    """Store that we're waiting for quantity input from this session."""
+    key = _session_key_from_body(body)
+    if key:
+        _SESSION_AWAITING_QUANTITY[key] = product_info
+
+
+def _get_awaiting_quantity(body: AgentIn) -> Optional[Dict[str, Any]]:
+    """Get product info if we're waiting for quantity from this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_AWAITING_QUANTITY.get(key)
+
+
+def _clear_awaiting_quantity(body: AgentIn) -> None:
+    """Clear quantity-awaiting state."""
+    key = _session_key_from_body(body)
+    if key and key in _SESSION_AWAITING_QUANTITY:
+        del _SESSION_AWAITING_QUANTITY[key]
+
+
 def _update_last_user_message(body: AgentIn) -> None:
     key = _session_key_from_body(body)
     if not key:
@@ -466,6 +521,60 @@ def _get_last_user_message(body: AgentIn) -> Optional[str]:
     if not key:
         return None
     return _SESSION_LAST_USER_MSG.get(key)
+
+
+# Phase 1: Show More - Track shown items
+def _get_shown_slugs(body: AgentIn) -> set:
+    """Get set of slugs this user has already seen in this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return set()
+    return _SESSION_SHOWN_SLUGS.get(key, set())
+
+
+def _mark_slugs_as_shown(body: AgentIn, slugs: List[str]) -> None:
+    """Mark these slugs as shown to prevent showing again on 'show more'."""
+    key = _session_key_from_body(body)
+    if not key:
+        return
+    if key not in _SESSION_SHOWN_SLUGS:
+        _SESSION_SHOWN_SLUGS[key] = set()
+    _SESSION_SHOWN_SLUGS[key].update(slugs)
+
+
+def _filter_out_shown_items(items: List[AgentItem], shown_slugs: set) -> List[AgentItem]:
+    """Remove items user has already seen."""
+    return [item for item in items if item.slug not in shown_slugs]
+
+
+def _get_last_user_message_OLD(body: AgentIn) -> Optional[str]:
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_LAST_USER_MSG.get(key)
+
+
+def _get_available_colors(slug: str) -> List[str]:
+    """Get available colors for a product by querying database for variants."""
+    try:
+        # Extract base slug (e.g., 'pg-hoodie-corebasics-119' → 'pg-hoodie-corebasics')
+        base_slug = slug.rsplit('-', 1)[0] if '-' in slug else slug
+        
+        query = """
+            SELECT DISTINCT color
+            FROM cove_product_embeddings
+            WHERE slug LIKE %s AND color IS NOT NULL AND color != ''
+            ORDER BY color
+        """
+        
+        with _get_pg_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (f"{base_slug}%",))
+                colors = [row[0] for row in cur.fetchall()]
+                return colors if len(colors) > 1 else []  # Only return if multiple colors
+    except Exception as e:
+        log.warning(f"Failed to get colors for {slug}: {e}")
+        return []
 
 
 async def _select_from_last_recs_via_llm(
@@ -853,18 +962,8 @@ async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
             filters = payload.get("filters") or {}
             top_k = int(payload.get("top_k") or 4)
 
-            tool_input: Dict[str, Any] = {
-                "query": query,
-                "filters": filters,
-                "top_k": top_k,
-            }
 
-            tool_resp = await tools_recs.recommend_products(tool_input)
-
-            if isinstance(tool_resp, dict):
-                return tool_resp
-
-            log.warning("recommend_products returned non-dict: %r", type(tool_resp))
+            log.warning("recommend_products returned non-dict: %r", type(tools_recs))
         except Exception:
             log.exception("recommend_products tool failed")
 
@@ -993,11 +1092,54 @@ async def _call_fit_recommend(
 # ---------- Main agent endpoint ----------
 
 
+def _inject_thinking_data(
+    response: AgentOut,
+    thinking_tracker: ThinkingTracker,
+    tool_tracker: ToolTracker
+) -> AgentOut:
+    """
+    Inject thinking events and tool usage into response (feature-flagged).
+    Only adds data if feature is enabled, otherwise returns response unchanged.
+    
+    Args:
+        response: The AgentOut response to enhance
+        thinking_tracker: Thinking tracker with events
+        tool_tracker: Tool tracker with usage data
+        
+    Returns:
+        Enhanced response if feature enabled, original response otherwise
+    """
+    # Check if feature is enabled
+    if not thinking_tracker.is_enabled():
+        return response  # Return unchanged (no-op)
+    
+    # Add thinking events
+    thinking_events = thinking_tracker.get_all_events()
+    if thinking_events:
+        response.thinking_events = thinking_events
+    
+    # Add tools used
+    tools_summary = tool_tracker.get_summary()
+    if tools_summary:
+        response.tools_used = tools_summary
+    
+    return response
+
 
 @router.post("/ai/agent/query", response_model=AgentOut)
 async def agent_query(body: AgentIn) -> AgentOut:
     t0 = time.perf_counter()
-    out: AgentOut = await _agent_query_impl(body)
+    
+    # Phase 1: Create trackers here to pass down
+    thinking_tracker = ThinkingTracker()
+    tool_tracker = ToolTracker()
+    
+    # Call implementation with trackers
+    out: AgentOut = await _agent_query_impl(body, thinking_tracker, tool_tracker)
+    
+    # Phase 1: Inject thinking data if feature enabled (feature-flagged, safe)
+    out = _inject_thinking_data(out, thinking_tracker, tool_tracker)
+    
     t_end = time.perf_counter()
     total_ms = int((t_end - t0) * 1000)
 
@@ -1053,10 +1195,16 @@ async def agent_query(body: AgentIn) -> AgentOut:
 
 from app.core.events import emit_event
 
-async def _agent_query_impl(body: AgentIn) -> AgentOut:
+async def _agent_query_impl(
+    body: AgentIn,
+    thinking_tracker: ThinkingTracker,
+    tool_tracker: ToolTracker
+) -> AgentOut:
     q = body.message
     prev_user_message = _get_last_user_message(body)
     _update_last_user_message(body)
+    
+    # Trackers are now passed as parameters (cleaner than re-creating)
 
     ai_profile: Optional[Dict[str, Any]] = None
     if body.clerkUserId:
@@ -1077,6 +1225,9 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         'icon': '🧠',
         'status': 'Understanding your request'
     })
+    
+    # Phase 1: Track thinking - Understanding intent
+    thinking_event_1 = thinking_tracker.add_thinking("classifier", "Understanding your request...")
 
     # === INTELLIGENT LLM-BASED INTENT CLASSIFICATION ===
     # Use 93% accurate semantic classifier instead of regex/rules
@@ -1096,6 +1247,13 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     semantic_intent = classification_result["intent"]
     confidence = classification_result.get("confidence", 0.95)
     intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
+    
+    # Phase 1: Complete thinking event
+    thinking_tracker.complete(
+        thinking_event_1,
+        details=f"Intent: {semantic_intent} → {intent_kind}",
+        confidence=confidence * 100
+    )
     
     # Map orchestrator intent back to API response kind for AgentOut
     # AgentOut only accepts: 'answer', 'recommendations', 'cart_proposal', 'checkout_ready'
@@ -1142,8 +1300,12 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     # Week 4: Check if we were awaiting size input
     awaiting = _get_awaiting_size(body)
     if awaiting:
-        # If user is starting a new discover query, clear stale awaiting state
-        if intent_kind == "discover" and not _looks_like_cart_add(q):
+        # Check if this message looks like JUST a size answer (e.g., "M", "in M", "size L")
+        # Simple pattern: message contains  S/M/L/XL but not other product keywords
+        looks_like_size_only = bool(re.search(r'\b(?:in\s+)?(?:size\s+)?([smlxSMLX]{1,3})\b', q.lower())) and len(q.strip()) < 20
+        
+        # Only clear awaiting if this is clearly a NEW product search, not a size response
+        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_size_only:
             _clear_awaiting_size(body)
             awaiting = None  # Treat as if no awaiting state
         
@@ -1155,9 +1317,9 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         # Check if message looks like cart add intent using existing function
         has_cart_intent = _looks_like_cart_add(q)
         
-        # Only extract size if NOT a cart add command
+        # Extract size from message - prioritize short responses like "M" or "in M"
         if not has_cart_intent:
-            match = re.search(r'\b(?:size\s+)?([smlxSMLX]{1,3})\b', q)
+            match = re.search(r'\b(?:in\s+)?(?:size\s+)?([smlxSMLX]{1,3})\b', q, re.IGNORECASE)
             if match:
                 size = match.group(1).upper()
         
@@ -1172,18 +1334,75 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             nice_type = (top.type or "").lower()
             nice_color = (top.color or "").lower()
             
-            parts = ["Do you want me to add this"]
+            # Store product with size and ask for quantity
+            product_with_size = product.copy()
+            product_with_size["size"] = size
+            
+            _set_awaiting_quantity(body, {"product": product_with_size})
+            
+            product_desc = f"{nice_color} {nice_type}".strip() if nice_color else nice_type
+            
+            return AgentOut(
+                kind="answer",
+                answer=f"Perfect! How many {product_desc} in size {size} would you like to add?",
+                citations=[],
+                items=[top],
+                cart_payload=None,
+                debug_plan={**debug_plan, "size_provided_in_followup": True},
+            )
+        # If has_cart_intent, just fall through - don't clear state, let normal flow handle it
+
+    # Check if we were awaiting quantity input
+    awaiting_qty = _get_awaiting_quantity(body)
+    if awaiting_qty:
+        # Check if this looks like a quantity response (number)
+        looks_like_qty_only = len(q.strip()) < 10  # Very short response
+        
+        # Only clear if clearly a new search
+        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_qty_only:
+            _clear_awaiting_quantity(body)
+            awaiting_qty = None
+    
+    if awaiting_qty:
+        # Extract quantity from message
+        quantity = None
+        has_cart_intent = _looks_like_cart_add(q)
+        
+        if not has_cart_intent:
+            # Try to find a number in the message (1-10 typical range)
+            match = re.search(r'\b([1-9]|10)\b', q.strip())
+            if match:
+                quantity = int(match.group(1))
+        
+        if quantity:
+            # Clear the awaiting state
+            _clear_awaiting_quantity(body)
+            
+            # Create final cart proposal with all info
+            product = awaiting_qty["product"]
+            top = AgentItem(**product)
+            
+            nice_type = (top.type or "").lower()
+            nice_color = (product.get("color") or top.color or "").lower()
+            nice_size = (product.get("size") or top.size or "").upper()
+            
+            parts = ["Do you want me to add"]
+            if quantity > 1:
+                parts.append(str(quantity))
+            else:
+                parts.append("this")
             if nice_color:
                 parts.append(nice_color)
-            parts.append(nice_type)
-            parts.append(f"in size {size}")
+            parts.append(nice_type if quantity == 1 else f"{nice_type}s")
+            if nice_size:
+                parts.append(f"in size {nice_size}")
             parts.append("to your cart?")
             answer = " ".join(parts).replace("  ", " ").strip()
             
             cart_payload = {
                 "variantId": top.variantId,
-                "size": size,
-                "quantity": 1,
+                "size": product.get("size") or top.size,
+                "quantity": quantity,
                 "cartId": body.cartId,
                 "clerkUserId": body.clerkUserId,
                 "guestSessionId": body.guestSessionId,
@@ -1196,9 +1415,68 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 citations=[],
                 items=[top],
                 cart_payload=cart_payload,
-                debug_plan={**debug_plan, "size_provided_in_followup": True},
+                debug_plan={**debug_plan, "quantity_provided_in_followup": True},
             )
-        # If has_cart_intent, just fall through - don't clear state, let normal flow handle it
+
+    # Check if we were awaiting color input
+    awaiting_color = _get_awaiting_color(body)
+    if awaiting_color:
+        # Check if this message looks like JUST a color response (e.g., "navy", "black", "in navy")
+        looks_like_color_only = len(q.strip()) < 30  # Short response
+        
+        # Only clear awaiting if this is clearly a NEW product search
+        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_color_only:
+            _clear_awaiting_color(body)
+            awaiting_color = None
+        
+    if awaiting_color:
+        # Extract color from message
+        color = None
+        has_cart_intent = _looks_like_cart_add(q)
+        
+        if not has_cart_intent:
+            # Try to match against available colors
+            available_colors = awaiting_color.get("available_colors", [])
+            q_lower = q.lower().strip()
+            
+            # Remove common prefixes
+            for prefix in ["in ", "color ", "the ", "i want ", "i'd like "]:
+                if q_lower.startswith(prefix):
+                    q_lower = q_lower[len(prefix):].strip()
+            
+            # Check if message contains any of the available colors
+            for avail_color in available_colors:
+                if avail_color.lower() in q_lower or q_lower in avail_color.lower():
+                    color = avail_color
+                    break
+        
+        if color:
+            # Clear the awaiting state
+            _clear_awaiting_color(body)
+            
+            # Now check if we need size
+            product = awaiting_color["product"]
+            top = AgentItem(**product)
+            
+            # Update product color in the session state
+            top_dict = product.copy()
+            top_dict["color"] = color
+            
+            # Ask for size if not provided
+            _set_awaiting_size(body, {"product": top_dict})
+            
+            nice_type = (top.type or "").lower()
+            available_sizes = ["S", "M", "L", "XL"]  # Could be dynamic from product data
+            sizes_str = ", ".join(available_sizes)
+            
+            return AgentOut(
+                kind="answer",  # FIX: Use answer, not cart_proposal when asking questions
+                answer=f"Great choice! The {color} {nice_type} is available. What size would you like? ({sizes_str})",
+                citations=[],
+                items=[top],
+                cart_payload=None,
+                debug_plan={**debug_plan, "color_provided_in_followup": True},
+            )
 
     if ai_profile:
         debug_plan["ai_profile_used"] = True
@@ -1235,12 +1513,37 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 chosen_size = rec_filters.get("size") or top.size
                 
                 # Week 4: If size not specified, ask user instead of cart_proposal with null
-                if not chosen_size:
-                    nice_type = (top.type or rec_filters.get("type") or "item").lower()
-                    nice_color = (top.color or rec_filters.get("color") or "").lower()
-                    product_desc = f"{nice_color} {nice_type}".strip() if nice_color else nice_type
+                # Check if we need to ask for color first
+                # TODO: Get available colors from product variants/recommendations
+                # For now, assume if color filter wasn't specified, product might have multiple colors
+                needs_color = not rec_filters.get("color") and not chosen_size  # If no color specified
+                
+                if needs_color:
+                    # Query database for available colors
+                    available_colors = _get_available_colors(top.slug)
                     
-                    # Store that we're awaiting size for this product
+                    if available_colors and len(available_colors) > 1:
+                        # Ask for color first
+                        _set_awaiting_color(body, {
+                            "product": top.dict(),
+                            "filters": rec_filters,
+                            "available_colors": available_colors
+                        })
+                        
+                        colors_str = ", ".join(available_colors)
+                        product_desc = (top.type or "item").lower()
+                        
+                        return AgentOut(
+                            kind="answer",
+                            answer=f"Great choice! This {product_desc} comes in {colors_str}. Which color would you like?",
+                            citations=[],
+                            items=[top],
+                            debug_plan=debug_plan,
+                        )
+                
+                if not chosen_size:
+                    # No color needed, just ask for size
+                    product_desc = (top.type or rec_filters.get("type") or "item").lower()
                     _set_awaiting_size(body, {
                         "product": top.dict(),
                         "filters": rec_filters,
@@ -1649,15 +1952,47 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             'icon': '🔍',
             'status': 'Searching catalog'
         })
+        
+        # Phase 1: Track search thinking
+        search_thinking = thinking_tracker.add_thinking("search", "Searching product catalog...")
+        
+        # Phase 1: Track hybrid_search tool
+        search_tool = tool_tracker.start("hybrid_search", inputs={"query": q, "top_k": body.top_k})
+        
+        try:
+            # Phase 1: If user has seen items before, fetch MORE to ensure we have enough new ones
+            shown_slugs = _get_shown_slugs(body)
+            search_top_k = body.top_k
+            if shown_slugs:
+                # Fetch 3x more to account for filtering
+                search_top_k = body.top_k * 3
+                debug_plan["expanded_search_for_shown"] = True
 
-        rec_query = build_rec_query(q, rec_filters)
+            rec_query = build_rec_query(q, rec_filters)
 
-        rec_payload = {
-            "query": rec_query,
-            "filters": rec_filters,
-            "top_k": body.top_k,
-        }
-        rec_resp = await _call_recs_suggest(rec_payload)
+            rec_payload = {
+                "query": rec_query,
+                "filters": rec_filters,
+                "top_k": search_top_k,  # Use expanded top_k
+            }
+            rec_resp = await _call_recs_suggest(rec_payload)
+            
+            # Phase 1: Complete tool tracking
+            item_count = len(rec_resp.get("items", []))
+            tool_tracker.complete(search_tool, outputs={"count": item_count})
+            
+            # Phase 1: Complete thinking
+            thinking_tracker.complete(
+                search_thinking,
+                details=f"Found {item_count} matching products",
+                tool_used=f"hybrid_search ({item_count} items)"
+            )
+            
+        except Exception as e:
+            # Phase 1: Track failures
+            tool_tracker.error(search_tool, str(e))
+            thinking_tracker.error(search_thinking, f"Search failed: {str(e)}")
+            raise
 
         debug_plan["rec_query"] = rec_query
 
@@ -1679,6 +2014,19 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         debug_plan["rec_item_count"] = len(items)
 
         if items:
+            # Phase 1: Filter out items user has already seen (for "show more")
+            shown_slugs = _get_shown_slugs(body)
+            if shown_slugs:
+                original_count = len(items)
+                items = _filter_out_shown_items(items, shown_slugs)
+                debug_plan["filtered_shown_items"] = original_count - len(items)
+            
+            # Limit to user's requested top_k (after filtering)
+            items = items[:body.top_k]
+            
+            # Mark these NEW items as shown for this session
+            _mark_slugs_as_shown(body, [item.slug for item in items])
+            
             _store_session_recs(body, items)
 
             # Generate personalized intro using LLM

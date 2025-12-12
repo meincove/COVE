@@ -270,7 +270,7 @@ async def _classify_with_llm(
     label knowledge here.
     """
     if not USE_LLM_ROUTER:
-        return None
+        return None, None  # FIX: Return tuple, not None
 
     try:
         llm = _get_router_llm()
@@ -303,13 +303,13 @@ async def _classify_with_llm(
 
         raw = await llm.generate(messages)
         if not raw:
-            return None
+            return None, None  # FIX: Return tuple, not None
 
         # Allow bare label or quoted string
         label = raw.strip().strip('"').strip("'").lower()
         if label not in _ALLOWED_KINDS:
             log.warning("Router LLM returned invalid label %r", label)
-            return None
+            return None, None  # FIX: Return tuple, not None
 
         return label, None
 

@@ -33,12 +33,19 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
         except asyncio.QueueFull:
             log.warning(f"Event queue full, dropping event: {event_type}")
     
+    # Phase 1: Create trackers
+    from app.core.thinking_tracker import ThinkingTracker
+    from app.core.tool_tracker import ToolTracker
+    
+    thinking_tracker = ThinkingTracker()
+    tool_tracker = ToolTracker()
+    
     try:
         # Set event emitter for this request context
         set_event_emitter(event_handler)
         
-        # Create task to run agent (it will emit events as it works)
-        agent_task = asyncio.create_task(_agent_query_impl(body))
+        # Call implementation with trackers
+        agent_task = asyncio.create_task(_agent_query_impl(body, thinking_tracker, tool_tracker))
         
         # Stream events as they arrive
         while not agent_task.done():
@@ -134,8 +141,33 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
         else:
             print(f"[SUGGESTIONS DEBUG] No suggestions generated for intent={result.kind}, context keys={list(suggestions_context.keys())}")
         
-        # Always send done event
-        yield f"event: done\ndata: {json.dumps({'kind': result.kind})}\n\n"
+        # Final event: done
+        done_data = {
+            'kind': result.kind,
+            'answer': result.answer if hasattr(result, 'answer') else None,
+        }
+        
+        # Phase 1: Serialize thinking_events and tools_used from trackers
+        try:
+            # Use correct methods: get_all_events() and get_summary()
+            thinking_events = thinking_tracker.get_all_events() if thinking_tracker else []
+            tools_used = tool_tracker.get_summary() if tool_tracker else []
+            
+            print(f"[STREAMING DEBUG] thinking_events count: {len(thinking_events)}")
+            print(f"[STREAMING DEBUG] tools_used count: {len(tools_used)}")
+            
+            if thinking_events:
+                done_data['thinking_events'] = thinking_events
+                print(f"[STREAMING DEBUG] Added {len(thinking_events)} thinking_events to done_data")
+            
+            if tools_used:
+                done_data['tools_used'] = tools_used
+                print(f"[STREAMING DEBUG] Added {len(tools_used)} tools_used to done_data")
+        except Exception as e:
+            print(f"[STREAMING DEBUG] Error serializing trackers: {e}")
+        
+        print(f"[STREAMING DEBUG] Final done_data keys: {list(done_data.keys())}")
+        yield f"event: done\ndata: {json.dumps(done_data)}\n\n"
         
     except Exception as e:
         log.exception("agent_stream error")
