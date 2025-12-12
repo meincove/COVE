@@ -35,7 +35,7 @@ class IntentClassifier:
     def _load_config(self, config_path: Path) -> Dict:
         """Load configuration from JSON file"""
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading intent config: {e}")
@@ -129,15 +129,22 @@ class IntentClassifier:
     
     def _llm_classify(self, query: str, context: Dict) -> Tuple[str, float, str]:
         """LLM-based classification (high accuracy, slower)"""
+        import os
         system_prompt = self._build_prompt()
         
         try:
+            # Get model from config (default to slash format for LiteLLM)
+            model = self.settings.get("llm_model", "openrouter/openai/gpt-4o-mini")
+            
+            # LiteLLM with OpenRouter needs api_base set
             response = completion(
-                model=self.settings.get("llm_model", "openrouter:openai/gpt-4o-mini"),
+                model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Query: {query}"}
                 ],
+                api_base="https://openrouter.ai/api/v1",
+                api_key=os.getenv("OPENROUTER_API_KEY"),
                 temperature=self.settings.get("llm_temperature", 0),
                 max_tokens=self.settings.get("llm_max_tokens", 20)
             )

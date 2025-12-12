@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, FormEvent } from "react";
+import { useState, useEffect, useMemo, useRef, FormEvent, forwardRef, useImperativeHandle } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Send, X, Check, Package, ShoppingCart } from "lucide-react";
@@ -126,7 +126,7 @@ function isEmailConfirmationMeta(
 
 // ---------- COMPONENT ----------
 
-export default function CoveChatWidget() {
+function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg: string) => void }>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -782,6 +782,52 @@ export default function CoveChatWidget() {
     );
   }
 
+  // Expose sendQuickMessage method to parent via ref
+  useImperativeHandle(ref, () => ({
+    sendQuickMessage: async (message: string) => {
+      const userMsg: ChatMessage = {
+        id: makeId(),
+        role: "user",
+        content: message,
+      };
+
+      setMessages((prev) => [...prev, userMsg]);
+      setLoading(true);
+
+      // Save user message to history
+      saveMessage({
+        role: 'user',
+        content: userMsg.content,
+      });
+
+      try {
+        const sessionId = guestSessionId ?? ensureGuestSessionId();
+
+        if (!hasStartedChat) {
+          setHasStartedChat(true);
+        }
+
+        // Send via streaming
+        await sendStreamingQuery(
+          userMsg.content,
+          isSignedIn && user ? user.id : undefined,
+          sessionId
+        );
+
+      } catch (err: any) {
+        console.error("Error talking to agent:", err);
+        const errorMsg: ChatMessage = {
+          id: makeId(),
+          role: "assistant",
+          content: "Sorry, something went wrong talking to Cove AI. Please try again.",
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }));
+
   // -------- RENDER --------
 
   return (
@@ -1004,3 +1050,7 @@ export default function CoveChatWidget() {
     </div >
   );
 }
+
+// Export with forwardRef
+const CoveChatWidget = forwardRef(CoveChatWidgetInner);
+export default CoveChatWidget;

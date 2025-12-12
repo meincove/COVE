@@ -954,22 +954,10 @@ async def _call_rag(query: str, top_k: int) -> Dict[str, Any]:
 
 async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Wrapper around Cove's recommendations logic (tools first, then HTTP).
+    Wrapper around Cove's recommendations logic.
+    Uses HTTP endpoint for product recommendations.
     """
-    if USE_TOOLS_LAYER:
-        try:
-            query = payload.get("query") or ""
-            filters = payload.get("filters") or {}
-            top_k = int(payload.get("top_k") or 4)
-
-
-            log.warning("recommend_products returned non-dict: %r", type(tools_recs))
-        except Exception:
-            log.exception("recommend_products tool failed")
-
-            if DISABLE_TOOLS_HTTP_FALLBACK:
-                return {}
-
+    # HTTP fallback (primary method for now)
     try:
         async with httpx.AsyncClient(timeout=10) as cx:
             r = await cx.post(
@@ -1205,6 +1193,242 @@ async def _agent_query_impl(
     _update_last_user_message(body)
     
     # Trackers are now passed as parameters (cleaner than re-creating)
+
+    # ===== CONVERSATION FLOW HANDLER =====
+    # Check if this is a multi-step conversation (e.g., outfit builder)
+    from app.core.conversation_flow import conversation_handler
+    
+    session_key = _session_key_from_body(body)
+    
+    # Check if in active conversation
+    if session_key and conversation_handler.is_in_conversation(session_key):
+        log.info(f"📝 Continuing conversation for session {session_key}")
+        
+        # Handle response
+        result = conversation_handler.handle_response(session_key, q)
+        
+        if result.get("trigger_orchestrator"):
+            # Conversation complete! Trigger orchestrator
+            log.info(f"✅ Conversation complete, triggering orchestrator")
+            
+            # Get orchestrator context
+            orchestrator_query = result.get("orchestrator_query", q)
+            orchestrator_context = result.get("orchestrator_context", {})
+            workflow_name = result.get("orchestrator_workflow", "outfit_builder")
+            
+            # Import and trigger orchestrator
+            from app.agents import orchestrator
+            
+            # Add session context
+            orchestrator_context.update({
+                "user_id": body.clerkUserId or body.guestSessionId,
+                "user_size_history": {}
+            })
+            
+            # Show thinking
+            emit_event('thinking:step', {
+                'icon': '🎨',
+                'status': 'Building your complete outfit'
+            })
+            thinking_tracker.add_thinking("orchestrator", "Executing multi-agent workflow...")
+            
+            try:
+                orchestrator_result = await orchestrator.execute_workflow(
+                    workflow_name=workflow_name,
+                    query=orchestrator_query,
+                    context=orchestrator_context
+                )
+                
+                # Format as AgentOut (same as before)
+                outfit_items = orchestrator_result.get("outfit_items", [])
+                
+                if not outfit_items:
+                    return AgentOut(
+                        kind="answer",
+                        answer=orchestrator_result.get("reasoning", "I couldn't find items for this outfit."),
+                        items=[],
+                        reasoning=orchestrator_result.get("reasoning", "")
+                    )
+                
+                # Convert to AgentItem format
+                agent_items = []
+                for item in outfit_items:
+                    product = item.get("product", {})
+                    agent_items.append(AgentItem(
+                        slug=product.get("slug", ""),
+                        title=product.get("title", product.get("name", "Unknown")),
+                        priceNumeric=float(product.get("priceNumeric", product.get("price", 0))),
+                        imageUrl=product.get("imageUrl", product.get("image_url", "")),
+                        brand=product.get("brand", ""),
+                        category=item.get("category", ""),
+                        variantId=str(product.get("variantId", product.get("variant_id", ""))),
+                        color=item.get("color", ""),
+                        size=item.get("recommended_size", ""),
+                    ))
+                
+                # Build answer
+                total = orchestrator_result.get("total", 0)
+                budget_max = orchestrator_context.get("budget_max", 500)
+                within_budget = orchestrator_result.get("within_budget", True)
+                
+                answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
+                
+                if within_budget:
+                    remaining = budget_max - total
+                    answer_parts.append(f"Within your €{budget_max} budget! €{remaining:.2f} remaining.")
+                
+                answer = " ".join(answer_parts)
+                
+                return AgentOut(
+                    kind="discover",
+                    answer=answer,
+                    items=agent_items,
+                    reasoning=orchestrator_result.get("reasoning", "")
+                )
+                
+            except Exception as e:
+                log.error(f"Orchestrator failed: {e}")
+                return AgentOut(
+                    kind="answer",
+                    answer="Sorry, I couldn't build your outfit right now. Please try again!",
+                    items=[]
+                )
+        
+        else:
+            # Continue conversation with next question
+            return AgentOut(
+                kind="answer",
+                answer=result.get("message", ""),
+                items=[]
+            )
+    
+    # Check if should START a conversation
+    flow_name = conversation_handler.should_start_conversation(q)
+    if flow_name:
+        log.info(f"🎯 Starting conversation flow: {flow_name}")
+        
+        first_question = conversation_handler.start_conversation(session_key, flow_name)
+        
+        return AgentOut(
+            kind="answer",
+            answer=first_question,
+            items=[]
+        )
+    
+    # ===== END CONVERSATION FLOW HANDLER =====
+
+    # ===== MULTI-AGENT ORCHESTRATOR CHECK =====
+    # Check if query should be handled by multi-agent orchestrator
+    # (only triggers if user provides full details now)
+    from app.agents import orchestrator
+    
+    workflow_name = await orchestrator.should_handle(q)
+    if workflow_name:
+        log.info(f"🎯 Multi-agent orchestrator triggered: {workflow_name}")
+        
+        # Event: Starting multi-agent workflow
+        emit_event('thinking:step', {
+            'icon': '🎨',
+            'status': 'Building your complete outfit'
+        })
+        thinking_tracker.add_thinking("orchestrator", "Building complete outfit with specialized agents...")
+        
+        # Get user budget from profile or use default
+        budget_max = 500  # Default
+        if body.clerkUserId:
+            ai_profile = await _load_ai_profile(body.clerkUserId)
+            if ai_profile and ai_profile.get('budget_max'):
+                budget_max = float(ai_profile['budget_max'])
+        
+        # Execute multi-agent workflow
+        try:
+            result = await orchestrator.execute_workflow(
+                workflow_name=workflow_name,
+                query=q,
+                context={
+                    "budget_max": budget_max,
+                    "user_id": body.clerkUserId or body.guestSessionId,
+                    "user_size_history": {}  # Could load from profile
+                }
+            )
+            
+            # Track agent executions
+            for agent_name, timing_ms in result.get("agent_timings", {}).items():
+                usage = tool_tracker.start(f"agent_{agent_name}", {"workflow": workflow_name})
+                tool_tracker.complete(usage, {"duration_ms": timing_ms, "success": True})
+            
+            # Format as AgentOut response
+            outfit_items = result.get("outfit_items", [])
+            
+            if not outfit_items:
+                # No items found, fallback to explanation
+                return AgentOut(
+                    kind="answer",
+                    answer=result.get("reasoning", "I couldn't find items for this outfit. Try a different style or budget?"),
+                    items=[],
+                    reasoning=result.get("reasoning", ""),
+                    debug={"orchestrator": "no_items_found"}
+                )
+            
+            # Convert outfit items to AgentItem format
+            agent_items = []
+            for item in outfit_items:
+                product = item.get("product", {})
+                agent_items.append(AgentItem(
+                    slug=product.get("slug", ""),
+                    title=product.get("title", product.get("name", "Unknown")),
+                    priceNumeric=float(product.get("priceNumeric", product.get("price", 0))),
+                    imageUrl=product.get("imageUrl", product.get("image_url", "")),
+                    brand=product.get("brand", ""),
+                    category=item.get("category", ""),
+                    variantId=str(product.get("variantId", product.get("variant_id", ""))),
+                    color=item.get("color", ""),
+                    size=item.get("recommended_size", ""),
+                ))
+            
+            # Build outfit description
+            total = result.get("total", 0)
+            within_budget = result.get("within_budget", True)
+            discount = result.get("discount_applied")
+            
+            answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
+            
+            if discount:
+                answer_parts.append(f"Applied {discount.get('code')}: saved €{discount.get('savings', 0):.2f}")
+            
+            if within_budget:
+                remaining = budget_max - total
+                answer_parts.append(f"Within your €{budget_max} budget! €{remaining:.2f} remaining.")
+            else:
+                answer_parts.append(f"Slightly over budget by €{total - budget_max:.2f}")
+            
+            answer = " ".join(answer_parts)
+            
+            # Additional reasoning
+            reasoning_parts = [result.get("reasoning", "")]
+            if result.get("size_recommendations"):
+                reasoning_parts.append("Sizes recommended based on brand standards.")
+            
+            return AgentOut(
+                kind="discover",  # Show as product cards
+                answer=answer,
+                items=agent_items,
+                reasoning=" ".join(reasoning_parts),
+                debug={
+                    "orchestrator": workflow_name,
+                    "agent_timings": result.get("agent_timings", {}),
+                    "confidence": result.get("confidence", 0),
+                    "total": total,
+                    "within_budget": within_budget
+                }
+            )
+            
+        except Exception as e:
+            log.error(f"Multi-agent orchestrator failed: {e}")
+            # Fall through to normal agent flow
+            pass
+    
+    # ===== END MULTI-AGENT ORCHESTRATOR CHECK =====
 
     ai_profile: Optional[Dict[str, Any]] = None
     if body.clerkUserId:

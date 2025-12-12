@@ -1,0 +1,96 @@
+{
+    "occasions": {
+        "meeting": {
+            "keywords": [
+                "meeting",
+                "client",
+                "presentation",
+                "business"
+            ],
+            "default_style": "professional",
+            "description": "Professional business setting"
+        },
+        "date": {
+            "keywords": [
+                "date",
+                "dinner",
+                "romantic"
+            ],
+            "default_style": "casual",
+            "description": "Romantic or social outing"
+        },
+        "casual": {
+            "keywords": [
+                "casual",
+                "weekend",
+                "hangout",
+                "everyday"
+            ],
+            "default_style": "streetwear",
+            "description": "Relaxed everyday wear"
+        },
+        "formal": {
+            "keywords": [
+                "formal",
+                "event",
+                "gala",
+                "wedding"
+            ],
+            "default_style": "professional",
+            "description": "Formal event or ceremony"
+        },
+        "gym": {
+            "keywords": [
+                "gym",
+                "workout",
+                "fitness",
+                "exercise"
+            ],
+            "default_style": "casual",
+            "description": "Athletic or fitness activity"
+        }
+    },
+    "styles": {
+        "minimalist": {
+            "keywords": [
+                "minimalist",
+                "simple",
+                "clean",
+                "basic"
+            ],
+            "description": "Clean, simple, understated"
+        },
+        "streetwear": {
+            "keywords": [
+                "street",
+                "urban",
+                "casual",
+                "trendy"
+            ],
+            "description": "Urban, trendy, casual"
+        },
+        "professional": {
+            "keywords": [
+                "professional",
+                "business",
+                "formal",
+                "corporate"
+            ],
+            "description": "Polished, business-appropriate"
+        }
+    },
+    "selection_reasons": {
+        "meeting": "Professional and polished {category}",
+        "date": "Stylish and attractive {category}",
+        "casual": "Comfortable and relaxed {category}",
+        "formal": "Elegant and refined {category}",
+        "gym": "Comfortable and functional {category}"
+    },
+    "default_occasion": "casual",
+    "default_style": "casual",
+    "default_budget": 500,
+    "default_categories": [
+        "top",
+        "bottom"
+    ]
+}

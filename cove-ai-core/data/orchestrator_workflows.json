@@ -1,0 +1,43 @@
+{
+    "outfit_builder": {
+        "name": "Outfit Builder",
+        "description": "Build complete outfit recommendations with Stylist, Fit, and Budget agents",
+        "trigger_patterns": [
+            "build me a",
+            "build an outfit for",
+            "create an outfit for",
+            "outfit for my"
+        ],
+        "steps": [
+            {
+                "agent": "stylist",
+                "required": true,
+                "timeout_ms": 5000,
+                "parallel_group": 0,
+                "description": "Select outfit items based on occasion and style"
+            },
+            {
+                "agent": "fit",
+                "required": false,
+                "timeout_ms": 2000,
+                "parallel_group": 1,
+                "description": "Recommend sizes for selected items"
+            },
+            {
+                "agent": "budget",
+                "required": true,
+                "timeout_ms": 3000,
+                "parallel_group": 1,
+                "description": "Optimize pricing and apply discounts"
+            }
+        ],
+        "min_success_agents": 2,
+        "enable_checkpointing": true,
+        "max_retries": 2,
+        "observability": {
+            "track_metrics": true,
+            "log_state_transitions": true,
+            "log_agent_timings": true
+        }
+    }
+}
