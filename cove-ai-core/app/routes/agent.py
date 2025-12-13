@@ -1256,14 +1256,15 @@ async def _agent_query_impl(
                     product = item.get("product", {})
                     agent_items.append(AgentItem(
                         slug=product.get("slug", ""),
-                        title=product.get("title", product.get("name", "Unknown")),
-                        priceNumeric=float(product.get("priceNumeric", product.get("price", 0))),
-                        imageUrl=product.get("imageUrl", product.get("image_url", "")),
-                        brand=product.get("brand", ""),
-                        category=item.get("category", ""),
-                        variantId=str(product.get("variantId", product.get("variant_id", ""))),
-                        color=item.get("color", ""),
-                        size=item.get("recommended_size", ""),
+                        title=product.get("title", "Unknown"),
+                        url=product.get("url", f"/product/{product.get('slug', '')}"),
+                        score=product.get("score", 0.0),
+                        reason=item.get("reason", ""),
+                        type=product.get("type", ""),
+                        tier=product.get("tier", ""),
+                        color=product.get("color", ""),
+                        size=product.get("size", ""),
+                        variantId=product.get("variantId", ""),
                     ))
                 
                 # Build answer
@@ -1280,7 +1281,7 @@ async def _agent_query_impl(
                 answer = " ".join(answer_parts)
                 
                 return AgentOut(
-                    kind="discover",
+                    kind="recommendations",
                     answer=answer,
                     items=agent_items,
                     reasoning=orchestrator_result.get("reasoning", "")
@@ -1411,7 +1412,7 @@ async def _agent_query_impl(
                 reasoning_parts.append("Sizes recommended based on brand standards.")
             
             return AgentOut(
-                kind="discover",  # Show as product cards
+                kind="recommendations",  # Show as product cards
                 answer=answer,
                 items=agent_items,
                 reasoning=" ".join(reasoning_parts),

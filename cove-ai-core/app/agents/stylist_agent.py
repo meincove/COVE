@@ -98,19 +98,27 @@ class StylistAgent(BaseAgent):
         
         for category in categories:
             try:
-                # Build rich semantic query for this outfit component
-                # Don't filter by type - let vector search find best matches
-                category_query = f"{style} {category} for {occasion}"
+                # Map outfit category to product types
+                category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
+                valid_types = category_mapping.get(category, [category])
                 
-                # Call product recommendation - NO type filter, pure semantic search
+                # Build rich semantic query with SPECIFIC product types
+                # Instead of "top for meeting", say "hoodie OR blazer OR shirt for meeting"
+                if valid_types and valid_types != [category]:
+                    type_str = " OR ".join(valid_types)  # "hoodie OR blazer OR jacket"
+                    category_query = f"{style} {type_str} for {occasion}"
+                else:
+                    category_query = f"{style} {category} for {occasion}"
+                
+                # Call product recommendation - semantic search
                 search_payload = {
                     "query": category_query,
                     "clerkUserId": context.get("user_id"),
                     "guestSessionId": context.get("guest_session_id"),
                     "filters": {
-                        "price_max": remaining_budget * 0.6  # Allow slightly more flexibility
+                        "price_max": remaining_budget * 0.6
                     },
-                    "top_k": 20  # Get more candidates, filter by category later
+                    "top_k": 20
                 }
                 
                 result = await _call_recs_suggest(search_payload)
