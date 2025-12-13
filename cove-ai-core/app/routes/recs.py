@@ -113,6 +113,8 @@ class RecItem(BaseModel):
     color: Optional[str] = None
     size: Optional[str] = None
     variantId: Optional[str] = None
+    price: Optional[float] = None  # For budget filtering
+
 
 class RecsOut(BaseModel):
     items: List[RecItem]
@@ -400,6 +402,19 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             reason_bits.append(f"size {filters.size.upper()}")
 
         reason = ", ".join(reason_bits).capitalize()
+        
+        # Extract price for budget filtering
+        price_val = None
+        if "base_price" in meta:
+            try:
+                price_val = float(meta["base_price"])
+            except (ValueError, TypeError):
+                pass
+        elif "price" in meta:  # Fallback
+            try:
+                price_val = float(meta["price"])
+            except (ValueError, TypeError):
+                pass
 
         item = RecItem(
             title=title,
@@ -412,6 +427,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             color=color_name,
             size=filters.size,
             variantId=variant_id,
+            price=price_val,
         )
         scored_items.append((final_score, item))
 

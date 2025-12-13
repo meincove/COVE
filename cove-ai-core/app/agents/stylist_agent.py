@@ -92,6 +92,7 @@ class StylistAgent(BaseAgent):
         errors = []
         total_cost = 0.0
         remaining_budget = budget
+        selected_slugs = set()  # Track to avoid duplicates
         
         # Import here to avoid circular dependency
         from app.routes.agent import _call_recs_suggest
@@ -125,41 +126,47 @@ class StylistAgent(BaseAgent):
                 items = result.get("items", [])
                 
                 if items:
-                    # Map outfit category to product types (e.g., "top" → ["hoodie", "tee", "blazer"])
+                    # Map outfit category to product types
                     category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
                     valid_types = category_mapping.get(category, [category])
                     
-                    # Filter items by category type
+                    # STRICT filter: only valid types, no fallback!
                     category_items = [
                         item for item in items 
                         if item.get("type") in valid_types
+                        and item.get("slug") not in selected_slugs  # No duplicates!
                     ]
                     
-                    if not category_items:
-                        # Fallback: try any items if mapping didn't help
-                        category_items = items
-                    
-                    # Select best item that fits budget
+                    # Select best item that fits budget (if price available)
                     best_item = None
                     for item in category_items:
-                        item_price = float(item.get("priceNumeric", 0) or 0)
-                        if item_price <= remaining_budget:
+                        slug = item.get("slug", "")
+                        item_price = float(item.get("price", 0) or 0)
+                        
+                        # Budget check (skip if price not available)
+                        if slug and (item_price == 0 or item_price <= remaining_budget):
                             best_item = item
                             break
                         
                     if best_item:
-                        item_price = float(best_item.get("priceNumeric", 0))
+                        slug = best_item.get("slug", "")
+                        item_price = float(best_item.get("price", 0) or 0)
+                        
                         outfit_items.append({
                             "category": category,
                             "product": best_item,
                             "reason": self._get_selection_reason(category, occasion, style)
                         })
+                        
+                        selected_slugs.add(slug)  # Track to avoid duplicates
                         total_cost += item_price
                         remaining_budget -= item_price
                         tools_used.append(f"hybrid_search({category})")
+                        
+                        log.info(f"Selected {slug} (€{item_price}) for {category}, remaining budget: €{remaining_budget}")
                     else:
-                        errors.append(f"No affordable {category} within budget")
-                        log.warning(f"No {category} found within remaining budget €{remaining_budget}")
+                        errors.append(f"No {category} found within budget")
+                        log.warning(f"No affordable {category} within €{remaining_budget}")
                 else:
                     errors.append(f"No {category} found")
                     log.warning(f"No products found for {category}")
