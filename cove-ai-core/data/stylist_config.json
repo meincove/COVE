@@ -92,5 +92,26 @@
     "default_categories": [
         "top",
         "bottom"
-    ]
+    ],
+    "category_mapping": {
+        "top": [
+            "hoodie",
+            "sweatshirt",
+            "tee",
+            "blazer",
+            "jacket",
+            "sweater"
+        ],
+        "bottom": [
+            "pants",
+            "shorts",
+            "skirt"
+        ],
+        "accessories": [
+            "accessories"
+        ],
+        "dress": [
+            "dress"
+        ]
+    }
 }

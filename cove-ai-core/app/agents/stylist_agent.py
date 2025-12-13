@@ -98,33 +98,47 @@ class StylistAgent(BaseAgent):
         
         for category in categories:
             try:
-                # Build category-specific search query
+                # Build rich semantic query for this outfit component
+                # Don't filter by type - let vector search find best matches
                 category_query = f"{style} {category} for {occasion}"
                 
-                # Call product recommendation with budget constraint
+                # Call product recommendation - NO type filter, pure semantic search
                 search_payload = {
-                    "message": category_query,
+                    "query": category_query,
                     "clerkUserId": context.get("user_id"),
                     "guestSessionId": context.get("guest_session_id"),
                     "filters": {
-                        "type": category,
-                        "price_max": remaining_budget * 0.5  # Don't spend entire budget on one item
+                        "price_max": remaining_budget * 0.6  # Allow slightly more flexibility
                     },
-                    "top_k": 5  # Get top 5 candidates
+                    "top_k": 20  # Get more candidates, filter by category later
                 }
                 
                 result = await _call_recs_suggest(search_payload)
                 items = result.get("items", [])
                 
                 if items:
+                    # Map outfit category to product types (e.g., "top" → ["hoodie", "tee", "blazer"])
+                    category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
+                    valid_types = category_mapping.get(category, [category])
+                    
+                    # Filter items by category type
+                    category_items = [
+                        item for item in items 
+                        if item.get("type") in valid_types
+                    ]
+                    
+                    if not category_items:
+                        # Fallback: try any items if mapping didn't help
+                        category_items = items
+                    
                     # Select best item that fits budget
                     best_item = None
-                    for item in items:
-                        item_price = float(item.get("priceNumeric", 0))
+                    for item in category_items:
+                        item_price = float(item.get("priceNumeric", 0) or 0)
                         if item_price <= remaining_budget:
                             best_item = item
                             break
-                    
+                        
                     if best_item:
                         item_price = float(best_item.get("priceNumeric", 0))
                         outfit_items.append({

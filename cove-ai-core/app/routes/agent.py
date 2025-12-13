@@ -1376,14 +1376,15 @@ async def _agent_query_impl(
                 product = item.get("product", {})
                 agent_items.append(AgentItem(
                     slug=product.get("slug", ""),
-                    title=product.get("title", product.get("name", "Unknown")),
-                    priceNumeric=float(product.get("priceNumeric", product.get("price", 0))),
-                    imageUrl=product.get("imageUrl", product.get("image_url", "")),
-                    brand=product.get("brand", ""),
-                    category=item.get("category", ""),
-                    variantId=str(product.get("variantId", product.get("variant_id", ""))),
-                    color=item.get("color", ""),
-                    size=item.get("recommended_size", ""),
+                    title=product.get("title", "Unknown"),
+                    url=product.get("url", f"/product/{product.get('slug', '')}"),  # Required field!
+                    score=product.get("score", 0.0),
+                    reason=item.get("reason", ""),
+                    type=product.get("type", ""),
+                    tier=product.get("tier", ""),
+                    color=product.get("color", ""),
+                    size=product.get("size", ""),
+                    variantId=product.get("variantId", ""),
                 ))
             
             # Build outfit description

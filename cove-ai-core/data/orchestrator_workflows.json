@@ -12,7 +12,7 @@
             {
                 "agent": "stylist",
                 "required": true,
-                "timeout_ms": 5000,
+                "timeout_ms": 15000,
                 "parallel_group": 0,
                 "description": "Select outfit items based on occasion and style"
             },
