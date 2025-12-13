@@ -117,7 +117,7 @@ class StylistAgent(BaseAgent):
                     "clerkUserId": context.get("user_id"),
                     "guestSessionId": context.get("guest_session_id"),
                     "filters": {
-                        "price_max": remaining_budget * 0.6
+                        "price_max": remaining_budget  # Use full remaining budget, not 60%
                     },
                     "top_k": 20
                 }
