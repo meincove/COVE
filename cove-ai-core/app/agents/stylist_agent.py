@@ -97,7 +97,7 @@ class StylistAgent(BaseAgent):
         # Import here to avoid circular dependency
         from app.routes.agent import _call_recs_suggest
         
-        for category in categories:
+        for idx, category in enumerate(categories):
             try:
                 # Map outfit category to product types
                 category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
@@ -137,14 +137,21 @@ class StylistAgent(BaseAgent):
                         and item.get("slug") not in selected_slugs  # No duplicates!
                     ]
                     
-                    # Select best item that fits budget (if price available)
+                    # ✨ SMART BUDGET ALLOCATION
+                    # Divide remaining budget among remaining categories
+                    remaining_categories = len(categories) - idx
+                    per_category_budget = remaining_budget / remaining_categories if remaining_categories > 0 else remaining_budget
+                    
+                    log.info(f"   Budget for {category}: €{per_category_budget:.2f} (€{remaining_budget:.2f} / {remaining_categories} remaining)")
+                    
+                    # Select best item that fits per-category budget
                     best_item = None
                     for item in category_items:
                         slug = item.get("slug", "")
                         item_price = float(item.get("price", 0) or 0)
                         
-                        # Budget check (skip if price not available)
-                        if slug and (item_price == 0 or item_price <= remaining_budget):
+                        # Budget check: use per-category budget
+                        if slug and (item_price == 0 or item_price <= per_category_budget):
                             best_item = item
                             break
                         
