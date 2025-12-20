@@ -1,6 +1,6 @@
 'use client'
 
-import { useSignIn } from '@clerk/nextjs'
+import { useSignIn, useAuth } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import OwlCharacter from '@/src/components/auth/OwlCharacter'
@@ -8,6 +8,7 @@ import ValidatedInput from '@/src/components/auth/ValidatedInput'
 
 export default function CustomSignInPage() {
     const { signIn, setActive, isLoaded } = useSignIn()
+    const { isSignedIn } = useAuth()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -15,6 +16,18 @@ export default function CustomSignInPage() {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
     const [validationState, setValidationState] = useState<'correct' | 'wrong' | 'idle'>('idle')
     const router = useRouter()
+
+    // ✅ Redirect if already signed in
+    useEffect(() => {
+        if (isLoaded && isSignedIn) {
+            const selectedPath = localStorage.getItem('cove_selected_path')
+            if (selectedPath === 'platform') {
+                router.push('/partner-onboarding')
+            } else {
+                router.push('/shop')
+            }
+        }
+    }, [isLoaded, isSignedIn, router])
 
     // Track mouse for owl
     useEffect(() => {
@@ -52,7 +65,7 @@ export default function CustomSignInPage() {
                     if (selectedPath === 'platform') {
                         router.push('/partner-onboarding')
                     } else {
-                        router.push('/')
+                        router.push('/shop')
                     }
                 }, 2000)
             }
@@ -80,6 +93,17 @@ export default function CustomSignInPage() {
     const handleGoogleSignIn = async () => {
         if (!isLoaded) return
 
+        // ✅ Check if already signed in
+        if (isSignedIn) {
+            const selectedPath = localStorage.getItem('cove_selected_path')
+            if (selectedPath === 'platform') {
+                router.push('/partner-onboarding')
+            } else {
+                router.push('/shop')
+            }
+            return
+        }
+
         try {
             await signIn.authenticateWithRedirect({
                 strategy: 'oauth_google',
@@ -95,6 +119,17 @@ export default function CustomSignInPage() {
     // Apple OAuth
     const handleAppleSignIn = async () => {
         if (!isLoaded) return
+
+        // ✅ Check if already signed in
+        if (isSignedIn) {
+            const selectedPath = localStorage.getItem('cove_selected_path')
+            if (selectedPath === 'platform') {
+                router.push('/partner-onboarding')
+            } else {
+                router.push('/shop')
+            }
+            return
+        }
 
         try {
             await signIn.authenticateWithRedirect({

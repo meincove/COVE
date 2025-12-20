@@ -3,16 +3,16 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 
-import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
+// import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
 import ModalHost from "@/src/components/ModalHost";
 import { ModalProvider } from "@/src/context/ModalContext";
 import { ThemeProvider } from "@/src/components/ThemeProvider";
-import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot"; // NEW: Stunning chatbot!
-import AnalyticsInit from "@/src/components/AnalyticsInit"; // Analytics tracking (Dec 8)
+import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot";
+import AnalyticsInit from "@/src/components/AnalyticsInit"; // Analytics tracking
+
 
 import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
 import NavbarController from "@/src/components/Navbar/NavbarController";
-import ScrollHUD from "@/src/components/dev/ScrollHUD";
 
 export const metadata: Metadata = {
   title: "Cove",
@@ -27,11 +27,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <AnalyticsInit /> {/* Initialize analytics tracking */}
             <ModalProvider>
-              <RootOverlay />
+              {/* <RootOverlay /> */}
 
               {/* SINGLE scroll container for everything */}
               <div className="tester-frame h-screen w-full overflow-y-auto overflow-x-hidden">
-                <NavbarController />
+                {/* <NavbarController /> */}
                 <main>{children}</main>
               </div>
 
@@ -39,7 +39,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <FloatingChatbot />
 
               <ModalHost />
-              <ScrollHUD />
             </ModalProvider>
           </ThemeProvider>
         </body>
@@ -47,4 +46,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </ClerkProvider>
   );
 }
-
