@@ -259,6 +259,7 @@ class AgentItem(BaseModel):
     color: Optional[str] = None
     size: Optional[str] = None
     variantId: Optional[str] = None
+    price: Optional[float] = None  # Product price for display
 
 
 # Week 4: Agentic Enhancement - Visible Thinking Status

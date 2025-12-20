@@ -41,19 +41,33 @@ class OutfitBuilderTester:
                 timeout=30
             )
             
-            # Parse streaming response
+            # Parse streaming response (Server-Sent Events format)
             full_data = {}
+            all_items = []
+            
             for line in response.iter_lines():
                 if line:
                     try:
-                        data = json.loads(line.decode('utf-8'))
-                        if data.get('done'):
-                            full_data = data.get('done_data', {})
-                            break
-                    except:
+                        line_str = line.decode('utf-8')
+                        
+                        # SSE format: "data: {json}"
+                        if line_str.startswith('data: '):
+                            json_str = line_str[6:]  # Remove "data: " prefix
+                            data = json.loads(json_str)
+                            
+                            # Collect items from batches
+                            if 'items' in data:
+                                all_items.extend(data['items'])
+                            
+                            # Get final done data
+                            if data.get('kind') == 'recommendations':
+                                full_data = data
+                                
+                    except Exception as e:
                         continue
             
-            items = full_data.get('items', [])
+            # Use collected items if available
+            items = all_items if all_items else full_data.get('items', [])
             answer = full_data.get('answer', '')
             
             # Validation
