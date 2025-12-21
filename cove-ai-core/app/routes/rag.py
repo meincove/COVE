@@ -787,6 +787,34 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
 
     if tok in catalog_types:
         return tok
+    # Robust Synonym Mapping
+    SYNONYMS = {
+        "shirt": "tee",
+        "shirts": "tee",
+        "tshirt": "tee",
+        "tshirts": "tee",
+        "t-shirt": "tee",
+        "t-shirts": "tee",
+        "sneaker": "shoes",
+        "sneakers": "shoes",
+        "boot": "shoes",
+        "boots": "shoes",
+        "jogger": "pants",
+        "joggers": "pants",
+        "trouser": "pants",
+        "trousers": "pants",
+        "denim": "pants",
+        "jeans": "pants",
+        "knit": "sweater",
+        "knits": "sweater",
+        "top": "tee",  # Controversial but better than nothing
+        "bottom": "pants",
+    }
+    
+    if tok in SYNONYMS:
+        mapped = SYNONYMS[tok]
+        if mapped in catalog_types:
+            return mapped
 
     candidates = {tok}
     if tok.endswith("ies") and len(tok) > 3:
@@ -808,13 +836,46 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
 
 
 def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
+    print(f"🔍 [PARSE] Starting _parse_query_attrs for query: '{q}'")
     v = _get_vocab(conn)
     raw = re.findall(r"[a-zA-Z]+", q.lower())
     toks = set(raw)
+    print(f"🔍 [PARSE] Extracted tokens: {toks}")
 
+    # Color synonym mapping - expand simple colors to catalog variants
+    COLOR_SYNONYMS = {
+        "blue": ["mid blue", "ink navy"],
+        "navy": ["ink navy", "mid blue"],
+        "white": ["optical white", "off-white"],
+        "black": ["jet black", "black"],
+        "grey": ["stone grey", "charcoal"],
+        "gray": ["stone grey", "charcoal"],
+    }
+    
+    # Direct matches from vocab
     colors = sorted({t for t in toks if t in v["colors"]})
+    print(f"🔍 [PARSE] Direct color matches from vocab: {colors}")
+    
+    # Expand via synonyms
+    expanded_colors = []
+    for tok in toks:
+        if tok in COLOR_SYNONYMS:
+            print(f"🔍 [PARSE] Found synonym key '{tok}', expanding to: {COLOR_SYNONYMS[tok]}")
+            for catalog_color in COLOR_SYNONYMS[tok]:
+                if catalog_color in v["colors"] and catalog_color not in colors:
+                    expanded_colors.append(catalog_color)
+                    print(f"🔍 [PARSE]   ✓ Added '{catalog_color}' (in catalog)")
+                elif catalog_color not in v["colors"]:
+                    print(f"🔍 [PARSE]   ✗ Skipped '{catalog_color}' (not in catalog)")
+    
+    colors.extend(expanded_colors)
+    print(f"🔍 [PARSE] Colors after synonym expansion: {colors}")
+    
     if "hot" in toks and "pink" in toks:
         colors.append("hotpink")
+    
+    # Re-sort after expansion
+    colors = sorted(set(colors))
 
     sizes = sorted({t.upper() for t in toks if t.upper() in v["sizes"]})
 
@@ -826,8 +887,10 @@ def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
             norm_types.add(norm)
 
     types = sorted(norm_types)
-
-    return {"colors": colors, "sizes": sizes, "types": types}
+    
+    result = {"colors": colors, "sizes": sizes, "types": types}
+    print(f"🔍 [PARSE] Final parsed attrs: {result}")
+    return result
 
 
 class _FitParams(NamedTuple):

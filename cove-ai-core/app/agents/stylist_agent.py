@@ -97,106 +97,215 @@ class StylistAgent(BaseAgent):
         # Import here to avoid circular dependency
         from app.routes.agent import _call_recs_suggest
         
-        for idx, category in enumerate(categories):
+        # ✨ WEEK 2 DAY 4: Recall user preferences for personalization
+        user_preferences = {"dislikes": [], "likes": [], "colors": [], "recalled_memories": []}
+        user_id = context.get("user_id")
+        
+        if user_id:
             try:
-                # Map outfit category to product types
-                category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
-                valid_types = category_mapping.get(category, [category])
+                from app.services.user_preference_manager import get_preference_manager
+                pref_manager = await get_preference_manager()
                 
-                # Build rich semantic query with SPECIFIC product types
-                # Instead of "top for meeting", say "hoodie OR blazer OR shirt for meeting"
-                if valid_types and valid_types != [category]:
-                    type_str = " OR ".join(valid_types)  # "hoodie OR blazer OR jacket"
-                    category_query = f"{style} {type_str} for {occasion}"
-                else:
-                    category_query = f"{style} {category} for {occasion}"
+                # Recall relevant memories for this context
+                recalled = await pref_manager.recall_for_context(
+                    user_id=user_id,
+                    context=f"building {query}",
+                    top_k=5
+                )
                 
-                # Call product recommendation - semantic search
-                search_payload = {
-                    "query": category_query,
-                    "clerkUserId": context.get("user_id"),
-                    "guestSessionId": context.get("guest_session_id"),
-                    "filters": {
-                        "price_max": remaining_budget  # Use full remaining budget, not 60%
-                    },
-                    "top_k": 20
+                # Get full preference summary
+                summary = await pref_manager.get_user_preferences_summary(user_id)
+                
+                user_preferences = {
+                    "dislikes": summary.get("dislikes", []),
+                    "likes": summary.get("likes", []),
+                    "colors": summary.get("colors", []),
+                    "recalled_memories": recalled
                 }
                 
-                result = await _call_recs_suggest(search_payload)
-                items = result.get("items", [])
-                
-                if items:
+                if recalled:
+                    log.info(f"💭 Recalled {len(recalled)} user preferences for outfit building")
+                    for mem in recalled:
+                        log.info(f"  - [{mem['similarity']:.2f}] {mem['content'][:60]}")
+                        
+            except Exception as e:
+                log.warning(f"Failed to recall user preferences: {e}")
+
+        
+        try:
+            for idx, category in enumerate(categories):
+                try:
                     # Map outfit category to product types
                     category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
                     valid_types = category_mapping.get(category, [category])
                     
-                    # STRICT filter: only valid types, no fallback!
-                    category_items = [
-                        item for item in items 
-                        if item.get("type") in valid_types
-                        and item.get("slug") not in selected_slugs  # No duplicates!
-                    ]
-                    
-                    # ✨ SMART BUDGET ALLOCATION
-                    # Divide remaining budget among remaining categories
-                    remaining_categories = len(categories) - idx
-                    per_category_budget = remaining_budget / remaining_categories if remaining_categories > 0 else remaining_budget
-                    
-                    log.info(f"   Budget for {category}: €{per_category_budget:.2f} (€{remaining_budget:.2f} / {remaining_categories} remaining)")
-                    
-                    # Select best item that fits per-category budget
-                    best_item = None
-                    for item in category_items:
-                        slug = item.get("slug", "")
-                        item_price = float(item.get("price", 0) or 0)
-                        
-                        # Budget check: use per-category budget
-                        if slug and (item_price == 0 or item_price <= per_category_budget):
-                            best_item = item
-                            break
-                        
-                    if best_item:
-                        slug = best_item.get("slug", "")
-                        item_price = float(best_item.get("price", 0) or 0)
-                        
-                        outfit_items.append({
-                            "category": category,
-                            "product": best_item,
-                            "reason": self._get_selection_reason(category, occasion, style)
-                        })
-                        
-                        selected_slugs.add(slug)  # Track to avoid duplicates
-                        total_cost += item_price
-                        remaining_budget -= item_price
-                        tools_used.append(f"hybrid_search({category})")
-                        
-                        log.info(f"Selected {slug} (€{item_price}) for {category}, remaining budget: €{remaining_budget}")
+                    # Build rich semantic query with SPECIFIC product types
+                    # Instead of "top for meeting", say "hoodie OR blazer OR shirt for meeting"
+                    if valid_types and valid_types != [category]:
+                        type_str = " OR ".join(valid_types)  # "hoodie OR blazer OR jacket"
+                        category_query = f"{style} {type_str} for {occasion}"
                     else:
-                        errors.append(f"No {category} found within budget")
-                        log.warning(f"No affordable {category} within €{remaining_budget}")
-                else:
-                    errors.append(f"No {category} found")
-                    log.warning(f"No products found for {category}")
+                        category_query = f"{style} {category} for {occasion}"
                     
-            except Exception as e:
-                log.error(f"Search failed for {category}: {e}")
-                errors.append(f"Search error: {category}")
-        
-        # Calculate success and confidence
-        success = len(outfit_items) >= 2  # Need at least 2 items
-        within_budget = total_cost <= budget
-        
-        # Confidence based on completeness and budget adherence
-        confidence = (len(outfit_items) / len(categories)) * 0.9
-        if within_budget:
-            confidence += 0.1
-        
-        # Build reasoning
-        reasoning_parts = []
-        if outfit_items:
-            reasoning_parts.append(f"Selected {len(outfit_items)} items for {occasion} ({style} style)")
-        if errors:
-            reasoning_parts.append(f"Issues: {', '.join(errors[:2])}")  # Show first 2 errors
+                    # ✨ WEEK 2 DAY 4: Inject Preferences into Query (The Picky Client Check)
+                    # Ensure preferred colors/styles are explicitly searched for
+                    if user_preferences.get("colors"):
+                        color_boost = " ".join(user_preferences["colors"])
+                        category_query += f" {color_boost}"
+                        log.info(f"   🎨 Boosting colors in query: {color_boost}")
+                    
+                    if user_preferences.get("likes"):
+                        # Only add relevant likes (e.g. don't add "blazer" to "pants" search)
+                        relevant_likes = [
+                            like for like in user_preferences["likes"] 
+                            if like in category_query or len(like.split()) > 1
+                        ]
+                        if relevant_likes:
+                            like_boost = " ".join(relevant_likes)
+                            category_query += f" {like_boost}"
+                            log.info(f"   👍 Boosting likes in query: {like_boost}")
+                        
+                    # Call product recommendation - semantic search
+                    search_payload = {
+                        "query": category_query,
+                        "clerkUserId": context.get("user_id"),
+                        "guestSessionId": context.get("guest_session_id"),
+                        "filters": {
+                            "price_max": remaining_budget  # Use full remaining budget, not 60%
+                        },
+                        "top_k": 20
+                    }
+                    
+                    result = await _call_recs_suggest(search_payload)
+                    items = result.get("items", [])
+                    
+                    if items:
+                        # ✨ WEEK 2 DAY 4: Filter based on user preferences
+                        # Remove items user explicitly dislikes
+                        if user_preferences.get("dislikes"):
+                            original_count = len(items)
+                            
+                            # Check if user dislikes this product type
+                            disliked_types = []
+                            for dislike_statement in user_preferences["dislikes"]:
+                                statement_lower = dislike_statement.lower()
+                                # Extract product types from dislike statements
+                                if category.lower() in statement_lower or category.replace("_", " ").lower() in statement_lower:
+                                    disliked_types.append(category)
+                                    log.info(f"   🚫 User dislikes {category}: '{dislike_statement[:60]}'")
+                            
+                            # Skip this category entirely if user dislikes it
+                            if category in disliked_types:
+                                log.info(f"   ⏭️  Skipping {category} - user preference")
+                                continue
+                            
+                            # Filter out specific disliked items (colors, patterns, etc.)
+                            items = [
+                                item for item in items
+                                if not any(
+                                    dislike_keyword in (item.get("title") or "").lower()
+                                    or dislike_keyword in (item.get("color") or "").lower()
+                                    for dislike_statement in user_preferences["dislikes"]
+                                    for dislike_keyword in ["bright", "pattern", "flashy"]
+                                    if dislike_keyword in dislike_statement.lower()
+                                )
+                            ]
+                            
+                            if len(items) < original_count:
+                                log.info(f"   Filtered out {original_count - len(items)} items based on preferences")
+
+                        # Map outfit category to product types
+                        category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
+                        valid_types = category_mapping.get(category, [category])
+                        
+                        # STRICT filter: only valid types, no fallback!
+                        category_items = [
+                            item for item in items 
+                            if item.get("type") in valid_types
+                            and item.get("slug") not in selected_slugs  # No duplicates!
+                        ]
+                        
+                        # ✨ SMART BUDGET ALLOCATION
+                        # Divide remaining budget among remaining categories
+                        remaining_categories = len(categories) - idx
+                        per_category_budget = remaining_budget / remaining_categories if remaining_categories > 0 else remaining_budget
+                        
+                        log.info(f"   Budget for {category}: €{per_category_budget:.2f} (€{remaining_budget:.2f} / {remaining_categories} remaining)")
+                        
+                        # Select best item that fits per-category budget
+                        best_item = None
+                        for item in category_items:
+                            slug = item.get("slug", "")
+                            item_price = float(item.get("price", 0) or 0)
+                            
+                            # Budget check: use per-category budget
+                            if slug and (item_price == 0 or item_price <= per_category_budget):
+                                best_item = item
+                                break
+                            
+                        if best_item:
+                            slug = best_item.get("slug", "")
+                            item_price = float(best_item.get("price", 0) or 0)
+                            
+                            outfit_items.append({
+                                "category": category,
+                                "product": best_item,
+                                "reason": self._get_selection_reason(category, occasion, style)
+                            })
+                            
+                            selected_slugs.add(slug)  # Track to avoid duplicates
+                            total_cost += item_price
+                            remaining_budget -= item_price
+                            tools_used.append(f"hybrid_search({category})")
+                            
+                            log.info(f"Selected {slug} (€{item_price}) for {category}, remaining budget: €{remaining_budget}")
+                        else:
+                            errors.append(f"No {category} found within budget")
+                            log.warning(f"No affordable {category} within €{remaining_budget}")
+                    else:
+                        errors.append(f"No {category} found")
+                        log.warning(f"No products found for {category}")
+                        
+                except Exception as e:
+                    log.error(f"Search failed for {category}: {e}")
+                    errors.append(f"Search error: {category}")
+            
+            # Calculate success and confidence
+            success = len(outfit_items) >= 2  # Need at least 2 items
+            within_budget = total_cost <= budget
+            
+            # Confidence based on completeness and budget adherence
+            confidence = (len(outfit_items) / len(categories)) * 0.9
+            if within_budget:
+                confidence += 0.1
+            
+            # Build reasoning
+            reasoning_parts = []
+            if outfit_items:
+                reasoning_parts.append(f"Selected {len(outfit_items)} items for {occasion} ({style} style)")
+            if errors:
+                reasoning_parts.append(f"Issues: {', '.join(errors[:2])}")  # Show first 2 errors
+
+            # ✨ WEEK 3 DAY 1: Visual Validation (GPT-4o)
+            if len(outfit_items) >= 2:
+                try:
+                    from app.agents.visual_validator import VisualValidator
+                    validator = VisualValidator()
+                    
+                    log.info("🎨 Validating outfit visual harmony...")
+                    validation = await validator.validate_outfit(outfit_items)
+                    
+                    if validation:
+                        reasoning_parts.append(f"Stylist Check: {validation.get('critique')}")
+                        if validation.get("score", 1.0) < 0.6:
+                            log.warning(f"⚠️ Outfit visual clash detected: {validation.get('issues')}")
+                        
+                except Exception as e:
+                    log.error(f"Visual validation failed (skipping): {e}")
+
+        except Exception as e:
+            errors.append(f"Error building outfit: {str(e)}")
+            success = False
         
         reasoning = ". ".join(reasoning_parts) if reasoning_parts else "No items found"
         
@@ -208,7 +317,9 @@ class StylistAgent(BaseAgent):
                 "within_budget": within_budget,
                 "occasion": occasion,
                 "style": style,
-                "budget_remaining": remaining_budget
+                "budget_remaining": remaining_budget,
+                # Include validation data if available
+                "visual_validation": validation if 'validation' in locals() else None
             },
             reasoning=reasoning,
             confidence=min(confidence, 1.0),

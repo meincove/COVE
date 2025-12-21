@@ -351,7 +351,7 @@ _vocab_cache: Dict[str, Any] = {
 }
 
 
-def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]:
+def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 0) -> Dict[str, Any]:  # Temp: force refresh
     """
     Return lowercased distinct colors and types for product variants.
 
@@ -360,30 +360,38 @@ def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]
     """
     now = time()
     if (now - _vocab_cache["t"] < ttl_sec) and _vocab_cache["colors"]:
+        print(f"📚 [VOCAB] Using cached vocab (age: {now - _vocab_cache['t']:.1f}s)")
         return _vocab_cache
+    
+    print(f"📚 [VOCAB] Cache expired or empty, refreshing from ai_products...")
 
     colors, types = set(), set()
     with conn.cursor() as cur:
-        # Colors from meta.colorName
+        # Colors from ai_products.metadata->>'color'
+        # NOTE: ai_products is the correct table with actual color data
+        # ai_core.docs has 2567 products but NO colors
         cur.execute(
             """
-            SELECT DISTINCT lower(meta->>'colorName')
-            FROM ai_core.docs
-            WHERE kind = 'product'
-              AND COALESCE(meta->>'colorName','') <> ''
+            SELECT DISTINCT lower(metadata->>'color')
+            FROM ai_products
+            WHERE metadata->>'color' IS NOT NULL
+              AND metadata->>'color' != ''
             """
         )
         colors |= {r[0] for r in cur.fetchall() if r[0]}
 
-        # Types from meta.type (fallback to first word of title)
+        # Types from ai_products.type
         cur.execute(
             """
-            SELECT DISTINCT lower(COALESCE(meta->>'type', split_part(lower(title),' ',1)))
-            FROM ai_core.docs
-            WHERE kind = 'product'
+            SELECT DISTINCT lower(type)
+            FROM ai_products
+            WHERE type IS NOT NULL
+              AND type != ''
             """
         )
         types |= {r[0] for r in cur.fetchall() if r[0]}
 
+    print(f"📚 [VOCAB] Loaded {len(colors)} colors from ai_products: {sorted(colors)}")
+    print(f"📚 [VOCAB] Loaded {len(types)} types from ai_products: {sorted(types)}")
     _vocab_cache.update({"t": now, "colors": colors, "types": types})
     return _vocab_cache

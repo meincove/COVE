@@ -637,15 +637,19 @@ Always respond with JSON only.
         user_payload["previous_user_message"] = prev_user_message
 
     client = LLMClient()
-    raw = await client.generate(
-        [
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": json.dumps(user_payload, ensure_ascii=False),
-            },
-        ]
-    )
+    try:
+        raw = await client.generate(
+            [
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": json.dumps(user_payload, ensure_ascii=False),
+                },
+            ]
+        )
+    except Exception as e:
+        log.warning(f"_select_from_last_recs_via_llm failed: {e}")
+        return None
 
     try:
         text = raw.strip()
@@ -796,6 +800,7 @@ async def _build_discover_intro(
     items: List[AgentItem],
     rec_filters: Dict[str, Any],
     attrs: Dict[str, Any],
+    honesty_message: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate personalized intro for discover responses using LLM.
@@ -849,6 +854,9 @@ Examples (WITH history):
 - "Based on what you usually like, here are some hoodies that fit your aesthetic."
 - "Found some bombers in your style. Think you'll dig these."
 """
+
+    if honesty_message:
+        system_prompt += f"\n\nIMPORTANT: The system has already analyzed the search results and determined we don't have exactly what the user wanted. HONESTY MESSAGE: {honesty_message}. Use this information to explain the situation gently."
 
     user_payload = {
         "message": body.message,
@@ -1196,7 +1204,31 @@ async def _agent_query_impl(
     # Trackers are now passed as parameters (cleaner than re-creating)
 
     # ===== CONVERSATION FLOW HANDLER =====
-    # Check if this is a multi-step conversation (e.g., outfit builder)
+    # Check if this is    # ✨ WEEK 3 DAY 2: Context-Aware Reasoning
+    # Resolve intent using conversation history (handle follow-ups)
+    
+    # 1. Get/Create Manager
+    from app.services.conversation_manager import get_conversation_manager
+    conv_manager = get_conversation_manager()
+    user_id = body.clerkUserId or body.guestSessionId or "anonymous"
+    
+    # 2. Add User Message to History
+    conv_manager.add_message(user_id, "user", q)
+    
+    # 3. Resolve Inteht (LLM)
+    # "Make it blue" -> "Show me blue blazers"
+    resolved_context = await conv_manager.resolve_intent(user_id, q)
+    resolved_query = resolved_context.get("resolved_query", q)
+    modification_type = resolved_context.get("modification_type", "new_topic")
+    
+    log.info(f"🧠 Context Resolved: '{q}' -> '{resolved_query}' ({modification_type})")
+    
+    # Use resolved query for downstream logic
+    q = resolved_query  
+    
+    # --- END Context Logic ---
+
+    from app.services.user_preference_manager import get_preference_manager
     from app.core.conversation_flow import conversation_handler
     
     session_key = _session_key_from_body(body)
@@ -1437,14 +1469,28 @@ async def _agent_query_impl(
     
     # ===== END CONVERSATION FLOW HANDLER =====
 
-    # ===== MULTI-AGENT ORCHESTRATOR CHECK =====
-    # Check if query should be handled by multi-agent orchestrator
-    # (only triggers if user provides full details now)
-    from app.agents import orchestrator
+    # ===== INTENT-BASED ROUTING (UNIFIED) =====
+    # We use the IntentClassifier as the verified router.
+    # - "outfit_builder" -> Multi-Agent Orchestrator
+    # - "recommendations" -> Legacy RAG (Product Search)
+    # - "cart/checkout" -> Handled by legacy flow below (or locally if needed)
     
-    workflow_name = await orchestrator.should_handle(q)
-    if workflow_name:
-        log.info(f"🎯 Multi-agent orchestrator triggered: {workflow_name}")
+    from app.mcp_agents.intent_classifier import get_classifier
+    from app.agents import orchestrator
+
+    # Classify intent
+    classifier = get_classifier()
+    classification = classifier.classify(q)
+    intent = classification.get("intent")
+    confidence = classification.get("confidence", 0.0)
+    
+    print(f"DEBUG: 🧭 Routing: intent='{intent}' confidence={confidence}")
+
+    # Explicitly route ONLY complex outfit requests to the Agent Orchestrator
+    if intent == "outfit_builder" and confidence > 0.6:
+        workflow_name = "outfit_builder"
+        print(f"DEBUG: 🎯 Routing to Agent Orchestrator: {workflow_name}")
+
         
         # Event: Starting multi-agent workflow
         emit_event('thinking:step', {
@@ -1557,13 +1603,17 @@ async def _agent_query_impl(
 
     with get_conn() as conn:
         attrs = _parse_query_attrs(conn, q)
+        print(f"🎯 [AGENT] Received parsed attrs from _parse_query_attrs: {attrs}")
         numeric_filters = parse_numeric_filters(q)
+        print(f"🎯 [AGENT] Numeric filters: {numeric_filters}")
         base_filters: Dict[str, Any] = build_filters(attrs, numeric_filters)
+        print(f"🎯 [AGENT] Base filters after build_filters: {base_filters}")
 
     rec_filters: Dict[str, Any] = _apply_profile_defaults_to_filters(
         base_filters,
         ai_profile,
     )
+    print(f"🎯 [AGENT] Final rec_filters after profile defaults: {rec_filters}")
 
     # Event: Understanding request
     emit_event('thinking:step', {
@@ -1606,13 +1656,18 @@ async def _agent_query_impl(
         "discover": "recommendations",
         "cart_add": "cart_proposal",
         "checkout_start": "checkout_ready",
-        "generic": "answer",
-        "policy": "answer",
         "size_fit": "answer",
-        "greeting": "answer",
-        "unknown": "answer",
-        "order_query": "answer",
+        "policy": "answer",
+        "agent_stylist": "recommendations"
     }
+    
+    # PRE-FLIGHT: Clear Classifier singleton to ensure config reload if needed
+    # (Optional but good for debug/dev when config changes)
+    if os.getenv("ENV") != "production":
+        from app.mcp_agents.intent_classifier import classifier
+        classifier._classifier = None
+
+    # --- Branch 1: cart_proposal -------------------------------------------------
     api_response_kind = ORCHESTRATOR_TO_API_KIND.get(intent_kind, "answer")
     
     # Production monitoring - using print for immediate visibility
@@ -2359,6 +2414,7 @@ async def _agent_query_impl(
         debug_plan["rec_item_count"] = len(items)
 
         if items:
+            print(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
             # Phase 1: Filter out items user has already seen (for "show more")
             shown_slugs = _get_shown_slugs(body)
             if shown_slugs:
@@ -2368,6 +2424,40 @@ async def _agent_query_impl(
             
             # Limit to user's requested top_k (after filtering)
             items = items[:body.top_k]
+            print(f"📦 [RECS] Items after shown filter + top_k limit: {len(items)} items")
+            
+            # ✨ WEEK 3 DAY 2: Honest Product Availability Check
+            # Prevent recommending t-shirts for suits!
+            from app.agents.product_availability_checker import ProductAvailabilityChecker
+            checker = ProductAvailabilityChecker()
+            
+            # Event: Validating results
+            emit_event('thinking:step', {
+                'icon': '🛡️',
+                'status': 'Validating product matches'
+            })
+            
+            availability = await checker.check_and_recommend(
+                user_query=q,
+                search_results=[it.dict() for it in items]
+            )
+            print(f"🛡️ [AVAILABILITY] Checker returned: should_show={availability.get('should_show_results')}, exact={availability.get('exact_match')}, close={availability.get('has_close_alternative')}")
+            print(f"🛡️ [AVAILABILITY] Recommended items count: {len(availability.get('recommended_items', []))}")
+            print(f"🛡️ [AVAILABILITY] Honesty message: {availability.get('honesty_message')}")
+            
+            # If checker says no, we don't show results
+            if not availability.get("should_show_results", True):
+                print(f"❌ [AVAILABILITY] Rejecting results - returning 0 items with honesty message")
+                log.info(f"🚫 Availability Checker rejected results for '{q}': {availability.get('honesty_message')}")
+                # Fall through to RAG/Chat with the honesty message
+                return AgentOut(
+                    kind="answer",
+                    answer=availability.get("honesty_message") or f"Sorry, we don't have '{q}' in our catalog.",
+                    items=[],
+                    debug_plan={**debug_plan, "availability_rejected": True}
+                )
+            
+            print(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
             
             # Mark these NEW items as shown for this session
             _mark_slugs_as_shown(body, [item.slug for item in items])
@@ -2380,16 +2470,18 @@ async def _agent_query_impl(
                 items=items,
                 attrs=attrs,
                 rec_filters=rec_filters,
+                honesty_message=availability.get("honesty_message")
             )
 
             debug_plan["llm_discover_intro_used"] = intro_info.get("llm_used", False)
             debug_plan["llm_discover_intro_history_len"] = intro_info.get("history_len", 0)
             debug_plan["llm_discover_intro_summary_used"] = intro_info.get("summary_used", False)
+            debug_plan["availability_explanation"] = availability.get("alternative_explanation")
 
             if intro_info.get("llm_used"):
                 debug_plan["llm_used"] = True
 
-            intro_line = intro_info.get("text", "Here are some options that match what you asked for.")
+            intro_line = intro_info.get("text", availability.get("honesty_message") or "Here are some options.")
 
             # Event: Ranking complete
             emit_event('thinking:step', {

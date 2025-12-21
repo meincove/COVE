@@ -147,6 +147,13 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
             'answer': result.answer if hasattr(result, 'answer') else None,
         }
         
+        # Add items if they exist in the result
+        if hasattr(result, 'items') and result.items:
+            done_data['items'] = [item.dict() for item in result.items]
+            print(f"[STREAMING DEBUG] Added {len(result.items)} items to done_data")
+        else:
+            print(f"[STREAMING DEBUG] No items in result to add")
+        
         # Phase 1: Serialize thinking_events and tools_used from trackers
         try:
             # Use correct methods: get_all_events() and get_summary()

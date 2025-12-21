@@ -15,9 +15,12 @@ import time
 import logging
 import json
 import asyncio
+import os
+import litellm
 from pathlib import Path
 
 from app.core.agent_registry import registry
+from app.services.conversation_manager import get_conversation_manager
 
 log = logging.getLogger("cove.agents.orchestrator")
 
@@ -104,20 +107,80 @@ class MultiAgentOrchestrator:
     
     async def should_handle(self, query: str) -> Optional[str]:
         """
-        Check if query matches any workflow triggers.
-        Config-driven - NO HARDCODING!
+        Smart Router: Classify query into one of the available workflows.
         
-        Returns workflow name or None.
+        1. Try simple keyword match (fast path)
+        2. If ambiguous, ask LLM (smart path)
+        
+        Returns workflow name or None (if general chat).
         """
         query_lower = query.lower()
         
+        # 1. Fast Path: Keyword Shortcuts
         for workflow_name, workflow in self.workflows.items():
             triggers = workflow.get("trigger_patterns", [])
-            if any(trigger in query_lower for trigger in triggers):
-                log.info(f"✓ Query matched workflow: {workflow_name}")
-                return workflow_name
+            for trigger in triggers:
+                if trigger in query_lower:
+                    log.info(f"✓ Fast-path matched workflow: {workflow_name} (trigger: '{trigger}')")
+                    return workflow_name
+
         
-        return None
+        # 2. Smart Path: LLM Intent Classification
+        try:
+            # Get conversation history for context (if available)
+            # This helps distinguish flow ("add shoes" vs "new outfit")
+            # We assume user_id is in current context or we skip history lookup here
+            # For simplicity in routing, we look at the query itself mostly
+            
+            # Use the dedicated Router Model (cheaper/faster, e.g. gpt-4o-mini)
+            router_model = os.getenv("LLM_ROUTER_MODEL", "openrouter/openai/gpt-4o-mini")
+            log.info(f"🤔 Routing query via {router_model}: {query[:50]}...")
+            
+            # Construct prompt with available workflows
+            workflow_descriptions = []
+            for name, wf in self.workflows.items():
+                workflow_descriptions.append(f"- {name}: {wf.get('description')}")
+            
+            system_prompt = f"""You are the Orchestrator Router for a fashion AI.
+Your job is to map the user's query to the best available workflow.
+
+Available Workflows:
+{chr(10).join(workflow_descriptions)}
+
+Rules:
+1. RESPONSE MUST BE RAW JSON. Do not include markdown blocks (```json).
+2. Format: {{"workflow": "workflow_name"}} or {{"workflow": null}}.
+3. Be conservative. If user just says "hi", return null.
+4. "outfit_builder" is ONLY for complex OUTFIT requests ("outfit for date", "what matches this", "style me").
+5. "knowledge_query" is for QUESTIONS about fashion/style ("what is...", "how to wear...").
+6. "support_request" is for RETURNS, SHIPPING, ORDER STATUS.
+7. SIMPLE SEARCH ("show me hoodies", "red dress", "search for shoes") -> null (Legacy system handles these).
+8. "add to cart", "buy", "checkout", "check out" -> null.
+"""
+
+            response = await litellm.acompletion(
+                model=router_model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": query}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.0
+            )
+            
+            result = json.loads(response.choices[0].message.content)
+            workflow = result.get("workflow")
+            
+            if workflow and workflow in self.workflows:
+                log.info(f"🎯 LLM routed to: {workflow}")
+                return workflow
+                
+            log.info("🤷 LLM declined to route (general chat)")
+            return None
+            
+        except Exception as e:
+            log.error(f"Router failed: {e}")
+            return None
     
     async def execute_workflow(
         self,

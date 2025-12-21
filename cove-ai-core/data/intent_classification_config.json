@@ -1,8 +1,40 @@
 {
     "intents": {
+        "outfit_builder": {
+            "description": "User wants to create a complete outfit, combine multiple items, or get complex styling advice for an occasion.",
+            "priority": 0,
+            "examples": [
+                "build me an outfit",
+                "what goes with this shirt",
+                "style me for a date",
+                "create a look for summer",
+                "match this with pants",
+                "I need a full outfit",
+                "outfit for a wedding",
+                "3 piece suit",
+                "show me some suits"
+            ],
+            "keywords": [
+                "outfit",
+                "style",
+                "look",
+                "match",
+                "combine",
+                "wear with",
+                "suit",
+                "suits",
+                "tuxedo"
+            ],
+            "required_entities": [],
+            "optional_entities": [
+                "occasion",
+                "style_preference",
+                "budget"
+            ]
+        },
         "recommendations": {
-            "description": "User wants product suggestions or recommendations",
-            "priority": 1,
+            "description": "User wants simple product suggestions for a specific item type only.",
+            "priority": 2,
             "examples": [
                 "show me hoodies",
                 "I'm looking for jackets",

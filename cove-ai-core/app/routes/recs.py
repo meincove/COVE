@@ -169,8 +169,18 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     
     # Apply config-driven fuzzy matching for typo tolerance (NO hardcoded corrections!)
     from app.core.fuzzy import apply_fuzzy_matching
+    from app.vector.store import catalog_vocab, get_conn
+    
     original_query = body.query or ""
-    processed_query = apply_fuzzy_matching(original_query) if original_query else ""
+    
+    # Get catalog vocabulary - only fuzzy match to known product types!
+    catalog_types = set()
+    if original_query:
+        with get_conn() as conn:
+            vocab = catalog_vocab(conn)
+            catalog_types = set(t.lower() for t in vocab.get("types", []))
+    
+    processed_query = apply_fuzzy_matching(original_query, catalog_types) if original_query else ""
 
     # Track if we had any non-price filters
     had_filters = any([

@@ -39,5 +39,39 @@
             "log_state_transitions": true,
             "log_agent_timings": true
         }
+    },
+    "knowledge_query": {
+        "name": "Knowledge Assistant",
+        "description": "Answer usage or fashion concept questions",
+        "steps": [
+            {
+                "agent": "knowledge",
+                "required": true,
+                "timeout_ms": 10000,
+                "description": "Consult fashion knowledge base"
+            }
+        ],
+        "min_success_agents": 1,
+        "enable_checkpointing": false,
+        "observability": {
+            "track_metrics": true
+        }
+    },
+    "support_request": {
+        "name": "Support Assistant",
+        "description": "Handle customer service requests",
+        "steps": [
+            {
+                "agent": "support",
+                "required": true,
+                "timeout_ms": 5000,
+                "description": "Execute support rules"
+            }
+        ],
+        "min_success_agents": 1,
+        "enable_checkpointing": false,
+        "observability": {
+            "track_metrics": true
+        }
     }
 }

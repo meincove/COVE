@@ -136,14 +136,14 @@ class IntentClassifier:
             # Get model from config (default to slash format for LiteLLM)
             model = self.settings.get("llm_model", "openrouter/openai/gpt-4o-mini")
             
-            # LiteLLM with OpenRouter needs api_base set
+            # LiteLLM handles OpenRouter via model prefix
             response = completion(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Query: {query}"}
                 ],
-                api_base="https://openrouter.ai/api/v1",
+                # api_base removed - let LiteLLM handle it via prefix
                 api_key=os.getenv("OPENROUTER_API_KEY"),
                 temperature=self.settings.get("llm_temperature", 0),
                 max_tokens=self.settings.get("llm_max_tokens", 20)
