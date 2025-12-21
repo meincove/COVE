@@ -74,13 +74,18 @@ export default function ProductPage() {
         setIsLoading(true)
 
         // hit our Next.js proxy, which already returns UiProduct shape
-        const res = await fetch(
-          `/api/catalog/product?slug=${encodeURIComponent(slugStr)}`,
-          { cache: 'no-store' }
-        )
+        // Pass both slug and variantId for the most accurate data
+        const apiUrl = `/api/catalog/product?slug=${encodeURIComponent(slugStr)}${urlVariantId ? `&variantId=${encodeURIComponent(urlVariantId)}` : ''}`
+
+        const res = await fetch(apiUrl, { cache: 'no-store' })
 
         if (!res.ok) {
-          console.error('Failed to fetch product', res.status)
+          try {
+            const errorData = await res.json()
+            console.error('Failed to fetch product:', res.status, errorData)
+          } catch {
+            console.error('Failed to fetch product:', res.status)
+          }
           setProduct(null)
           setDefaultSelectedSize(null)
           setDefaultQuantity(0)
@@ -212,8 +217,22 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-lg text-gray-400">Invalid or missing product</p>
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
+        <div className="max-w-md text-center">
+          <p className="text-2xl font-bold mb-4">Product Not Found</p>
+          <p className="text-lg text-gray-400 mb-6">
+            The product you're looking for doesn't exist or has been removed.
+          </p>
+          <p className="text-sm text-gray-500 mb-8">
+            Product slug: <code className="bg-gray-800 px-2 py-1 rounded">{slugParam}</code>
+          </p>
+          <button
+            onClick={() => window.location.href = '/shopping'}
+            className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium transition-colors"
+          >
+            ← Back to Shopping
+          </button>
+        </div>
       </div>
     )
   }

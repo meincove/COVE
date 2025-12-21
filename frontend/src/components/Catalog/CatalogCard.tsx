@@ -145,6 +145,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import CatalogCardBase from './CatalogCardBase'
 import { useModal } from '@/src/context/ModalContext'
 import { colorThemes, colorNameToThemeKey } from '@/utils/colorThemes'
@@ -177,6 +178,8 @@ export default function CatalogCard({
   sizes,
   gender,
   fit,
+  slug,
+  brand, // Brand ID for URL routing
   selectedVariantId,
   selectedSize,
   isActive = true,
@@ -184,6 +187,7 @@ export default function CatalogCard({
   onToggleExpand,
   onVariantChange,
 }: CatalogCardProps) {
+  const router = useRouter()
   const { openModal } = useModal()
 
   // ---------- COLOR STATE ----------
@@ -270,32 +274,37 @@ export default function CatalogCard({
     }
   })()
 
-  // ---------- MODAL OPEN ----------
+  // ---------- REDIRECTION / MODAL OPEN ----------
   const handleBrowse = () => {
     if (!isActive) return
 
+    // If the parent provided an expand handler, use it (usually for carousel)
     if (onToggleExpand) {
       onToggleExpand()
       return
     }
 
-    openModal({
-      layoutKey: layoutKey.toString(),
-      id,
-      name,
-      description,
-      tier,
-      material,
-      type,
-      price,
-      colors,
-      sizes,
-      selectedVariantId: selectedColor.variantId,
-      gender,
-      fit,
-      selectedSize: null,
-      initialQuantity: 1,
-    })
+    // Brand-First URL Structure (Dec 18 multi-brand update)
+    const productSlug = slug || id
+    const variantId = selectedColor.variantId
+    const colorName = (selectedColor.colorName || 'default').toLowerCase().replace(/\s+/g, '-')
+
+    // Map brand_id to brand slug for URL
+    const brandSlugMap: Record<string, string> = {
+      'COVE': 'cove',
+      'BoldHues': 'boldhues',
+      'ModernHeritage': 'modern-heritage'
+    }
+
+    const brandSlug = brand ? brandSlugMap[brand] : null
+
+    // Use brand-first URL structure when brand is available
+    // Otherwise fall back to old structure
+    const url = brandSlug
+      ? `/brands/${brandSlug}/products/${productSlug}?variantId=${variantId}&color=${colorName}`
+      : `/product/${productSlug}?variantId=${variantId}&color=${colorName}`
+
+    router.push(url)
   }
 
   return (

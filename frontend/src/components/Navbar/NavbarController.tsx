@@ -140,7 +140,6 @@
 
 
 
-
 "use client";
 
 import {
@@ -155,7 +154,6 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import FullNavbar from "./NavbarComponents/FullModeNavbar/FullNavbar";
 import IslandNavbar from "./NavbarComponents/IslandModeNavbar/IslandNavbar";
-import MenuNavbar from "./NavbarComponents/MenuModeNavbar/MenuNavbar";
 
 export type NavbarMode = "full" | "island" | "menu";
 
@@ -177,13 +175,15 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
   const pathname = usePathname();
   const [mode, setModeState] = useState<NavbarMode>("full");
 
+  // ✅ Hide old navbar ONLY on "/" and "/shopping" (test route)
+  const shouldHideNavbar = pathname === "/" || pathname?.startsWith("/shopping");
+
   const lastNonMenuModeRef = useRef<Exclude<NavbarMode, "menu">>("full");
   const modeRef = useRef<NavbarMode>("full");
   useEffect(() => {
     modeRef.current = mode;
   }, [mode]);
 
-  // lock so users can't interrupt the full <-> island animation
   const transitionLockRef = useRef(false);
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -230,12 +230,11 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
         if (next !== "full" && y < EXIT_ISLAND) next = "full";
 
         if (next !== modeRef.current) {
-          // lock transitions for the duration of the fade
           transitionLockRef.current = true;
           if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
           lockTimeoutRef.current = setTimeout(() => {
             transitionLockRef.current = false;
-          }, 400); // a bit longer than motion duration
+          }, 400);
 
           setModeState(next);
           modeRef.current = next;
@@ -279,39 +278,17 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
     };
   }, []);
 
-
-  // inside NavbarController return
-
   return (
     <NavbarModeCtx.Provider value={{ mode, setMode }}>
-      {/* Hide navbar on welcome page */}
-      {pathname !== '/' && (
+      {/* ✅ Old navbar hidden on "/" + "/shopping" only */}
+      {!shouldHideNavbar && (
         <AnimatePresence mode="wait" initial={false}>
           {mode === "full" && <FullNavbar key="full" />}
-
-          {/* ONE shared IslandNavbar instance for both island + menu */}
-          {mode !== "full" && (
-            <IslandNavbar key="island" isMenu={mode === "menu"} />
-          )}
+          {mode !== "full" && <IslandNavbar key="island" isMenu={mode === "menu"} />}
         </AnimatePresence>
       )}
 
       {children}
     </NavbarModeCtx.Provider>
   );
-
-
-  // return (
-  //   <NavbarModeCtx.Provider value={{ mode, setMode }}>
-  //     <AnimatePresence mode="wait" initial={false}>
-  //       {mode === "full" && <FullNavbar key="full" />}
-
-  //       {(mode === "island" || mode === "menu") && (
-  //         <IslandNavbar key={mode} isMenu={mode === "menu"} />
-  //       )}
-  //     </AnimatePresence>
-
-  //     {children}
-  //   </NavbarModeCtx.Provider>
-  // );
 }
