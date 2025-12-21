@@ -351,7 +351,7 @@ _vocab_cache: Dict[str, Any] = {
 }
 
 
-def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 0) -> Dict[str, Any]:  # Temp: force refresh
+def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]:
     """
     Return lowercased distinct colors and types for product variants.
 

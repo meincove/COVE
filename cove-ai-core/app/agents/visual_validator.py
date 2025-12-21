@@ -21,8 +21,9 @@ class VisualValidator:
     Validates outfit visual harmony using Multi-Modal LLM (GPT-4o).
     """
     
-    def __init__(self, model: str = "openrouter/openai/gpt-4o"):
-        self.model = model
+    def __init__(self, model: Optional[str] = None):
+        """Initialize with model from env (GEN_MODEL) or explicit override"""
+        self.model = model or os.getenv("GEN_MODEL", "openrouter/openai/gpt-4o-mini")
     
     async def validate_outfit(self, items: List[Dict]) -> Dict:
         """

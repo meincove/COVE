@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import re
 from typing import Any, Dict, List, Optional, NamedTuple
 
 from fastapi import APIRouter
+from pathlib import Path
 from pydantic import BaseModel
 
 from app.agent.verify import apply_guardrails, cross_check
@@ -274,6 +276,18 @@ class RAGIn(BaseModel):
 # ------------------ Embeddings (async, kept for completeness) ------------------
 
 EMBED_MODEL = os.getenv("EMBED_MODEL", "openrouter:openai/text-embedding-3-small")
+
+# Type normalization config cache
+_type_norm_config_cache = None
+
+def _get_type_normalization_config():
+    """Load type normalization config from JSON (cached)"""
+    global _type_norm_config_cache
+    if _type_norm_config_cache is None:
+        config_path = Path(__file__).resolve().parent.parent.parent / "data" / "type_normalization_config.json"
+        with open(config_path) as f:
+            _type_norm_config_cache = json.load(f)
+    return _type_norm_config_cache
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY", "")
@@ -787,34 +801,15 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
 
     if tok in catalog_types:
         return tok
-    # Robust Synonym Mapping
-    SYNONYMS = {
-        "shirt": "tee",
-        "shirts": "tee",
-        "tshirt": "tee",
-        "tshirts": "tee",
-        "t-shirt": "tee",
-        "t-shirts": "tee",
-        "sneaker": "shoes",
-        "sneakers": "shoes",
-        "boot": "shoes",
-        "boots": "shoes",
-        "jogger": "pants",
-        "joggers": "pants",
-        "trouser": "pants",
-        "trousers": "pants",
-        "denim": "pants",
-        "jeans": "pants",
-        "knit": "sweater",
-        "knits": "sweater",
-        "top": "tee",  # Controversial but better than nothing
-        "bottom": "pants",
-    }
+    # Load type synonyms from config (NO HARDCODING!)
+    config = _get_type_normalization_config()
+    synonyms = config.get('type_synonyms', {})
     
-    if tok in SYNONYMS:
-        mapped = SYNONYMS[tok]
-        if mapped in catalog_types:
-            return mapped
+    # Check if token is a synonym for any canonical type
+    for canonical_type, synonym_list in synonyms.items():
+        if tok in [s.lower() for s in synonym_list]:
+            if canonical_type in catalog_types:
+                return canonical_type
 
     candidates = {tok}
     if tok.endswith("ies") and len(tok) > 3:
@@ -1249,7 +1244,8 @@ async def rag_query(body: RAGIn):
         fit_params = _parse_fit_params(body.query)
 
         if intent_kind == "size_fit" and fit_params is not None:
-            product_type = (attrs.get("types") or ["hoodie"])[0]
+            # Generic fallback instead of hardcoded "hoodie"
+            product_type = (attrs.get("types") or ["apparel"])[0]
             slug_for_fit = _pick_primary_slug_for_fit(conn, docs, attrs)
 
             fit_resp = await _call_fit_recommend(

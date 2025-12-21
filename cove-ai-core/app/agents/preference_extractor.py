@@ -26,8 +26,9 @@ class PreferenceExtractor:
         >>> # Returns: {"dislikes": ["hoodie", "bright_colors"], ...}
     """
     
-    def __init__(self, model: str = "openrouter/anthropic/claude-3.5-sonnet"):
-        self.model = model
+    def __init__(self, model: Optional[str] = None):
+        """Initialize with model from env (GEN_MODEL) or explicit override"""
+        self.model = model or os.getenv("GEN_MODEL", "openrouter/openai/gpt-4o-mini")
     
     async def extract(self, statement: str) -> Dict:
         """

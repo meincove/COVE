@@ -22,8 +22,9 @@ class OccasionAnalyzer:
     - Intelligent budget allocation (not just 50/50 split)
     """
     
-    def __init__(self, model: str = "openrouter/anthropic/claude-3.5-sonnet"):
-        self.model = model
+    def __init__(self, model: Optional[str] = None):
+        """Initialize with model from env (GEN_MODEL) or explicit override"""
+        self.model = model or os.getenv("GEN_MODEL", "openrouter/openai/gpt-4o-mini")
     
     async def analyze(
         self,

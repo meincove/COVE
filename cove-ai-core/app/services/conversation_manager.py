@@ -74,8 +74,10 @@ class ConversationManager:
             # We use a lower temperature for deterministic resolution
             log.info(f"Resolving intent for user {user_id}...")
             
+            # Normalize model format (openrouter: → openrouter/)
+            model = os.getenv("GEN_MODEL", "openrouter/openai/gpt-4o-mini").replace("openrouter:", "openrouter/")
             response = await litellm.acompletion(
-                model=os.getenv("LLM_MAIN_MODEL", "openrouter/anthropic/claude-3.5-sonnet"),
+                model=model,
                 messages=[
                     {
                         "role": "system", 
