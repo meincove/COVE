@@ -868,21 +868,22 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
               >
                 {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
 
-                {/* Phase 1: Show enhanced thinking OR old content, not both */}
-                {recMeta && (recMeta.thinking_events || recMeta.tools_used) ? (
+                {/* Phase 1: Show enhanced thinking if available */}
+                {recMeta && (recMeta.thinking_events || recMeta.tools_used) && (
                   <EnhancedThinking
                     thinking_events={recMeta.thinking_events}
                     tools_used={recMeta.tools_used}
                   />
-                ) : (
-                  <>
-                    {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
-                    {/* Week 4: Original thinking steps (backward compatibility) */}
-                    {recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
-                      <AgentThinkingSteps steps={recMeta.thinking_steps} />
-                    )}
-                  </>
                 )}
+
+                {/* Show content (answer text) always */}
+                {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
+
+                {/* Week 4: Fallback for original thinking steps if no enhanced thinking */}
+                {!recMeta?.thinking_events && !recMeta?.tools_used &&
+                  recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
+                    <AgentThinkingSteps steps={recMeta.thinking_steps} />
+                  )}
 
                 {/* Recommendations */}
                 {recMeta?.items && recMeta.items.length > 0 && (

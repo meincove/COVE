@@ -2438,7 +2438,7 @@ async def _agent_query_impl(
             })
             
             availability = await checker.check_and_recommend(
-                user_query=q,
+                user_query=rec_query,
                 search_results=[it.dict() for it in items]
             )
             print(f"🛡️ [AVAILABILITY] Checker returned: should_show={availability.get('should_show_results')}, exact={availability.get('exact_match')}, close={availability.get('has_close_alternative')}")

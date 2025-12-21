@@ -3,10 +3,7 @@
         "name": "Outfit Builder",
         "description": "Build complete outfit recommendations with Stylist, Fit, and Budget agents",
         "trigger_patterns": [
-            "build me a",
-            "build an outfit for",
-            "create an outfit for",
-            "outfit for my"
+            "outfit"
         ],
         "steps": [
             {

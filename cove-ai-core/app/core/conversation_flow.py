@@ -26,14 +26,13 @@ class ConversationFlowHandler:
     
     def __init__(self):
         self.flows = self._load_flows()
+        self.stylist_config = self._load_stylist_config()
         # In-memory state storage (session_id -> state)
-        # TODO: Move to Redis for production
         self._active_conversations: Dict[str, Dict[str, Any]] = {}
-    
+
     def _load_flows(self) -> Dict[str, Any]:
         """Load conversation flows from JSON config."""
         config_path = Path(__file__).parent.parent.parent / "data" / "conversation_flows.json"
-        
         try:
             with open(config_path, "r") as f:
                 flows = json.load(f)
@@ -42,6 +41,68 @@ class ConversationFlowHandler:
         except Exception as e:
             log.error(f"Failed to load conversation flows: {e}")
             return {}
+
+    def _load_stylist_config(self) -> Dict[str, Any]:
+        """Load stylist config for keyword extraction."""
+        config_path = Path(__file__).parent.parent.parent / "data" / "stylist_config.json"
+        try:
+            with open(config_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            log.error(f"Failed to load stylist config: {e}")
+            return {}
+
+    # ... (skipping unchanged methods) ...
+
+    def _extract_slots_from_text(self, text: str) -> Dict[str, Any]:
+        """Attempt to extract budget, occasion, and style using CONFIG-DRIVEN rules."""
+        text_lower = text.lower()
+        extracted = {}
+        
+        # --- Extract Budget ---
+        # Matches: "250 euros", "250€", "$250", "budget 250", "under 250"
+        budget_match = re.search(r'(?:€|eur|euro|euros|\$|£)\s*(\d+)', text_lower)
+        if not budget_match:
+            budget_match = re.search(r'(\d+)\s*(?:€|eur|euro|euros|\$|£)', text_lower)
+        
+        if budget_match:
+            try:
+                extracted["budget"] = str(float(budget_match.group(1)))
+            except: 
+                pass
+        
+        # --- Extract Occasion (Config-Driven) ---
+        occasions_config = self.stylist_config.get("occasions", {})
+        found_occasion = None
+        
+        # Check against mapped keywords
+        for occasion_key, data in occasions_config.items():
+            keywords = data.get("keywords", [])
+            # Also match the key itself
+            if occasion_key in text_lower or any(kw in text_lower for kw in keywords):
+                # Prefer longer matches if overlap? 
+                # For now, first match is acceptable, but let's prioritize specific phrases if possible.
+                # Actually, simple set check is fine for now.
+                found_occasion = occasion_key
+                break
+        
+        if found_occasion:
+            extracted["occasion"] = found_occasion
+
+        # --- Extract Style (Config-Driven) ---
+        styles_config = self.stylist_config.get("styles", {})
+        found_style = None
+        
+        for style_key, data in styles_config.items():
+            keywords = data.get("keywords", [])
+            if style_key in text_lower or any(kw in text_lower for kw in keywords):
+                found_style = style_key
+                break
+                
+        if found_style:
+            extracted["style"] = found_style
+                
+        return extracted
     
     def should_start_conversation(self, message: str) -> Optional[str]:
         """
@@ -94,15 +155,6 @@ class ConversationFlowHandler:
     def handle_response(self, session_id: str, message: str) -> Dict[str, Any]:
         """
         Handle user response in active conversation.
-        
-        Returns:
-            {
-                "complete": bool,  # Is conversation complete?
-                "message": str,    # Next question or completion message
-                "trigger_orchestrator": bool,  # Should trigger orchestrator?
-                "orchestrator_query": str | None,  # Query for orchestrator
-                "orchestrator_context": dict | None  # Context for orchestrator
-            }
         """
         if session_id not in self._active_conversations:
             return {
@@ -114,38 +166,50 @@ class ConversationFlowHandler:
         state = self._active_conversations[session_id]
         flow = state["flow"]
         steps = flow.get("flow", [])
+        
+        # 1. SMART EXTRACTION: Try to extract ALL possible slots from this message
+        # This handles cases like "casual weekend 250 euros" (answering 2 questions at once)
+        extracted = self._extract_slots_from_text(message)
+        log.info(f"🧠 extracted slots from '{message}': {extracted}")
+        
+        # Merge extracted slots into known answers
+        # Be careful not to overwrite existing answers with None, but DO overwrite if new value found
+        for key, val in extracted.items():
+            if val:
+                state["answers"][key] = val
+                
+        # Also store the raw response for the *current* step if we didn't extract a specific value for it
+        # This ensures we capture free-text answers that might not match our extraction rules
         current_idx = state["current_step"]
+        if current_idx < len(steps):
+            current_step_name = steps[current_idx]["step"]
+            # If we haven't already filled this slot via smart extraction, use the whole message
+            if current_step_name not in state["answers"]:
+                state["answers"][current_step_name] = message
+
+        # 2. DYNAMIC SKIPPING: Advance index until we find a step that needs an answer
+        while state["current_step"] < len(steps):
+            next_step_def = steps[state["current_step"]]
+            step_name = next_step_def["step"]
+            
+            # If we already have an answer for this step, SKIP IT
+            if step_name in state["answers"]:
+                log.info(f"⏭️ Skipping step '{step_name}' - already answered: {state['answers'][step_name]}")
+                state["current_step"] += 1
+            else:
+                # Found a step that needs answering!
+                return {
+                    "complete": False,
+                    "message": self._format_question(next_step_def),
+                    "trigger_orchestrator": False
+                }
         
-        if current_idx >= len(steps):
-            # Shouldn't happen, but handle gracefully
-            del self._active_conversations[session_id]
-            return {
-                "complete": True,
-                "message": "Conversation complete!",
-                "trigger_orchestrator": False
-            }
-        
-        # Store current answer
-        current_step = steps[current_idx]
-        step_name = current_step["step"]
-        state["answers"][step_name] = message
-        
-        # Move to next step
-        state["current_step"] += 1
-        
-        # Check if more steps
-        if state["current_step"] < len(steps):
-            next_step = steps[state["current_step"]]
-            return {
-                "complete": False,
-                "message": self._format_question(next_step),
-                "trigger_orchestrator": False
-            }
-        
-        # Conversation complete! Build orchestrator query
+        # 3. Conversation complete! Build orchestrator query
         del self._active_conversations[session_id]
         
         return self._build_orchestrator_trigger(flow, state["answers"])
+
+
     
     def _format_question(self, step: Dict[str, Any]) -> str:
         """Format question with examples."""

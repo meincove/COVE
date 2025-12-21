@@ -37,7 +37,8 @@ class ProductAvailabilityChecker:
         raw_model = model or os.getenv("GEN_MODEL", "openrouter/openai/gpt-4o-mini")
         # Normalize model format: handle both openrouter:provider/model and openrouter/provider/model
         self.model = raw_model.replace("openrouter:", "openrouter/")
-    
+
+
     async def check_and_recommend(
         self,
         user_query: str,
@@ -63,8 +64,6 @@ class ProductAvailabilityChecker:
         }
         """
         
-        # If very few results, probably don't have it
-        print(f"🕵️ Availability Check: query='{user_query}', results={len(search_results)}")
         if len(search_results) < min_results:
             return {
                 "exact_match": False,
@@ -172,6 +171,10 @@ EXAMPLES:
 - Same product type + similar color → RECOMMEND
 - Same product type + completely different color → REJECT
 - Different product type → REJECT (even if color matches!)
+
+IMPORTANT: Ignore conversational phrasing in the query (e.g., "show me", "can you find", "I need"). Focus on the actual product requested.
+- "Show me hoodies" → Target is "hoodie"
+- "I need a blue shirt" → Target is "blue shirt"
 
 Be helpful but HONEST. Don't show unrelated items just to show something!"""
                 }, {
