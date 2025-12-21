@@ -1,6 +1,32 @@
 from django.db import models
 
 # --------------------------------------
+# Brand: Multi-brand support
+# --------------------------------------
+class Brand(models.Model):
+    brand_id = models.CharField(max_length=50, primary_key=True)
+    brand_name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True, db_index=True)
+    logo_url = models.CharField(max_length=500, blank=True, null=True)
+    theme_colors = models.JSONField(blank=True, null=True, help_text="Brand theme configuration (colors, fonts)")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Brand"
+        verbose_name_plural = "Brands"
+        ordering = ['brand_name']
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active']),
+        ]
+
+    def __str__(self):
+        return self.brand_name
+
+
+# --------------------------------------
 # ProductMasterGroup: Base product info
 # --------------------------------------
 class ProductMasterGroup(models.Model):

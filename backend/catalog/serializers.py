@@ -1,5 +1,23 @@
 from rest_framework import serializers
-from .models import ProductMasterGroup, ColorGroup, ProductImage, SizeStockPrice
+from .models import Brand, ProductMasterGroup, ColorGroup, ProductImage, SizeStockPrice
+
+class BrandSerializer(serializers.ModelSerializer):
+    """Serializer for Brand model"""
+    
+    class Meta:
+        model = Brand
+        fields = [
+            'brand_id',
+            'brand_name', 
+            'slug',
+            'logo_url',
+            'theme_colors',
+            'is_active',
+            'description',
+            'created_at'
+        ]
+        read_only_fields = ['created_at']
+
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
