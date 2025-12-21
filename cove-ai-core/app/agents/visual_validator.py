@@ -10,6 +10,7 @@ Analyzes outfit images for:
 
 import litellm
 import logging
+import os
 from typing import List, Dict, Optional
 import json
 
