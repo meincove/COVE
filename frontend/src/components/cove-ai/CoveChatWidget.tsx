@@ -475,27 +475,56 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
   // Week 6: Add thinking message when streaming starts
   useEffect(() => {
     if (isStreamingProgress && thinkingSteps.length > 0) {
-      // Check if we already have a thinking message
-      const hasThinkingMsg = messages.some(m => m.id === 'thinking-temp');
+      // Map streaming steps to EnhancedThinking format
+      const mappedEvents = thinkingSteps.map((step, idx) => ({
+        id: `stream-step-${idx}`,
+        timestamp: Date.now(),
+        agent: getAgentFromIcon(step.icon), // simple helper to map icon to agent type
+        action: step.status, // "status" in streaming is the text description
+        status: step.done ? "done" : "pending",
+        details: step.detail
+      }));
 
-      if (!hasThinkingMsg) {
-        // Add a temporary thinking message
-        const thinkingMsg: ChatMessage = {
-          id: 'thinking-temp',
-          role: 'assistant',
-          content: '',
-        };
-        setMessages(prev => [...prev, thinkingMsg]);
-      } else {
-        // Update the thinking message with latest steps
-        setMessages(prev => prev.map(m =>
+      setMessages(prev => {
+        const hasThinkingMsg = prev.some(m => m.id === 'thinking-temp');
+
+        if (!hasThinkingMsg) {
+          return [...prev, {
+            id: 'thinking-temp',
+            role: 'assistant',
+            content: '',
+            meta: {
+              kind: 'recommendations',
+              items: [],
+              thinking_events: mappedEvents as any // Cast to match AgentResponse type
+            } as RecommendationsMeta
+          }];
+        }
+
+        return prev.map(m =>
           m.id === 'thinking-temp'
-            ? { ...m, content: '' } // Content doesn't matter, steps render separately
+            ? {
+              ...m,
+              meta: {
+                ...m.meta,
+                kind: 'recommendations',
+                thinking_events: mappedEvents as any
+              } as RecommendationsMeta
+            }
             : m
-        ));
-      }
+        );
+      });
     }
   }, [isStreamingProgress, thinkingSteps]);
+
+  function getAgentFromIcon(icon: string): string {
+    if (icon.includes("🧠")) return "classifier";
+    if (icon.includes("🔍")) return "search";
+    if (icon.includes("✨")) return "stylist";
+    if (icon.includes("💰")) return "budget";
+    if (icon.includes("📏")) return "fit";
+    return "classifier"; // default
+  }
 
   // Week 6: Replace thinking message with final result
   useEffect(() => {
@@ -873,6 +902,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
                   <EnhancedThinking
                     thinking_events={recMeta.thinking_events}
                     tools_used={recMeta.tools_used}
+                    loading={isStreamingProgress && m.id === messages[messages.length - 1].id}
                   />
                 )}
 
@@ -1014,7 +1044,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
           </div>
         )}
 
-        {loading && <LoadingSkeleton />}
+        {loading && thinkingSteps.length === 0 && <LoadingSkeleton />}
 
       </div>
 

@@ -1,37 +1,154 @@
 {
-    "description": "Product type normalization and synonym mapping - NO HARDCODED TYPES!",
-    "version": "1.0",
+    "description": "Product type normalization and synonym mapping - EXPANDED SPECTRUM",
+    "version": "1.1",
     "type_synonyms": {
         "tee": [
-            "shirt",
-            "shirts",
             "tshirt",
             "tshirts",
             "t-shirt",
             "t-shirts",
             "top",
-            "tops"
+            "tops",
+            "graphic tee"
+        ],
+        "shirt": [
+            "button down",
+            "flannel",
+            "oxford",
+            "dress shirt"
         ],
         "hoodie": [
             "sweatshirt",
             "sweatshirts",
             "hoody",
             "hoodies",
-            "pullover"
+            "pullover",
+            "fleece"
         ],
         "sweater": [
             "knit",
             "knits",
             "jumper",
-            "cardigan"
+            "cardigan",
+            "crewneck",
+            "v-neck"
+        ],
+        "jacket": [
+            "coat",
+            "outerwear",
+            "parka",
+            "windbreaker"
         ],
         "bomber": [
             "jacket",
-            "jackets"
+            "bomber jacket",
+            "aviator"
         ],
         "blazer": [
+            "jacket",
             "suit jacket",
-            "sport coat"
+            "sport coat",
+            "formal jacket"
+        ],
+        "pants": [
+            "trousers",
+            "slacks",
+            "bottoms",
+            "chinos"
+        ],
+        "jeans": [
+            "pants",
+            "denim",
+            "blue jeans"
+        ],
+        "joggers": [
+            "pants",
+            "sweatpants",
+            "track pants",
+            "activewear"
+        ],
+        "shorts": [
+            "trunks",
+            "bermudas"
+        ],
+        "shoes": [
+            "footwear",
+            "sneakers",
+            "boots",
+            "loafers",
+            "trainers",
+            "runners"
+        ]
+    },
+    "type_similarity": {
+        "pants": [
+            "joggers",
+            "jeans",
+            "shorts",
+            "trousers"
+        ],
+        "joggers": [
+            "pants",
+            "jeans",
+            "shorts",
+            "sweatpants"
+        ],
+        "jeans": [
+            "pants",
+            "joggers",
+            "trousers",
+            "shorts"
+        ],
+        "shorts": [
+            "pants",
+            "joggers",
+            "jeans"
+        ],
+        "jacket": [
+            "bomber",
+            "blazer",
+            "coat",
+            "parka"
+        ],
+        "bomber": [
+            "jacket",
+            "blazer",
+            "coat"
+        ],
+        "blazer": [
+            "jacket",
+            "bomber",
+            "coat"
+        ],
+        "coat": [
+            "jacket",
+            "bomber",
+            "parka"
+        ],
+        "hoodie": [
+            "sweater",
+            "sweatshirt",
+            "pullover"
+        ],
+        "sweater": [
+            "hoodie",
+            "cardigan",
+            "knit"
+        ],
+        "tee": [
+            "shirt",
+            "top",
+            "polo"
+        ],
+        "shirt": [
+            "tee",
+            "polo",
+            "button down"
+        ],
+        "shoes": [
+            "sneakers",
+            "boots",
+            "loafers"
         ]
     },
     "settings": {
@@ -41,8 +158,8 @@
         "allow_partial_match": false
     },
     "notes": [
-        "Type synonyms map alternative names to canonical catalog types",
-        "When load_from_catalog=true, valid types are loaded from database dynamically",
-        "fallback_strategy options: 'most_common' (use most frequent type in catalog), 'tee' (hardcoded fallback), 'none' (don't use fallback)"
+        "Expanded spectrum maps specific terms (bomber, joggers) to general categories (jacket, pants)",
+        "Crucial for filtering: searching 'bomber' filters for 'jacket' type, allowing text search to find specific items.",
+        "type_similarity defines semantically similar product types for intelligent fallback (e.g., pants -> joggers, jeans before skirts)"
     ]
 }

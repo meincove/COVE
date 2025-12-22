@@ -17,6 +17,8 @@ from pathlib import Path
 import json
 import logging
 import re
+import os
+from litellm import acompletion
 
 log = logging.getLogger("cove.conversation")
 
@@ -54,7 +56,28 @@ class ConversationFlowHandler:
 
     # ... (skipping unchanged methods) ...
 
-    def _extract_slots_from_text(self, text: str) -> Dict[str, Any]:
+    async def _extract_slots_from_text(self, text: str) -> Dict[str, Any]:
+        """Attempt to extract budget, occasion, and style using LLM + Fallback."""
+        try:
+            log.info(f"🧠 LLM Extracting slots from: '{text}'")
+            response = await acompletion(
+                model="openrouter/openai/gpt-4o-mini",
+                messages=[ 
+                    {"role": "system", "content": "Extract JSON keys: 'occasion', 'budget' (number/text), 'style'. Return proper JSON. If not found, use null."},
+                    {"role": "user", "content": text}
+                ],
+                response_format={"type": "json_object"},
+                api_key=os.getenv("OPENROUTER_API_KEY")
+            )
+            content = response.choices[0].message.content
+            extracted = json.loads(content)
+            # Filter nulls
+            return {k: v for k, v in extracted.items() if v}
+        except Exception as e:
+            log.warning(f"⚠️ LLM extraction failed: {e}. Falling back to heuristics.")
+            return self._extract_slots_heuristic(text)
+
+    def _extract_slots_heuristic(self, text: str) -> Dict[str, Any]:
         """Attempt to extract budget, occasion, and style using CONFIG-DRIVEN rules."""
         text_lower = text.lower()
         extracted = {}
@@ -121,7 +144,7 @@ class ConversationFlowHandler:
         
         return None
     
-    def start_conversation(self, session_id: str, flow_name: str) -> str:
+    async def start_conversation(self, session_id: str, flow_name: str, initial_message: str = "") -> str:
         """
         Start a new conversation flow.
         
@@ -137,22 +160,60 @@ class ConversationFlowHandler:
             return "Sorry, this conversation flow is not configured properly."
         
         # Initialize conversation state
-        self._active_conversations[session_id] = {
+        state = {
             "flow_name": flow_name,
             "current_step": 0,
             "answers": {},
             "flow": flow
         }
+        self._active_conversations[session_id] = state
         
-        # Return first question
-        first_step = steps[0]
-        return self._format_question(first_step)
+        # ✨ ONE-SHOT: Extract slots from the triggering message immediately
+        if initial_message:
+            extracted = await self._extract_slots_from_text(initial_message)
+            log.info(f"🚀 One-Shot Extraction from '{initial_message}': {extracted}")
+            for key, val in extracted.items():
+                if val:
+                    state["answers"][key] = val
+        
+        # Advance index until we find a step that needs an answer
+        while state["current_step"] < len(steps):
+            next_step_def = steps[state["current_step"]]
+            step_name = next_step_def["step"]
+            
+            # If we already have an answer (from one-shot), SKIP IT
+            if step_name in state["answers"]:
+                log.info(f"⏭️ Skipping step '{step_name}' - already answered via one-shot")
+                state["current_step"] += 1
+            else:
+                # Found a step that needs answering!
+                return self._format_question(next_step_def)
+                
+        # If we skipped ALL steps, we are done immediately!
+        # But start_conversation expects to return a string (question).
+        # We should return a "Processing..." message or trigger completion logic?
+        # Ideally, we trigger completion here. But the agent expects a question.
+        # We'll return a special "All set!" message that implies we are working.
+        
+        # Trigger orchestrator immediately?
+        # The agent.py logic handles the response from `start_conversation` as a simple string answer.
+        # It doesn't know to trigger functionality yet.
+        # Workaround: Return a confirmation that looks like a question/statement, 
+        # and rely on the NEXT 'handle_response' (which won't happen?)
+        
+        # Actually, if we return "Done", the user has to type something else.
+        # WE NEED `agent.py` to handle immediate completion.
+        
+        # For now, let's just return a "Confirm details" step or allow one final confirmation?
+        # Or simply Ask: "Ready to build?" 
+        # This allows the user to say "Yes".
+        return "I have everything I need! Ready to see your outfit?"
     
     def is_in_conversation(self, session_id: str) -> bool:
         """Check if session has an active conversation."""
         return session_id in self._active_conversations
     
-    def handle_response(self, session_id: str, message: str) -> Dict[str, Any]:
+    async def handle_response(self, session_id: str, message: str) -> Dict[str, Any]:
         """
         Handle user response in active conversation.
         """
@@ -169,7 +230,7 @@ class ConversationFlowHandler:
         
         # 1. SMART EXTRACTION: Try to extract ALL possible slots from this message
         # This handles cases like "casual weekend 250 euros" (answering 2 questions at once)
-        extracted = self._extract_slots_from_text(message)
+        extracted = await self._extract_slots_from_text(message)
         log.info(f"🧠 extracted slots from '{message}': {extracted}")
         
         # Merge extracted slots into known answers
@@ -270,6 +331,12 @@ class ConversationFlowHandler:
     
     def _extract_budget(self, budget_str: str) -> float:
         """Extract numeric budget from string like '$300' or '200-300' or 'under €500'."""
+        if not budget_str:
+            return 500.0
+            
+        # Ensure it's a string (LLM might return int)
+        budget_str = str(budget_str)
+        
         # Remove currency symbols
         cleaned = re.sub(r'[$€£]', '', budget_str)
         

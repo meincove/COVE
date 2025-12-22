@@ -2278,9 +2278,12 @@ async def _agent_query_impl(
             shown_slugs = _get_shown_slugs(body)
             search_top_k = body.top_k
             if shown_slugs:
-                # Fetch 3x more to account for filtering
-                search_top_k = body.top_k * 3
+                # Fetch significantly more to account for filtering (pagination effect)
+                # If user has seen top 20 items, we need to fetch 30+ to find new ones.
+                search_top_k = max(60, body.top_k * 5)
                 debug_plan["expanded_search_for_shown"] = True
+                debug_plan["search_top_k"] = search_top_k
+
 
             rec_query = build_rec_query(q, rec_filters)
 

@@ -180,7 +180,7 @@ Analyze the user's query and determine their PRIMARY intent. Think step-by-step:
 
 **Key Principles:**
 - **Assume shopping context**: "perfect" = wants to buy, "colors?" = wants to see options
-- **Focus on INTENT, not literal words**: "I need this" = wants to add to cart
+- **Distinguish Search vs Buy**: "I need a jacket" = recommendations (search). "I need THIS" (referring to displayed item) = cart_proposal (buy).
 - **Handle slang**: "cop this" = add to cart, "lemme get" = add to cart
 - **Understand implicit requests**: "I like it" = wants to buy
 - **Short affirmations are cart_proposal**: "yes", "ok", "sure", "perfect", "great"
@@ -228,7 +228,7 @@ Analyze the user's query and determine their PRIMARY intent. Think step-by-step:
 7. Order tracking keywords ("where's my order", "track") → order_history
 8. Sizing questions ("what size", "fit") → size_help
 9. Quality questions ("is it good", "material") → quality_question
-10. General product browsing ("show me", "looking for") → recommendations
+10. General product browsing ("show me", "looking for", "i need a [category]") → recommendations
 
 **Edge Cases:**
 - Very short positive responses in shopping context = cart_proposal

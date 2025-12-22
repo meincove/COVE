@@ -4,7 +4,8 @@
             "i want to build an outfit",
             "help me build an outfit",
             "build me an outfit",
-            "i need an outfit"
+            "i need an outfit",
+            "outfit"
         ],
         "flow": [
             {

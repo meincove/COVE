@@ -10,6 +10,8 @@ from app.core.agent_registry import Agent, registry
 from typing import Dict, Any, List
 import logging
 import json
+import os
+import litellm
 from pathlib import Path
 
 log = logging.getLogger("cove.agents.stylist")
@@ -132,20 +134,35 @@ class StylistAgent(BaseAgent):
                 log.warning(f"Failed to recall user preferences: {e}")
 
         
+        # ✨ WEEK 3 DAY 2: Intelligent Analysis (LLM)
+        # Replaces simple config parsing with full reasoning
+        analysis = await self._analyze_request_with_llm(query, budget, categories, user_preferences)
+        occasion = analysis.get("occasion", occasion) # Override heuristic
+        style = analysis.get("style", style) # Override heuristic
+        cat_queries = analysis.get("category_queries", {})
+        
+        log.info(f"🤖 Stylist Plan: {analysis.get('reasoning', 'No reasoning')}")
+
         try:
             for idx, category in enumerate(categories):
                 try:
-                    # Map outfit category to product types
-                    category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
-                    valid_types = category_mapping.get(category, [category])
-                    
-                    # Build rich semantic query with SPECIFIC product types
-                    # Instead of "top for meeting", say "hoodie OR blazer OR shirt for meeting"
-                    if valid_types and valid_types != [category]:
-                        type_str = " OR ".join(valid_types)  # "hoodie OR blazer OR jacket"
-                        category_query = f"{style} {type_str} for {occasion}"
+                    # 1. Use LLM-generated query if available (Smart)
+                    if cat_queries.get(category):
+                        category_query = cat_queries[category]
+                        # Ensure we still use valid types logic if needed? 
+                        # Actually, trust the LLM's query text, but maybe verify types later?
+                        # For now, trust the Semantic Search.
                     else:
-                        category_query = f"{style} {category} for {occasion}"
+                        # 2. Fallback to Config Logic (Heuristic)
+                        category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
+                        valid_types = category_mapping.get(category, [category])
+                        
+                        # Build rich semantic query with SPECIFIC product types
+                        if valid_types and valid_types != [category]:
+                            type_str = " OR ".join(valid_types)
+                            category_query = f"{style} {type_str} for {occasion}"
+                        else:
+                            category_query = f"{style} {category} for {occasion}"
                     
                     # ✨ WEEK 2 DAY 4: Inject Preferences into Query (The Picky Client Check)
                     # Ensure preferred colors/styles are explicitly searched for
@@ -367,6 +384,75 @@ class StylistAgent(BaseAgent):
         
         return occasion, style
     
+    async def _analyze_request_with_llm(
+        self, 
+        query: str, 
+        budget: float, 
+        categories: List[str],
+        user_preferences: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """
+        Use LLM to interpret style/occasion and generate search queries.
+        Replaces brittle regex/keyword matching.
+        """
+        try:
+            model = os.getenv("LLM_REASONING_MODEL", "openrouter/openai/gpt-4o-mini")
+            
+            # Construct context-aware system prompt
+            prefs_text = ""
+            if user_preferences:
+                if user_preferences.get("likes"):
+                    prefs_text += f"\nUser Likes: {', '.join(user_preferences['likes'])}"
+                if user_preferences.get("dislikes"):
+                    prefs_text += f"\nUser Dislikes: {', '.join(user_preferences['dislikes'])}"
+                if user_preferences.get("colors"):
+                    prefs_text += f"\nPreferred Colors: {', '.join(user_preferences['colors'])}"
+
+            prompt = f"""You are an Expert Fashion Stylist AI.
+User Request: "{query}"
+Budget: €{budget}
+Categories to fill: {', '.join(categories)}
+{prefs_text}
+
+Task:
+1. Analyze the implied Occasion and Style.
+2. Generate a precise Semantic Search Query for EACH category.
+3. BE SPECIFIC. "casual press conference" -> "smart casual blazer", NOT "hoodie".
+4. "Streetwear" = Hoodies/Baggy. "Casual" (for work/meeting) = Relaxed Blazer/Smart Shirt.
+5. Respect the Budget.
+
+Response JSON Format:
+{{
+    "occasion": "detected occasion",
+    "style": "detected style",
+    "reasoning": "why you chose this style",
+    "category_queries": {{
+        "top": "specific search query for top",
+        "bottom": "specific search query for bottom",
+        "shoes": "specific search query for shoes"
+    }}
+}}
+DO NOT output markdown. Just the JSON object.
+"""
+            response = await litellm.acompletion(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                temperature=0.2
+            )
+            
+            return json.loads(response.choices[0].message.content)
+            
+        except Exception as e:
+            log.error(f"LLM analysis failed: {e}")
+            # Fallback to heuristic parsing
+            occ, style = self._parse_query(query)
+            return {
+                "occasion": occ,
+                "style": style,
+                "category_queries": {} # Will trigger fallback in execute
+            }
+
     def _get_selection_reason(self, category: str, occasion: str, style: str) -> str:
         """
         Generate explanation for why this item was selected.
