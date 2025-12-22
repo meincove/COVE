@@ -1,4 +1,5 @@
 # app/routes/rag.py
+# Triggering reload to clear type config cache
 from __future__ import annotations
 
 import asyncio
@@ -796,11 +797,16 @@ from difflib import get_close_matches
 
 def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     tok = (tok or "").lower()
+    print(f"🔍 [NORMALIZE] Input token: '{tok}', catalog has {len(catalog_types)} types")
+    
     if not tok or not catalog_types:
+        print(f"🔍 [NORMALIZE] Empty token or catalog, returning None")
         return None
 
     if tok in catalog_types:
+        print(f"🔍 [NORMALIZE] ✓ Direct match found: '{tok}'")
         return tok
+    
     # Load type synonyms from config (NO HARDCODING!)
     config = _get_type_normalization_config()
     synonyms = config.get('type_synonyms', {})
@@ -809,6 +815,7 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     for canonical_type, synonym_list in synonyms.items():
         if tok in [s.lower() for s in synonym_list]:
             if canonical_type in catalog_types:
+                print(f"🔍 [NORMALIZE] ✓ Synonym match: '{tok}' → '{canonical_type}'")
                 return canonical_type
 
     candidates = {tok}
@@ -819,20 +826,28 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     if tok.endswith("s") and len(tok) > 1:
         candidates.add(tok[:-1])
 
+    print(f"🔍 [NORMALIZE] Candidates after pluralization: {candidates}")
+    
     for c in candidates:
         if c in catalog_types:
+            print(f"🔍 [NORMALIZE] ✓ Candidate match found: '{c}'")
             return c
 
     match = get_close_matches(tok, list(catalog_types), n=1, cutoff=0.84)
     if match:
+        print(f"🔍 [NORMALIZE] ✓ Fuzzy match found: '{match[0]}'")
         return match[0]
 
+    print(f"🔍 [NORMALIZE] ✗ No match found for '{tok}'")
     return None
 
 
 def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
     print(f"🔍 [PARSE] Starting _parse_query_attrs for query: '{q}'")
     v = _get_vocab(conn)
+    print(f"🔍 [PARSE] Vocabulary types ({len(v['types'])} total): {sorted(list(v['types']))[:20]}...")  # Show first 20
+    print(f"🔍 [PARSE] Is 'skirt' in vocab? {'skirt' in v['types']}")
+    
     raw = re.findall(r"[a-zA-Z]+", q.lower())
     toks = set(raw)
     print(f"🔍 [PARSE] Extracted tokens: {toks}")

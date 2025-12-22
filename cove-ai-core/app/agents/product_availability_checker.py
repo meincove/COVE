@@ -35,9 +35,31 @@ class ProductAvailabilityChecker:
     def __init__(self, model: Optional[str] = None):
         """Initialize with model from env config (GEN_MODEL) or explicit override."""
         raw_model = model or os.getenv("GEN_MODEL", "openrouter/openai/gpt-4o-mini")
-        # Normalize model format: handle both openrouter:provider/model and openrouter/provider/model
         self.model = raw_model.replace("openrouter:", "openrouter/")
+        self.type_knowledge = self._load_type_relationships()
 
+    def _load_type_relationships(self) -> str:
+        """Load type mappings from config and format as natural language knowledge."""
+        try:
+            from pathlib import Path
+            config_path = Path(__file__).resolve().parent.parent.parent / "data" / "type_normalization_config.json"
+            with open(config_path) as f:
+                config = json.load(f)
+            
+            synonyms = config.get("type_synonyms", {})
+            lines = []
+            for canonical, variants in synonyms.items():
+                # "Bomber is a specific type of Jacket."
+                # variants includes "bomber jacket", "aviator" etc.
+                # format: "Items like {variants} are subtypes of {canonical}."
+                clean_vars = [v for v in variants if v != canonical]
+                if clean_vars:
+                    lines.append(f"- **{canonical.title()}**: includes {', '.join(clean_vars)}.")
+            
+            return "\n".join(lines)
+        except Exception as e:
+            log.warning(f"Failed to load type config: {e}")
+            return ""
 
     async def check_and_recommend(
         self,
@@ -45,24 +67,7 @@ class ProductAvailabilityChecker:
         search_results: List[Dict],
         min_results: int = 3
     ) -> Dict:
-        """
-        Analyze if search results match user's request.
-        
-        Args:
-            user_query: What the user asked for (e.g., "dark blue shirt")
-            search_results: Products returned by search
-            min_results: Minimum results to consider "found"
-        
-        Returns:
-        {
-            "exact_match": false,
-            "has_close_alternative": true,
-            "alternative_explanation": "We don't have dark blue, but here are blue options",
-            "recommended_items": [...],  # Only if close enough
-            "should_show_results": true,
-            "honesty_message": "We don't have exactly what you're looking for..."
-        }
-        """
+        """Analyze if search results match user's request."""
         
         if len(search_results) < min_results:
             return {
@@ -73,110 +78,75 @@ class ProductAvailabilityChecker:
                 "should_show_results": False,
                 "honesty_message": f"Sorry, we don't have '{user_query}' in our catalog."
             }
-        
-        # Ask Claude: Are these results close enough to the user's request?
+            
+        # Inject dynamic knowledge
+        knowledge_block = ""
+        if self.type_knowledge:
+            knowledge_block = f"""
+3. **PRIORITY #3: DYNAMIC TYPE KNOWLEDGE (TRUSTED)**
+   The following relationships are DEFINED in our catalog system. **RESPECT THEM.**
+{self.type_knowledge}
+   - If user asks for a subtype (e.g. Bomber), and we show the parent (Jacket), **ACCEPT IT**.
+"""
+
+        # Ask Claude
         try:
             response = await litellm.acompletion(
                 model=self.model,
                 messages=[{
                     "role": "system",
-                    "content": """You're a product catalog quality control assistant.
+                    "content": f"""You're a product catalog quality control assistant.
 
 Your task: Determine if search results are APPROPRIATE to show the user.
 
 Return JSON:
-{
-    "exact_match": true/false,  // Perfect match (same type + color)?
-    "close_match": true/false,  // Close enough to recommend?
+{{
+    "exact_match": true/false,
+    "close_match": true/false,
     "match_explanation": "Brief explanation",
-    "should_recommend": true/false,  // Show results or not?
+    "should_recommend": true/false,
     "honesty_message": "What to tell the user"
-}
+}}
 
-CRITICAL MATCHING RULES:
+RULES (Hierarchical Priority):
 
-1. **Product Type** (SMART):
-   - Must match exactly OR be commonly interchangeable
-   - **Common substitutions (OK to recommend):**
-     - "shirt" ≈ "tee" (users often use these interchangeably!)
-     - "hoodie" ≈ "sweatshirt" (same category)
-     - "pants" ≈ "trousers" ≈ "jeans" (same category)
-   - **Different types (REJECT):**
-     - jacket ≠ pants
-     - shirt ≠ dress
-     - hoodie ≠ shorts
-   
-2. **Color Matching** (SMART):
-   
-   **Similar colors (RECOMMEND):**
-   - dark blue ≈ blue ≈ navy ≈ mid blue ≈ ink navy (same family!)
-   - light grey ≈ grey ≈ charcoal ≈ stone grey (same family!)
-   - red ≈ burgundy ≈ wine
-   - white ≈ optical white ≈ off-white (same family!)
-   - black ≈ jet black (same family!)
-   
-   **CRITICAL**: Descriptive color names should match simple queries!
-   - User asks "blue hoodie" + Results show "mid blue hoodie" or "ink navy hoodie" → RECOMMEND
-   - User asks "white tee" + Results show "optical white tee" → RECOMMEND
-   
-   **Different colors (REJECT):****
-   - red ≠ blue/green/yellow (completely different!)
-   - orange ≠ black/white
-   - If user asks for RED and results are BLUE → should_recommend=false
-   
-   **CRITICAL**:  If search results include the requested product type (e.g., hoodies) and have color data populated:
-   - User asks "blue hoodie" + Results show hoodies with ANY blue variant → RECOMMEND
-   - Even if color is "mid blue", "ink navy", or just "blue" → These are all valid!
-   - The search system already filtered for appropriate colors
-   - If items have color field populated and match type → should_recommend=TRUE
-   
-   **Different colors (REJECT):
-   - "jacket" (no color) → any jacket color OK
-   
-   **Color missing in results:**
-   - User wants "red hoodie", results show "hoodie" (no color info)
-   - Be cautious → close_match=true IF same type
-   
-3. **Material/Fabric**:
-   - linen → cotton (similar enough, same type!)
-   - Different materials OK if same product type
+1. **PRIORITY #1: TRUST THE VISUAL SEARCH**
+   - The search engine uses visual similarity. If it returned an item, it likely matches.
+   - **Missing Metadata?** If color/type info is missing (N/A), **ASSUME IT MATCHES**. RECOMMEND IT.
 
-4. **Specificity**:
-   - Specific brand wanted but not available → REJECT
-   - Generic query → broader matches OK
+2. **PRIORITY #2: SEMANTIC SIMILARITY**
+   - Use semantic understanding to determine if results match the user's intent.
+   - **Shirt vs Tee**: VALID (same category).
+   - **Hoodie vs Sweatshirt**: VALID (same category).
+   - **Pants vs Joggers vs Jeans**: VALID (same category).
+{knowledge_block}
+   - Do NOT reject based on rigid category boundaries.
+
+3. **PRIORITY #3: ABSTRACT INTENTS**
+   - Query: "Trends", "Styles", "Gifts", "Vibes", "Outfits" -> **ACCEPT ANYTHING**.
+
+4. **PRIORITY #4: REJECTIONS (Smart Category Boundaries)**
+   - Reject if the results are in a DIFFERENT category than what the user asked for.
+   - **Cross-Category Mismatches (REJECT)**:
+     * User asks for TOPS (shirt, tee, hoodie, sweater, jacket, blazer) → Results show BOTTOMS (pants, jeans, skirts, shorts)
+     * User asks for BOTTOMS (pants, jeans, skirts, shorts, joggers) → Results show TOPS (shirts, jackets, hoodies)
+     * User asks for FOOTWEAR (shoes, sneakers, boots) → Results show CLOTHING
+     * User asks for specific brand "Nike" → Results show only "Adidas"
+   
+   - **Same-Category Matches (RECOMMEND)**:
+     * User asks for "skirts" → Results show skirts ✅
+     * User asks for "pants" → Results show joggers/jeans ✅
+     * User asks for "jacket" → Results show bomber/blazer ✅
+     * User asks for "shirt" → Results show tees ✅
 
 EXAMPLES:
-
-✅ RECOMMEND:
-- User: "dark blue shirt" + Results: "blue shirt", "navy shirt"
-  → close_match=true (color family matches!)
-  
-- User: "linen blazer" + Results: "cotton blazer"
-  → close_match=true (same type, material differs)
-  
-- User: "black hoodie" + Results: "hoodie" (no color info)
-  → close_match=true (right type, careful on color)
-
-❌ REJECT:
-- User: "red velvet jacket" + Results: "blue jacket", "green jacket"
-  → should_recommend=false (WRONG COLOR - not even close!)
-  
-- User: "hoodie" + Results: "pants", "shirts"
-  → should_recommend=false (WRONG TYPE!)
-  
-- User: "Nike Air Max" + Results: "Adidas shoes"
-  → should_recommend=false (specific brand wanted)
-
-🎯 KEY PRINCIPLE:
-- Same product type + similar color → RECOMMEND
-- Same product type + completely different color → REJECT
-- Different product type → REJECT (even if color matches!)
-
-IMPORTANT: Ignore conversational phrasing in the query (e.g., "show me", "can you find", "I need"). Focus on the actual product requested.
-- "Show me hoodies" → Target is "hoodie"
-- "I need a blue shirt" → Target is "blue shirt"
-
-Be helpful but HONEST. Don't show unrelated items just to show something!"""
+- User: "Blue Shirt", Result: "Tee" (Color: N/A) -> **RECOMMEND** (same category).
+- User: "Red Hoodie", Result: "Hoodie" (Color: N/A) -> **RECOMMEND** (exact match).
+- User: "Skirts", Result: "Skirt" -> **RECOMMEND** (exact match).
+- User: "Pants", Result: "Joggers" -> **RECOMMEND** (same category).
+- User: "Shirt", Result: "Pants" -> **REJECT** (cross-category mismatch).
+- User: "Jacket", Result: "Skirt" -> **REJECT** (cross-category mismatch).
+"""
                 }, {
                     "role": "user",
                     "content": f"""User query: "{user_query}"
@@ -185,7 +155,6 @@ Top search results:
 {self._format_results_for_llm(search_results[:8])}
 
 Question: Should I recommend these results to the user?
-Analyze if they're close enough or completely unrelated.
 Return only valid JSON."""
                 }],
                 response_format={"type": "json_object"},
@@ -193,10 +162,9 @@ Return only valid JSON."""
             )
             
             analysis = json.loads(response.choices[0].message.content)
-            print(f"🤖 Availability LLM: exact={analysis.get('exact_match')}, close={analysis.get('close_match')}, recommend={analysis.get('should_recommend')}")
-            print(f"   Explanation: {analysis.get('match_explanation')}")
+            log.info(f"🤖 [AVAILABILITY CHECKER] LLM Analysis for '{user_query}': {analysis}")
+            # ... rest of method default logic ...
             
-            # Build response based on Claude's analysis
             return {
                 "exact_match": analysis.get("exact_match", False),
                 "has_close_alternative": analysis.get("close_match", False),
@@ -207,8 +175,8 @@ Return only valid JSON."""
             }
             
         except Exception as e:
-            log.error(f"Failed to analyze product availability: {e}")
-            # Fallback: show results but mark as potentially incorrect
+            log.error(f"Failed to analyze product availability: {{e}}")
+            # Fallback
             return {
                 "exact_match": False,
                 "has_close_alternative": True,

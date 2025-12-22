@@ -961,7 +961,37 @@ async def _call_rag(query: str, top_k: int) -> Dict[str, Any]:
     return {"answer": "Sorry—something went wrong fetching product info.", "citations": []}
 
 
+# Type normalization config cache
+_type_norm_config_cache = None
+
+def _get_type_normalization_config():
+    """Load type normalization config from JSON (cached)"""
+    global _type_norm_config_cache
+    if _type_norm_config_cache is None:
+        config_path = Path(__file__).resolve().parent.parent.parent / "data" / "type_normalization_config.json"
+        with open(config_path) as f:
+            _type_norm_config_cache = json.load(f)
+    return _type_norm_config_cache
+
+
+def _get_similar_types(product_type: str) -> List[str]:
+    """
+    Get semantically similar product types from config.
+    Returns list of similar types in order of relevance.
+    
+    Example: "pants" -> ["joggers", "jeans", "shorts", "trousers"]
+    """
+    try:
+        config = _get_type_normalization_config()
+        similarity_map = config.get("type_similarity", {})
+        return similarity_map.get(product_type.lower(), [])
+    except Exception as e:
+        log.warning(f"Failed to load type similarity: {e}")
+        return []
+
+
 async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
+
     """
     Wrapper around Cove's recommendations logic.
     Uses HTTP endpoint for product recommendations.
@@ -1238,7 +1268,7 @@ async def _agent_query_impl(
         log.info(f"📝 Continuing conversation for session {session_key}")
         
         # Handle response
-        result = conversation_handler.handle_response(session_key, q)
+        result = await conversation_handler.handle_response(session_key, q)
         
         if result.get("trigger_orchestrator"):
             # Conversation complete! Trigger orchestrator
@@ -1341,129 +1371,13 @@ async def _agent_query_impl(
     if flow_name:
         log.info(f"🎯 Detected trigger for flow: {flow_name}")
         
-        # ✨ SMART DETECTION: Check if message contains ALL required info
-        # Extract occasion, budget, style from message
-        import re
-        q_lower = q.lower()
-        
-        # Extract occasion
-        occasion = None
-        occasion_keywords = [
-            "meeting", "date", "wedding", "party", "casual", "formal", 
-            "interview", "dinner", "lunch", "hangout", "gym", "workout", 
-            "weekend", "work", "office", "night", "business"
-        ]
-        for keyword in occasion_keywords:
-            if keyword in q_lower:
-                occasion = keyword
-                break
-        
-        # Extract budget
-        budget = None
-        budget_match = re.search(r'budget\s*[:\s]*[$€£]?\s*(\d+)', q_lower)
-        if budget_match:
-            budget = float(budget_match.group(1))
-        else:
-            # Try standalone numbers
-            currency_match = re.search(r'[$€£]\s*(\d+)', q)
-            if currency_match:
-                budget = float(currency_match.group(1))
-        
-        # Extract style
-        style = None
-        style_keywords = [
-            "streetwear", "professional", "casual", "formal", "smart", 
-            "minimalist", "luxe", "basic", "athletic", "edgy"
-        ]
-        for keyword in style_keywords:
-            if keyword in q_lower:
-                style = keyword
-                break
-        
-        # If we have occasion AND budget, skip conversation and trigger orchestrator!
-        if occasion and budget:
-            log.info(f"✅ Complete info detected - skipping conversation!")
-            log.info(f"   Occasion: {occasion}, Budget: €{budget}, Style: {style or 'any'}")
-            
-            # Import orchestrator
-            from app.agents import orchestrator
-            
-            # Build context
-            orchestrator_context = {
-                "budget_max": budget,
-                "occasion": occasion,
-                "style": style or "casual",
-                "user_id": body.clerkUserId or body.guestSessionId,
-                "user_size_history": {}
-            }
-            
-            # Build query
-            query_parts = [f"build an outfit for {occasion}"]
-            if style:
-                query_parts.append(f"style {style}")
-            orchestrator_query = ", ".join(query_parts)
-            
-            # Show thinking
-            emit_event('thinking:step', {
-                'icon': '🎨',
-                'status': 'Building your complete outfit'
-            })
-            thinking_tracker.add_thinking("orchestrator", "Executing multi-agent workflow...")
-            
-            try:
-                orchestrator_result = await orchestrator.execute_workflow(
-                    workflow_name="outfit_builder",
-                    query=orchestrator_query,
-                    context=orchestrator_context
-                )
-                
-                # Format as AgentOut
-                outfit_items = orchestrator_result.get("outfit_items", [])
-                
-                if not outfit_items:
-                    return AgentOut(
-                        kind="answer",
-                        answer=orchestrator_result.get("reasoning", "I couldn't find items for this outfit."),
-                        items=[],
-                        reasoning=orchestrator_result.get("reasoning", "")
-                    )
-                
-                # Convert to AgentItem format
-                agent_items = []
-                for item in outfit_items:
-                    product = item.get("product", {})
-                    agent_items.append(AgentItem(
-                        slug=product.get("slug", ""),
-                        title=product.get("title", "Unknown"),
-                        url=product.get("url", f"/product/{product.get('slug', '')}"),
-                        price=product.get("price"),
-                        score=0.9,
-                        reason="Selected for your outfit",
-                        type=product.get("type")
-                    ))
-                
-                return AgentOut(
-                    kind="recommendations",
-                    answer=orchestrator_result.get("reasoning", "Here's your complete outfit!"),
-                    items=agent_items,
-                    reasoning=orchestrator_result.get("reasoning", "")
-                )
-                
-            except Exception as e:
-                log.error(f"Orchestrator failed: {e}")
-                return AgentOut(
-                    kind="answer",
-                    answer="Sorry, I couldn't build your outfit right now. Please try again!",
-                    items=[]
-                )
-        
-        # Missing info - start conversation
-        log.info(f"⏭️ Missing info - starting conversation (occasion={occasion}, budget={budget})")
-        first_question = conversation_handler.start_conversation(session_key, flow_name)
+        # Start conversation (with one-shot extraction)
+        # matches trigger, so we pass initial message to pre-fill info
+        first_question = await conversation_handler.start_conversation(session_key, flow_name, initial_message=q)
         
         return AgentOut(
             kind="answer",
-            answer=first_question,
+            answer=first_question, # "I have everything I need! Ready?" or "What's the occasion?"
             items=[]
         )
     
@@ -2404,6 +2318,27 @@ async def _agent_query_impl(
             if isinstance(it, dict) and it.get("slug")
         ]
 
+        # --- RETRY LOGIC: If strict type filtering yielded 0 results, try loosening constraints ---
+        if not items and rec_filters.get("type"):
+            print(f"🔄 [RETRY] Zero results for type='{rec_filters['type']}'. Retrying without type filter...")
+            
+            fallback_filters = rec_filters.copy()
+            del fallback_filters["type"]
+            
+            rec_payload["filters"] = fallback_filters
+            try:
+                rec_resp = await _call_recs_suggest(rec_payload)
+                raw_items = rec_resp.get("items") or []
+                items = [
+                    AgentItem(**it)
+                    for it in raw_items
+                    if isinstance(it, dict) and it.get("slug")
+                ]
+                if items:
+                    print(f"✅ [RETRY] Found {len(items)} items without type filter. Proceeding to Availability Checker.")
+            except Exception as e:
+                log.warning(f"Fallback search failed: {e}")
+
         # Event: Found items
         emit_event('thinking:step', {
             'icon': '✓',
@@ -2413,9 +2348,18 @@ async def _agent_query_impl(
 
         debug_plan["rec_item_count"] = len(items)
 
+        # Initialize availability dict for cases with no items
+        availability = {
+            "should_show_results": bool(items),
+            "exact_match": False,
+            "has_close_alternative": False,
+            "recommended_items": items,
+            "honesty_message": ""
+        }
+
         if items:
             print(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
-            # Phase 1: Filter out items user has already seen (for "show more")
+            # Phase 1: Filter out items user has already seen (for \"show more\")
             shown_slugs = _get_shown_slugs(body)
             if shown_slugs:
                 original_count = len(items)
@@ -2437,6 +2381,10 @@ async def _agent_query_impl(
                 'status': 'Validating product matches'
             })
             
+            print(f"🔍 [DEBUG] Calling availability checker with:")
+            print(f"   - rec_query: '{rec_query}'")
+            print(f"   - items: {[{'title': it.title, 'type': it.type, 'color': it.color} for it in items]}")
+            
             availability = await checker.check_and_recommend(
                 user_query=rec_query,
                 search_results=[it.dict() for it in items]
@@ -2444,56 +2392,218 @@ async def _agent_query_impl(
             print(f"🛡️ [AVAILABILITY] Checker returned: should_show={availability.get('should_show_results')}, exact={availability.get('exact_match')}, close={availability.get('has_close_alternative')}")
             print(f"🛡️ [AVAILABILITY] Recommended items count: {len(availability.get('recommended_items', []))}")
             print(f"🛡️ [AVAILABILITY] Honesty message: {availability.get('honesty_message')}")
+        
+        # --- FALLBACK LOGIC (executes for empty results OR rejected results) ---
+        should_show = availability.get("should_show_results", False)
+        
+        if not should_show:
+            print(f"❌ [AVAILABILITY] Initial search failed/rejected (items={len(items)}). Attempting Semantic Fallback.")
             
-            # If checker says no, we don't show results
-            if not availability.get("should_show_results", True):
-                print(f"❌ [AVAILABILITY] Rejecting results - returning 0 items with honesty message")
-                log.info(f"🚫 Availability Checker rejected results for '{q}': {availability.get('honesty_message')}")
-                # Fall through to RAG/Chat with the honesty message
-                return AgentOut(
-                    kind="answer",
-                    answer=availability.get("honesty_message") or f"Sorry, we don't have '{q}' in our catalog.",
-                    items=[],
-                    debug_plan={**debug_plan, "availability_rejected": True}
-                )
+            # Check if we have a mapped category we can fall back to
+            types_list = attrs.get("types", [])
+            current_type = types_list[0] if types_list else None
             
-            print(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
+            fallback_success = False
             
-            # Mark these NEW items as shown for this session
-            _mark_slugs_as_shown(body, [item.slug for item in items])
+            if current_type:
+                from app.agents.product_availability_checker import ProductAvailabilityChecker
+                checker = ProductAvailabilityChecker()
+                
+                # NEW: Try semantically similar types first (e.g., pants -> joggers, jeans)
+                similar_types = _get_similar_types(current_type)
+                print(f"🔄 [SEMANTIC FALLBACK] Similar types for '{current_type}': {similar_types}")
+                
+                fallback_success = False
+                
+                # Try each similar type in order of relevance
+                for similar_type in similar_types[:3]:  # Limit to top 3 most similar
+                    print(f"🔄 [FALLBACK] Trying similar type: '{similar_type}'")
+                    
+                    # Build query with color if available
+                    parts = []
+                    if attrs.get("colors"):
+                        parts.append(attrs["colors"][0])
+                    parts.append(similar_type)
+                    
+                    fallback_query = " ".join(parts)
+                    fallback_filters = rec_filters.copy()
+                    fallback_filters["type"] = similar_type
+                    
+                    fallback_payload = {
+                        "query": fallback_query,
+                        "filters": fallback_filters,
+                        "top_k": body.top_k
+                    }
+                    
+                    try:
+                        fb_resp = await _call_recs_suggest(fallback_payload)
+                        fb_raw_items = fb_resp.get("items") or []
+                        fb_items = [AgentItem(**it) for it in fb_raw_items if isinstance(it, dict) and it.get("slug")]
+                        
+                        if fb_items:
+                            # Re-check availability
+                            fb_availability = await checker.check_and_recommend(
+                                user_query=fallback_query,
+                                search_results=[it.dict() for it in fb_items]
+                            )
+                            
+                            if fb_availability.get("should_show_results", True):
+                                print(f"✅ [SEMANTIC FALLBACK] Success! Found {len(fb_items)} {similar_type}s")
+                                items = fb_items
+                                availability = fb_availability 
+                                availability["should_show_results"] = True
+                                availability["honesty_message"] = f"We couldn't find exact matches for '{q}', but here are some {similar_type}s you might like."
+                                fallback_success = True
+                                break  # Found good results, stop trying
+                    except Exception as e:
+                        log.warning(f"Semantic fallback for '{similar_type}' failed: {e}")
+                        continue
+                
+                # If semantic fallback didn't work, try broad category fallback (old strategy)
+                if not fallback_success:
+                    print(f"🔄 [FALLBACK] Semantic fallback exhausted. Trying broad category fallback.")
+                    
+                    # Strategy 1: Broad Category Search with Color
+                    # "{Color} {Type}" (e.g. "Black Jacket")
+                    parts = []
+                    if attrs.get("colors"):
+                        parts.append(attrs["colors"][0])
+                    parts.append(current_type)
+                    
+                    fallback_query = " ".join(parts)
+                    
+                    # Strategy 2: If Strategy 1 is same as original query, DROP COLOR
+                    if fallback_query.lower().strip() == rec_query.lower().strip():
+                        print(f"🔄 [FALLBACK] Strategy 1 failed (Same Query). Dropping color to broaden.")
+                        fallback_query = current_type  # Just "jacket"
+                        # Create new filters without color
+                        fallback_filters = rec_filters.copy()
+                        fallback_filters.pop("color", None)
+                    else:
+                        fallback_filters = rec_filters
+                    
+                    if fallback_query.lower().strip() != rec_query.lower().strip() or "color" not in fallback_filters:
+                        print(f"🔄 [FALLBACK] Attempting Category Search: '{fallback_query}'")
+                        
+                        # Create new payload dict (not Pydantic model)
+                        fallback_payload = {
+                            "query": fallback_query,
+                            "filters": fallback_filters,
+                            "top_k": body.top_k
+                        }
+                        
+                        try:
+                            fb_resp = await _call_recs_suggest(fallback_payload)
+                            fb_raw_items = fb_resp.get("items") or []
+                            fb_items = [AgentItem(**it) for it in fb_raw_items if isinstance(it, dict) and it.get("slug")]
+                            
+                            if fb_items:
+                                # Re-check availability (relaxed mode)
+                                fb_availability = await checker.check_and_recommend(
+                                    user_query=fallback_query,
+                                    search_results=[it.dict() for it in fb_items]
+                                )
+                                
+                                if fb_availability.get("should_show_results", True):
+                                    print(f"✅ [FALLBACK] Success! Found {len(fb_items)} items for category '{fallback_query}'")
+                                    items = fb_items
+                                    availability = fb_availability 
+                                    availability["should_show_results"] = True
+                                    availability["honesty_message"] = f"We couldn't find exact matches for '{q}', but here are some {fallback_query}s you might like."
+                        except Exception as e:
+                            log.warning(f"Category fallback failed: {e}")
+            else:
+                # No type extracted - try a very broad fallback by removing type filter
+                print(f"🔄 [FALLBACK] No type extracted. Trying broad search without type filter.")
+                from app.agents.product_availability_checker import ProductAvailabilityChecker
+                checker = ProductAvailabilityChecker()
+                
+                # Remove all strict filters for maximum broadness
+                fallback_filters = {}
+                fallback_query = rec_query  # Keep original query text
+                
+                fallback_payload = {
+                    "query": fallback_query,
+                    "filters": fallback_filters,
+                    "top_k": body.top_k
+                }
+                
+                try:
+                    fb_resp = await _call_recs_suggest(fallback_payload)
+                    fb_raw_items = fb_resp.get("items") or []
+                    fb_items = [AgentItem(**it) for it in fb_raw_items if isinstance(it, dict) and it.get("slug")]
+                    
+                    if fb_items:
+                        fb_availability = await checker.check_and_recommend(
+                            user_query=fallback_query,
+                            search_results=[it.dict() for it in fb_items]
+                        )
+                        
+                        if fb_availability.get("should_show_results", True):
+                            print(f"✅ [FALLBACK] Success! Found {len(fb_items)} items with broad search")
+                            items = fb_items
+                            availability = fb_availability
+                            availability["should_show_results"] = True
+                            availability["honesty_message"] = f"We couldn't find exact matches for '{q}', but here are some items you might like."
+                            fallback_success = True
+                except Exception as e:
+                    log.warning(f"Broad fallback failed: {e}")
+
+
+        # Re-evaluate should_show after fallback
+        should_show = availability.get("should_show_results", False)
+
+
+        if not should_show:
+            # Ensure we have a honesty message
+            if not availability.get("honesty_message"):
+                availability["honesty_message"] = f"We couldn't find matching products in the catalog."
             
-            _store_session_recs(body, items)
-
-            # Generate personalized intro using LLM
-            intro_info = await _build_discover_intro(
-                body=body,
-                items=items,
-                attrs=attrs,
-                rec_filters=rec_filters,
-                honesty_message=availability.get("honesty_message")
-            )
-
-            debug_plan["llm_discover_intro_used"] = intro_info.get("llm_used", False)
-            debug_plan["llm_discover_intro_history_len"] = intro_info.get("history_len", 0)
-            debug_plan["llm_discover_intro_summary_used"] = intro_info.get("summary_used", False)
-            debug_plan["availability_explanation"] = availability.get("alternative_explanation")
-
-            if intro_info.get("llm_used"):
-                debug_plan["llm_used"] = True
-
-            intro_line = intro_info.get("text", availability.get("honesty_message") or "Here are some options.")
-
-            # Event: Ranking complete
-            emit_event('thinking:step', {
-                'icon': '✓',
-                'status': 'Top recommendations ready',
-                'done': True
-            })
-
+            log.info(f"🚫 Availability Checker rejected results for '{q}': {availability.get('honesty_message')}")
             return AgentOut(
-                kind="recommendations",
-                answer=intro_line,
-                citations=[],
+                kind="answer",
+                answer=availability.get("honesty_message"),
+                items=[],
+                debug_plan={**debug_plan, "availability_rejected": True}
+            )
+        
+        print(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
+        
+        # Mark these NEW items as shown for this session
+        _mark_slugs_as_shown(body, [item.slug for item in items])
+        
+        _store_session_recs(body, items)
+
+        # Generate personalized intro using LLM
+        intro_info = await _build_discover_intro(
+            body=body,
+            items=items,
+            attrs=attrs,
+            rec_filters=rec_filters,
+            honesty_message=availability.get("honesty_message")
+        )
+
+        debug_plan["llm_discover_intro_used"] = intro_info.get("llm_used", False)
+        debug_plan["llm_discover_intro_history_len"] = intro_info.get("history_len", 0)
+        debug_plan["llm_discover_intro_summary_used"] = intro_info.get("summary_used", False)
+        debug_plan["availability_explanation"] = availability.get("alternative_explanation")
+
+        if intro_info.get("llm_used"):
+            debug_plan["llm_used"] = True
+
+        intro_line = intro_info.get("text", availability.get("honesty_message") or "Here are some options.")
+
+        # Event: Ranking complete
+        emit_event('thinking:step', {
+            'icon': '✓',
+            'status': 'Top recommendations ready',
+            'done': True
+        })
+
+        return AgentOut(
+            kind="recommendations",
+            answer=intro_line,
+            citations=[],
                 items=items,
                 debug_plan=debug_plan,
             )
