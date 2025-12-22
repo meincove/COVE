@@ -20,6 +20,9 @@ export type StreamState = {
     answer: string | null;
     kind: string | null;
     suggestedActions: any[] | null;  // Week 6: Context-aware quick replies
+    // Phase 1: Agentic enhancements
+    thinking_events: any[] | null;
+    tools_used: any[] | null;
 };
 
 export function useAgentStream() {
@@ -34,6 +37,8 @@ export function useAgentStream() {
         answer: null,
         kind: null,
         suggestedActions: null,
+        thinking_events: null,
+        tools_used: null,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -63,6 +68,8 @@ export function useAgentStream() {
             answer: null,
             kind: null,
             suggestedActions: null,
+            thinking_events: null,
+            tools_used: null,
         });
 
         try {
@@ -152,6 +159,9 @@ export function useAgentStream() {
                     ...prev,
                     isStreaming: false,
                     kind: data.kind || null,
+                    // Phase 1: Capture thinking_events and tools_used from done event
+                    thinking_events: data.thinking_events || null,
+                    tools_used: data.tools_used || null,
                 }));
                 break;
 

@@ -30,8 +30,8 @@ export default function SSOCallback() {
             if (selectedPath === 'platform') {
                 router.push('/partner-onboarding')
             } else {
-                // Redirect to home with refresh to ensure auth state is updated
-                router.push('/')
+                // Redirect to shop with refresh to ensure auth state is updated
+                router.push('/shop')
                 router.refresh()
             }
         }

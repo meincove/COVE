@@ -35,7 +35,7 @@ class IntentClassifier:
     def _load_config(self, config_path: Path) -> Dict:
         """Load configuration from JSON file"""
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading intent config: {e}")
@@ -129,15 +129,22 @@ class IntentClassifier:
     
     def _llm_classify(self, query: str, context: Dict) -> Tuple[str, float, str]:
         """LLM-based classification (high accuracy, slower)"""
+        import os
         system_prompt = self._build_prompt()
         
         try:
+            # Get model from config (default to slash format for LiteLLM)
+            model = self.settings.get("llm_model", "openrouter/openai/gpt-4o-mini")
+            
+            # LiteLLM handles OpenRouter via model prefix
             response = completion(
-                model=self.settings.get("llm_model", "openrouter:openai/gpt-4o-mini"),
+                model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Query: {query}"}
                 ],
+                # api_base removed - let LiteLLM handle it via prefix
+                api_key=os.getenv("OPENROUTER_API_KEY"),
                 temperature=self.settings.get("llm_temperature", 0),
                 max_tokens=self.settings.get("llm_max_tokens", 20)
             )
@@ -173,7 +180,7 @@ Analyze the user's query and determine their PRIMARY intent. Think step-by-step:
 
 **Key Principles:**
 - **Assume shopping context**: "perfect" = wants to buy, "colors?" = wants to see options
-- **Focus on INTENT, not literal words**: "I need this" = wants to add to cart
+- **Distinguish Search vs Buy**: "I need a jacket" = recommendations (search). "I need THIS" (referring to displayed item) = cart_proposal (buy).
 - **Handle slang**: "cop this" = add to cart, "lemme get" = add to cart
 - **Understand implicit requests**: "I like it" = wants to buy
 - **Short affirmations are cart_proposal**: "yes", "ok", "sure", "perfect", "great"
@@ -221,7 +228,7 @@ Analyze the user's query and determine their PRIMARY intent. Think step-by-step:
 7. Order tracking keywords ("where's my order", "track") → order_history
 8. Sizing questions ("what size", "fit") → size_help
 9. Quality questions ("is it good", "material") → quality_question
-10. General product browsing ("show me", "looking for") → recommendations
+10. General product browsing ("show me", "looking for", "i need a [category]") → recommendations
 
 **Edge Cases:**
 - Very short positive responses in shopping context = cart_proposal

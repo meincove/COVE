@@ -184,10 +184,10 @@ html {
   }
 
   /* Add padding to body to account for fixed navbar */
-  body {
+  /* DISABLED FOR WELCOME PAGE */
+  /* body {
     padding-top: 88px;
-    /* Height of navbar */
-  }
+  } */
 
   /* Body surface holding page sections (demo) */
   .content-surface {
@@ -487,6 +487,23 @@ html {
 
   .animate-fade-in {
     animation: fade-in 0.3s ease-out forwards;
+  }
+
+  /* Progressive reveal animation for thinking events */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   /* Chat message aesthetics */

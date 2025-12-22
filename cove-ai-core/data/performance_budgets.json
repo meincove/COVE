@@ -1,0 +1,12 @@
+{
+    "intent_classification": 200,
+    "product_search": 500,
+    "hybrid_search": 600,
+    "vector_search": 400,
+    "keyword_search": 300,
+    "agent_execution": 1500,
+    "parallel_agents": 1800,
+    "total_response": 2000,
+    "cache_lookup": 50,
+    "llm_call": 1000
+}

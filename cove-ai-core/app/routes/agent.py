@@ -41,6 +41,10 @@ from app.core.policy_cache import get_policy_answer
 from app.core.performance import measure_time
 # Week 5-6: Intelligent LLM-based intent classification
 from app.mcp_agents.intent_classifier import get_classifier
+# Phase 1: Agentic enhancements - Thinking display (feature-flagged)
+from app.core.thinking_tracker import ThinkingTracker
+from app.core.tool_tracker import ToolTracker
+from app.core.performance_monitor import get_monitor
 
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
@@ -255,6 +259,7 @@ class AgentItem(BaseModel):
     color: Optional[str] = None
     size: Optional[str] = None
     variantId: Optional[str] = None
+    price: Optional[float] = None  # Product price for display
 
 
 # Week 4: Agentic Enhancement - Visible Thinking Status
@@ -283,6 +288,9 @@ class AgentOut(BaseModel):
     checkout: Optional[Dict[str, Any]] = None  # Week 4: For checkout_ready responses
     thinking_steps: Optional[List[Dict[str, str]]] = None  # Week 4: Agentic - Show reasoning
     debug_plan: Optional[Dict[str, Any]] = None
+    # Phase 1: Agentic enhancements - Detailed thinking display (feature-flagged)
+    thinking_events: Optional[List[Dict[str, Any]]] = None  # Detailed AI reasoning steps
+    tools_used: Optional[List[Dict[str, Any]]] = None  # Tools called with duration/results
 
 
 class AgentCartAddIn(BaseModel):
@@ -406,6 +414,10 @@ _SESSION_RECS: Dict[str, List[Dict[str, Any]]] = {}
 _SESSION_LAST_USER_MSG: Dict[str, str] = {}
 # Week 4: Track when we asked user for size
 _SESSION_AWAITING_SIZE: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, ...}}
+_SESSION_AWAITING_COLOR: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, available_colors, ...}}
+_SESSION_AWAITING_QUANTITY: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, color, size, ...}}
+# Phase 1: Track what products user has already seen (for "show more" queries)
+_SESSION_SHOWN_SLUGS: Dict[str, set] = {}  # {session_key: {slug1, slug2, ...}}
 
 
 def _session_key_from_body(body: AgentIn) -> Optional[str]:
@@ -454,6 +466,50 @@ def _clear_awaiting_size(body: AgentIn) -> None:
         del _SESSION_AWAITING_SIZE[key]
 
 
+def _set_awaiting_color(body: AgentIn, product_info: Dict[str, Any]) -> None:
+    """Store that we're waiting for color input from this session."""
+    key = _session_key_from_body(body)
+    if key:
+        _SESSION_AWAITING_COLOR[key] = product_info
+
+
+def _get_awaiting_color(body: AgentIn) -> Optional[Dict[str, Any]]:
+    """Get product info if we're waiting for color from this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_AWAITING_COLOR.get(key)
+
+
+def _clear_awaiting_color(body: AgentIn) -> None:
+    """Clear color-awaiting state."""
+    key = _session_key_from_body(body)
+    if key and key in _SESSION_AWAITING_COLOR:
+        del _SESSION_AWAITING_COLOR[key]
+
+
+def _set_awaiting_quantity(body: AgentIn, product_info: Dict[str, Any]) -> None:
+    """Store that we're waiting for quantity input from this session."""
+    key = _session_key_from_body(body)
+    if key:
+        _SESSION_AWAITING_QUANTITY[key] = product_info
+
+
+def _get_awaiting_quantity(body: AgentIn) -> Optional[Dict[str, Any]]:
+    """Get product info if we're waiting for quantity from this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_AWAITING_QUANTITY.get(key)
+
+
+def _clear_awaiting_quantity(body: AgentIn) -> None:
+    """Clear quantity-awaiting state."""
+    key = _session_key_from_body(body)
+    if key and key in _SESSION_AWAITING_QUANTITY:
+        del _SESSION_AWAITING_QUANTITY[key]
+
+
 def _update_last_user_message(body: AgentIn) -> None:
     key = _session_key_from_body(body)
     if not key:
@@ -466,6 +522,60 @@ def _get_last_user_message(body: AgentIn) -> Optional[str]:
     if not key:
         return None
     return _SESSION_LAST_USER_MSG.get(key)
+
+
+# Phase 1: Show More - Track shown items
+def _get_shown_slugs(body: AgentIn) -> set:
+    """Get set of slugs this user has already seen in this session."""
+    key = _session_key_from_body(body)
+    if not key:
+        return set()
+    return _SESSION_SHOWN_SLUGS.get(key, set())
+
+
+def _mark_slugs_as_shown(body: AgentIn, slugs: List[str]) -> None:
+    """Mark these slugs as shown to prevent showing again on 'show more'."""
+    key = _session_key_from_body(body)
+    if not key:
+        return
+    if key not in _SESSION_SHOWN_SLUGS:
+        _SESSION_SHOWN_SLUGS[key] = set()
+    _SESSION_SHOWN_SLUGS[key].update(slugs)
+
+
+def _filter_out_shown_items(items: List[AgentItem], shown_slugs: set) -> List[AgentItem]:
+    """Remove items user has already seen."""
+    return [item for item in items if item.slug not in shown_slugs]
+
+
+def _get_last_user_message_OLD(body: AgentIn) -> Optional[str]:
+    key = _session_key_from_body(body)
+    if not key:
+        return None
+    return _SESSION_LAST_USER_MSG.get(key)
+
+
+def _get_available_colors(slug: str) -> List[str]:
+    """Get available colors for a product by querying database for variants."""
+    try:
+        # Extract base slug (e.g., 'pg-hoodie-corebasics-119' → 'pg-hoodie-corebasics')
+        base_slug = slug.rsplit('-', 1)[0] if '-' in slug else slug
+        
+        query = """
+            SELECT DISTINCT color
+            FROM cove_product_embeddings
+            WHERE slug LIKE %s AND color IS NOT NULL AND color != ''
+            ORDER BY color
+        """
+        
+        with _get_pg_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (f"{base_slug}%",))
+                colors = [row[0] for row in cur.fetchall()]
+                return colors if len(colors) > 1 else []  # Only return if multiple colors
+    except Exception as e:
+        log.warning(f"Failed to get colors for {slug}: {e}")
+        return []
 
 
 async def _select_from_last_recs_via_llm(
@@ -527,15 +637,19 @@ Always respond with JSON only.
         user_payload["previous_user_message"] = prev_user_message
 
     client = LLMClient()
-    raw = await client.generate(
-        [
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": json.dumps(user_payload, ensure_ascii=False),
-            },
-        ]
-    )
+    try:
+        raw = await client.generate(
+            [
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": json.dumps(user_payload, ensure_ascii=False),
+                },
+            ]
+        )
+    except Exception as e:
+        log.warning(f"_select_from_last_recs_via_llm failed: {e}")
+        return None
 
     try:
         text = raw.strip()
@@ -686,6 +800,7 @@ async def _build_discover_intro(
     items: List[AgentItem],
     rec_filters: Dict[str, Any],
     attrs: Dict[str, Any],
+    honesty_message: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate personalized intro for discover responses using LLM.
@@ -739,6 +854,9 @@ Examples (WITH history):
 - "Based on what you usually like, here are some hoodies that fit your aesthetic."
 - "Found some bombers in your style. Think you'll dig these."
 """
+
+    if honesty_message:
+        system_prompt += f"\n\nIMPORTANT: The system has already analyzed the search results and determined we don't have exactly what the user wanted. HONESTY MESSAGE: {honesty_message}. Use this information to explain the situation gently."
 
     user_payload = {
         "message": body.message,
@@ -843,34 +961,42 @@ async def _call_rag(query: str, top_k: int) -> Dict[str, Any]:
     return {"answer": "Sorry—something went wrong fetching product info.", "citations": []}
 
 
+# Type normalization config cache
+_type_norm_config_cache = None
+
+def _get_type_normalization_config():
+    """Load type normalization config from JSON (cached)"""
+    global _type_norm_config_cache
+    if _type_norm_config_cache is None:
+        config_path = Path(__file__).resolve().parent.parent.parent / "data" / "type_normalization_config.json"
+        with open(config_path) as f:
+            _type_norm_config_cache = json.load(f)
+    return _type_norm_config_cache
+
+
+def _get_similar_types(product_type: str) -> List[str]:
+    """
+    Get semantically similar product types from config.
+    Returns list of similar types in order of relevance.
+    
+    Example: "pants" -> ["joggers", "jeans", "shorts", "trousers"]
+    """
+    try:
+        config = _get_type_normalization_config()
+        similarity_map = config.get("type_similarity", {})
+        return similarity_map.get(product_type.lower(), [])
+    except Exception as e:
+        log.warning(f"Failed to load type similarity: {e}")
+        return []
+
+
 async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
+
     """
-    Wrapper around Cove's recommendations logic (tools first, then HTTP).
+    Wrapper around Cove's recommendations logic.
+    Uses HTTP endpoint for product recommendations.
     """
-    if USE_TOOLS_LAYER:
-        try:
-            query = payload.get("query") or ""
-            filters = payload.get("filters") or {}
-            top_k = int(payload.get("top_k") or 4)
-
-            tool_input: Dict[str, Any] = {
-                "query": query,
-                "filters": filters,
-                "top_k": top_k,
-            }
-
-            tool_resp = await tools_recs.recommend_products(tool_input)
-
-            if isinstance(tool_resp, dict):
-                return tool_resp
-
-            log.warning("recommend_products returned non-dict: %r", type(tool_resp))
-        except Exception:
-            log.exception("recommend_products tool failed")
-
-            if DISABLE_TOOLS_HTTP_FALLBACK:
-                return {}
-
+    # HTTP fallback (primary method for now)
     try:
         async with httpx.AsyncClient(timeout=10) as cx:
             r = await cx.post(
@@ -993,11 +1119,54 @@ async def _call_fit_recommend(
 # ---------- Main agent endpoint ----------
 
 
+def _inject_thinking_data(
+    response: AgentOut,
+    thinking_tracker: ThinkingTracker,
+    tool_tracker: ToolTracker
+) -> AgentOut:
+    """
+    Inject thinking events and tool usage into response (feature-flagged).
+    Only adds data if feature is enabled, otherwise returns response unchanged.
+    
+    Args:
+        response: The AgentOut response to enhance
+        thinking_tracker: Thinking tracker with events
+        tool_tracker: Tool tracker with usage data
+        
+    Returns:
+        Enhanced response if feature enabled, original response otherwise
+    """
+    # Check if feature is enabled
+    if not thinking_tracker.is_enabled():
+        return response  # Return unchanged (no-op)
+    
+    # Add thinking events
+    thinking_events = thinking_tracker.get_all_events()
+    if thinking_events:
+        response.thinking_events = thinking_events
+    
+    # Add tools used
+    tools_summary = tool_tracker.get_summary()
+    if tools_summary:
+        response.tools_used = tools_summary
+    
+    return response
+
 
 @router.post("/ai/agent/query", response_model=AgentOut)
 async def agent_query(body: AgentIn) -> AgentOut:
     t0 = time.perf_counter()
-    out: AgentOut = await _agent_query_impl(body)
+    
+    # Phase 1: Create trackers here to pass down
+    thinking_tracker = ThinkingTracker()
+    tool_tracker = ToolTracker()
+    
+    # Call implementation with trackers
+    out: AgentOut = await _agent_query_impl(body, thinking_tracker, tool_tracker)
+    
+    # Phase 1: Inject thinking data if feature enabled (feature-flagged, safe)
+    out = _inject_thinking_data(out, thinking_tracker, tool_tracker)
+    
     t_end = time.perf_counter()
     total_ms = int((t_end - t0) * 1000)
 
@@ -1053,10 +1222,294 @@ async def agent_query(body: AgentIn) -> AgentOut:
 
 from app.core.events import emit_event
 
-async def _agent_query_impl(body: AgentIn) -> AgentOut:
+async def _agent_query_impl(
+    body: AgentIn,
+    thinking_tracker: ThinkingTracker,
+    tool_tracker: ToolTracker
+) -> AgentOut:
     q = body.message
     prev_user_message = _get_last_user_message(body)
     _update_last_user_message(body)
+    
+    # Trackers are now passed as parameters (cleaner than re-creating)
+
+    # ===== CONVERSATION FLOW HANDLER =====
+    # Check if this is    # ✨ WEEK 3 DAY 2: Context-Aware Reasoning
+    # Resolve intent using conversation history (handle follow-ups)
+    
+    # 1. Get/Create Manager
+    from app.services.conversation_manager import get_conversation_manager
+    conv_manager = get_conversation_manager()
+    user_id = body.clerkUserId or body.guestSessionId or "anonymous"
+    
+    # 2. Add User Message to History
+    conv_manager.add_message(user_id, "user", q)
+    
+    # 3. Resolve Inteht (LLM)
+    # "Make it blue" -> "Show me blue blazers"
+    resolved_context = await conv_manager.resolve_intent(user_id, q)
+    resolved_query = resolved_context.get("resolved_query", q)
+    modification_type = resolved_context.get("modification_type", "new_topic")
+    
+    log.info(f"🧠 Context Resolved: '{q}' -> '{resolved_query}' ({modification_type})")
+    
+    # Use resolved query for downstream logic
+    q = resolved_query  
+    
+    # --- END Context Logic ---
+
+    from app.services.user_preference_manager import get_preference_manager
+    from app.core.conversation_flow import conversation_handler
+    
+    session_key = _session_key_from_body(body)
+    
+    # Check if in active conversation
+    if session_key and conversation_handler.is_in_conversation(session_key):
+        log.info(f"📝 Continuing conversation for session {session_key}")
+        
+        # Handle response
+        result = await conversation_handler.handle_response(session_key, q)
+        
+        if result.get("trigger_orchestrator"):
+            # Conversation complete! Trigger orchestrator
+            log.info(f"✅ Conversation complete, triggering orchestrator")
+            
+            # Get orchestrator context
+            orchestrator_query = result.get("orchestrator_query", q)
+            orchestrator_context = result.get("orchestrator_context", {})
+            workflow_name = result.get("orchestrator_workflow", "outfit_builder")
+            
+            # Import and trigger orchestrator
+            from app.agents import orchestrator
+            
+            # Add session context
+            orchestrator_context.update({
+                "user_id": body.clerkUserId or body.guestSessionId,
+                "user_size_history": {}
+            })
+            
+            # Show thinking
+            emit_event('thinking:step', {
+                'icon': '🎨',
+                'status': 'Building your complete outfit'
+            })
+            thinking_tracker.add_thinking("orchestrator", "Executing multi-agent workflow...")
+            
+            try:
+                orchestrator_result = await orchestrator.execute_workflow(
+                    workflow_name=workflow_name,
+                    query=orchestrator_query,
+                    context=orchestrator_context
+                )
+                
+                # Format as AgentOut (same as before)
+                outfit_items = orchestrator_result.get("outfit_items", [])
+                
+                if not outfit_items:
+                    return AgentOut(
+                        kind="answer",
+                        answer=orchestrator_result.get("reasoning", "I couldn't find items for this outfit."),
+                        items=[],
+                        reasoning=orchestrator_result.get("reasoning", "")
+                    )
+                
+                # Convert to AgentItem format
+                agent_items = []
+                for item in outfit_items:
+                    product = item.get("product", {})
+                    agent_items.append(AgentItem(
+                        slug=product.get("slug", ""),
+                        title=product.get("title", "Unknown"),
+                        url=product.get("url", f"/product/{product.get('slug', '')}"),
+                        score=product.get("score", 0.0),
+                        reason=item.get("reason", ""),
+                        type=product.get("type", ""),
+                        tier=product.get("tier", ""),
+                        color=product.get("color", ""),
+                        size=product.get("size", ""),
+                        variantId=product.get("variantId", ""),
+                    ))
+                
+                # Build answer
+                total = orchestrator_result.get("total", 0)
+                budget_max = orchestrator_context.get("budget_max", 500)
+                within_budget = orchestrator_result.get("within_budget", True)
+                
+                answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
+                
+                if within_budget:
+                    remaining = budget_max - total
+                    answer_parts.append(f"Within your €{budget_max} budget! €{remaining:.2f} remaining.")
+                
+                answer = " ".join(answer_parts)
+                
+                return AgentOut(
+                    kind="recommendations",
+                    answer=answer,
+                    items=agent_items,
+                    reasoning=orchestrator_result.get("reasoning", "")
+                )
+                
+            except Exception as e:
+                log.error(f"Orchestrator failed: {e}")
+                return AgentOut(
+                    kind="answer",
+                    answer="Sorry, I couldn't build your outfit right now. Please try again!",
+                    items=[]
+                )
+        
+        else:
+            # Continue conversation with next question
+            return AgentOut(
+                kind="answer",
+                answer=result.get("message", ""),
+                items=[]
+            )
+    
+    # Check if should START a conversation
+    flow_name = conversation_handler.should_start_conversation(q)
+    if flow_name:
+        log.info(f"🎯 Detected trigger for flow: {flow_name}")
+        
+        # Start conversation (with one-shot extraction)
+        # matches trigger, so we pass initial message to pre-fill info
+        first_question = await conversation_handler.start_conversation(session_key, flow_name, initial_message=q)
+        
+        return AgentOut(
+            kind="answer",
+            answer=first_question, # "I have everything I need! Ready?" or "What's the occasion?"
+            items=[]
+        )
+    
+    # ===== END CONVERSATION FLOW HANDLER =====
+
+    # ===== INTENT-BASED ROUTING (UNIFIED) =====
+    # We use the IntentClassifier as the verified router.
+    # - "outfit_builder" -> Multi-Agent Orchestrator
+    # - "recommendations" -> Legacy RAG (Product Search)
+    # - "cart/checkout" -> Handled by legacy flow below (or locally if needed)
+    
+    from app.mcp_agents.intent_classifier import get_classifier
+    from app.agents import orchestrator
+
+    # Classify intent
+    classifier = get_classifier()
+    classification = classifier.classify(q)
+    intent = classification.get("intent")
+    confidence = classification.get("confidence", 0.0)
+    
+    print(f"DEBUG: 🧭 Routing: intent='{intent}' confidence={confidence}")
+
+    # Explicitly route ONLY complex outfit requests to the Agent Orchestrator
+    if intent == "outfit_builder" and confidence > 0.6:
+        workflow_name = "outfit_builder"
+        print(f"DEBUG: 🎯 Routing to Agent Orchestrator: {workflow_name}")
+
+        
+        # Event: Starting multi-agent workflow
+        emit_event('thinking:step', {
+            'icon': '🎨',
+            'status': 'Building your complete outfit'
+        })
+        thinking_tracker.add_thinking("orchestrator", "Building complete outfit with specialized agents...")
+        
+        # Get user budget from profile or use default
+        budget_max = 500  # Default
+        if body.clerkUserId:
+            ai_profile = await _load_ai_profile(body.clerkUserId)
+            if ai_profile and ai_profile.get('budget_max'):
+                budget_max = float(ai_profile['budget_max'])
+        
+        # Execute multi-agent workflow
+        try:
+            result = await orchestrator.execute_workflow(
+                workflow_name=workflow_name,
+                query=q,
+                context={
+                    "budget_max": budget_max,
+                    "user_id": body.clerkUserId or body.guestSessionId,
+                    "user_size_history": {}  # Could load from profile
+                }
+            )
+            
+            # Track agent executions
+            for agent_name, timing_ms in result.get("agent_timings", {}).items():
+                usage = tool_tracker.start(f"agent_{agent_name}", {"workflow": workflow_name})
+                tool_tracker.complete(usage, {"duration_ms": timing_ms, "success": True})
+            
+            # Format as AgentOut response
+            outfit_items = result.get("outfit_items", [])
+            
+            if not outfit_items:
+                # No items found, fallback to explanation
+                return AgentOut(
+                    kind="answer",
+                    answer=result.get("reasoning", "I couldn't find items for this outfit. Try a different style or budget?"),
+                    items=[],
+                    reasoning=result.get("reasoning", ""),
+                    debug={"orchestrator": "no_items_found"}
+                )
+            
+            # Convert outfit items to AgentItem format
+            agent_items = []
+            for item in outfit_items:
+                product = item.get("product", {})
+                agent_items.append(AgentItem(
+                    slug=product.get("slug", ""),
+                    title=product.get("title", "Unknown"),
+                    url=product.get("url", f"/product/{product.get('slug', '')}"),  # Required field!
+                    score=product.get("score", 0.0),
+                    reason=item.get("reason", ""),
+                    type=product.get("type", ""),
+                    tier=product.get("tier", ""),
+                    color=product.get("color", ""),
+                    size=product.get("size", ""),
+                    variantId=product.get("variantId", ""),
+                ))
+            
+            # Build outfit description
+            total = result.get("total", 0)
+            within_budget = result.get("within_budget", True)
+            discount = result.get("discount_applied")
+            
+            answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
+            
+            if discount:
+                answer_parts.append(f"Applied {discount.get('code')}: saved €{discount.get('savings', 0):.2f}")
+            
+            if within_budget:
+                remaining = budget_max - total
+                answer_parts.append(f"Within your €{budget_max} budget! €{remaining:.2f} remaining.")
+            else:
+                answer_parts.append(f"Slightly over budget by €{total - budget_max:.2f}")
+            
+            answer = " ".join(answer_parts)
+            
+            # Additional reasoning
+            reasoning_parts = [result.get("reasoning", "")]
+            if result.get("size_recommendations"):
+                reasoning_parts.append("Sizes recommended based on brand standards.")
+            
+            return AgentOut(
+                kind="recommendations",  # Show as product cards
+                answer=answer,
+                items=agent_items,
+                reasoning=" ".join(reasoning_parts),
+                debug={
+                    "orchestrator": workflow_name,
+                    "agent_timings": result.get("agent_timings", {}),
+                    "confidence": result.get("confidence", 0),
+                    "total": total,
+                    "within_budget": within_budget
+                }
+            )
+            
+        except Exception as e:
+            log.error(f"Multi-agent orchestrator failed: {e}")
+            # Fall through to normal agent flow
+            pass
+    
+    # ===== END MULTI-AGENT ORCHESTRATOR CHECK =====
 
     ai_profile: Optional[Dict[str, Any]] = None
     if body.clerkUserId:
@@ -1064,19 +1517,26 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
     with get_conn() as conn:
         attrs = _parse_query_attrs(conn, q)
+        print(f"🎯 [AGENT] Received parsed attrs from _parse_query_attrs: {attrs}")
         numeric_filters = parse_numeric_filters(q)
+        print(f"🎯 [AGENT] Numeric filters: {numeric_filters}")
         base_filters: Dict[str, Any] = build_filters(attrs, numeric_filters)
+        print(f"🎯 [AGENT] Base filters after build_filters: {base_filters}")
 
     rec_filters: Dict[str, Any] = _apply_profile_defaults_to_filters(
         base_filters,
         ai_profile,
     )
+    print(f"🎯 [AGENT] Final rec_filters after profile defaults: {rec_filters}")
 
     # Event: Understanding request
     emit_event('thinking:step', {
         'icon': '🧠',
         'status': 'Understanding your request'
     })
+    
+    # Phase 1: Track thinking - Understanding intent
+    thinking_event_1 = thinking_tracker.add_thinking("classifier", "Understanding your request...")
 
     # === INTELLIGENT LLM-BASED INTENT CLASSIFICATION ===
     # Use 93% accurate semantic classifier instead of regex/rules
@@ -1097,19 +1557,31 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     confidence = classification_result.get("confidence", 0.95)
     intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
     
+    # Phase 1: Complete thinking event
+    thinking_tracker.complete(
+        thinking_event_1,
+        details=f"Intent: {semantic_intent} → {intent_kind}",
+        confidence=confidence * 100
+    )
+    
     # Map orchestrator intent back to API response kind for AgentOut
     # AgentOut only accepts: 'answer', 'recommendations', 'cart_proposal', 'checkout_ready'
     ORCHESTRATOR_TO_API_KIND = {
         "discover": "recommendations",
         "cart_add": "cart_proposal",
         "checkout_start": "checkout_ready",
-        "generic": "answer",
-        "policy": "answer",
         "size_fit": "answer",
-        "greeting": "answer",
-        "unknown": "answer",
-        "order_query": "answer",
+        "policy": "answer",
+        "agent_stylist": "recommendations"
     }
+    
+    # PRE-FLIGHT: Clear Classifier singleton to ensure config reload if needed
+    # (Optional but good for debug/dev when config changes)
+    if os.getenv("ENV") != "production":
+        from app.mcp_agents.intent_classifier import classifier
+        classifier._classifier = None
+
+    # --- Branch 1: cart_proposal -------------------------------------------------
     api_response_kind = ORCHESTRATOR_TO_API_KIND.get(intent_kind, "answer")
     
     # Production monitoring - using print for immediate visibility
@@ -1142,8 +1614,12 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
     # Week 4: Check if we were awaiting size input
     awaiting = _get_awaiting_size(body)
     if awaiting:
-        # If user is starting a new discover query, clear stale awaiting state
-        if intent_kind == "discover" and not _looks_like_cart_add(q):
+        # Check if this message looks like JUST a size answer (e.g., "M", "in M", "size L")
+        # Simple pattern: message contains  S/M/L/XL but not other product keywords
+        looks_like_size_only = bool(re.search(r'\b(?:in\s+)?(?:size\s+)?([smlxSMLX]{1,3})\b', q.lower())) and len(q.strip()) < 20
+        
+        # Only clear awaiting if this is clearly a NEW product search, not a size response
+        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_size_only:
             _clear_awaiting_size(body)
             awaiting = None  # Treat as if no awaiting state
         
@@ -1155,9 +1631,9 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
         # Check if message looks like cart add intent using existing function
         has_cart_intent = _looks_like_cart_add(q)
         
-        # Only extract size if NOT a cart add command
+        # Extract size from message - prioritize short responses like "M" or "in M"
         if not has_cart_intent:
-            match = re.search(r'\b(?:size\s+)?([smlxSMLX]{1,3})\b', q)
+            match = re.search(r'\b(?:in\s+)?(?:size\s+)?([smlxSMLX]{1,3})\b', q, re.IGNORECASE)
             if match:
                 size = match.group(1).upper()
         
@@ -1172,18 +1648,75 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             nice_type = (top.type or "").lower()
             nice_color = (top.color or "").lower()
             
-            parts = ["Do you want me to add this"]
+            # Store product with size and ask for quantity
+            product_with_size = product.copy()
+            product_with_size["size"] = size
+            
+            _set_awaiting_quantity(body, {"product": product_with_size})
+            
+            product_desc = f"{nice_color} {nice_type}".strip() if nice_color else nice_type
+            
+            return AgentOut(
+                kind="answer",
+                answer=f"Perfect! How many {product_desc} in size {size} would you like to add?",
+                citations=[],
+                items=[top],
+                cart_payload=None,
+                debug_plan={**debug_plan, "size_provided_in_followup": True},
+            )
+        # If has_cart_intent, just fall through - don't clear state, let normal flow handle it
+
+    # Check if we were awaiting quantity input
+    awaiting_qty = _get_awaiting_quantity(body)
+    if awaiting_qty:
+        # Check if this looks like a quantity response (number)
+        looks_like_qty_only = len(q.strip()) < 10  # Very short response
+        
+        # Only clear if clearly a new search
+        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_qty_only:
+            _clear_awaiting_quantity(body)
+            awaiting_qty = None
+    
+    if awaiting_qty:
+        # Extract quantity from message
+        quantity = None
+        has_cart_intent = _looks_like_cart_add(q)
+        
+        if not has_cart_intent:
+            # Try to find a number in the message (1-10 typical range)
+            match = re.search(r'\b([1-9]|10)\b', q.strip())
+            if match:
+                quantity = int(match.group(1))
+        
+        if quantity:
+            # Clear the awaiting state
+            _clear_awaiting_quantity(body)
+            
+            # Create final cart proposal with all info
+            product = awaiting_qty["product"]
+            top = AgentItem(**product)
+            
+            nice_type = (top.type or "").lower()
+            nice_color = (product.get("color") or top.color or "").lower()
+            nice_size = (product.get("size") or top.size or "").upper()
+            
+            parts = ["Do you want me to add"]
+            if quantity > 1:
+                parts.append(str(quantity))
+            else:
+                parts.append("this")
             if nice_color:
                 parts.append(nice_color)
-            parts.append(nice_type)
-            parts.append(f"in size {size}")
+            parts.append(nice_type if quantity == 1 else f"{nice_type}s")
+            if nice_size:
+                parts.append(f"in size {nice_size}")
             parts.append("to your cart?")
             answer = " ".join(parts).replace("  ", " ").strip()
             
             cart_payload = {
                 "variantId": top.variantId,
-                "size": size,
-                "quantity": 1,
+                "size": product.get("size") or top.size,
+                "quantity": quantity,
                 "cartId": body.cartId,
                 "clerkUserId": body.clerkUserId,
                 "guestSessionId": body.guestSessionId,
@@ -1196,9 +1729,68 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 citations=[],
                 items=[top],
                 cart_payload=cart_payload,
-                debug_plan={**debug_plan, "size_provided_in_followup": True},
+                debug_plan={**debug_plan, "quantity_provided_in_followup": True},
             )
-        # If has_cart_intent, just fall through - don't clear state, let normal flow handle it
+
+    # Check if we were awaiting color input
+    awaiting_color = _get_awaiting_color(body)
+    if awaiting_color:
+        # Check if this message looks like JUST a color response (e.g., "navy", "black", "in navy")
+        looks_like_color_only = len(q.strip()) < 30  # Short response
+        
+        # Only clear awaiting if this is clearly a NEW product search
+        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_color_only:
+            _clear_awaiting_color(body)
+            awaiting_color = None
+        
+    if awaiting_color:
+        # Extract color from message
+        color = None
+        has_cart_intent = _looks_like_cart_add(q)
+        
+        if not has_cart_intent:
+            # Try to match against available colors
+            available_colors = awaiting_color.get("available_colors", [])
+            q_lower = q.lower().strip()
+            
+            # Remove common prefixes
+            for prefix in ["in ", "color ", "the ", "i want ", "i'd like "]:
+                if q_lower.startswith(prefix):
+                    q_lower = q_lower[len(prefix):].strip()
+            
+            # Check if message contains any of the available colors
+            for avail_color in available_colors:
+                if avail_color.lower() in q_lower or q_lower in avail_color.lower():
+                    color = avail_color
+                    break
+        
+        if color:
+            # Clear the awaiting state
+            _clear_awaiting_color(body)
+            
+            # Now check if we need size
+            product = awaiting_color["product"]
+            top = AgentItem(**product)
+            
+            # Update product color in the session state
+            top_dict = product.copy()
+            top_dict["color"] = color
+            
+            # Ask for size if not provided
+            _set_awaiting_size(body, {"product": top_dict})
+            
+            nice_type = (top.type or "").lower()
+            available_sizes = ["S", "M", "L", "XL"]  # Could be dynamic from product data
+            sizes_str = ", ".join(available_sizes)
+            
+            return AgentOut(
+                kind="answer",  # FIX: Use answer, not cart_proposal when asking questions
+                answer=f"Great choice! The {color} {nice_type} is available. What size would you like? ({sizes_str})",
+                citations=[],
+                items=[top],
+                cart_payload=None,
+                debug_plan={**debug_plan, "color_provided_in_followup": True},
+            )
 
     if ai_profile:
         debug_plan["ai_profile_used"] = True
@@ -1235,12 +1827,37 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
                 chosen_size = rec_filters.get("size") or top.size
                 
                 # Week 4: If size not specified, ask user instead of cart_proposal with null
-                if not chosen_size:
-                    nice_type = (top.type or rec_filters.get("type") or "item").lower()
-                    nice_color = (top.color or rec_filters.get("color") or "").lower()
-                    product_desc = f"{nice_color} {nice_type}".strip() if nice_color else nice_type
+                # Check if we need to ask for color first
+                # TODO: Get available colors from product variants/recommendations
+                # For now, assume if color filter wasn't specified, product might have multiple colors
+                needs_color = not rec_filters.get("color") and not chosen_size  # If no color specified
+                
+                if needs_color:
+                    # Query database for available colors
+                    available_colors = _get_available_colors(top.slug)
                     
-                    # Store that we're awaiting size for this product
+                    if available_colors and len(available_colors) > 1:
+                        # Ask for color first
+                        _set_awaiting_color(body, {
+                            "product": top.dict(),
+                            "filters": rec_filters,
+                            "available_colors": available_colors
+                        })
+                        
+                        colors_str = ", ".join(available_colors)
+                        product_desc = (top.type or "item").lower()
+                        
+                        return AgentOut(
+                            kind="answer",
+                            answer=f"Great choice! This {product_desc} comes in {colors_str}. Which color would you like?",
+                            citations=[],
+                            items=[top],
+                            debug_plan=debug_plan,
+                        )
+                
+                if not chosen_size:
+                    # No color needed, just ask for size
+                    product_desc = (top.type or rec_filters.get("type") or "item").lower()
                     _set_awaiting_size(body, {
                         "product": top.dict(),
                         "filters": rec_filters,
@@ -1649,15 +2266,50 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             'icon': '🔍',
             'status': 'Searching catalog'
         })
+        
+        # Phase 1: Track search thinking
+        search_thinking = thinking_tracker.add_thinking("search", "Searching product catalog...")
+        
+        # Phase 1: Track hybrid_search tool
+        search_tool = tool_tracker.start("hybrid_search", inputs={"query": q, "top_k": body.top_k})
+        
+        try:
+            # Phase 1: If user has seen items before, fetch MORE to ensure we have enough new ones
+            shown_slugs = _get_shown_slugs(body)
+            search_top_k = body.top_k
+            if shown_slugs:
+                # Fetch significantly more to account for filtering (pagination effect)
+                # If user has seen top 20 items, we need to fetch 30+ to find new ones.
+                search_top_k = max(60, body.top_k * 5)
+                debug_plan["expanded_search_for_shown"] = True
+                debug_plan["search_top_k"] = search_top_k
 
-        rec_query = build_rec_query(q, rec_filters)
 
-        rec_payload = {
-            "query": rec_query,
-            "filters": rec_filters,
-            "top_k": body.top_k,
-        }
-        rec_resp = await _call_recs_suggest(rec_payload)
+            rec_query = build_rec_query(q, rec_filters)
+
+            rec_payload = {
+                "query": rec_query,
+                "filters": rec_filters,
+                "top_k": search_top_k,  # Use expanded top_k
+            }
+            rec_resp = await _call_recs_suggest(rec_payload)
+            
+            # Phase 1: Complete tool tracking
+            item_count = len(rec_resp.get("items", []))
+            tool_tracker.complete(search_tool, outputs={"count": item_count})
+            
+            # Phase 1: Complete thinking
+            thinking_tracker.complete(
+                search_thinking,
+                details=f"Found {item_count} matching products",
+                tool_used=f"hybrid_search ({item_count} items)"
+            )
+            
+        except Exception as e:
+            # Phase 1: Track failures
+            tool_tracker.error(search_tool, str(e))
+            thinking_tracker.error(search_thinking, f"Search failed: {str(e)}")
+            raise
 
         debug_plan["rec_query"] = rec_query
 
@@ -1669,6 +2321,27 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
             if isinstance(it, dict) and it.get("slug")
         ]
 
+        # --- RETRY LOGIC: If strict type filtering yielded 0 results, try loosening constraints ---
+        if not items and rec_filters.get("type"):
+            print(f"🔄 [RETRY] Zero results for type='{rec_filters['type']}'. Retrying without type filter...")
+            
+            fallback_filters = rec_filters.copy()
+            del fallback_filters["type"]
+            
+            rec_payload["filters"] = fallback_filters
+            try:
+                rec_resp = await _call_recs_suggest(rec_payload)
+                raw_items = rec_resp.get("items") or []
+                items = [
+                    AgentItem(**it)
+                    for it in raw_items
+                    if isinstance(it, dict) and it.get("slug")
+                ]
+                if items:
+                    print(f"✅ [RETRY] Found {len(items)} items without type filter. Proceeding to Availability Checker.")
+            except Exception as e:
+                log.warning(f"Fallback search failed: {e}")
+
         # Event: Found items
         emit_event('thinking:step', {
             'icon': '✓',
@@ -1678,37 +2351,262 @@ async def _agent_query_impl(body: AgentIn) -> AgentOut:
 
         debug_plan["rec_item_count"] = len(items)
 
+        # Initialize availability dict for cases with no items
+        availability = {
+            "should_show_results": bool(items),
+            "exact_match": False,
+            "has_close_alternative": False,
+            "recommended_items": items,
+            "honesty_message": ""
+        }
+
         if items:
-            _store_session_recs(body, items)
-
-            # Generate personalized intro using LLM
-            intro_info = await _build_discover_intro(
-                body=body,
-                items=items,
-                attrs=attrs,
-                rec_filters=rec_filters,
-            )
-
-            debug_plan["llm_discover_intro_used"] = intro_info.get("llm_used", False)
-            debug_plan["llm_discover_intro_history_len"] = intro_info.get("history_len", 0)
-            debug_plan["llm_discover_intro_summary_used"] = intro_info.get("summary_used", False)
-
-            if intro_info.get("llm_used"):
-                debug_plan["llm_used"] = True
-
-            intro_line = intro_info.get("text", "Here are some options that match what you asked for.")
-
-            # Event: Ranking complete
+            print(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
+            # Phase 1: Filter out items user has already seen (for \"show more\")
+            shown_slugs = _get_shown_slugs(body)
+            if shown_slugs:
+                original_count = len(items)
+                items = _filter_out_shown_items(items, shown_slugs)
+                debug_plan["filtered_shown_items"] = original_count - len(items)
+            
+            # Limit to user's requested top_k (after filtering)
+            items = items[:body.top_k]
+            print(f"📦 [RECS] Items after shown filter + top_k limit: {len(items)} items")
+            
+            # ✨ WEEK 3 DAY 2: Honest Product Availability Check
+            # Prevent recommending t-shirts for suits!
+            from app.agents.product_availability_checker import ProductAvailabilityChecker
+            checker = ProductAvailabilityChecker()
+            
+            # Event: Validating results
             emit_event('thinking:step', {
-                'icon': '✓',
-                'status': 'Top recommendations ready',
-                'done': True
+                'icon': '🛡️',
+                'status': 'Validating product matches'
             })
+            
+            print(f"🔍 [DEBUG] Calling availability checker with:")
+            print(f"   - rec_query: '{rec_query}'")
+            print(f"   - items: {[{'title': it.title, 'type': it.type, 'color': it.color} for it in items]}")
+            
+            availability = await checker.check_and_recommend(
+                user_query=rec_query,
+                search_results=[it.dict() for it in items]
+            )
+            print(f"🛡️ [AVAILABILITY] Checker returned: should_show={availability.get('should_show_results')}, exact={availability.get('exact_match')}, close={availability.get('has_close_alternative')}")
+            print(f"🛡️ [AVAILABILITY] Recommended items count: {len(availability.get('recommended_items', []))}")
+            print(f"🛡️ [AVAILABILITY] Honesty message: {availability.get('honesty_message')}")
+        
+        # --- FALLBACK LOGIC (executes for empty results OR rejected results) ---
+        should_show = availability.get("should_show_results", False)
+        
+        if not should_show:
+            print(f"❌ [AVAILABILITY] Initial search failed/rejected (items={len(items)}). Attempting Semantic Fallback.")
+            
+            # Check if we have a mapped category we can fall back to
+            types_list = attrs.get("types", [])
+            current_type = types_list[0] if types_list else None
+            
+            fallback_success = False
+            
+            if current_type:
+                from app.agents.product_availability_checker import ProductAvailabilityChecker
+                checker = ProductAvailabilityChecker()
+                
+                # NEW: Try semantically similar types first (e.g., pants -> joggers, jeans)
+                similar_types = _get_similar_types(current_type)
+                print(f"🔄 [SEMANTIC FALLBACK] Similar types for '{current_type}': {similar_types}")
+                
+                fallback_success = False
+                
+                # Try each similar type in order of relevance
+                for similar_type in similar_types[:3]:  # Limit to top 3 most similar
+                    print(f"🔄 [FALLBACK] Trying similar type: '{similar_type}'")
+                    
+                    # Build query with color if available
+                    parts = []
+                    if attrs.get("colors"):
+                        parts.append(attrs["colors"][0])
+                    parts.append(similar_type)
+                    
+                    fallback_query = " ".join(parts)
+                    fallback_filters = rec_filters.copy()
+                    fallback_filters["type"] = similar_type
+                    
+                    fallback_payload = {
+                        "query": fallback_query,
+                        "filters": fallback_filters,
+                        "top_k": body.top_k
+                    }
+                    
+                    try:
+                        fb_resp = await _call_recs_suggest(fallback_payload)
+                        fb_raw_items = fb_resp.get("items") or []
+                        fb_items = [AgentItem(**it) for it in fb_raw_items if isinstance(it, dict) and it.get("slug")]
+                        
+                        if fb_items:
+                            # Re-check availability
+                            fb_availability = await checker.check_and_recommend(
+                                user_query=fallback_query,
+                                search_results=[it.dict() for it in fb_items]
+                            )
+                            
+                            if fb_availability.get("should_show_results", True):
+                                print(f"✅ [SEMANTIC FALLBACK] Success! Found {len(fb_items)} {similar_type}s")
+                                items = fb_items
+                                availability = fb_availability 
+                                availability["should_show_results"] = True
+                                availability["honesty_message"] = f"We couldn't find exact matches for '{q}', but here are some {similar_type}s you might like."
+                                fallback_success = True
+                                break  # Found good results, stop trying
+                    except Exception as e:
+                        log.warning(f"Semantic fallback for '{similar_type}' failed: {e}")
+                        continue
+                
+                # If semantic fallback didn't work, try broad category fallback (old strategy)
+                if not fallback_success:
+                    print(f"🔄 [FALLBACK] Semantic fallback exhausted. Trying broad category fallback.")
+                    
+                    # Strategy 1: Broad Category Search with Color
+                    # "{Color} {Type}" (e.g. "Black Jacket")
+                    parts = []
+                    if attrs.get("colors"):
+                        parts.append(attrs["colors"][0])
+                    parts.append(current_type)
+                    
+                    fallback_query = " ".join(parts)
+                    
+                    # Strategy 2: If Strategy 1 is same as original query, DROP COLOR
+                    if fallback_query.lower().strip() == rec_query.lower().strip():
+                        print(f"🔄 [FALLBACK] Strategy 1 failed (Same Query). Dropping color to broaden.")
+                        fallback_query = current_type  # Just "jacket"
+                        # Create new filters without color
+                        fallback_filters = rec_filters.copy()
+                        fallback_filters.pop("color", None)
+                    else:
+                        fallback_filters = rec_filters
+                    
+                    if fallback_query.lower().strip() != rec_query.lower().strip() or "color" not in fallback_filters:
+                        print(f"🔄 [FALLBACK] Attempting Category Search: '{fallback_query}'")
+                        
+                        # Create new payload dict (not Pydantic model)
+                        fallback_payload = {
+                            "query": fallback_query,
+                            "filters": fallback_filters,
+                            "top_k": body.top_k
+                        }
+                        
+                        try:
+                            fb_resp = await _call_recs_suggest(fallback_payload)
+                            fb_raw_items = fb_resp.get("items") or []
+                            fb_items = [AgentItem(**it) for it in fb_raw_items if isinstance(it, dict) and it.get("slug")]
+                            
+                            if fb_items:
+                                # Re-check availability (relaxed mode)
+                                fb_availability = await checker.check_and_recommend(
+                                    user_query=fallback_query,
+                                    search_results=[it.dict() for it in fb_items]
+                                )
+                                
+                                if fb_availability.get("should_show_results", True):
+                                    print(f"✅ [FALLBACK] Success! Found {len(fb_items)} items for category '{fallback_query}'")
+                                    items = fb_items
+                                    availability = fb_availability 
+                                    availability["should_show_results"] = True
+                                    availability["honesty_message"] = f"We couldn't find exact matches for '{q}', but here are some {fallback_query}s you might like."
+                        except Exception as e:
+                            log.warning(f"Category fallback failed: {e}")
+            else:
+                # No type extracted - try a very broad fallback by removing type filter
+                print(f"🔄 [FALLBACK] No type extracted. Trying broad search without type filter.")
+                from app.agents.product_availability_checker import ProductAvailabilityChecker
+                checker = ProductAvailabilityChecker()
+                
+                # Remove all strict filters for maximum broadness
+                fallback_filters = {}
+                fallback_query = rec_query  # Keep original query text
+                
+                fallback_payload = {
+                    "query": fallback_query,
+                    "filters": fallback_filters,
+                    "top_k": body.top_k
+                }
+                
+                try:
+                    fb_resp = await _call_recs_suggest(fallback_payload)
+                    fb_raw_items = fb_resp.get("items") or []
+                    fb_items = [AgentItem(**it) for it in fb_raw_items if isinstance(it, dict) and it.get("slug")]
+                    
+                    if fb_items:
+                        fb_availability = await checker.check_and_recommend(
+                            user_query=fallback_query,
+                            search_results=[it.dict() for it in fb_items]
+                        )
+                        
+                        if fb_availability.get("should_show_results", True):
+                            print(f"✅ [FALLBACK] Success! Found {len(fb_items)} items with broad search")
+                            items = fb_items
+                            availability = fb_availability
+                            availability["should_show_results"] = True
+                            availability["honesty_message"] = f"We couldn't find exact matches for '{q}', but here are some items you might like."
+                            fallback_success = True
+                except Exception as e:
+                    log.warning(f"Broad fallback failed: {e}")
 
+
+        # Re-evaluate should_show after fallback
+        should_show = availability.get("should_show_results", False)
+
+
+        if not should_show:
+            # Ensure we have a honesty message
+            if not availability.get("honesty_message"):
+                availability["honesty_message"] = f"We couldn't find matching products in the catalog."
+            
+            log.info(f"🚫 Availability Checker rejected results for '{q}': {availability.get('honesty_message')}")
             return AgentOut(
-                kind="recommendations",
-                answer=intro_line,
-                citations=[],
+                kind="answer",
+                answer=availability.get("honesty_message"),
+                items=[],
+                debug_plan={**debug_plan, "availability_rejected": True}
+            )
+        
+        print(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
+        
+        # Mark these NEW items as shown for this session
+        _mark_slugs_as_shown(body, [item.slug for item in items])
+        
+        _store_session_recs(body, items)
+
+        # Generate personalized intro using LLM
+        intro_info = await _build_discover_intro(
+            body=body,
+            items=items,
+            attrs=attrs,
+            rec_filters=rec_filters,
+            honesty_message=availability.get("honesty_message")
+        )
+
+        debug_plan["llm_discover_intro_used"] = intro_info.get("llm_used", False)
+        debug_plan["llm_discover_intro_history_len"] = intro_info.get("history_len", 0)
+        debug_plan["llm_discover_intro_summary_used"] = intro_info.get("summary_used", False)
+        debug_plan["availability_explanation"] = availability.get("alternative_explanation")
+
+        if intro_info.get("llm_used"):
+            debug_plan["llm_used"] = True
+
+        intro_line = intro_info.get("text", availability.get("honesty_message") or "Here are some options.")
+
+        # Event: Ranking complete
+        emit_event('thinking:step', {
+            'icon': '✓',
+            'status': 'Top recommendations ready',
+            'done': True
+        })
+
+        return AgentOut(
+            kind="recommendations",
+            answer=intro_line,
+            citations=[],
                 items=items,
                 debug_plan=debug_plan,
             )

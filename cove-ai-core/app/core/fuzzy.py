@@ -56,16 +56,18 @@ def find_closest_match(word: str, candidates: List[str], threshold: int) -> Opti
     return None
 
 
-def apply_common_corrections(word: str, config: dict) -> str:
+def apply_common_corrections(word: str, config: dict, catalog_types: set = None) -> str:
     """
     Apply common typo corrections from config (not hardcoded!).
+    NOW VOCABULARY-AWARE: Only corrects to words that exist in catalog.
     
     Args:
         word: Input word
         config: Fuzzy matching config
+        catalog_types: Set of known product types from database (optional)
         
     Returns:
-        Corrected word if match found, else original
+        Corrected word if match found AND result is in catalog, else original
     """
     common_corrections = config.get('common_corrections', {})
     word_lower = word.lower()
@@ -73,15 +75,21 @@ def apply_common_corrections(word: str, config: dict) -> str:
     # Check if word is a known typo for any correct term
     for correct_term, typos in common_corrections.items():
         if word_lower in [t.lower() for t in typos]:
-            return correct_term
+            # Only return correction if it's in the catalog OR no catalog provided
+            if catalog_types is None or correct_term.lower() in catalog_types:
+                return correct_term
     
     # Check fuzzy match against correct terms
     threshold = config['typo_tolerance']['edit_distance_threshold']
     correct_terms = list(common_corrections.keys())
     
+    # VOCABULARY FILTER: Only match to terms that exist in catalog
+    if catalog_types is not None:
+        correct_terms = [t for t in correct_terms if t.lower() in catalog_types]
+    
     # Only apply if word is long enough (from config)
     min_length = config['typo_tolerance'].get('min_word_length', 4)
-    if len(word) >= min_length:
+    if len(word) >= min_length and correct_terms:  # Must have valid targets
         match = find_closest_match(word_lower, correct_terms, threshold)
         if match:
             return match
@@ -111,16 +119,17 @@ def preprocess_query(query: str, config: dict) -> str:
     return query
 
 
-def apply_fuzzy_matching(query: str) -> str:
+def apply_fuzzy_matching(query: str, catalog_types: set = None) -> str:
     """
     Apply config-driven fuzzy matching to query.
-    NO hardcoded corrections - all from config!
+    NOW VOCABULARY-AWARE: Only corrections to words that exist in catalog!
     
     Args:
         query: User's search query
+        catalog_types: Set of known product types from database (optional)
         
     Returns:
-        Query with typo corrections applied
+        Query with typo corrections applied (only to known catalog terms)
     """
     config = get_fuzzy_config()
     
@@ -142,7 +151,7 @@ def apply_fuzzy_matching(query: str) -> str:
         # Try brand corrections first, then product type corrections
         corrected = apply_brand_corrections(word, config)
         if corrected == word:  # No brand match, try product types
-            corrected = apply_common_corrections(word, config)
+            corrected = apply_common_corrections(word, config, catalog_types)
         corrected_words.append(corrected)
     
     return ' '.join(corrected_words)

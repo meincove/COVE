@@ -1,0 +1,150 @@
+{
+    "occasions": {
+        "meeting": {
+            "keywords": [
+                "meeting",
+                "client",
+                "presentation",
+                "business",
+                "conference",
+                "interview",
+                "office",
+                "work"
+            ],
+            "default_style": "professional",
+            "description": "Professional business setting"
+        },
+        "date": {
+            "keywords": [
+                "date",
+                "dinner",
+                "romantic",
+                "anniversary",
+                "night out"
+            ],
+            "default_style": "smart_casual",
+            "description": "Romantic or social outing"
+        },
+        "casual": {
+            "keywords": [
+                "casual",
+                "weekend",
+                "hangout",
+                "everyday",
+                "errands",
+                "coffee"
+            ],
+            "default_style": "relaxed",
+            "description": "Relaxed everyday wear"
+        },
+        "formal": {
+            "keywords": [
+                "formal",
+                "event",
+                "gala",
+                "wedding",
+                "black tie"
+            ],
+            "default_style": "formal",
+            "description": "Formal event or ceremony"
+        },
+        "gym": {
+            "keywords": [
+                "gym",
+                "workout",
+                "fitness",
+                "exercise",
+                "active"
+            ],
+            "default_style": "athletic",
+            "description": "Athletic or fitness activity"
+        }
+    },
+    "styles": {
+        "minimalist": {
+            "keywords": [
+                "minimalist",
+                "simple",
+                "clean",
+                "basic",
+                "neutral"
+            ],
+            "description": "Clean, simple, understated"
+        },
+        "streetwear": {
+            "keywords": [
+                "street",
+                "urban",
+                "hype",
+                "trendy",
+                "oversized"
+            ],
+            "description": "Urban, trendy, statement pieces"
+        },
+        "professional": {
+            "keywords": [
+                "professional",
+                "business",
+                "corporate",
+                "suited",
+                "formal"
+            ],
+            "description": "Polished, business-appropriate"
+        },
+        "smart_casual": {
+            "keywords": [
+                "smart casual",
+                "business casual",
+                "polished",
+                "chic",
+                "elegant"
+            ],
+            "description": "Polished but comfortable"
+        },
+        "relaxed": {
+            "keywords": [
+                "relaxed",
+                "casual",
+                "comfy",
+                "cozy",
+                "laid back"
+            ],
+            "description": "Comfortable, easygoing"
+        }
+    },
+    "selection_reasons": {
+        "meeting": "Professional and polished {category}",
+        "date": "Stylish and attractive {category}",
+        "casual": "Comfortable and relaxed {category}",
+        "formal": "Elegant and refined {category}",
+        "gym": "Comfortable and functional {category}"
+    },
+    "default_occasion": "casual",
+    "default_style": "casual",
+    "default_budget": 500,
+    "default_categories": [
+        "top",
+        "bottom"
+    ],
+    "category_mapping": {
+        "top": [
+            "hoodie",
+            "sweatshirt",
+            "tee",
+            "blazer",
+            "jacket",
+            "sweater"
+        ],
+        "bottom": [
+            "pants",
+            "shorts",
+            "skirt"
+        ],
+        "accessories": [
+            "accessories"
+        ],
+        "dress": [
+            "dress"
+        ]
+    }
+}

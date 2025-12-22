@@ -21,12 +21,12 @@ export type StyleMeta = {
   useCases?: string[];
   pattern?: "solid" | "graphic" | "colorblock" | string;
   logoPlacement?:
-    | "front-small"
-    | "front-large"
-    | "back-large"
-    | "sleeve"
-    | "none"
-    | string;
+  | "front-small"
+  | "front-large"
+  | "back-large"
+  | "sleeve"
+  | "none"
+  | string;
 };
 
 export type FitProfileMeta = {
@@ -61,6 +61,8 @@ export type CatalogCard = {
   id: string; // groupId, e.g. "PG_HOODIE_CASUAL_FLEECE"
   groupId: string;
   slug: string; // "hoodie-casual-fleece-59.99" (group slug)
+  brand?: string; // brand_id for multi-brand support (e.g. "COVE", "BoldHues")
+  layoutKey?: string | number; // Card layout key for React rendering
 
   sizingKey?: string; // e.g. "hoodie_unisex_regular"
 

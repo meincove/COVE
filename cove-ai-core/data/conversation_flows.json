@@ -1,0 +1,49 @@
+{
+    "outfit_builder_conversation": {
+        "trigger_patterns": [
+            "i want to build an outfit",
+            "help me build an outfit",
+            "build me an outfit",
+            "i need an outfit",
+            "outfit"
+        ],
+        "flow": [
+            {
+                "step": "occasion",
+                "question": "Great! Let's build you the perfect outfit! 🎨\n\nWhat's the occasion?",
+                "examples": [
+                    "business meeting",
+                    "date night",
+                    "casual weekend",
+                    "wedding",
+                    "gym"
+                ],
+                "required": true
+            },
+            {
+                "step": "budget",
+                "question": "Perfect! What's your budget?",
+                "examples": [
+                    "$100",
+                    "$200-300",
+                    "under €500"
+                ],
+                "required": true,
+                "default": 500
+            },
+            {
+                "step": "style",
+                "question": "Any style preferences? (optional)",
+                "examples": [
+                    "smart casual",
+                    "streetwear",
+                    "minimalist",
+                    "bold colors"
+                ],
+                "required": false
+            }
+        ],
+        "completion_message": "🎨 Got it! Building your {occasion} outfit with a €{budget} budget...",
+        "orchestrator_workflow": "outfit_builder"
+    }
+}

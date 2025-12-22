@@ -1,0 +1,48 @@
+{
+    "description": "Product type normalization and synonym mapping - NO HARDCODED TYPES!",
+    "version": "1.0",
+    "type_synonyms": {
+        "tee": [
+            "shirt",
+            "shirts",
+            "tshirt",
+            "tshirts",
+            "t-shirt",
+            "t-shirts",
+            "top",
+            "tops"
+        ],
+        "hoodie": [
+            "sweatshirt",
+            "sweatshirts",
+            "hoody",
+            "hoodies",
+            "pullover"
+        ],
+        "sweater": [
+            "knit",
+            "knits",
+            "jumper",
+            "cardigan"
+        ],
+        "bomber": [
+            "jacket",
+            "jackets"
+        ],
+        "blazer": [
+            "suit jacket",
+            "sport coat"
+        ]
+    },
+    "settings": {
+        "load_from_catalog": true,
+        "fallback_strategy": "most_common",
+        "case_sensitive": false,
+        "allow_partial_match": false
+    },
+    "notes": [
+        "Type synonyms map alternative names to canonical catalog types",
+        "When load_from_catalog=true, valid types are loaded from database dynamically",
+        "fallback_strategy options: 'most_common' (use most frequent type in catalog), 'tee' (hardcoded fallback), 'none' (don't use fallback)"
+    ]
+}

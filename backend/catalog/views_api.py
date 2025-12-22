@@ -1,7 +1,7 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from .models import ProductMasterGroup, ColorGroup
-from .serializers import ProductSerializer, ColorGroupSerializer
+from .models import Brand, ProductMasterGroup, ColorGroup
+from .serializers import BrandSerializer, ProductSerializer, ColorGroupSerializer
 from .pagination import StandardResultsSetPagination
 
 
@@ -117,3 +117,34 @@ class VariantDetailView(RetrieveAPIView):
     serializer_class = ColorGroupSerializer
     lookup_field = "variant_id"
     queryset = ColorGroup.objects.select_related("product").prefetch_related("images", "sizes")
+
+
+@extend_schema(
+    tags=["Brands"],
+    summary="List all brands",
+    description="Returns all active brands with their metadata (logo, theme colors, description)",
+)
+class BrandListView(ListAPIView):
+    """GET /api/brands/"""
+    serializer_class = BrandSerializer
+    queryset = Brand.objects.filter(is_active=True).order_by('brand_name')
+
+
+@extend_schema(
+    tags=["Brands"],
+    summary="Get brand by slug",
+    parameters=[
+        OpenApiParameter(
+            name="slug",
+            description="Brand slug (in path)",
+            required=True,
+            type=str,
+            location=OpenApiParameter.PATH,
+        )
+    ],
+)
+class BrandDetailView(RetrieveAPIView):
+    """GET /api/brands/<slug>/"""
+    serializer_class = BrandSerializer
+    lookup_field = "slug"
+    queryset = Brand.objects.filter(is_active=True)

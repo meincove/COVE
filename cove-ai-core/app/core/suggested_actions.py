@@ -27,7 +27,7 @@ class SuggestedActionsEngine:
     def _load_config(self, config_path: Path) -> Dict:
         """Load suggestion configuration from JSON file"""
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading suggestions config: {e}")

@@ -40,9 +40,11 @@ class LLMClient:
                     "Export it in your shell or .env before calling LLMClient."
                 )
 
-            # strip "openrouter:" prefix before sending
+            # strip "openrouter:" or "openrouter/" prefix before sending
             if model.startswith("openrouter:"):
                 model_name = model.split("openrouter:", 1)[1]
+            elif model.startswith("openrouter/"):
+                model_name = model.split("openrouter/", 1)[1]
             else:
                 model_name = model
 

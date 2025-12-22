@@ -2,7 +2,7 @@
     "typo_tolerance": {
         "enabled": true,
         "edit_distance_threshold": 2,
-        "min_word_length": 4,
+        "min_word_length": 5,
         "apply_to_fields": [
             "type",
             "brand",
@@ -14,6 +14,15 @@
         }
     },
     "common_corrections": {
+        "suit": [
+            "suit"
+        ],
+        "suits": [
+            "suits"
+        ],
+        "tuxedo": [
+            "tuxedo"
+        ],
         "hoodie": [
             "hodie",
             "hoddie",

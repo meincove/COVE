@@ -84,6 +84,26 @@ export type AgentResponse = {
     status: string;
     detail?: string;
   }>;
+  // Phase 1: Enhanced agentic thinking (feature-flagged)
+  thinking_events?: Array<{
+    id: string;
+    timestamp: number;
+    agent: string;
+    action: string;
+    status: "pending" | "done" | "error";
+    details?: string;
+    confidence?: number;
+    tool_used?: string;
+  }>;
+  tools_used?: Array<{
+    tool: string;
+    duration_ms: number;
+    success: boolean;
+    summary: string;
+    error?: string;
+    inputs?: Record<string, any>;
+    outputs?: Record<string, any>;
+  }>;
   debug_plan?: Record<string, any>;
   orders?: Order[];  // Week 4
   emailConfirmation?: EmailConfirmationData;

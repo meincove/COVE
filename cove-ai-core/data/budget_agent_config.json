@@ -1,0 +1,128 @@
+{
+    "priority_categories": {
+        "core": {
+            "categories": [
+                "top",
+                "bottom"
+            ],
+            "budget_allocation": 0.6,
+            "description": "Essential outfit pieces"
+        },
+        "accessories": {
+            "categories": [
+                "shoes",
+                "belt",
+                "bag"
+            ],
+            "budget_allocation": 0.3,
+            "description": "Outfit completion items"
+        },
+        "extras": {
+            "categories": [
+                "jacket",
+                "hat",
+                "scarf"
+            ],
+            "budget_allocation": 0.1,
+            "description": "Optional enhancement items"
+        }
+    },
+    "discount_strategies": {
+        "percentage_off": {
+            "min_threshold": 10,
+            "apply_to": [
+                "all"
+            ],
+            "description": "Percentage discount codes"
+        },
+        "fixed_amount": {
+            "min_threshold": 5,
+            "apply_to": [
+                "all"
+            ],
+            "description": "Fixed euro amount off"
+        },
+        "free_shipping": {
+            "min_order": 50,
+            "value": 5,
+            "description": "Free shipping threshold"
+        },
+        "bundle_discount": {
+            "min_items": 3,
+            "percentage": 10,
+            "description": "Multi-item discount"
+        }
+    },
+    "pricing_rules": {
+        "max_item_percentage": 0.5,
+        "min_item_percentage": 0.1,
+        "prefer_distributed": true,
+        "description": "Don't spend >50% budget on single item"
+    },
+    "discount_codes": {
+        "WELCOME15": {
+            "type": "percentage_off",
+            "value": 15,
+            "min_order": 0,
+            "description": "15% off for new users"
+        },
+        "STARTUP15": {
+            "type": "percentage_off",
+            "value": 15,
+            "min_order": 100,
+            "description": "15% off orders over €100"
+        },
+        "FREESHIP50": {
+            "type": "free_shipping",
+            "value": 5,
+            "min_order": 50,
+            "description": "Free shipping over €50"
+        },
+        "SAVE20": {
+            "type": "percentage_off",
+            "value": 20,
+            "min_order": 200,
+            "description": "20% off orders over €200"
+        }
+    },
+    "optimization_strategies": {
+        "minimize_cost": {
+            "description": "Find cheapest options within quality",
+            "weight_price": 0.8,
+            "weight_quality": 0.2
+        },
+        "maximize_value": {
+            "description": "Best quality for budget",
+            "weight_price": 0.5,
+            "weight_quality": 0.5
+        },
+        "maximize_quality": {
+            "description": "Best available within budget",
+            "weight_price": 0.2,
+            "weight_quality": 0.8
+        }
+    },
+    "substitution_rules": {
+        "if_over_budget": {
+            "try_smaller_size_category": true,
+            "remove_extras": true,
+            "find_cheaper_brand": true,
+            "apply_discounts": true
+        },
+        "max_iterations": 3,
+        "description": "Steps to take when over budget"
+    },
+    "confidence_rules": {
+        "exact_budget_match": 0.95,
+        "within_10_percent": 0.9,
+        "within_20_percent": 0.8,
+        "needed_substitutions": 0.7,
+        "heavily_modified": 0.6
+    },
+    "default_budget": 500,
+    "min_budget": 30,
+    "max_budget": 2000,
+    "free_shipping_threshold": 50,
+    "currency": "EUR",
+    "currency_symbol": "€"
+}

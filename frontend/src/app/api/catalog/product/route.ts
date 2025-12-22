@@ -29,15 +29,18 @@ type UiProduct = {
 };
 
 // Helper to get backend URL (Django)
+// Unified environment variable for backend URL
 function getBackendBaseUrl() {
   return (
+    process.env.DJANGO_BACKEND_URL ||
     process.env.NEXT_PUBLIC_BACKEND_BASE_URL ||
-    process.env.BACKEND_BASE_URL ||
-    "http://127.0.0.1:8001"
+    "http://localhost:8001"
   );
 }
 
 export async function GET(req: NextRequest) {
+  // return NextResponse.json({ detail: "VERIFY_ROUTE_HIT" }, { status: 404 });
+
   const { searchParams } = new URL(req.url);
   const slug = searchParams.get("slug");
   const variantId = searchParams.get("variantId");
@@ -51,18 +54,18 @@ export async function GET(req: NextRequest) {
 
   const backendBase = getBackendBaseUrl();
 
-  // Prefer variantId when present, otherwise slug
-  const queryParam = variantId
-    ? `variantId=${encodeURIComponent(variantId)}`
-    : `slug=${encodeURIComponent(slug as string)}`;
-
-  const backendUrl = `${backendBase}/tools/catalog.details?${queryParam}`;
+  // UNIFIED ENDPOINT: Use /api/products/{slug}/ for consistency with shopping page
+  // This guarantees that if a product appears in the list, it will load in detail view
+  const backendUrl = `${backendBase}/api/products/${slug}/`;
+  console.log("[api/catalog/product] Fetching from unified endpoint:", backendUrl);
+  console.log("[api/catalog/product] Request params:", { slug, variantId });
 
   let resp: Response;
   try {
     resp = await fetch(backendUrl, {
       cache: "no-store",
     });
+    console.log("[api/catalog/product] Backend response status:", resp.status);
   } catch (err) {
     console.error("[api/catalog/product] backend fetch error", err);
     return NextResponse.json(
@@ -79,22 +82,30 @@ export async function GET(req: NextRequest) {
       text.slice(0, 200),
     );
     return NextResponse.json(
-      { detail: "Backend returned error", status: resp.status },
-      { status: 502 },
+      {
+        detail: "Backend returned error",
+        backendStatus: resp.status,
+        triedUrl: backendUrl,
+        message: resp.status === 404
+          ? `Product '${slug}' not found in database. This product may have been removed or the URL is incorrect.`
+          : "An error occurred while fetching the product"
+      },
+      { status: resp.status === 404 ? 404 : 502 },
     );
   }
 
-  const data = await resp.json();
+  const backendProduct = await resp.json();
 
-  const backendProduct = data.product;
-  if (!backendProduct) {
+  // The /api/products/{slug}/ endpoint returns the product directly, not wrapped in {product: ...}
+  if (!backendProduct || !backendProduct.product_id) {
     return NextResponse.json(
       { detail: "Product not found in backend response" },
       { status: 404 },
     );
   }
 
-  const variants = backendProduct.variants || [];
+  // Handle the color_variants field from /api/products/ endpoint
+  const variants = backendProduct.color_variants || [];
 
   // Aggregate size stock at product level: { S: totalQty, M: ... }
   const productSizeTotals: Record<string, number> = {};
@@ -115,7 +126,13 @@ export async function GET(req: NextRequest) {
       variantId: v.variantId,
       colorName: v.color_name,
       hex: v.color_hex,
-      images: v.images || [],
+      // Professional Image Handling (Product Page)
+      // Backend returns images as objects: {image_name: "url"}
+      images: (v.images || []).map((img: any) => {
+        const imageName = typeof img === 'string' ? img : img.image_name;
+        if (imageName.startsWith('http') || imageName.startsWith('/')) return imageName;
+        return `/clothing-images/${imageName}`;
+      }),
       sizes: perVariantSizes,
       slug: backendProduct.slug,
     };

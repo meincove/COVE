@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, FormEvent } from "react";
+import { useState, useEffect, useMemo, useRef, FormEvent, forwardRef, useImperativeHandle } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Send, X, Check, Package, ShoppingCart } from "lucide-react";
@@ -24,6 +24,7 @@ import { useAgentStream } from "@/src/hooks/useAgentStream";
 import { useChatHistory } from "@/src/hooks/useChatHistory";
 import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/TypingIndicator";
 import ThinkingSteps from "@/src/components/cove-ai/ThinkingSteps";
+import EnhancedThinking from "@/src/components/cove-ai/EnhancedThinking";  // Phase 1
 import PersonalizedGreeting from "@/src/components/cove-ai/PersonalizedGreeting";
 
 // ---------- TYPES ----------
@@ -45,6 +46,9 @@ type RecommendationsMeta = {
   kind: "recommendations";
   items: AgentItem[];
   thinking_steps?: Array<{ icon: string; status: string; detail?: string }>;  // Week 4: Agentic
+  // Phase 1: Enhanced thinking
+  thinking_events?: AgentResponse["thinking_events"];
+  tools_used?: AgentResponse["tools_used"];
 };
 
 // Week 4: New metadata types
@@ -122,7 +126,7 @@ function isEmailConfirmationMeta(
 
 // ---------- COMPONENT ----------
 
-export default function CoveChatWidget() {
+function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg: string) => void }>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -161,6 +165,8 @@ export default function CoveChatWidget() {
     answer,
     kind,
     suggestedActions,
+    thinking_events: streamThinkingEvents,
+    tools_used: streamToolsUsed,
   } = useAgentStream();
 
   // Week 6: Chat history persistence
@@ -395,6 +401,8 @@ export default function CoveChatWidget() {
             kind: "recommendations",
             items,
             thinking_steps: data.thinking_steps,  // Week 4: FIX - Include thinking steps!
+            thinking_events: data.thinking_events,  // Phase 1: Enhanced thinking
+            tools_used: data.tools_used,  // Phase 1: Tool tracking
           } as RecommendationsMeta)
           : undefined,
       };
@@ -467,27 +475,56 @@ export default function CoveChatWidget() {
   // Week 6: Add thinking message when streaming starts
   useEffect(() => {
     if (isStreamingProgress && thinkingSteps.length > 0) {
-      // Check if we already have a thinking message
-      const hasThinkingMsg = messages.some(m => m.id === 'thinking-temp');
+      // Map streaming steps to EnhancedThinking format
+      const mappedEvents = thinkingSteps.map((step, idx) => ({
+        id: `stream-step-${idx}`,
+        timestamp: Date.now(),
+        agent: getAgentFromIcon(step.icon), // simple helper to map icon to agent type
+        action: step.status, // "status" in streaming is the text description
+        status: step.done ? "done" : "pending",
+        details: step.detail
+      }));
 
-      if (!hasThinkingMsg) {
-        // Add a temporary thinking message
-        const thinkingMsg: ChatMessage = {
-          id: 'thinking-temp',
-          role: 'assistant',
-          content: '',
-        };
-        setMessages(prev => [...prev, thinkingMsg]);
-      } else {
-        // Update the thinking message with latest steps
-        setMessages(prev => prev.map(m =>
+      setMessages(prev => {
+        const hasThinkingMsg = prev.some(m => m.id === 'thinking-temp');
+
+        if (!hasThinkingMsg) {
+          return [...prev, {
+            id: 'thinking-temp',
+            role: 'assistant',
+            content: '',
+            meta: {
+              kind: 'recommendations',
+              items: [],
+              thinking_events: mappedEvents as any // Cast to match AgentResponse type
+            } as RecommendationsMeta
+          }];
+        }
+
+        return prev.map(m =>
           m.id === 'thinking-temp'
-            ? { ...m, content: '' } // Content doesn't matter, steps render separately
+            ? {
+              ...m,
+              meta: {
+                ...m.meta,
+                kind: 'recommendations',
+                thinking_events: mappedEvents as any
+              } as RecommendationsMeta
+            }
             : m
-        ));
-      }
+        );
+      });
     }
   }, [isStreamingProgress, thinkingSteps]);
+
+  function getAgentFromIcon(icon: string): string {
+    if (icon.includes("🧠")) return "classifier";
+    if (icon.includes("🔍")) return "search";
+    if (icon.includes("✨")) return "stylist";
+    if (icon.includes("💰")) return "budget";
+    if (icon.includes("📏")) return "fit";
+    return "classifier"; // default
+  }
 
   // Week 6: Replace thinking message with final result
   useEffect(() => {
@@ -504,6 +541,9 @@ export default function CoveChatWidget() {
             meta: {
               kind: 'recommendations',
               items: streamedItems,
+              // Phase 1: Include thinking_events and tools_used from streaming
+              thinking_events: streamThinkingEvents,
+              tools_used: streamToolsUsed,
             },
             suggestedActions: suggestedActions || [],
           }
@@ -518,10 +558,12 @@ export default function CoveChatWidget() {
         meta: {
           kind: 'recommendations',
           items: streamedItems,
+          thinking_events: streamThinkingEvents,
+          tools_used: streamToolsUsed,
         },
       });
     }
-  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage]);
+  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage, streamThinkingEvents, streamToolsUsed]);
 
   // Week 6: Handle cart proposal from streaming
   useEffect(() => {
@@ -769,6 +811,52 @@ export default function CoveChatWidget() {
     );
   }
 
+  // Expose sendQuickMessage method to parent via ref
+  useImperativeHandle(ref, () => ({
+    sendQuickMessage: async (message: string) => {
+      const userMsg: ChatMessage = {
+        id: makeId(),
+        role: "user",
+        content: message,
+      };
+
+      setMessages((prev) => [...prev, userMsg]);
+      setLoading(true);
+
+      // Save user message to history
+      saveMessage({
+        role: 'user',
+        content: userMsg.content,
+      });
+
+      try {
+        const sessionId = guestSessionId ?? ensureGuestSessionId();
+
+        if (!hasStartedChat) {
+          setHasStartedChat(true);
+        }
+
+        // Send via streaming
+        await sendStreamingQuery(
+          userMsg.content,
+          isSignedIn && user ? user.id : undefined,
+          sessionId
+        );
+
+      } catch (err: any) {
+        console.error("Error talking to agent:", err);
+        const errorMsg: ChatMessage = {
+          id: makeId(),
+          role: "assistant",
+          content: "Sorry, something went wrong talking to Cove AI. Please try again.",
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }));
+
   // -------- RENDER --------
 
   return (
@@ -807,25 +895,25 @@ export default function CoveChatWidget() {
                 className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm text-neutral-50 overflow-hidden ${isUser ? "chat-msg-user" : "chat-msg-assistant"
                   }`}
               >
-                {/* Week 6: Show thinking steps inline for temp message */}
-                {!isUser && m.id === 'thinking-temp' && isStreamingProgress && (
-                  <div className="flex flex-wrap gap-2">
-                    {thinkingSteps.map((step, i) => (
-                      <div
-                        key={i}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-xs"
-                        style={{ animationDelay: `${i * 100}ms` }}
-                      >
-                        <span className="text-base">{step.icon}</span>
-                        <span className="text-purple-200">{step.status}</span>
-                        {step.done && <Check className="h-3 w-3 text-green-400" />}
-                      </div>
-                    ))}
-                  </div>
+                {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
+
+                {/* Phase 1: Show enhanced thinking if available */}
+                {recMeta && (recMeta.thinking_events || recMeta.tools_used) && (
+                  <EnhancedThinking
+                    thinking_events={recMeta.thinking_events}
+                    tools_used={recMeta.tools_used}
+                    loading={isStreamingProgress && m.id === messages[messages.length - 1].id}
+                  />
                 )}
 
+                {/* Show content (answer text) always */}
                 {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
 
+                {/* Week 4: Fallback for original thinking steps if no enhanced thinking */}
+                {!recMeta?.thinking_events && !recMeta?.tools_used &&
+                  recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
+                    <AgentThinkingSteps steps={recMeta.thinking_steps} />
+                  )}
 
                 {/* Recommendations */}
                 {recMeta?.items && recMeta.items.length > 0 && (
@@ -956,7 +1044,7 @@ export default function CoveChatWidget() {
           </div>
         )}
 
-        {loading && <LoadingSkeleton />}
+        {loading && thinkingSteps.length === 0 && <LoadingSkeleton />}
 
       </div>
 
@@ -993,3 +1081,7 @@ export default function CoveChatWidget() {
     </div >
   );
 }
+
+// Export with forwardRef
+const CoveChatWidget = forwardRef(CoveChatWidgetInner);
+export default CoveChatWidget;

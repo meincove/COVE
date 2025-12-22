@@ -1,0 +1,144 @@
+{
+    "brand_sizing": {
+        "COVE": {
+            "fit": "true_to_size",
+            "description": "Standard European sizing"
+        },
+        "UrbanPulse": {
+            "fit": "runs_small",
+            "size_adjustment": 1,
+            "description": "Recommend sizing up"
+        },
+        "NordicThread": {
+            "fit": "true_to_size",
+            "description": "Consistent sizing"
+        },
+        "ModernHeritage": {
+            "fit": "runs_large",
+            "size_adjustment": -1,
+            "description": "Recommend sizing down"
+        },
+        "TimelessCo": {
+            "fit": "true_to_size",
+            "description": "Standard sizing"
+        }
+    },
+    "size_order": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+    ],
+    "size_conversion": {
+        "US_to_EU": {
+            "XS": "XS",
+            "S": "S",
+            "M": "M",
+            "L": "L",
+            "XL": "XL",
+            "XXL": "XXL"
+        },
+        "numeric_to_letter": {
+            "0": "XS",
+            "2": "XS",
+            "4": "S",
+            "6": "S",
+            "8": "M",
+            "10": "M",
+            "12": "L",
+            "14": "L",
+            "16": "XL",
+            "18": "XL"
+        }
+    },
+    "fit_preferences": {
+        "slim": {
+            "description": "Fitted, close to body",
+            "categories": [
+                "top",
+                "bottom",
+                "jacket"
+            ]
+        },
+        "regular": {
+            "description": "Standard comfortable fit",
+            "categories": [
+                "top",
+                "bottom",
+                "jacket",
+                "hoodie"
+            ]
+        },
+        "relaxed": {
+            "description": "Loose, comfortable",
+            "categories": [
+                "top",
+                "hoodie",
+                "jogger"
+            ]
+        },
+        "oversized": {
+            "description": "Very loose, street style",
+            "categories": [
+                "hoodie",
+                "tee",
+                "jacket"
+            ]
+        }
+    },
+    "category_fit_rules": {
+        "top": {
+            "default_fit": "regular",
+            "size_matters": true,
+            "check_chest": true
+        },
+        "bottom": {
+            "default_fit": "regular",
+            "size_matters": true,
+            "check_waist": true
+        },
+        "hoodie": {
+            "default_fit": "relaxed",
+            "size_matters": true,
+            "allow_oversized": true
+        },
+        "jacket": {
+            "default_fit": "regular",
+            "size_matters": true,
+            "check_shoulders": true
+        },
+        "shoes": {
+            "default_fit": "true_to_size",
+            "size_matters": true,
+            "half_sizes": true
+        },
+        "accessories": {
+            "default_fit": "one_size",
+            "size_matters": false
+        }
+    },
+    "confidence_rules": {
+        "has_user_history": 0.9,
+        "has_brand_match": 0.85,
+        "no_history_true_to_size": 0.7,
+        "no_history_needs_adjustment": 0.6,
+        "accessories": 1.0
+    },
+    "warnings": {
+        "runs_small": "This brand tends to run small. Consider sizing up.",
+        "runs_large": "This brand tends to run large. Consider sizing down.",
+        "no_history": "We don't have your size history yet. Recommendation based on brand standards.",
+        "between_sizes": "You're between sizes. We recommend {direction} for better fit.",
+        "check_measurements": "For best fit, check product measurements."
+    },
+    "default_size": "M",
+    "require_size_for_categories": [
+        "top",
+        "bottom",
+        "hoodie",
+        "jacket",
+        "shoes"
+    ]
+}

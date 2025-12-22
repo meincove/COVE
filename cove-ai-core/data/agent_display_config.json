@@ -1,0 +1,48 @@
+{
+    "enabled": true,
+    "display_thinking": true,
+    "show_tool_calls": true,
+    "thinking_delay_ms": 800,
+    "performance": {
+        "max_thinking_events": 20,
+        "stream_chunk_size": 512
+    },
+    "agents": {
+        "orchestrator": {
+            "icon": "brain",
+            "color": "#8B5CF6",
+            "label": "Coordinating",
+            "show_in_ui": true
+        },
+        "classifier": {
+            "icon": "brain",
+            "color": "#8B5CF6",
+            "label": "Understanding",
+            "show_in_ui": true
+        },
+        "search": {
+            "icon": "search",
+            "color": "#3B82F6",
+            "label": "Searching",
+            "show_in_ui": true
+        },
+        "stylist": {
+            "icon": "sparkles",
+            "color": "#F59E0B",
+            "label": "Styling",
+            "show_in_ui": true
+        },
+        "fit": {
+            "icon": "ruler",
+            "color": "#10B981",
+            "label": "Sizing",
+            "show_in_ui": true
+        },
+        "budget": {
+            "icon": "dollar-sign",
+            "color": "#EF4444",
+            "label": "Optimizing Price",
+            "show_in_ui": true
+        }
+    }
+}

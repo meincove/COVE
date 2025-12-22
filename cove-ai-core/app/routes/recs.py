@@ -113,6 +113,8 @@ class RecItem(BaseModel):
     color: Optional[str] = None
     size: Optional[str] = None
     variantId: Optional[str] = None
+    price: Optional[float] = None  # For budget filtering
+
 
 class RecsOut(BaseModel):
     items: List[RecItem]
@@ -167,8 +169,18 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     
     # Apply config-driven fuzzy matching for typo tolerance (NO hardcoded corrections!)
     from app.core.fuzzy import apply_fuzzy_matching
+    from app.vector.store import catalog_vocab, get_conn
+    
     original_query = body.query or ""
-    processed_query = apply_fuzzy_matching(original_query) if original_query else ""
+    
+    # Get catalog vocabulary - only fuzzy match to known product types!
+    catalog_types = set()
+    if original_query:
+        with get_conn() as conn:
+            vocab = catalog_vocab(conn)
+            catalog_types = set(t.lower() for t in vocab.get("types", []))
+    
+    processed_query = apply_fuzzy_matching(original_query, catalog_types) if original_query else ""
 
     # Track if we had any non-price filters
     had_filters = any([
@@ -400,6 +412,19 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             reason_bits.append(f"size {filters.size.upper()}")
 
         reason = ", ".join(reason_bits).capitalize()
+        
+        # Extract price for budget filtering
+        price_val = None
+        if "base_price" in meta:
+            try:
+                price_val = float(meta["base_price"])
+            except (ValueError, TypeError):
+                pass
+        elif "price" in meta:  # Fallback
+            try:
+                price_val = float(meta["price"])
+            except (ValueError, TypeError):
+                pass
 
         item = RecItem(
             title=title,
@@ -412,6 +437,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             color=color_name,
             size=filters.size,
             variantId=variant_id,
+            price=price_val,
         )
         scored_items.append((final_score, item))
 
