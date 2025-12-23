@@ -45,6 +45,8 @@ from app.mcp_agents.intent_classifier import get_classifier
 from app.core.thinking_tracker import ThinkingTracker
 from app.core.tool_tracker import ToolTracker
 from app.core.performance_monitor import get_monitor
+# Phase 1: Context management - Fact extraction
+from app.services.fact_extractor import get_fact_extractor
 
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
@@ -1181,7 +1183,7 @@ async def agent_query(body: AgentIn) -> AgentOut:
         },
     )
 
-    # Log conversation history (fire-and-forget, won't break on errors)
+    # Phase 1: Extract conversation facts (fire-and-forget, won't break on errors)
     try:
         # Extract items metadata for logging
         items_meta = []
@@ -1193,6 +1195,34 @@ async def agent_query(body: AgentIn) -> AgentOut:
         
         # Extract debug plan
         debug_plan = getattr(out, "debug_plan", {}) or {}
+        
+        # NEW: Extract and store conversation facts
+        try:
+            fact_extractor = get_fact_extractor()
+            
+            # Prepare agent metadata (what was shown/done)
+            agent_metadata = {
+                "items": items_meta,
+                "intent_kind": debug_plan.get("intent_kind"),
+                "kind": getattr(out, "kind", "answer"),
+                "cart_payload": getattr(out, "cart_payload", None),
+            }
+            
+            # Extract facts from this turn
+            # Note: We'll need to fetch and update session facts from Django
+            # For now, just extract facts (storage integration comes next)
+            facts = await fact_extractor.extract_facts(
+                user_message=body.message,
+                assistant_response=getattr(out, "answer", ""),
+                agent_metadata=agent_metadata
+            )
+            
+            # TODO: Store facts in ChatSession.metadata via Django API
+            # This will be implemented in next step
+            
+            log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
+        except Exception as e:
+            log.warning(f"Fact extraction failed (non-critical): {e}", exc_info=False)
         
         await log_history_turn(
             user_message=body.message,
