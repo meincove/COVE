@@ -1200,6 +1200,7 @@ async def agent_query(body: AgentIn) -> AgentOut:
         async def extract_facts_background():
             """Run fact extraction in background without blocking response"""
             try:
+                log.info("🔍 [FACT EXTRACTION] Starting background extraction...")
                 fact_extractor = get_fact_extractor()
                 
                 # Prepare agent metadata (what was shown/done)
@@ -1210,6 +1211,7 @@ async def agent_query(body: AgentIn) -> AgentOut:
                     "cart_payload": getattr(out, "cart_payload", None),
                 }
                 
+                log.info(f"🔍 [FACT EXTRACTION] Calling LLM to extract facts...")
                 # Extract facts from this turn
                 facts = await fact_extractor.extract_facts(
                     user_message=body.message,
@@ -1218,8 +1220,10 @@ async def agent_query(body: AgentIn) -> AgentOut:
                 )
                 
                 log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
+                log.info(f"🔍 [FACT EXTRACTION] Facts keys: {list(facts.keys())}")
                 
                 # Store facts in database
+                log.info(f"🔍 [FACT STORAGE] Calling storage client...")
                 from app.services.fact_storage import store_facts
                 stored = await store_facts(
                     clerk_user_id=body.clerkUserId,
@@ -1233,10 +1237,11 @@ async def agent_query(body: AgentIn) -> AgentOut:
                     log.warning("⚠️ Facts storage failed (non-critical)")
                     
             except Exception as e:
-                log.warning(f"Fact extraction/storage failed (non-critical): {e}", exc_info=False)
+                log.error(f"❌ Fact extraction/storage failed: {e}", exc_info=True)
         
         # Fire and forget - don't wait for completion
         import asyncio
+        log.info("🚀 [FACT EXTRACTION] Launching background task...")
         asyncio.create_task(extract_facts_background())
         
         await log_history_turn(
