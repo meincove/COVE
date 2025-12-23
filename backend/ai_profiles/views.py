@@ -381,26 +381,6 @@ def conversation_event_log(request):
         "source": event.source,
         "created_at": event.created_at.isoformat(),
     }, status=201)
-        
-        # Get most recent session
-        session = ChatSession.objects.filter(**session_filter).order_by("-created_at").first()
-        
-        if not session or not session.metadata:
-            return JsonResponse({"facts": {}}, status=200)
-        
-        facts = session.metadata.get("conversation_facts", {})
-        
-        return JsonResponse({
-            "facts": facts,
-            "session_id": session.id
-        }, status=200)
-    
-    except Exception as e:
-        # Return empty facts on error (graceful degradation)
-        return JsonResponse({
-            "facts": {},
-            "error": str(e)
-        }, status=200)
 
 
 # ---------------------------------------------------------------------------
