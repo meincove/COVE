@@ -1,0 +1,37 @@
+{
+    "brand_offers": {
+        "nike": {
+            "trigger": "view_brand",
+            "min_visits": 2,
+            "message": "👋 Big fan of Nike? We actually have a hidden 20% discount code: **NIKE20** if you order today!",
+            "priority": 10
+        },
+        "adidas": {
+            "trigger": "view_brand",
+            "min_visits": 1,
+            "message": "👀 Checking out Adidas? Their new Ultraboost line just dropped. Want to see the top rated ones?",
+            "action": "show_products",
+            "priority": 5
+        },
+        "gucci": {
+            "trigger": "view_product",
+            "min_time_on_page": 15,
+            "message": "That's a timeless piece. ✨ Since you're looking at luxury, we offer free express insurance on all Gucci orders.",
+            "priority": 8
+        }
+    },
+    "cart_rules": {
+        "near_free_shipping": {
+            "min_total": 80,
+            "max_total": 100,
+            "message": "🚚 You're just **€{diff}** away from free shipping! Want me to find some matching socks?",
+            "action": "suggest_fillers",
+            "priority": 9
+        },
+        "abandoned_cart": {
+            "timeout_seconds": 60,
+            "message": "Should I save these items for later, or are you ready to checkout?",
+            "priority": 3
+        }
+    }
+}

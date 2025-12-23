@@ -4,12 +4,25 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Sparkles, Send, ShoppingBag, Package, HelpCircle, Shirt, TrendingUp, Heart, ShoppingCart } from "lucide-react";
 import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
+import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
+import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactiveSignals";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasUnread, setHasUnread] = useState(false);
     const [activeView, setActiveView] = useState<'chat' | 'products' | 'cart'>('chat');
+
+    // Proactive Offer State
+    const [activeOffer, setActiveOffer] = useState<ProactiveResponse | null>(null);
+
+    // Listen for proactive signals
+    useProactiveSignals((offer) => {
+        if (!isOpen) {
+            setActiveOffer(offer);
+            setTimeout(() => setActiveOffer(null), 15000);
+        }
+    });
 
     // Ref to chat widget for triggering messages
     const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string) => void }>(null);
@@ -23,7 +36,10 @@ export default function FloatingChatbot() {
     const toggleChat = () => {
         const newState = !isOpen;
         setIsOpen(newState);
-        if (!newState) setHasUnread(false);
+        if (newState) {
+            setHasUnread(false);
+            setActiveOffer(null);
+        }
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('cove_chat_open', String(newState));
         }
@@ -52,6 +68,15 @@ export default function FloatingChatbot() {
 
     return (
         <>
+            <ProactiveBubble
+                message={activeOffer?.message || ""}
+                isVisible={!!activeOffer && !isOpen}
+                onOpen={() => {
+                    setIsOpen(true);
+                    setActiveOffer(null);
+                }}
+                onDismiss={() => setActiveOffer(null)}
+            />
             {/* Floating Chat Button - Enhanced */}
             <button
                 onClick={toggleChat}
