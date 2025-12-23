@@ -731,10 +731,11 @@ def _history_to_llm_messages(
     *,
     smalltalk: bool = False,
     summary: Optional[str] = None,
+    conversation_facts: Optional[Dict[str, Any]] = None,
 ) -> List[Dict[str, str]]:
     """
     Convert history rows (already trimmed) into OpenAI-style messages,
-    optionally prepending a summary of older turns.
+    optionally prepending a summary of older turns and conversation facts.
     """
     from app.core.rules import get_prompt
     
@@ -766,6 +767,21 @@ def _history_to_llm_messages(
     messages: List[Dict[str, str]] = [
         {"role": "system", "content": system_content}
     ]
+    
+    # Inject conversation facts if available
+    if conversation_facts:
+        from app.services.fact_extractor import get_fact_extractor
+        fact_extractor = get_fact_extractor()
+        facts_context = fact_extractor.get_context_for_llm(conversation_facts)
+        
+        if facts_context:
+            messages.append({
+                "role": "system",
+                "content": (
+                    "📋 CONVERSATION CONTEXT (use this to provide personalized responses):\n\n"
+                    + facts_context
+                )
+            })
 
     if summary:
         messages.append(
@@ -922,11 +938,19 @@ async def _call_llm_with_history(
     if not smalltalk:
         smalltalk = _is_short_smalltalk(body.message, intent_kind)
 
+    # Renaming variables to match the provided snippet for consistency,
+    # assuming these renames are part of a larger context.
+    trimmed_history = history # Assuming 'history' is the source for 'trimmed_history'
+    q = body.message # Assuming 'body.message' is the source for 'q'
+    is_smalltalk = smalltalk # Assuming 'smalltalk' is the source for 'is_smalltalk'
+    summary_text = summary # Assuming 'summary' is the source for 'summary_text'
+
     messages = _history_to_llm_messages(
-        history,
-        body.message,
-        smalltalk=smalltalk,
-        summary=summary,
+        trimmed_history,
+        q,
+        smalltalk=is_smalltalk,
+        summary=summary_text,
+        conversation_facts=conversation_facts,
     )
 
     client = LLMClient()
@@ -1282,6 +1306,20 @@ async def _agent_query_impl(
     _update_last_user_message(body)
     
     # Trackers are now passed as parameters (cleaner than re-creating)
+    
+    # ===== FETCH CONVERSATION FACTS =====
+    # Retrieve stored facts from database to inject into LLM context
+    conversation_facts = {}
+    try:
+        from app.services.fact_storage import get_facts
+        conversation_facts = await get_facts(
+            clerk_user_id=body.clerkUserId,
+            guest_session_id=body.guestSessionId
+        )
+        if conversation_facts:
+            log.info(f"📥 Retrieved conversation facts with {len(conversation_facts.get('product_focus', {}).get('current_products', []))} current products")
+    except Exception as e:
+        log.warning(f"Failed to retrieve conversation facts (non-critical): {e}")
 
     # ===== CONVERSATION FLOW HANDLER =====
     # Check if this is    # ✨ WEEK 3 DAY 2: Context-Aware Reasoning
