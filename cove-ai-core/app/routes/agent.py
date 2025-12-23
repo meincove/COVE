@@ -1205,7 +1205,7 @@ async def agent_query(body: AgentIn) -> AgentOut:
     
     t_end = time.perf_counter()
     total_ms = int((t_end - t0) * 1000)
-
+    
     log.info(
         "agent_timing",
         extra={
