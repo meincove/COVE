@@ -819,6 +819,7 @@ async def _build_discover_intro(
     rec_filters: Dict[str, Any],
     attrs: Dict[str, Any],
     honesty_message: Optional[str] = None,
+    conversation_facts: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Generate personalized intro for discover responses using LLM.
@@ -875,6 +876,15 @@ Examples (WITH history):
 
     if honesty_message:
         system_prompt += f"\n\nIMPORTANT: The system has already analyzed the search results and determined we don't have exactly what the user wanted. HONESTY MESSAGE: {honesty_message}. Use this information to explain the situation gently."
+
+    # Inject conversation facts if available
+    if conversation_facts:
+        from app.services.fact_extractor import get_fact_extractor
+        fact_extractor = get_fact_extractor()
+        facts_context = fact_extractor.get_context_for_llm(conversation_facts)
+        
+        if facts_context:
+            system_prompt += f"\n\n📋 CONVERSATION CONTEXT (use this to personalize your intro):\n\n{facts_context}"
 
     user_payload = {
         "message": body.message,
@@ -2349,6 +2359,21 @@ async def _agent_query_impl(
     # --- Branch 2: recommendations (discover) ------------------------------------
     if wants_recs:
         print(f"🔍 [DEBUG] RECS BRANCH TRIGGERED: wants_recs={wants_recs}, intent_kind={intent_kind}")
+        
+        # Fetch conversation facts for personalization
+        # (Recs branch bypasses _agent_query_impl, so we need to fetch facts here)
+        try:
+            from app.services.fact_storage import get_facts
+            conversation_facts = await get_facts(
+                clerk_user_id=body.clerkUserId,
+                guest_session_id=body.guestSessionId
+            )
+            if conversation_facts:
+                log.info(f"📥 [RECS] Retrieved conversation facts with {len(conversation_facts.get('product_focus', {}).get('current_products', []))} current products")
+        except Exception as e:
+            log.warning(f"[RECS] Failed to retrieve conversation facts (non-critical): {e}")
+            conversation_facts = {}
+        
         # Event: Searching catalog
         emit_event('thinking:step', {
             'icon': '🔍',
@@ -2671,7 +2696,8 @@ async def _agent_query_impl(
             items=items,
             attrs=attrs,
             rec_filters=rec_filters,
-            honesty_message=availability.get("honesty_message")
+            honesty_message=availability.get("honesty_message"),
+            conversation_facts=conversation_facts,
         )
 
         debug_plan["llm_discover_intro_used"] = intro_info.get("llm_used", False)
