@@ -1196,33 +1196,37 @@ async def agent_query(body: AgentIn) -> AgentOut:
         # Extract debug plan
         debug_plan = getattr(out, "debug_plan", {}) or {}
         
-        # NEW: Extract and store conversation facts
-        try:
-            fact_extractor = get_fact_extractor()
-            
-            # Prepare agent metadata (what was shown/done)
-            agent_metadata = {
-                "items": items_meta,
-                "intent_kind": debug_plan.get("intent_kind"),
-                "kind": getattr(out, "kind", "answer"),
-                "cart_payload": getattr(out, "cart_payload", None),
-            }
-            
-            # Extract facts from this turn
-            # Note: We'll need to fetch and update session facts from Django
-            # For now, just extract facts (storage integration comes next)
-            facts = await fact_extractor.extract_facts(
-                user_message=body.message,
-                assistant_response=getattr(out, "answer", ""),
-                agent_metadata=agent_metadata
-            )
-            
-            # TODO: Store facts in ChatSession.metadata via Django API
-            # This will be implemented in next step
-            
-            log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
-        except Exception as e:
-            log.warning(f"Fact extraction failed (non-critical): {e}", exc_info=False)
+        # NEW: Extract and store conversation facts (BACKGROUND - non-blocking)
+        async def extract_facts_background():
+            """Run fact extraction in background without blocking response"""
+            try:
+                fact_extractor = get_fact_extractor()
+                
+                # Prepare agent metadata (what was shown/done)
+                agent_metadata = {
+                    "items": items_meta,
+                    "intent_kind": debug_plan.get("intent_kind"),
+                    "kind": getattr(out, "kind", "answer"),
+                    "cart_payload": getattr(out, "cart_payload", None),
+                }
+                
+                # Extract facts from this turn
+                facts = await fact_extractor.extract_facts(
+                    user_message=body.message,
+                    assistant_response=getattr(out, "answer", ""),
+                    agent_metadata=agent_metadata
+                )
+                
+                # TODO: Store facts in ChatSession.metadata via Django API
+                # This will be implemented in next step
+                
+                log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
+            except Exception as e:
+                log.warning(f"Fact extraction failed (non-critical): {e}", exc_info=False)
+        
+        # Fire and forget - don't wait for completion
+        import asyncio
+        asyncio.create_task(extract_facts_background())
         
         await log_history_turn(
             user_message=body.message,
