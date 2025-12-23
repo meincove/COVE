@@ -1217,12 +1217,23 @@ async def agent_query(body: AgentIn) -> AgentOut:
                     agent_metadata=agent_metadata
                 )
                 
-                # TODO: Store facts in ChatSession.metadata via Django API
-                # This will be implemented in next step
-                
                 log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
+                
+                # Store facts in database
+                from app.services.fact_storage import store_facts
+                stored = await store_facts(
+                    clerk_user_id=body.clerkUserId,
+                    guest_session_id=body.guestSessionId,
+                    facts=facts
+                )
+                
+                if stored:
+                    log.info("💾 Facts stored in database successfully")
+                else:
+                    log.warning("⚠️ Facts storage failed (non-critical)")
+                    
             except Exception as e:
-                log.warning(f"Fact extraction failed (non-critical): {e}", exc_info=False)
+                log.warning(f"Fact extraction/storage failed (non-critical): {e}", exc_info=False)
         
         # Fire and forget - don't wait for completion
         import asyncio
