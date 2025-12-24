@@ -1210,48 +1210,30 @@ def _inject_thinking_data(
     return response
 
 
-@router.post("/ai/agent/query", response_model=AgentOut)
-async def agent_query(body: AgentIn) -> AgentOut:
-    t0 = time.perf_counter()
+def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut):
+    """
+    Trigger fact extraction in background for any agent response.
     
-    # Phase 1: Create trackers here to pass down
-    thinking_tracker = ThinkingTracker()
-    tool_tracker = ToolTracker()
+    This is a fire-and-forget operation that won't block the response.
+    Works for ALL code paths (RECS, cart, Q&A, etc.) - no hardcoding.
     
-    # Call implementation with trackers
-    out: AgentOut = await _agent_query_impl(body, thinking_tracker, tool_tracker)
-    
-    # Phase 1: Inject thinking data if feature enabled (feature-flagged, safe)
-    out = _inject_thinking_data(out, thinking_tracker, tool_tracker)
-    
-    t_end = time.perf_counter()
-    total_ms = int((t_end - t0) * 1000)
-    
-    log.info(
-        "agent_timing",
-        extra={
-            "parse_ms": None,
-            "retrieval_ms": None,
-            "llm_ms": None,
-            "total_ms": total_ms,
-            "kind": getattr(out, "kind", None),
-        },
-    )
-
-    # Phase 1: Extract conversation facts (fire-and-forget, won't break on errors)
+    Args:
+        body: The original request
+        response: The agent's response
+    """
     try:
-        # Extract items metadata for logging
+        # Extract items metadata
         items_meta = []
-        if hasattr(out, "items") and out.items:
+        if hasattr(response, "items") and response.items:
             try:
-                items_meta = [item.dict() for item in out.items]
+                items_meta = [item.dict() for item in response.items]
             except Exception:
-                items_meta = [dict(item) for item in out.items]
+                items_meta = [dict(item) for item in response.items]
         
         # Extract debug plan
-        debug_plan = getattr(out, "debug_plan", {}) or {}
+        debug_plan = getattr(response, "debug_plan", {}) or {}
         
-        # NEW: Extract and store conversation facts (BACKGROUND - non-blocking)
+        # Background task
         async def extract_facts_background():
             """Run fact extraction in background without blocking response"""
             try:
@@ -1262,15 +1244,15 @@ async def agent_query(body: AgentIn) -> AgentOut:
                 agent_metadata = {
                     "items": items_meta,
                     "intent_kind": debug_plan.get("intent_kind"),
-                    "kind": getattr(out, "kind", "answer"),
-                    "cart_payload": getattr(out, "cart_payload", None),
+                    "kind": getattr(response, "kind", "answer"),
+                    "cart_payload": getattr(response, "cart_payload", None),
                 }
                 
                 log.info(f"🔍 [FACT EXTRACTION] Calling LLM to extract facts...")
                 # Extract facts from this turn
                 facts = await fact_extractor.extract_facts(
                     user_message=body.message,
-                    assistant_response=getattr(out, "answer", ""),
+                    assistant_response=getattr(response, "answer", ""),
                     agent_metadata=agent_metadata
                 )
                 
@@ -1298,6 +1280,51 @@ async def agent_query(body: AgentIn) -> AgentOut:
         import asyncio
         log.info("🚀 [FACT EXTRACTION] Launching background task...")
         asyncio.create_task(extract_facts_background())
+        
+    except Exception as e:
+        log.error(f"❌ Failed to trigger fact extraction: {e}", exc_info=True)
+
+
+@router.post("/ai/agent/query", response_model=AgentOut)
+async def agent_query(body: AgentIn) -> AgentOut:
+    t0 = time.perf_counter()
+    
+    # Phase 1: Create trackers here to pass down
+    thinking_tracker = ThinkingTracker()
+    tool_tracker = ToolTracker()
+    
+    # Call implementation with trackers
+    out: AgentOut = await _agent_query_impl(body, thinking_tracker, tool_tracker)
+    
+    # Phase 1: Inject thinking data if feature enabled (feature-flagged, safe)
+    out = _inject_thinking_data(out, thinking_tracker, tool_tracker)
+    
+    t_end = time.perf_counter()
+    total_ms = int((t_end - t0) * 1000)
+    
+    log.info(
+        "agent_timing",
+        extra={
+            "parse_ms": None,
+            "retrieval_ms": None,
+            "llm_ms": None,
+            "total_ms": total_ms,
+            "kind": getattr(out, "kind", None),
+        },
+    )
+    
+    # Phase 1: Trigger fact extraction (works for ALL code paths)
+    _trigger_fact_extraction_background(body, out)
+    
+    # Phase 2: Log conversation history
+    try:
+        debug_plan = getattr(out, "debug_plan", {}) or {}
+        items_meta = []
+        if hasattr(out, "items") and out.items:
+            try:
+                items_meta = [item.dict() for item in out.items]
+            except Exception:
+                items_meta = [dict(item) for item in out.items]
         
         await log_history_turn(
             user_message=body.message,
