@@ -117,7 +117,15 @@ CRITICAL: For shopping assistants, PRODUCT CONTEXT is the most important thing t
 Extract:
 1. **Product Focus** (MOST IMPORTANT):
    - Which specific products is the user currently discussing?
-   - Full product details (name, price, brand, material, etc.)
+   - **EXTRACT ALL AVAILABLE PRODUCT DETAILS** from the AGENT METADATA, including:
+     * Basic: name, product_id, brand, type, tier
+     * Pricing: price (ALWAYS include if available in metadata)
+     * Physical: material, fit, color, sizes available
+     * Fabric: materialMain, gsm, breathability, softness, thickness
+     * Style: dressCode, styleTags, useCases, pattern
+     * Care: washTemp, dryer, iron, careNotes
+     * Fit details: fit type, length, bodyShapes, recommendedGender
+     * Any other details from metadata (description, styleNotes, fitNotes)
    - User's questions about each product
    - User's interest level (high/medium/low based on questions asked)
 
@@ -126,6 +134,8 @@ Extract:
    - Style preferences (minimalist, streetwear, etc.)
    - Color preferences (liked/disliked)
    - Budget constraints
+   - Material preferences
+   - Fit preferences (oversized, slim, etc.)
 
 3. **Active Context**:
    - Current feature (product_search, outfit_builder, cart, etc.)
@@ -142,7 +152,21 @@ Output JSON schema:
       {
         "product_id": "...",
         "name": "...",
-        "full_details": {...},
+        "full_details": {
+          "tier": "...",
+          "type": "...",
+          "price": 123.45,  // ALWAYS include if in metadata
+          "material": "...",
+          "fit": "...",
+          "color": "...",
+          "fabric": {...},  // Include all fabric details if available
+          "style": {...},   // Include all style details if available
+          "care": {...},    // Include all care details if available
+          "description": "...",
+          "styleNotes": "...",
+          "fitNotes": "...",
+          // Include ANY other details from AGENT METADATA
+        },
         "user_questions": [...],
         "user_interest_level": "high|medium|low",
         "turn_introduced": N
@@ -156,8 +180,12 @@ Output JSON schema:
   "decisions_made": [...]
 }
 
-IMPORTANT: Only extract facts that are explicitly mentioned or strongly implied.
-Do not invent or assume facts."""
+IMPORTANT RULES:
+1. **EXTRACT ALL DETAILS** from AGENT METADATA - don't just extract basic info
+2. **ALWAYS include price** if it's in the metadata (even if null)
+3. **Include fabric, style, care details** if available
+4. Only extract facts that are explicitly mentioned in the metadata or conversation
+5. Do not invent or assume facts not present in the data"""
 
     def _build_extraction_prompt(
         self,
