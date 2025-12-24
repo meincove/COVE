@@ -54,10 +54,13 @@ log = logging.getLogger("cove.agent")
 router = APIRouter()
 
 # How much history we send per LLM call (after trimming)
-MAX_HISTORY_MESSAGES = int(os.getenv("AGENT_MAX_HISTORY_MESSAGES", "8"))
+# Phase 2: Expanded context window for better conversation memory
+# Increased from 8 to 15 to remember ~7-8 conversation turns
+MAX_HISTORY_MESSAGES = int(os.getenv("AGENT_MAX_HISTORY_MESSAGES", "15"))
 
-# Above this many messages, we try to summarise older turns
-HISTORY_SUMMARY_THRESHOLD = int(os.getenv("AGENT_HISTORY_SUMMARY_THRESHOLD", "16"))
+# Phase 2: Delay summarization for longer conversations
+# Increased from 16 to 30 to preserve more detail in recent history
+HISTORY_SUMMARY_THRESHOLD = int(os.getenv("AGENT_HISTORY_SUMMARY_THRESHOLD", "30"))
 
 # Safety cap on summary length (characters)
 MAX_HISTORY_SUMMARY_CHARS = int(os.getenv("AGENT_MAX_HISTORY_SUMMARY_CHARS", "600"))
@@ -778,7 +781,12 @@ def _history_to_llm_messages(
             messages.append({
                 "role": "system",
                 "content": (
-                    "📋 CONVERSATION CONTEXT (use this to provide personalized responses):\n\n"
+                    "📋 CONVERSATION CONTEXT - USE THIS TO PROVIDE PERSONALIZED RESPONSES:\n\n"
+                    "IMPORTANT: When the user asks about products, preferences, or references earlier conversation:\n"
+                    "- Check this context FIRST before responding\n"
+                    "- Reference specific products by name when relevant\n"
+                    "- Use their stated preferences to personalize recommendations\n"
+                    "- If they say 'go back to X', look for X in the products below\n\n"
                     + facts_context
                 )
             })
@@ -954,6 +962,19 @@ async def _call_llm_with_history(
     q = body.message # Assuming 'body.message' is the source for 'q'
     is_smalltalk = smalltalk # Assuming 'smalltalk' is the source for 'is_smalltalk'
     summary_text = summary # Assuming 'summary' is the source for 'summary_text'
+
+    # Fetch conversation facts for context
+    conversation_facts = {}
+    try:
+        from app.services.fact_storage import get_facts
+        conversation_facts = await get_facts(
+            clerk_user_id=body.clerkUserId,
+            guest_session_id=body.guestSessionId
+        )
+        if conversation_facts:
+            log.info(f"📥 Retrieved conversation facts for chat query")
+    except Exception as e:
+        log.warning(f"Failed to retrieve conversation facts (non-critical): {e}")
 
     messages = _history_to_llm_messages(
         trimmed_history,

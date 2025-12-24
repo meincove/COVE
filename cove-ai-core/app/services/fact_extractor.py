@@ -252,32 +252,78 @@ ASSISTANT: {assistant_response}
         
         This is injected into the system prompt so the LLM always has
         access to key facts even if old messages are truncated.
+        
+        IMPROVED: More structured, clearer formatting to help LLM use facts better.
         """
         if not facts:
             return ""
         
         context_parts = []
         
-        # Product focus (most important)
+        # Product focus (most important) - IMPROVED FORMATTING
         if product_focus := facts.get("product_focus"):
             if current_products := product_focus.get("current_products"):
-                context_parts.append("## Current Products Being Discussed:")
-                for prod in current_products:
-                    context_parts.append(f"- {prod.get('name', 'Unknown')} (ID: {prod.get('product_id')})")
+                context_parts.append("## 🛍️ Products User is Currently Discussing:")
+                context_parts.append("(Reference these when user asks 'go back', 'compare', or mentions specific products)")
+                context_parts.append("")
+                
+                for i, prod in enumerate(current_products, 1):
+                    name = prod.get('name', 'Unknown Product')
+                    prod_id = prod.get('product_id', 'N/A')
+                    turn = prod.get('turn_introduced', '?')
+                    interest = prod.get('user_interest_level', 'medium')
+                    
+                    # Clear product header
+                    context_parts.append(f"{i}. **{name}** (shown in turn {turn}, interest: {interest})")
+                    context_parts.append(f"   Product ID: {prod_id}")
+                    
+                    # Details in readable format
                     if details := prod.get("full_details"):
-                        context_parts.append(f"  Details: {json.dumps(details, indent=2)}")
+                        detail_str = ", ".join([f"{k}: {v}" for k, v in details.items() if v is not None])
+                        if detail_str:
+                            context_parts.append(f"   Details: {detail_str}")
+                    
+                    # User questions about this product
                     if questions := prod.get("user_questions"):
-                        context_parts.append(f"  User asked: {', '.join(questions)}")
+                        context_parts.append(f"   User asked: {', '.join(questions)}")
+                    
+                    context_parts.append("")  # Blank line between products
         
-        # User preferences
+        # User preferences - IMPROVED FORMATTING
         if prefs := facts.get("user_preferences"):
-            context_parts.append("\n## User Preferences:")
-            context_parts.append(json.dumps(prefs, indent=2))
+            context_parts.append("## 👤 User Preferences:")
+            context_parts.append("(Use these to personalize recommendations and responses)")
+            context_parts.append("")
+            
+            for key, value in prefs.items():
+                # Format key nicely (size_preferences -> Size Preferences)
+                formatted_key = key.replace('_', ' ').title()
+                context_parts.append(f"- **{formatted_key}**: {value}")
+            context_parts.append("")
         
-        # Active context
+        # Active context - IMPROVED FORMATTING
         if active := facts.get("active_context"):
-            context_parts.append("\n## Active Context:")
-            context_parts.append(json.dumps(active, indent=2))
+            context_parts.append("## 🎯 Current Conversation State:")
+            
+            if current_feature := active.get("current_feature"):
+                context_parts.append(f"- Mode: {current_feature}")
+            
+            if last_query := active.get("last_query"):
+                context_parts.append(f"- Last query: \"{last_query}\"")
+            
+            if search_filters := active.get("search_filters"):
+                filter_str = ", ".join([f"{k}={v}" for k, v in search_filters.items()])
+                context_parts.append(f"- Active filters: {filter_str}")
+            
+            context_parts.append("")
+        
+        # Decisions made - NEW ADDITION
+        if decisions := facts.get("decisions_made"):
+            if decisions:  # Only show if there are decisions
+                context_parts.append("## ✅ Important Decisions/Statements:")
+                for decision in decisions[-5:]:  # Last 5 decisions
+                    context_parts.append(f"- {decision}")
+                context_parts.append("")
         
         return "\n".join(context_parts)
 
