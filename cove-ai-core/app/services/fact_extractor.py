@@ -204,6 +204,17 @@ ASSISTANT: {assistant_response}
         
         if agent_metadata:
             prompt += f"\nAGENT METADATA: {json.dumps(agent_metadata, indent=2)}\n"
+            prompt += """
+CRITICAL: If AGENT METADATA contains 'items' with product details, extract ALL available fields:
+- Basic: material, fit, price, tier, type, color
+- Fabric: fabric (entire object with gsm, breathability, softness, etc.)
+- Style: style (entire object with dressCode, styleTags, useCases, etc.)
+- Care: care (entire object with washTemp, dryer, iron, careNotes, etc.)
+- Fit: fitProfile (entire object)
+- Descriptions: description, styleNotes, fitNotes
+
+DO NOT leave these fields as null if they exist in the items metadata!
+"""
         
         if existing_facts:
             prompt += f"\nEXISTING FACTS: {json.dumps(existing_facts, indent=2)}\n"

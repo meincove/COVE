@@ -113,7 +113,18 @@ class RecItem(BaseModel):
     color: Optional[str] = None
     size: Optional[str] = None
     variantId: Optional[str] = None
-    price: Optional[float] = None  # For budget filtering
+    price: Optional[float] = None
+    
+    # Rich product details for fact extraction (all optional)
+    material: Optional[str] = None
+    fit: Optional[str] = None
+    fabric: Optional[Dict[str, Any]] = None
+    care: Optional[Dict[str, Any]] = None
+    style: Optional[Dict[str, Any]] = None
+    description: Optional[str] = None
+    styleNotes: Optional[str] = None
+    fitNotes: Optional[str] = None
+    # For budget filtering
 
 
 class RecsOut(BaseModel):
@@ -438,6 +449,15 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             size=filters.size,
             variantId=variant_id,
             price=price_val,
+            # Rich product details for fact extraction
+            material=meta.get("material"),
+            fit=meta.get("fit"),
+            fabric=meta.get("fabric"),
+            care=meta.get("care"),
+            style=meta.get("style"),
+            description=meta.get("description"),
+            styleNotes=meta.get("styleNotes"),
+            fitNotes=meta.get("fitNotes"),
         )
         scored_items.append((final_score, item))
 

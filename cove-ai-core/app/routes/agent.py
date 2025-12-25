@@ -265,6 +265,16 @@ class AgentItem(BaseModel):
     size: Optional[str] = None
     variantId: Optional[str] = None
     price: Optional[float] = None  # Product price for display
+    
+    # Rich product details for fact extraction (match RecItem)
+    material: Optional[str] = None
+    fit: Optional[str] = None
+    fabric: Optional[Dict[str, Any]] = None
+    care: Optional[Dict[str, Any]] = None
+    style: Optional[Dict[str, Any]] = None
+    description: Optional[str] = None
+    styleNotes: Optional[str] = None
+    fitNotes: Optional[str] = None
 
 
 # Week 4: Agentic Enhancement - Visible Thinking Status
@@ -1247,6 +1257,13 @@ def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut):
                     "kind": getattr(response, "kind", "answer"),
                     "cart_payload": getattr(response, "cart_payload", None),
                 }
+                
+                # DEBUG: Log what we're passing to fact extractor
+                if items_meta:
+                    log.info(f"🔍 [FACT EXTRACTION] First item keys: {list(items_meta[0].keys())}")
+                    log.info(f"🔍 [FACT EXTRACTION] Has material? {'material' in items_meta[0]}")
+                    log.info(f"🔍 [FACT EXTRACTION] Has fabric? {'fabric' in items_meta[0]}")
+                    log.info(f"🔍 [FACT EXTRACTION] Has style? {'style' in items_meta[0]}")
                 
                 log.info(f"🔍 [FACT EXTRACTION] Calling LLM to extract facts...")
                 # Extract facts from this turn
