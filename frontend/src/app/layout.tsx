@@ -48,37 +48,37 @@
 // }
 
 
-import type { Metadata } from "next";
-import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 
-import ModalHost from "@/src/components/ModalHost";
-import { ModalProvider } from "@/src/context/ModalContext";
-import { ThemeProvider } from "@/src/components/ThemeProvider";
-import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot";
-import AnalyticsInit from "@/src/components/AnalyticsInit";
+import type { Metadata } from "next"
+import "./globals.css"
+import { ClerkProvider } from "@clerk/nextjs"
+import { dark } from "@clerk/themes"
 
-import NavbarController from "@/src/components/Navbar/NavbarController";
+import ModalHost from "@/src/components/ModalHost"
+import { ModalProvider } from "@/src/context/ModalContext"
+import { ThemeProvider } from "@/src/components/ThemeProvider"
+import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot"
+import AnalyticsInit from "@/src/components/AnalyticsInit"
+import NavbarController from "@/src/components/Navbar/NavbarController"
 
 export const metadata: Metadata = {
   title: "Cove",
   description: "Luxury meets tech.",
-};
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider appearance={{ baseTheme: dark }}>
-      <html lang="en" suppressHydrationWarning>
-        <body className="antialiased" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning className="h-full">
+        <body className="h-[100dvh] overflow-hidden antialiased" suppressHydrationWarning>
           <ThemeProvider>
             <AnalyticsInit />
             <ModalProvider>
-              <div className="tester-frame h-screen w-full overflow-y-auto overflow-x-hidden">
-                {/* ✅ Old navbar will show everywhere except "/" and "/shopping" */}
-                <NavbarController />
-
-                <main>{children}</main>
+              {/* ✅ Single scroll root for the whole app */}
+              <div className="tester-frame relative h-[100dvh] w-full overflow-y-auto overflow-x-hidden">
+                <NavbarController>
+                  <main className="overflow-visible">{children}</main>
+                </NavbarController>
               </div>
 
               <FloatingChatbot />
@@ -88,5 +88,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </body>
       </html>
     </ClerkProvider>
-  );
+  )
 }
