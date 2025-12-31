@@ -664,13 +664,6 @@ def _filter_out_shown_items(items: List[AgentItem], shown_slugs: set) -> List[Ag
     return [item for item in items if item.slug not in shown_slugs]
 
 
-def _get_last_user_message_OLD(body: AgentIn) -> Optional[str]:
-    key = _session_key_from_body(body)
-    if not key:
-        return None
-    return _SESSION_LAST_USER_MSG.get(key)
-
-
 def _get_available_colors(slug: str) -> List[str]:
     """Get available colors for a product by querying database for variants."""
     try:
