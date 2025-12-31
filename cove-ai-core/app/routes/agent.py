@@ -1350,30 +1350,30 @@ async def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut)
         response: The agent's response
     """
     try:
-        print("=" * 80)
+        log.debug("= * 80)
         print("🔍 [FACT EXTRACTION] FUNCTION CALLED - STARTING EXTRACTION")
-        print("=" * 80)
+        log.debug("= * 80)
         log.info("🔍 [FACT EXTRACTION] Starting background extraction...")
         print("DEBUG: After log.info")
         
         # Extract items metadata
         items_meta = []
-        print(f"DEBUG: hasattr(response, 'items') = {hasattr(response, 'items')}")
+        log.debug(f" hasattr(response, 'items') = {hasattr(response, 'items')}")
         if hasattr(response, "items") and response.items:
-            print(f"DEBUG: response.items exists, length = {len(response.items)}")
+            log.debug(f" response.items exists, length = {len(response.items)}")
             try:
                 items_meta = [item.dict() for item in response.items]
-                print(f"DEBUG: Successfully converted {len(items_meta)} items to dict")
+                log.debug(f" Successfully converted {len(items_meta)} items to dict")
             except Exception as e:
-                print(f"DEBUG: Exception in item.dict(): {e}")
+                log.debug(f" Exception in item.dict(): {e}")
                 items_meta = [dict(item) for item in response.items]
         
-        print(f"DEBUG: About to log items_meta length")
+        log.debug(f" About to log items_meta length")
         try:
             log.info(f"🎯 [DEBUG] Extracted {len(items_meta)} items from response")
             print("DEBUG: log.info succeeded")
         except Exception as e:
-            print(f"DEBUG: log.info FAILED: {e}")
+            log.debug(f" log.info FAILED: {e}")
             import traceback
             traceback.print_exc()
         
@@ -1382,7 +1382,7 @@ async def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut)
             log.info("⏭️  No items to extract facts from, skipping")
             return
         
-        print(f"DEBUG: Have {len(items_meta)} items, continuing...")
+        log.debug(f" Have {len(items_meta)} items, continuing...")
         
         # Extract debug plan
         debug_plan = getattr(response, "debug_plan", {}) or {}
@@ -1648,7 +1648,7 @@ async def _agent_query_impl(
     intent = classification.get("intent")
     confidence = classification.get("confidence", 0.0)
     
-    print(f"DEBUG: 🧭 Routing: intent='{intent}' confidence={confidence}")
+    log.debug(f" 🧭 Routing: intent='{intent}' confidence={confidence}")
     
     # ===== CONVERSATION FLOW HANDLER =====
     # If intent is outfit_builder and NOT already in/completed a flow, start gathering requirements
@@ -1676,7 +1676,7 @@ async def _agent_query_impl(
     # Route outfit requests to orchestrator (if we get here, conversation is complete or skipped)
     if is_outfit_intent:
         workflow_name = "outfit_builder"
-        print(f"DEBUG: 🎯 Routing to Agent Orchestrator: {workflow_name}")
+        log.debug(f" 🎯 Routing to Agent Orchestrator: {workflow_name}")
         if body.sessionType == "outfit_builder":
             log.info(f"🎨 Forced outfit builder from sessionType (bypassing intent classification)")
 
@@ -1702,9 +1702,9 @@ async def _agent_query_impl(
         
         # Get user budget: 1) From conversation flow, 2) From profile, 3) Default
         gathered_context = getattr(body, '_gathered_context', {})
-        print(f"DEBUG: 💰 _gathered_context = {gathered_context}")
+        log.debug(f" 💰 _gathered_context = {gathered_context}")
         budget_max = gathered_context.get('budget_max')  # User's explicit answer to "What's your budget?"
-        print(f"DEBUG: 💰 budget_max from context = {budget_max}")
+        log.debug(f" 💰 budget_max from context = {budget_max}")
         
         if not budget_max:
             # Fallback to user profile
@@ -1847,8 +1847,8 @@ async def _agent_query_impl(
             for item in outfit_items:
                 product = item.get("product", {})
                 # DEBUG: Log product dict to diagnose missing price/imageUrl
-                print(f"DEBUG: outfit product keys: {list(product.keys())}")
-                print(f"DEBUG: product price={product.get('price')}, imageUrl={product.get('imageUrl')}")
+                log.debug(f" outfit product keys: {list(product.keys())}")
+                log.debug(f" product price={product.get('price')}, imageUrl={product.get('imageUrl')}")
                 agent_items.append(AgentItem(
                     slug=product.get("slug", ""),
                     title=product.get("title", "Unknown"),
@@ -1997,7 +1997,7 @@ async def _agent_query_impl(
     api_response_kind = ORCHESTRATOR_TO_API_KIND.get(intent_kind, "answer")
     
     # Production monitoring - using print for immediate visibility
-    print(f"🔍 [INTENT_MONITOR] query='{q[:80]}' | semantic='{semantic_intent}' | orchestrator='{intent_kind}' | api_kind='{api_response_kind}' | conf={confidence:.2%}")
+    log.debug(f"🔍 [INTENT_MONITOR] query='{q[:80]}' | semantic='{semantic_intent}' | orchestrator='{intent_kind}' | api_kind='{api_response_kind}' | conf={confidence:.2%}")
     
     # ✅ USE INTELLIGENT CLASSIFIER - No hardcoding!
     # Trust the LLM-based semantic classification
@@ -2218,7 +2218,7 @@ async def _agent_query_impl(
 
     # --- Branch 1: cart_proposal -------------------------------------------------
     if wants_cart:
-        print(f"🛒 [DEBUG] CART BRANCH TRIGGERED: wants_cart={wants_cart}, intent_kind={intent_kind}")
+        log.info(f"🛒 [DEBUG] CART BRANCH TRIGGERED: wants_cart={wants_cart}, intent_kind={intent_kind}")
         last_recs = _get_session_recs(body)
         debug_plan["last_recs_count"] = len(last_recs)
 
@@ -2236,7 +2236,7 @@ async def _agent_query_impl(
                 if cart_history:
                     context_idx = _get_recently_discussed_product_index(cart_history, last_recs)
                     if context_idx is not None:
-                        print(f"🛒 [CONTEXT_CART] Resolved '{vague_reference.group(1)}' to product index {context_idx}")
+                        log.info(f"🛒 [CONTEXT_CART] Resolved '{vague_reference.group(1)}' to product index {context_idx}")
                         debug_plan["cart_context_resolved"] = True
                         debug_plan["cart_context_idx"] = context_idx
             
@@ -2694,7 +2694,7 @@ async def _agent_query_impl(
 
     # --- Branch 2: recommendations (discover) ------------------------------------
     if wants_recs:
-        print(f"🔍 [DEBUG] RECS BRANCH TRIGGERED: wants_recs={wants_recs}, intent_kind={intent_kind}")
+        log.debug(f"🔍 [DEBUG] RECS BRANCH TRIGGERED: wants_recs={wants_recs}, intent_kind={intent_kind}")
         
         # Fetch conversation facts for personalization
         # (Recs branch bypasses _agent_query_impl, so we need to fetch facts here)
@@ -2833,7 +2833,7 @@ async def _agent_query_impl(
                 'status': 'Validating product matches'
             })
             
-            print(f"🔍 [DEBUG] Calling availability checker with:")
+            log.debug(f"🔍 [DEBUG] Calling availability checker with:")
             print(f"   - rec_query: '{rec_query}'")
             print(f"   - items: {[{'title': it.title, 'type': it.type, 'color': it.color} for it in items]}")
             
