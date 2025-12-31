@@ -51,7 +51,7 @@ def init_pool():
             min_size=0,  # Neon: Start with no connections
             max_size=5,  # Neon: Keep pool small
             num_workers=2,
-            timeout=10,
+            timeout=180,  # Increased for Neon unarchive cold start (can take 60-120s)
             max_lifetime=300,  # Recycle every 5 min
             max_idle=60,  # Close idle after 1 min
             kwargs={"autocommit": True},
@@ -237,7 +237,7 @@ def get_pool():
         min_size=0,  # Neon: Start with no connections
         max_size=5,  # Neon: Keep pool small for serverless
         num_workers=2,  # Reduced for Neon
-        timeout=10,
+        timeout=180,  # Increased for Neon unarchive cold start (can take 60-120s)
         max_lifetime=300,  # ← NEON FIX: Recycle connections every 5 minutes
         max_idle=60,  # ← NEON FIX: Close idle connections after 1 minute
         # autocommit for our simple read/write use cases
@@ -363,35 +363,37 @@ def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]
         print(f"📚 [VOCAB] Using cached vocab (age: {now - _vocab_cache['t']:.1f}s)")
         return _vocab_cache
     
-    print(f"📚 [VOCAB] Cache expired or empty, refreshing from ai_products...")
+    print(f"📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...")
 
     colors, types = set(), set()
     with conn.cursor() as cur:
-        # Colors from ai_products.metadata->>'color'
-        # NOTE: ai_products is the correct table with actual color data
-        # ai_core.docs has 2567 products but NO colors
+        # Colors from ai_core.docs meta->'colors' array (colorName field)
+        # This is the correct location based on schema
         cur.execute(
             """
-            SELECT DISTINCT lower(metadata->>'color')
-            FROM ai_products
-            WHERE metadata->>'color' IS NOT NULL
-              AND metadata->>'color' != ''
+            SELECT DISTINCT lower(c->>'colorName')
+            FROM ai_core.docs,
+                 jsonb_array_elements(COALESCE(meta->'colors', '[]'::jsonb)) AS c
+            WHERE kind = 'product'
+              AND c->>'colorName' IS NOT NULL
+              AND c->>'colorName' != ''
             """
         )
         colors |= {r[0] for r in cur.fetchall() if r[0]}
 
-        # Types from ai_products.type
+        # Types from meta->>'type'
         cur.execute(
             """
-            SELECT DISTINCT lower(type)
-            FROM ai_products
-            WHERE type IS NOT NULL
-              AND type != ''
+            SELECT DISTINCT lower(meta->>'type')
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND meta->>'type' IS NOT NULL
+              AND meta->>'type' != ''
             """
         )
         types |= {r[0] for r in cur.fetchall() if r[0]}
 
-    print(f"📚 [VOCAB] Loaded {len(colors)} colors from ai_products: {sorted(colors)}")
-    print(f"📚 [VOCAB] Loaded {len(types)} types from ai_products: {sorted(types)}")
+    print(f"📚 [VOCAB] Loaded {len(colors)} colors from ai_core.docs: {sorted(colors)}")
+    print(f"📚 [VOCAB] Loaded {len(types)} types from ai_core.docs: {sorted(types)}")
     _vocab_cache.update({"t": now, "colors": colors, "types": types})
     return _vocab_cache

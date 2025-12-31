@@ -817,6 +817,17 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
             if canonical_type in catalog_types:
                 print(f"🔍 [NORMALIZE] ✓ Synonym match: '{tok}' → '{canonical_type}'")
                 return canonical_type
+    
+    # Check broad category map (e.g., "shoes" → ["boots", "heels", "loafers", "sneakers"])
+    broad_map = config.get('broad_category_map', {})
+    if tok in broad_map:
+        mapped_types = broad_map[tok]
+        if isinstance(mapped_types, list):
+            for mt in mapped_types:
+                if mt.lower() in catalog_types:
+                    print(f"🔍 [NORMALIZE] ✓ Broad category match: '{tok}' → '{mt}'")
+                    return mt.lower()
+            print(f"🔍 [NORMALIZE] ✗ Broad category '{tok}' has no catalog matches: {mapped_types}")
 
     candidates = {tok}
     if tok.endswith("ies") and len(tok) > 3:

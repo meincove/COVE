@@ -9,7 +9,9 @@ export type AgentItem = {
   color?: string;
   size?: string;
   variantId?: string;
-  price?: number;  // NEW: for real pricing
+  price?: number;
+  imageUrl?: string;  // For displaying in UI
+  image_url?: string; // Potential backend key
 };
 
 export type AgentCartPayload = {

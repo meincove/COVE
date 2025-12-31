@@ -38,11 +38,46 @@ class VisualValidator:
                 "is_harmonious": bool,
                 "score": 0.85,  # 0-1 score
                 "critique": "The navy blazer pairs well with...",
-                "issues": ["Colors clash", "Formal/Casual mismatch"]
+                "issues": ["Colors clash"],
+                "completeness": {"is_complete": True, "missing": []}
             }
         """
+        # Helper to extract image URL from various structures
+        def get_img(item):
+            # 1. Direct key
+            if item.get("image_url"): return item["image_url"]
+            if item.get("image"): return item["image"]
+            
+            # 2. Nested in 'product'
+            prod = item.get("product", {})
+            if prod.get("image_url"): return prod["image_url"]
+            if prod.get("image"): return prod["image"]
+            
+            # 3. deeply nested metadata
+            if isinstance(prod, dict) and prod.get("metadata"):
+                meta = prod["metadata"]
+                if isinstance(meta, dict) and meta.get("image"): return meta["image"]
+            
+            # 4. Top-level 'images' list (common in our JSON)
+            if item.get("images") and isinstance(item["images"], list) and len(item["images"]) > 0:
+                return item["images"][0]
+            
+            # 5. Nested 'images' list in 'product'
+            if prod.get("images") and isinstance(prod["images"], list) and len(prod["images"]) > 0:
+                return prod["images"][0]
+
+            return None
+
+        def get_title(item):
+            if item.get("title"): return item["title"]
+            return item.get("product", {}).get("title", item.get("product", {}).get("name", "Unknown Item"))
+
         # Filter items with images
-        valid_items = [item for item in items if item.get("image_url")]
+        valid_items = []
+        for item in items:
+            url = get_img(item)
+            if url:
+                valid_items.append({"image_url": url, "title": get_title(item)})
         
         if len(valid_items) < 2:
             return {
@@ -76,11 +111,16 @@ class VisualValidator:
                     "content": """You are a high-end fashion stylist. Analyze the provided garment images as a complete outfit.
                     
 Return JSON:
+Return JSON:
 {
     "score": 0.0-1.0, (1.0 = perfect match, <0.7 = clash)
-    "critique": "One sentence summary of the look.",
-    "issues": ["List of specific visual problems"],
-    "is_harmonious": boolean (true if score > 0.7)
+    "critique": "One sentence summary.",
+    "is_harmonious": boolean,
+    "completeness_check": {
+        "is_complete": boolean, (Head-to-toe? Needs top, bottom, shoes)
+        "missing": ["list", "of", "missing", "crucial", "items"] (e.g. "Missing Shoes")
+    },
+    "issues": ["List of specific visual problems"]
 }"""
                 }, {
                     "role": "user",

@@ -3,21 +3,38 @@
 import { useState, useEffect, useMemo, useRef, FormEvent, forwardRef, useImperativeHandle } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { Send, X, Check, Package, ShoppingCart } from "lucide-react";
+import {
+  Send,
+  X,
+  Maximize2,
+  Minimize2,
+  MessageSquare,
+  Box,
+  ShoppingCart,
+  Check,
+  ChevronRight,
+  Sparkles,
+  Wand2,
+  ShoppingBag,
+  RefreshCw,
+  MoreHorizontal
+} from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { useCartSessionStore } from "@/src/store/cartSessionStore";
 import { useCartStore } from "@/src/store/cartStore";
-import type { CartItem } from "@/types/cart";
-import type {
-  AgentItem,
+import {
+  Message,
   AgentCartPayload,
   AgentResponse,
 } from "@/types/agent";
-import ChatProductCard from "@/src/components/cove-ai/ChatProductCard";
 import ProductCarousel from "@/src/components/cove-ai/ProductCarousel";
 import SuggestedQueries from "@/src/components/cove-ai/SuggestedQueries";
 import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
-import LoadingSkeleton from "@/src/components/cove-ai/LoadingSkeleton";
+import LoadingSkeleton from './LoadingSkeleton';
+import AgenticOutfitBuilder from './AgenticOutfitBuilder';
+import { useOutfitStore } from '@/src/hooks/useOutfitStore';
 import Toast, { ToastType } from "@/src/components/cove-ai/Toast";
 import { useAgentStreaming } from "@/src/hooks/useAgentStreaming";
 import { useAgentStream } from "@/src/hooks/useAgentStream";
@@ -26,6 +43,7 @@ import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/Typin
 import ThinkingSteps from "@/src/components/cove-ai/ThinkingSteps";
 import EnhancedThinking from "@/src/components/cove-ai/EnhancedThinking";  // Phase 1
 import PersonalizedGreeting from "@/src/components/cove-ai/PersonalizedGreeting";
+import { useLayoutStore } from "@/src/store/layoutStore";
 
 // ---------- TYPES ----------
 
@@ -126,7 +144,12 @@ function isEmailConfirmationMeta(
 
 // ---------- COMPONENT ----------
 
-function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg: string) => void }>) {
+// ✨ PHASE 6: Props for mode-specific behavior
+interface CoveChatWidgetProps {
+  mode?: 'chat' | 'outfit_builder';
+}
+
+function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string) => void }>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -167,7 +190,11 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
     suggestedActions,
     thinking_events: streamThinkingEvents,
     tools_used: streamToolsUsed,
+    agenticEvents,  // ✨ PHASE 6: Live product exploration
   } = useAgentStream();
+
+  // Phase 3: Layout Store integration for Virtual Trial Room
+  const setGeneratedOutfit = useLayoutStore((s) => s.setGeneratedOutfit);
 
   // Week 6: Chat history persistence
   const sessionId = guestSessionId || ensureGuestSessionId();
@@ -183,7 +210,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
     if (!historyLoading && history.length > 0 && messages.length === 0) {
       // Convert history to chat messages
       const historyMessages: ChatMessage[] = history.map((h, i) => ({
-        id: `history-${i}-${Date.now()}`,
+        id: `history - ${ i } -${ Date.now() } `,
         role: h.role,
         content: h.content,
         meta: h.meta,
@@ -301,7 +328,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!input.trim() || loading || isStreamingProgress) return;
+    if (!input.trim()) return;
 
     const userMsg: ChatMessage = {
       id: makeId(),
@@ -328,11 +355,12 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
       }
 
       // Week 6: ALL queries use streaming - backend decides routing!
-      // No hardcoded patterns - let the agent's classify() decide
+      // ✨ PHASE 6: Use mode prop to determine sessionType (no keyword detection)
       await sendStreamingQuery(
         userMsg.content,
         isSignedIn && user ? user.id : undefined,
-        sessionId
+        sessionId,
+        mode === 'outfit_builder' ? 'outfit_builder' : undefined
       );
 
     } catch (err: any) {
@@ -366,11 +394,11 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
       const cp = data.cart_payload;
 
       const sizeLabel =
-        cp && cp.size ? ` in size ${String(cp.size).toUpperCase()}` : "";
+        cp && cp.size ? ` in size ${String(cp.size).toUpperCase()} ` : "";
 
       const summary =
         firstItem && cp
-          ? `I found ${firstItem.title}${sizeLabel}. Add this to your cart?`
+          ? `I found ${firstItem.title}${sizeLabel}. Add this to your cart ? `
           : data.answer || "I found an item I can add to your cart. Proceed?";
 
 
@@ -390,6 +418,22 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
 
     if (data.kind === "recommendations") {
       const items = data.items ?? [];
+
+
+
+      // Week 6: Trigger Virtual Trial Room ONLY for outfit builder responses
+      // Not for simple product queries like "show me hoodies"
+      // Use STRICT phrases to avoid false positives from casual "outfit" mentions
+      const answerLower = data.answer?.toLowerCase() || '';
+      const isOutfitResponse = answerLower.includes('built a complete outfit') ||
+        answerLower.includes('complete outfit for you') ||
+        answerLower.includes("i've built") ||
+        answerLower.includes('your outfit is ready') ||
+        answerLower.includes('€0.00 total');  // Outfit builder signature
+      if (items.length > 0 && isOutfitResponse) {
+        setGeneratedOutfit(items);
+      }
+
 
       const msg: ChatMessage = {
         id: makeId(),
@@ -477,7 +521,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
     if (isStreamingProgress && thinkingSteps.length > 0) {
       // Map streaming steps to EnhancedThinking format
       const mappedEvents = thinkingSteps.map((step, idx) => ({
-        id: `stream-step-${idx}`,
+        id: `stream - step - ${idx} `,
         timestamp: Date.now(),
         agent: getAgentFromIcon(step.icon), // simple helper to map icon to agent type
         action: step.status, // "status" in streaming is the text description
@@ -529,6 +573,19 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
   // Week 6: Replace thinking message with final result
   useEffect(() => {
     if (!isStreamingProgress && introText && streamedItems.length > 0) {
+      // ✨ TRIGGER VIRTUAL TRIAL ROOM (Fix for Streaming)
+      // Only for outfit builder responses, not simple product queries
+      // Use STRICT phrases to avoid false positives from casual "outfit" mentions
+      const introLower = introText.toLowerCase();
+      const isOutfitResponse = introLower.includes('built a complete outfit') ||
+        introLower.includes('complete outfit for you') ||
+        introLower.includes("i've built") ||
+        introLower.includes('your outfit is ready') ||
+        introLower.includes('€0.00 total');  // Outfit builder signature
+      if (isOutfitResponse) {
+        setGeneratedOutfit(streamedItems);
+      }
+
       // Remove thinking message and add final result
       setMessages(prev => {
         const filtered = prev.filter(m => m.id !== 'thinking-temp');
@@ -542,8 +599,8 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
               kind: 'recommendations',
               items: streamedItems,
               // Phase 1: Include thinking_events and tools_used from streaming
-              thinking_events: streamThinkingEvents,
-              tools_used: streamToolsUsed,
+              thinking_events: streamThinkingEvents ?? undefined,
+              tools_used: streamToolsUsed ?? undefined,
             },
             suggestedActions: suggestedActions || [],
           }
@@ -736,7 +793,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
 
       if (!cartAddRes.ok) {
         console.error("Cart add failed:", responseData);
-        throw new Error(responseData.message || `Cart add failed: ${cartAddRes.status}`);
+        throw new Error(responseData.message || `Cart add failed: ${cartAddRes.status} `);
       }
 
 
@@ -751,7 +808,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
         colorName: firstItem.color ?? "",
         quantity: cp.quantity,
         price: firstItem.price ?? 0,  // Week 4: Use real price if available
-        imageUrl: firstItem.imageUrl || undefined,  // Use image from AI response
+        imageUrl: firstItem.imageUrl || "",  // Use image from AI response
         material: "",
       };
 
@@ -837,10 +894,12 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
         }
 
         // Send via streaming
+        // ✨ PHASE 6: Use mode prop to determine sessionType
         await sendStreamingQuery(
           userMsg.content,
           isSignedIn && user ? user.id : undefined,
-          sessionId
+          sessionId,
+          mode === 'outfit_builder' ? 'outfit_builder' : undefined
         );
 
       } catch (err: any) {
@@ -860,11 +919,44 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
   // -------- RENDER --------
 
   return (
-    <div className="flex flex-col h-full max-h-[600px] rounded-2xl border border-neutral-800 bg-neutral-950/80">
+    <div className="flex flex-col h-full rounded-2xl border border-neutral-800 bg-neutral-950/80 overflow-hidden">
       {/* Messages list */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-        {/* Personalized Greeting - NEW! */}
-        {messages.length === 0 && !isStreamingProgress && <PersonalizedGreeting />}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3">
+        {/* Personalized Greeting - Mode-specific */}
+        {messages.length === 0 && !isStreamingProgress && (
+          mode === 'outfit_builder' ? (
+            <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-purple-500/10 rounded-2xl p-4 border border-purple-500/20">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">✨</span>
+                <h3 className="text-lg font-semibold text-white">Outfit Builder</h3>
+              </div>
+              <p className="text-neutral-300 text-sm mb-4">
+                I'll help you create the perfect look! Just tell me about your occasion, budget, or style preferences.
+              </p>
+              <div className="space-y-2">
+                <p className="text-xs text-neutral-500 uppercase tracking-wider">Try asking:</p>
+                {[
+                  "Casual weekend outfit under €200",
+                  "Date night look for fancy restaurant",
+                  "Professional outfit for important meeting",
+                  "Summer streetwear fit"
+                ].map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setInput(suggestion);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm text-neutral-300 hover:text-white transition-colors"
+                  >
+                    "{suggestion}"
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <PersonalizedGreeting />
+          )
+        )}
 
         {messages.map((m) => {
           const isUser = m.role === "user";
@@ -893,7 +985,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
             >
               <div
                 className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm text-neutral-50 overflow-hidden ${isUser ? "chat-msg-user" : "chat-msg-assistant"
-                  }`}
+                  } `}
               >
                 {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
 
@@ -915,8 +1007,8 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
                     <AgentThinkingSteps steps={recMeta.thinking_steps} />
                   )}
 
-                {/* Recommendations */}
-                {recMeta?.items && recMeta.items.length > 0 && (
+                {/* Recommendations - hide in outfit_builder mode (shown in OutfitCanvas) */}
+                {recMeta?.items && recMeta.items.length > 0 && mode !== 'outfit_builder' && (
                   <div className="mt-1">
                     <ProductCarousel items={recMeta.items} />
                   </div>
@@ -1014,37 +1106,20 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
           );
         })}
 
-        {/* Welcome suggestions - shown when chat is empty */}
-        {messages.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center py-8 px-4">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-medium text-neutral-200 mb-2">
-                👋 Hey! What can I help you find today?
-              </h3>
-              <p className="text-sm text-neutral-400">
-                Try one of these to get started:
-              </p>
-            </div>
-            <SuggestedQueries
-              suggestions={[
-                { id: 'welcome-1', text: '✨ Show me trending styles', query: 'Show me trending styles' },
-                { id: 'welcome-2', text: '🧥 I need a hoodie', query: 'Show me some hoodies' },
-                { id: 'welcome-3', text: '👕 Looking for tees', query: 'Show me some tees' },
-                { id: 'welcome-4', text: '🎨 Surprise me!', query: 'Recommend something cool' },
-              ]}
-              onSelect={async (query) => {
-                setInput(query);
-                setTimeout(() => {
-                  const form = document.querySelector('form') as HTMLFormElement;
-                  form?.requestSubmit();
-                }, 50);
-              }}
-              disabled={loading}
+        {/* Welcome suggestions removed - PersonalizedGreeting handles the empty state */}
+
+        {loading && thinkingSteps.length === 0 && <LoadingSkeleton />}
+
+        {/* ✨ PHASE 6: Live Product Exploration during outfit building */}
+        {/* Render if we have active events OR if we have persistent outfit data in store */}
+        {(agenticEvents.length > 0 || Object.keys(useOutfitStore.getState().categories).length > 0) && (
+          <div className="px-3 mb-4">
+            <AgenticOutfitBuilder
+              streamEvents={agenticEvents}
+              isActive={true}
             />
           </div>
         )}
-
-        {loading && thinkingSteps.length === 0 && <LoadingSkeleton />}
 
       </div>
 
@@ -1061,7 +1136,7 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
         />
         <button
           type="submit"
-          disabled={loading || !input.trim()}
+          disabled={!input.trim()}
           className="px-3 py-1 text-sm rounded-full bg-neutral-100 text-black disabled:opacity-40"
         >
           Send
@@ -1083,5 +1158,5 @@ function CoveChatWidgetInner(_props: {}, ref: React.Ref<{ sendQuickMessage: (msg
 }
 
 // Export with forwardRef
-const CoveChatWidget = forwardRef(CoveChatWidgetInner);
+const CoveChatWidget = forwardRef<{ sendQuickMessage: (msg: string) => void }, CoveChatWidgetProps>(CoveChatWidgetInner);
 export default CoveChatWidget;

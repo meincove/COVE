@@ -1,0 +1,140 @@
+{
+    "brands": [
+        {
+            "name": "SoleMates",
+            "description": "Premium footwear for every occasion. Handcrafted leather and modern comfort.",
+            "categories": [
+                "shoes"
+            ],
+            "base_price_range": [
+                80,
+                250
+            ],
+            "products": [
+                {
+                    "template": "Classic {color} Leather Loafers",
+                    "description": "Timeless penny loafers crafted from full-grain {color} leather. Features a cushioned insole for all-day comfort and a durable rubber outsole. Perfect for business casual or smart weekend looks.",
+                    "colors": [
+                        "Black",
+                        "Brown",
+                        "Burgundy",
+                        "Tan"
+                    ],
+                    "styles": [
+                        "smart_casual",
+                        "business"
+                    ]
+                },
+                {
+                    "template": "Urban Runner {color} Sneakers",
+                    "description": "Lightweight knit sneakers in {color}. Responsive cushioning and breathable upper make these perfect for city walking or gym sessions. Minimalist design matches everything.",
+                    "colors": [
+                        "White",
+                        "Grey",
+                        "Black",
+                        "Navy"
+                    ],
+                    "styles": [
+                        "casual",
+                        "minimalist",
+                        "athletic"
+                    ]
+                },
+                {
+                    "template": "Chelsea Boots in {color} Suede",
+                    "description": "Essential {color} suede Chelsea boots. Elastic side panels for easy on/off and a sleek silhouette. The perfect boot for date nights or autumn walks.",
+                    "colors": [
+                        "Sand",
+                        "Chocolate",
+                        "Black"
+                    ],
+                    "styles": [
+                        "smart_casual",
+                        "date"
+                    ]
+                },
+                {
+                    "template": "Elegant {color} Pumps",
+                    "description": "Sophisticated pointed-toe heels in {color}. 3-inch stiletto heel with a padded footbed. The ultimate finishing touch for formal events.",
+                    "colors": [
+                        "Black",
+                        "Nude",
+                        "Red"
+                    ],
+                    "styles": [
+                        "formal",
+                        "date"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Noir & Blanc",
+            "description": "Contemporary formal wear and tailoring. Sharp lines, premium fabrics.",
+            "categories": [
+                "formal",
+                "top",
+                "bottom"
+            ],
+            "base_price_range": [
+                150,
+                600
+            ],
+            "products": [
+                {
+                    "template": "Tailored {color} Wool Blazer",
+                    "description": "A sharp, structured blazer in premium Italian {color} wool. Slim fit with peak lapels and double vents. Instantly elevates any outfit.",
+                    "colors": [
+                        "Navy",
+                        "Charcoal",
+                        "Black"
+                    ],
+                    "styles": [
+                        "business",
+                        "formal",
+                        "smart_casual"
+                    ]
+                },
+                {
+                    "template": "Signature {color} Dress Shirt",
+                    "description": "Crisp {color} poplin button-down shirt. Wrinkle-resistant cotton blend with a cutaway collar. The foundation of a professional wardrobe.",
+                    "colors": [
+                        "White",
+                        "Light Blue",
+                        "Pink"
+                    ],
+                    "styles": [
+                        "business",
+                        "formal"
+                    ]
+                },
+                {
+                    "template": "Pleated {color} Trousers",
+                    "description": "High-waisted tailored trousers in {color}. Double pleats offer a relaxed but refined silhouette. Cropped length showcases your footwear.",
+                    "colors": [
+                        "Black",
+                        "Grey",
+                        "Navy",
+                        "Beige"
+                    ],
+                    "styles": [
+                        "smart_casual",
+                        "business"
+                    ]
+                },
+                {
+                    "template": "Evening Silk Gown in {color}",
+                    "description": "Breathtaking floor-length silk gown in {color}. Draped neckline and open back design. Exudes elegance for black-tie events.",
+                    "colors": [
+                        "Emerald",
+                        "Black",
+                        "Champagne"
+                    ],
+                    "styles": [
+                        "formal"
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -7,6 +7,10 @@ from typing import Dict, Optional, List
 import litellm
 import json
 import logging
+import os
+
+# Phase 3: LLM caching for performance
+from app.core.llm_cache import llm_cache
 
 log = logging.getLogger(__name__)
 
@@ -75,6 +79,22 @@ class OccasionAnalyzer:
             context_parts.append(f"Season: {season}")
         
         context = "\n".join(context_parts)
+        
+        # Phase 3: Check cache first
+        cache_key = llm_cache._create_key(
+            model=self.model,
+            messages=[{
+                "role": "system",
+                "content": "occasion_analyzer"  # Simplified for cache key
+            }, {
+                "role": "user",
+                "content": context
+            }]
+        )
+        
+        cached_result = llm_cache.get(cache_key)
+        if cached_result:
+            return cached_result
         
         try:
             response = await litellm.acompletion(
@@ -150,6 +170,9 @@ What outfit should I recommend? Return only valid JSON."""
             log.info(f"Occasion analysis: formality={analysis['formality']}, "
                     f"complexity={analysis['outfit_complexity']}, "
                     f"confidence={analysis.get('confidence', 'N/A')}")
+            
+            # Phase 3: Cache the result
+            llm_cache.set(cache_key, analysis)
             
             return analysis
             

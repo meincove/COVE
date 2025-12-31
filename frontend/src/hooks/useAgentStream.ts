@@ -23,6 +23,8 @@ export type StreamState = {
     // Phase 1: Agentic enhancements
     thinking_events: any[] | null;
     tools_used: any[] | null;
+    // ✨ PHASE 6: Live product exploration events
+    agenticEvents: any[];
 };
 
 export function useAgentStream() {
@@ -39,6 +41,7 @@ export function useAgentStream() {
         suggestedActions: null,
         thinking_events: null,
         tools_used: null,
+        agenticEvents: [],  // ✨ PHASE 6: Live exploration
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -46,7 +49,8 @@ export function useAgentStream() {
     const sendQuery = useCallback(async (
         message: string,
         userId?: string,
-        sessionId?: string
+        sessionId?: string,
+        sessionType?: string  // ✨ PHASE 6: For outfit_builder workflow
     ) => {
         // Abort previous request if exists
         if (abortControllerRef.current) {
@@ -70,6 +74,7 @@ export function useAgentStream() {
             suggestedActions: null,
             thinking_events: null,
             tools_used: null,
+            agenticEvents: [],  // ✨ PHASE 6
         });
 
         try {
@@ -81,6 +86,7 @@ export function useAgentStream() {
                     clerkUserId: userId,
                     guestSessionId: sessionId,
                     top_k: 4,
+                    sessionType,  // ✨ PHASE 6: Triggers orchestrator for outfit_builder
                 }),
                 signal: abortController.signal,
             });
@@ -201,6 +207,19 @@ export function useAgentStream() {
                     ...prev,
                     isStreaming: false,
                     error: data.message || 'Something went wrong',
+                }));
+                break;
+
+            // ✨ PHASE 6: Handle agentic exploration events
+            case 'agentic:category_start':
+            case 'agentic:category_candidates':
+            case 'agentic:item_selected':
+            case 'agentic:category_vetting':
+            case 'agentic:budget_set':  // Budget from conversation flow
+                console.log('🎯 AGENTIC EVENT:', eventType, data);  // DEBUG
+                setState(prev => ({
+                    ...prev,
+                    agenticEvents: [...prev.agenticEvents, { event_type: eventType.replace('agentic:', ''), ...data }],
                 }));
                 break;
         }

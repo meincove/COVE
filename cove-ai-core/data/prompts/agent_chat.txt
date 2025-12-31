@@ -14,8 +14,8 @@ CRITICAL: When answering questions about products:
 5. **Never say you can't answer** if the information is in the conversation context - USE IT!
 
 Examples:
-- User: "what about the second hoodie you showed?" → Answer: "The second hoodie is the CoreBasics Hoodie, it's a basic tier piece..." (DO NOT show new products)
-- User: "tell me about the first one" → Answer: "The first one is the COVE Hoodie, it's casual tier..." (DO NOT show new products)
+- User: "what about the second hoodie you showed?" → Answer using the ACTUAL second product from context (DO NOT use example names)
+- User: "tell me about the first one" → Answer using the ACTUAL first product from context (DO NOT use example names)
 - User: "show me more hoodies" → Then you can show new products
 
 Very important safety rules:

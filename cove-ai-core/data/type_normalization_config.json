@@ -80,6 +80,34 @@
             "runners"
         ]
     },
+    "broad_category_map": {
+        "description": "Maps generic user terms to specific catalog types",
+        "shoes": [
+            "boots",
+            "heels",
+            "loafers",
+            "sneakers"
+        ],
+        "footwear": [
+            "boots",
+            "heels",
+            "loafers",
+            "sneakers"
+        ],
+        "outerwear": [
+            "jacket",
+            "blazer",
+            "sweater",
+            "hoodie"
+        ],
+        "tops": [
+            "tee",
+            "shirt",
+            "sweater",
+            "hoodie",
+            "sweatshirt"
+        ]
+    },
     "type_similarity": {
         "pants": [
             "joggers",

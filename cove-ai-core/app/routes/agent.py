@@ -66,6 +66,54 @@ HISTORY_SUMMARY_THRESHOLD = int(os.getenv("AGENT_HISTORY_SUMMARY_THRESHOLD", "30
 MAX_HISTORY_SUMMARY_CHARS = int(os.getenv("AGENT_MAX_HISTORY_SUMMARY_CHARS", "600"))
 
 
+# ===== SESSION NAMESPACING UTILITIES =====
+# Support for separate chat sessions (main, outfit_builder, cart, etc.)
+
+def get_namespaced_session_id(
+    guest_id: Optional[str],
+    clerk_id: Optional[str],
+    session_type: str = "main"
+) -> str:
+    """
+    Create namespaced session ID for separate chat sessions.
+    
+    Examples:
+        - guest_abc123:main
+        - guest_abc123:outfit_builder
+        - clerk_user_xyz:outfit_builder
+    
+    Args:
+        guest_id: Guest session ID
+        clerk_id: Clerk user ID
+        session_type: Type of session ("main", "outfit_builder", "cart")
+    
+    Returns:
+        Namespaced session ID
+    """
+    base_id = clerk_id or guest_id or "anonymous"
+    return f"{base_id}:{session_type}"
+
+
+def get_base_user_id(
+    guest_id: Optional[str],
+    clerk_id: Optional[str]
+) -> str:
+    """
+    Get base user ID without session namespace.
+    
+    Used for accessing user-level data (facts, preferences, history)
+    that should be shared across all sessions.
+    
+    Args:
+        guest_id: Guest session ID
+        clerk_id: Clerk user ID
+    
+    Returns:
+        Base user ID
+    """
+    return clerk_id or guest_id or "anonymous"
+
+
 class AgentIn(BaseModel):
     message: str
     top_k: int = 6
@@ -74,6 +122,7 @@ class AgentIn(BaseModel):
     cartId: Optional[str] = None
     clerkUserId: Optional[str] = None
     guestSessionId: Optional[str] = None
+    sessionType: Optional[str] = "main"  # NEW: "main", "outfit_builder", "cart"
     email: Optional[str] = None
 
     # how much per-user history to use in the LLM fallback
@@ -265,6 +314,7 @@ class AgentItem(BaseModel):
     size: Optional[str] = None
     variantId: Optional[str] = None
     price: Optional[float] = None  # Product price for display
+    imageUrl: Optional[str] = None  # ✨ PHASE 6: Product image URL
     
     # Rich product details for fact extraction (match RecItem)
     material: Optional[str] = None
@@ -359,6 +409,54 @@ def _looks_like_cart_add(msg: str) -> bool:
     return False
 
 
+def _get_recently_discussed_product_index(
+    history: List[Dict[str, Any]],
+    last_recs: List[Dict[str, Any]],
+) -> Optional[int]:
+    """
+    Check conversation history for ordinal references to products
+    (e.g., "second one", "first product") and return the matching index.
+    
+    This enables context-aware cart add when user says "add this" after
+    discussing a specific product.
+    """
+    if not history or not last_recs:
+        return None
+    
+    # Ordinal word to index mapping
+    ordinal_map = {
+        'first': 0, '1st': 0, 
+        'second': 1, '2nd': 1,
+        'third': 2, '3rd': 2,
+        'fourth': 3, '4th': 3,
+        'fifth': 4, '5th': 4,
+        'sixth': 5, '6th': 5,
+    }
+    
+    # Look at recent messages for ordinal product references
+    for msg in reversed(history[-6:]):  # Check last 6 messages
+        content = (msg.get("content") or "").lower()
+        role = msg.get("role", "user")
+        
+        # Skip system messages
+        if role == "system":
+            continue
+            
+        # Check for ordinal references
+        ordinal_match = re.search(
+            r'\b(first|second|third|fourth|fifth|sixth|1st|2nd|3rd|4th|5th|6th)\b\s*(one|product|item)?',
+            content
+        )
+        if ordinal_match:
+            word = ordinal_match.group(1).lower()
+            idx = ordinal_map.get(word)
+            if idx is not None and 0 <= idx < len(last_recs):
+                log.info(f"[CONTEXT_CART] Found ordinal reference '{word}' -> index {idx}")
+                return idx
+    
+    return None
+
+
 # ---------- AI profile integration ----------
 
 
@@ -436,13 +534,16 @@ _SESSION_SHOWN_SLUGS: Dict[str, set] = {}  # {session_key: {slug1, slug2, ...}}
 
 
 def _session_key_from_body(body: AgentIn) -> Optional[str]:
-    if body.cartId:
-        return f"cart:{body.cartId}"
-    if body.clerkUserId:
-        return f"user:{body.clerkUserId}"
-    if body.guestSessionId:
-        return f"guest:{body.guestSessionId}"
-    return None
+    """
+    Extract session key from request body with session namespacing support.
+    
+    Returns namespaced session ID (e.g., "guest_abc:main", "guest_abc:outfit_builder")
+    """
+    return get_namespaced_session_id(
+        body.guestSessionId,
+        body.clerkUserId,
+        body.sessionType
+    )
 
 
 def _store_session_recs(body: AgentIn, items: List[AgentItem]) -> None:
@@ -724,7 +825,7 @@ async def _fetch_history_for_llm(
         print(f"[_get_history] Requesting {url} with params={params}", file=sys.stderr)
         async with httpx.AsyncClient(timeout=10) as cx:
             r = await cx.get(url, params=params)
-        print(f"[_get_history] Response {r.status_code}: {r.text[:200]}", file=sys.stderr)
+        print(f"[_get_history] Response {r.status_code}: {r.text}", file=sys.stderr)
         if r.status_code != 200:
             log.warning("history_get non-200 %s: %s", r.status_code, r.text)
             return []
@@ -762,8 +863,9 @@ def _history_to_llm_messages(
     if smalltalk:
         system_content += (
             "\n\nThe user's current message is a very short, non-question smalltalk message. "
-            "Reply with a short friendly greeting and ONE short line about how you can help "
-            "with Cove products, sizes, or outfit ideas today."
+            "Reply with a warm, brief greeting that fits a premium fashion brand vibe. "
+            "Do NOT list services or be robotic. Just say hello and offer to help style them "
+            "or find the perfect piece."
         )
     elif is_first_turn:
         system_content += (
@@ -824,6 +926,23 @@ def _history_to_llm_messages(
         content = str(row.get("content") or "").strip()
         if not content:
             continue
+
+        # ✨ Fix for "second product" context awareness
+        # If this message resulted in showing items (usually assistant message), log them here
+        # so the LLM knows what "the second one" refers to.
+        meta = row.get("meta") or {}
+        items_shown = meta.get("items") or meta.get("items_shown")
+        
+        if items_shown and isinstance(items_shown, list):
+            items_context = "\n\n[System Note: The following products were shown in this turn:]"
+            for i, item in enumerate(items_shown):
+                if isinstance(item, dict):
+                    title = item.get("title", "Item")
+                    color = item.get("color", "")
+                    kind = item.get("type", "")
+                    details = f"{color} {kind}".strip()
+                    items_context += f"\n{i+1}. {title} ({details})"
+            content += items_context
 
         messages.append({"role": role, "content": content})
 
@@ -1065,7 +1184,7 @@ async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     # HTTP fallback (primary method for now)
     try:
-        async with httpx.AsyncClient(timeout=10) as cx:
+        async with httpx.AsyncClient(timeout=120) as cx:
             r = await cx.post(
                 "http://127.0.0.1:8000/ai/recs/suggest",
                 json=payload,
@@ -1074,7 +1193,7 @@ async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
             return r.json()
         log.warning("recs.suggest non-200 %s: %s", r.status_code, r.text)
     except Exception as e:
-        log.warning("recs.suggest failed: %s", e)
+        log.exception(f"recs.suggest failed: {e}")
 
     return {}
 
@@ -1220,86 +1339,98 @@ def _inject_thinking_data(
     return response
 
 
-def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut):
+async def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut):
     """
-    Trigger fact extraction in background for any agent response.
+    Run fact extraction in background.
     
-    This is a fire-and-forget operation that won't block the response.
-    Works for ALL code paths (RECS, cart, Q&A, etc.) - no hardcoding.
+    This function IS the background task - no nested task creation.
     
     Args:
         body: The original request
         response: The agent's response
     """
     try:
+        print("=" * 80)
+        print("🔍 [FACT EXTRACTION] FUNCTION CALLED - STARTING EXTRACTION")
+        print("=" * 80)
+        log.info("🔍 [FACT EXTRACTION] Starting background extraction...")
+        print("DEBUG: After log.info")
+        
         # Extract items metadata
         items_meta = []
+        print(f"DEBUG: hasattr(response, 'items') = {hasattr(response, 'items')}")
         if hasattr(response, "items") and response.items:
+            print(f"DEBUG: response.items exists, length = {len(response.items)}")
             try:
                 items_meta = [item.dict() for item in response.items]
-            except Exception:
+                print(f"DEBUG: Successfully converted {len(items_meta)} items to dict")
+            except Exception as e:
+                print(f"DEBUG: Exception in item.dict(): {e}")
                 items_meta = [dict(item) for item in response.items]
+        
+        print(f"DEBUG: About to log items_meta length")
+        try:
+            log.info(f"🎯 [DEBUG] Extracted {len(items_meta)} items from response")
+            print("DEBUG: log.info succeeded")
+        except Exception as e:
+            print(f"DEBUG: log.info FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        if not items_meta:
+            print("DEBUG: No items, returning")
+            log.info("⏭️  No items to extract facts from, skipping")
+            return
+        
+        print(f"DEBUG: Have {len(items_meta)} items, continuing...")
         
         # Extract debug plan
         debug_plan = getattr(response, "debug_plan", {}) or {}
         
-        # Background task
-        async def extract_facts_background():
-            """Run fact extraction in background without blocking response"""
-            try:
-                log.info("🔍 [FACT EXTRACTION] Starting background extraction...")
-                fact_extractor = get_fact_extractor()
-                
-                # Prepare agent metadata (what was shown/done)
-                agent_metadata = {
-                    "items": items_meta,
-                    "intent_kind": debug_plan.get("intent_kind"),
-                    "kind": getattr(response, "kind", "answer"),
-                    "cart_payload": getattr(response, "cart_payload", None),
-                }
-                
-                # DEBUG: Log what we're passing to fact extractor
-                if items_meta:
-                    log.info(f"🔍 [FACT EXTRACTION] First item keys: {list(items_meta[0].keys())}")
-                    log.info(f"🔍 [FACT EXTRACTION] Has material? {'material' in items_meta[0]}")
-                    log.info(f"🔍 [FACT EXTRACTION] Has fabric? {'fabric' in items_meta[0]}")
-                    log.info(f"🔍 [FACT EXTRACTION] Has style? {'style' in items_meta[0]}")
-                
-                log.info(f"🔍 [FACT EXTRACTION] Calling LLM to extract facts...")
-                # Extract facts from this turn
-                facts = await fact_extractor.extract_facts(
-                    user_message=body.message,
-                    assistant_response=getattr(response, "answer", ""),
-                    agent_metadata=agent_metadata
-                )
-                
-                log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
-                log.info(f"🔍 [FACT EXTRACTION] Facts keys: {list(facts.keys())}")
-                
-                # Store facts in database
-                log.info(f"🔍 [FACT STORAGE] Calling storage client...")
-                from app.services.fact_storage import store_facts
-                stored = await store_facts(
-                    clerk_user_id=body.clerkUserId,
-                    guest_session_id=body.guestSessionId,
-                    facts=facts
-                )
-                
-                if stored:
-                    log.info("💾 Facts stored in database successfully")
-                else:
-                    log.warning("⚠️ Facts storage failed (non-critical)")
-                    
-            except Exception as e:
-                log.error(f"❌ Fact extraction/storage failed: {e}", exc_info=True)
+        # Get fact extractor
+        fact_extractor = get_fact_extractor()
         
-        # Fire and forget - don't wait for completion
-        import asyncio
-        log.info("🚀 [FACT EXTRACTION] Launching background task...")
-        asyncio.create_task(extract_facts_background())
+        # Prepare agent metadata (what was shown/done)
+        agent_metadata = {
+            "items": items_meta,
+            "intent_kind": debug_plan.get("intent_kind"),
+            "kind": getattr(response, "kind", "answer"),
+            "cart_payload": getattr(response, "cart_payload", None),
+        }
         
+        # DEBUG: Log what we're passing to fact extractor
+        log.info(f"🔍 [FACT EXTRACTION] First item keys: {list(items_meta[0].keys())}")
+        log.info(f"🔍 [FACT EXTRACTION] Has material? {'material' in items_meta[0]}")
+        log.info(f"🔍 [FACT EXTRACTION] Has fabric? {'fabric' in items_meta[0]}")
+        log.info(f"🔍 [FACT EXTRACTION] Has style? {'style' in items_meta[0]}")
+        
+        log.info(f"🔍 [FACT EXTRACTION] Calling LLM to extract facts...")
+        # Extract facts from this turn
+        facts = await fact_extractor.extract_facts(
+            user_message=body.message,
+            assistant_response=getattr(response, "answer", ""),
+            agent_metadata=agent_metadata
+        )
+        
+        log.info(f"📊 Extracted facts: {len(facts.get('product_focus', {}).get('current_products', []))} products")
+        log.info(f"🔍 [FACT EXTRACTION] Facts keys: {list(facts.keys())}")
+        
+        # Store facts in database
+        log.info(f"🔍 [FACT STORAGE] Calling storage client...")
+        from app.services.fact_storage import store_facts
+        stored = await store_facts(
+            clerk_user_id=body.clerkUserId,
+            guest_session_id=body.guestSessionId,
+            facts=facts
+        )
+        
+        if stored:
+            log.info("💾 Facts stored in database successfully")
+        else:
+            log.warning("⚠️ Facts storage failed (non-critical)")
+            
     except Exception as e:
-        log.error(f"❌ Failed to trigger fact extraction: {e}", exc_info=True)
+        log.error(f"❌ Fact extraction/storage failed: {e}", exc_info=True)
 
 
 @router.post("/ai/agent/query", response_model=AgentOut)
@@ -1330,8 +1461,38 @@ async def agent_query(body: AgentIn) -> AgentOut:
         },
     )
     
-    # Phase 1: Trigger fact extraction (works for ALL code paths)
-    _trigger_fact_extraction_background(body, out)
+    
+    # Phase 1: Trigger fact extraction via Celery (production-grade background processing)
+    try:
+        if hasattr(out, "items") and out.items:
+            # Extract items metadata
+            try:
+                items_meta = [item.dict() for item in out.items]
+            except Exception:
+                items_meta = [dict(item) for item in out.items]
+            
+            if items_meta:
+                # Get debug plan for intent kind
+                debug_plan = getattr(out, "debug_plan", {}) or {}
+                
+                # Enqueue Celery task (non-blocking, instant)
+                from app.tasks.fact_extraction import extract_and_store_facts_task
+                
+                task = extract_and_store_facts_task.delay(
+                    user_message=body.message,
+                    assistant_response=getattr(out, "answer", ""),
+                    items_meta=items_meta,
+                    intent_kind=debug_plan.get("intent_kind", "unknown"),
+                    clerk_user_id=body.clerkUserId or "",
+                    guest_session_id=body.guestSessionId or ""
+                )
+                
+                log.info(f"📤 [CELERY] Fact extraction task {task.id} enqueued for session {body.guestSessionId}")
+            else:
+                log.info("⏭️  No items to extract facts from, skipping")
+    except Exception as e:
+        # Don't fail the request if task enqueue fails
+        log.error(f"❌ Failed to enqueue fact extraction task: {e}", exc_info=True)
     
     # Phase 2: Log conversation history
     try:
@@ -1426,6 +1587,9 @@ async def _agent_query_impl(
     
     session_key = _session_key_from_body(body)
     
+    # Flag to prevent conversation restart loop when falling through
+    skip_conversation_check = False
+    
     # Check if in active conversation
     if session_key and conversation_handler.is_in_conversation(session_key):
         log.info(f"📝 Continuing conversation for session {session_key}")
@@ -1434,92 +1598,27 @@ async def _agent_query_impl(
         result = await conversation_handler.handle_response(session_key, q)
         
         if result.get("trigger_orchestrator"):
-            # Conversation complete! Trigger orchestrator
-            log.info(f"✅ Conversation complete, triggering orchestrator")
+            # Conversation complete! Let the request fall through to main outfit_builder path
+            log.info(f"✅ Conversation complete, falling through to main outfit_builder path")
             
-            # Get orchestrator context
-            orchestrator_query = result.get("orchestrator_query", q)
-            orchestrator_context = result.get("orchestrator_context", {})
-            workflow_name = result.get("orchestrator_workflow", "outfit_builder")
+            # Update the query with orchestrated query (contains all gathered requirements)
+            q = result.get("orchestrator_query", q)
             
-            # Import and trigger orchestrator
-            from app.agents import orchestrator
+            # Update context with gathered requirements
+            gathered_context = result.get("orchestrator_context", {})
             
-            # Add session context
-            orchestrator_context.update({
-                "user_id": body.clerkUserId or body.guestSessionId,
-                "user_size_history": {}
-            })
+            # Store gathered context in body for access by main path
+            # We'll inject this into the main outfit_builder path below
+            body._gathered_context = gathered_context
             
-            # Show thinking
-            emit_event('thinking:step', {
-                'icon': '🎨',
-                'status': 'Building your complete outfit'
-            })
-            thinking_tracker.add_thinking("orchestrator", "Executing multi-agent workflow...")
+            # Force session type to outfit_builder so main path picks it up
+            body.sessionType = "outfit_builder"
             
-            try:
-                orchestrator_result = await orchestrator.execute_workflow(
-                    workflow_name=workflow_name,
-                    query=orchestrator_query,
-                    context=orchestrator_context
-                )
-                
-                # Format as AgentOut (same as before)
-                outfit_items = orchestrator_result.get("outfit_items", [])
-                
-                if not outfit_items:
-                    return AgentOut(
-                        kind="answer",
-                        answer=orchestrator_result.get("reasoning", "I couldn't find items for this outfit."),
-                        items=[],
-                        reasoning=orchestrator_result.get("reasoning", "")
-                    )
-                
-                # Convert to AgentItem format
-                agent_items = []
-                for item in outfit_items:
-                    product = item.get("product", {})
-                    agent_items.append(AgentItem(
-                        slug=product.get("slug", ""),
-                        title=product.get("title", "Unknown"),
-                        url=product.get("url", f"/product/{product.get('slug', '')}"),
-                        score=product.get("score", 0.0),
-                        reason=item.get("reason", ""),
-                        type=product.get("type", ""),
-                        tier=product.get("tier", ""),
-                        color=product.get("color", ""),
-                        size=product.get("size", ""),
-                        variantId=product.get("variantId", ""),
-                    ))
-                
-                # Build answer
-                total = orchestrator_result.get("total", 0)
-                budget_max = orchestrator_context.get("budget_max", 500)
-                within_budget = orchestrator_result.get("within_budget", True)
-                
-                answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
-                
-                if within_budget:
-                    remaining = budget_max - total
-                    answer_parts.append(f"Within your €{budget_max} budget! €{remaining:.2f} remaining.")
-                
-                answer = " ".join(answer_parts)
-                
-                return AgentOut(
-                    kind="recommendations",
-                    answer=answer,
-                    items=agent_items,
-                    reasoning=orchestrator_result.get("reasoning", "")
-                )
-                
-            except Exception as e:
-                log.error(f"Orchestrator failed: {e}")
-                return AgentOut(
-                    kind="answer",
-                    answer="Sorry, I couldn't build your outfit right now. Please try again!",
-                    items=[]
-                )
+            # Set flag to skip conversation flow check below (prevent restart loop)
+            skip_conversation_check = True
+            
+            # Don't return - fall through to main outfit_builder path at line ~1679
+            # This path emits agentic events properly!
         
         else:
             # Continue conversation with next question
@@ -1529,45 +1628,70 @@ async def _agent_query_impl(
                 items=[]
             )
     
-    # Check if should START a conversation
-    flow_name = conversation_handler.should_start_conversation(q)
-    if flow_name:
-        log.info(f"🎯 Detected trigger for flow: {flow_name}")
-        
-        # Start conversation (with one-shot extraction)
-        # matches trigger, so we pass initial message to pre-fill info
-        first_question = await conversation_handler.start_conversation(session_key, flow_name, initial_message=q)
-        
-        return AgentOut(
-            kind="answer",
-            answer=first_question, # "I have everything I need! Ready?" or "What's the occasion?"
-            items=[]
-        )
-    
-    # ===== END CONVERSATION FLOW HANDLER =====
-
     # ===== INTENT-BASED ROUTING (UNIFIED) =====
-    # We use the IntentClassifier as the verified router.
-    # - "outfit_builder" -> Multi-Agent Orchestrator
-    # - "recommendations" -> Legacy RAG (Product Search)
-    # - "cart/checkout" -> Handled by legacy flow below (or locally if needed)
+    # ✨ SMART: Use LLM intent classifier instead of hardcoded patterns
+    # This correctly handles any phrasing: "what should I wear", "style me", "party outfit", etc.
     
     from app.mcp_agents.intent_classifier import get_classifier
     from app.agents import orchestrator
+    from app.services.context_manager import get_conversation_context
 
-    # Classify intent
+    # Get conversation context for intent classification
+    conversation_context = await get_conversation_context(
+        session_id=body.guestSessionId or "",
+        clerk_user_id=body.clerkUserId
+    )
+
+    # Classify intent with context awareness (LLM-based, not hardcoded!)
     classifier = get_classifier()
-    classification = classifier.classify(q)
+    classification = await classifier.classify(q, context=conversation_context)
     intent = classification.get("intent")
     confidence = classification.get("confidence", 0.0)
     
     print(f"DEBUG: 🧭 Routing: intent='{intent}' confidence={confidence}")
+    
+    # ===== CONVERSATION FLOW HANDLER =====
+    # If intent is outfit_builder and NOT already in/completed a flow, start gathering requirements
+    # This uses LLM classification instead of hardcoded patterns!
+    should_skip_flow = skip_conversation_check
+    is_outfit_intent = (intent == "outfit_builder" and confidence > 0.6) or body.sessionType == "outfit_builder"
+    
+    if is_outfit_intent and not should_skip_flow:
+        # Check if we should start conversation flow to gather requirements
+        # Use "outfit_builder_conversation" flow name directly since we know the intent
+        flow_name = "outfit_builder_conversation"
+        if flow_name in conversation_handler.flows:
+            log.info(f"🎯 Intent classified as outfit_builder - Starting conversation flow")
+            
+            # Start conversation (with one-shot extraction from initial message)
+            first_question = await conversation_handler.start_conversation(session_key, flow_name, initial_message=q)
+            
+            return AgentOut(
+                kind="answer",
+                answer=first_question,  # "What's your budget?" or "I have everything I need!"
+                items=[]
+            )
+    # ===== END CONVERSATION FLOW HANDLER =====
 
-    # Explicitly route ONLY complex outfit requests to the Agent Orchestrator
-    if intent == "outfit_builder" and confidence > 0.6:
+    # Route outfit requests to orchestrator (if we get here, conversation is complete or skipped)
+    if is_outfit_intent:
         workflow_name = "outfit_builder"
         print(f"DEBUG: 🎯 Routing to Agent Orchestrator: {workflow_name}")
+        if body.sessionType == "outfit_builder":
+            log.info(f"🎨 Forced outfit builder from sessionType (bypassing intent classification)")
 
+        # Use outfit_builder session type for separate conversation
+        outfit_session_key = get_namespaced_session_id(
+            body.guestSessionId,
+            body.clerkUserId,
+            "outfit_builder"  # Force outfit builder session
+        )
+        
+        # Get base user ID for accessing shared facts/preferences
+        user_id = get_base_user_id(body.guestSessionId, body.clerkUserId)
+        
+        log.info(f"🎨 Outfit builder session: {outfit_session_key}")
+        log.info(f"👤 Base user ID: {user_id}")
         
         # Event: Starting multi-agent workflow
         emit_event('thinking:step', {
@@ -1576,24 +1700,129 @@ async def _agent_query_impl(
         })
         thinking_tracker.add_thinking("orchestrator", "Building complete outfit with specialized agents...")
         
-        # Get user budget from profile or use default
-        budget_max = 500  # Default
-        if body.clerkUserId:
-            ai_profile = await _load_ai_profile(body.clerkUserId)
-            if ai_profile and ai_profile.get('budget_max'):
-                budget_max = float(ai_profile['budget_max'])
+        # Get user budget: 1) From conversation flow, 2) From profile, 3) Default
+        gathered_context = getattr(body, '_gathered_context', {})
+        print(f"DEBUG: 💰 _gathered_context = {gathered_context}")
+        budget_max = gathered_context.get('budget_max')  # User's explicit answer to "What's your budget?"
+        print(f"DEBUG: 💰 budget_max from context = {budget_max}")
         
-        # Execute multi-agent workflow
+        if not budget_max:
+            # Fallback to user profile
+            budget_max = 500  # Default
+            if body.clerkUserId:
+                ai_profile = await _load_ai_profile(body.clerkUserId)
+                if ai_profile and ai_profile.get('budget_max'):
+                    budget_max = float(ai_profile['budget_max'])
+        
+        log.info(f"💰 Using budget: €{budget_max} (from {'conversation' if gathered_context.get('budget_max') else 'profile/default'})")
+        
+        # ✨ Stream budget to frontend so UI displays correct amount
+        emit_event('agentic:budget_set', {
+            'budget_max': float(budget_max),
+            'source': 'conversation' if gathered_context.get('budget_max') else 'default'
+        })
+        
+        # Execute multi-agent workflow with streaming
         try:
-            result = await orchestrator.execute_workflow(
+            # Enable streaming for real-time progress
+            log.info(f"🚀 Starting orchestrator execution with streaming...")
+            result = None
+            update_count = 0
+            
+            log.info(f"🔄 About to enter async for loop...")
+            async for update in orchestrator.execute_workflow(
                 workflow_name=workflow_name,
                 query=q,
                 context={
+                    "session_id": outfit_session_key,  # Namespaced session for conversation
+                    "user_id": user_id,  # Base user ID for facts (shared across sessions)
                     "budget_max": budget_max,
-                    "user_id": body.clerkUserId or body.guestSessionId,
                     "user_size_history": {}  # Could load from profile
-                }
-            )
+                },
+                stream=True  # Enable streaming!
+            ):
+                update_count += 1
+                log.info(f"📦 Orchestrator update #{update_count}: type={update.get('type')}")
+                log.info(f"📦 Update content: {update}")
+                # Emit progress updates to frontend
+                if update.get("type") == "progress":
+                    agents = update.get("agents", [])
+                    status = update.get("status", "Processing...")
+                    emit_event('thinking:step', {
+                        'icon': '⚙️',
+                        'status': status
+                    })
+                    log.info(f"🔄 Progress: {status}")
+                
+                elif update.get("type") == "step_complete":
+                    agents = update.get("agents", [])
+                    emit_event('thinking:step', {
+                        'icon': '✅',
+                        'status': f"Completed {', '.join(agents)}"
+                    })
+                
+                elif update.get("type") == "complete":
+                    result = update.get("result")
+                    log.info(f"✅ Workflow complete: {update.get('duration_ms', 0):.0f}ms")
+                
+                elif update.get("type") == "error":
+                    result = update.get("result")
+                    log.error(f"❌ Workflow error: {update.get('error')}")
+                
+                # ✨ PHASE 6: Handle agentic exploration events (live product discovery)
+                elif update.get("type") == "agentic_event":
+                    event_type = update.get("event_type")
+                    # DEBUG: Write to file to verify events reach this point
+                    with open("/tmp/agentic_debug.log", "a") as f:
+                        f.write(f"AGENTIC EVENT: {event_type} - {update}\n")
+                    
+                    if event_type == "category_start":
+                        emit_event('agentic:category_start', {
+                            'category': update.get('category'),
+                            'index': update.get('index'),
+                            'total_categories': update.get('total_categories'),
+                            'status': update.get('status')
+                        })
+                        log.info(f"🔍 Agentic: Starting {update.get('category')}...")
+                    
+                    elif event_type == "category_candidates":
+                        emit_event('agentic:category_candidates', {
+                            'category': update.get('category'),
+                            'candidates': update.get('candidates', []),
+                            'total_found': update.get('total_found'),
+                            'status': update.get('status')
+                        })
+                        log.info(f"📦 Agentic: Found {update.get('total_found')} candidates for {update.get('category')}")
+                    
+                    elif event_type == "item_selected":
+                        emit_event('agentic:item_selected', {
+                            'category': update.get('category'),
+                            'selected_item': update.get('selected_item'),
+                            'reason': update.get('reason'),
+                            'remaining_budget': update.get('remaining_budget'),
+                            'status': update.get('status')
+                        })
+                        log.info(f"✅ Agentic: Selected {update.get('selected_item', {}).get('title')} for {update.get('category')}")
+
+                    elif event_type == "category_vetting":
+                        emit_event('agentic:category_vetting', {
+                            'category': update.get('category'),
+                            'slug': update.get('slug'),
+                            'status': update.get('status'),
+                            'message': update.get('message'),
+                            'reason': update.get('reason')
+                        })
+            
+            log.info(f"✅ Async for loop completed. Total updates: {update_count}")
+            log.info(f"🎯 Final result: {result}")
+            
+            # If no result (shouldn't happen), use fallback
+            if not result:
+                return AgentOut(
+                    kind="answer",
+                    answer="Sorry, I couldn't build your outfit right now. Please try again!",
+                    items=[]
+                )
             
             # Track agent executions
             for agent_name, timing_ms in result.get("agent_timings", {}).items():
@@ -1617,6 +1846,9 @@ async def _agent_query_impl(
             agent_items = []
             for item in outfit_items:
                 product = item.get("product", {})
+                # DEBUG: Log product dict to diagnose missing price/imageUrl
+                print(f"DEBUG: outfit product keys: {list(product.keys())}")
+                print(f"DEBUG: product price={product.get('price')}, imageUrl={product.get('imageUrl')}")
                 agent_items.append(AgentItem(
                     slug=product.get("slug", ""),
                     title=product.get("title", "Unknown"),
@@ -1628,6 +1860,9 @@ async def _agent_query_impl(
                     color=product.get("color", ""),
                     size=product.get("size", ""),
                     variantId=product.get("variantId", ""),
+                    # ✨ PHASE 6: Add price and imageUrl for proper outfit display
+                    price=product.get("price"),
+                    imageUrl=product.get("imageUrl"),
                 ))
             
             # Build outfit description
@@ -1642,9 +1877,11 @@ async def _agent_query_impl(
             
             if within_budget:
                 remaining = budget_max - total
-                answer_parts.append(f"Within your €{budget_max} budget! €{remaining:.2f} remaining.")
+                # Only mention budget if it's tight or explicitly relevant
+                if remaining < 100:
+                    answer_parts.append(f"(€{remaining:.2f} left of budget)")
             else:
-                answer_parts.append(f"Slightly over budget by €{total - budget_max:.2f}")
+                answer_parts.append(f"Slightly over your €{budget_max} limit.")
             
             answer = " ".join(answer_parts)
             
@@ -1668,11 +1905,17 @@ async def _agent_query_impl(
             )
             
         except Exception as e:
-            log.error(f"Multi-agent orchestrator failed: {e}")
+            import traceback
+            log.error(f"❌ Multi-agent orchestrator failed: {e}")
+            log.error(f"Traceback: {traceback.format_exc()}")
             # Fall through to normal agent flow
             pass
     
     # ===== END MULTI-AGENT ORCHESTRATOR CHECK =====
+
+
+    # ===== NOTE: Conversation flow now handled BEFORE orchestrator (lines ~1632-1648) =====
+
 
     ai_profile: Optional[Dict[str, Any]] = None
     if body.clerkUserId:
@@ -1703,13 +1946,19 @@ async def _agent_query_impl(
 
     # === INTELLIGENT LLM-BASED INTENT CLASSIFICATION ===
     # Use 93% accurate semantic classifier instead of regex/rules
+    # Import context manager
+    from app.services.context_manager import get_conversation_context
+    
+    # Get conversation context (products shown, etc.)
+    conversation_context = await get_conversation_context(
+        session_id=body.guestSessionId or "",
+        clerk_user_id=body.clerkUserId
+    )
+    
     intelligent_classifier = get_classifier()
-    classification_result = intelligent_classifier.classify(
+    classification_result = await intelligent_classifier.classify(
         query=q,
-        context={
-            "user_id": body.clerkUserId or body.guestSessionId,
-            "cart_id": body.cartId,
-        }
+        context=conversation_context  # Pass products shown, not just user_id
     )
     
     semantic_intent = classification_result["intent"]
@@ -1974,12 +2223,35 @@ async def _agent_query_impl(
         debug_plan["last_recs_count"] = len(last_recs)
 
         if last_recs:
-            indices = await _select_from_last_recs_via_llm(
-                message=q,
-                last_items=last_recs,
-                prev_user_message=prev_user_message,
-            )
-            debug_plan["cart_source"] = "last_recs"
+            # NEW: Context-aware cart add - check if user references a recently discussed product
+            # When user says "add this to cart" after discussing "the second one", resolve it
+            vague_reference = re.search(r'\b(this|it|that|the one)\b', q.lower())
+            context_idx = None
+            
+            if vague_reference:
+                # Fetch conversation history to resolve vague references
+                cart_history = await _fetch_history_for_llm(
+                    body.clerkUserId, body.guestSessionId, limit=10
+                )
+                if cart_history:
+                    context_idx = _get_recently_discussed_product_index(cart_history, last_recs)
+                    if context_idx is not None:
+                        print(f"🛒 [CONTEXT_CART] Resolved '{vague_reference.group(1)}' to product index {context_idx}")
+                        debug_plan["cart_context_resolved"] = True
+                        debug_plan["cart_context_idx"] = context_idx
+            
+            # Use context-resolved index if available, otherwise fall back to LLM selection
+            if context_idx is not None:
+                indices = [context_idx]
+                debug_plan["cart_source"] = "context_history"
+            else:
+                indices = await _select_from_last_recs_via_llm(
+                    message=q,
+                    last_items=last_recs,
+                    prev_user_message=prev_user_message,
+                )
+                debug_plan["cart_source"] = "last_recs"
+            
             debug_plan["cart_selected_indices"] = indices
             debug_plan["cart_prev_user_message"] = prev_user_message
 
@@ -2159,9 +2431,8 @@ async def _agent_query_impl(
             kind=api_response_kind,  # Use mapped API kind for Pydantic validation
             answer=(
                 "I'm not sure which item you want me to add. "
-                "Please either click a specific product or say something like "
-                "“Add the black hoodie in size M to my cart” or "
-                "“Add the second hoodie to my cart.”"
+                "Please either click a specific product or tell me which one "
+                "(for example: 'add the second one' or 'add the boots')."
             ),
             citations=[],
             items=[],

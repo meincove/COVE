@@ -114,6 +114,7 @@ class RecItem(BaseModel):
     size: Optional[str] = None
     variantId: Optional[str] = None
     price: Optional[float] = None
+    imageUrl: Optional[str] = None  # ✨ PHASE 6: Product image
     
     # Rich product details for fact extraction (all optional)
     material: Optional[str] = None
@@ -292,7 +293,8 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 if val:
                     # Check if metadata has the corresponding field
                     meta_val = m.get(meta_key) or ""
-                    if str(meta_val).lower().strip() != str(val).lower().strip():
+                    # Allow partial match (e.g. "grey" matching "grey heather")
+                    if str(val).lower().strip() not in str(meta_val).lower().strip():
                         return False
 
             # size (require that size exists and is in stock, if numeric)
@@ -437,6 +439,15 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             except (ValueError, TypeError):
                 pass
 
+        # ✨ PHASE 6: Extract image URL from metadata
+        image_url = meta.get("image")  # From backend_loader
+        if not image_url:
+            # Fallback: check images array (flat JSON)
+            images = meta.get("images", [])
+            if images and isinstance(images, list) and len(images) > 0:
+                first_img = images[0]
+                image_url = first_img if isinstance(first_img, str) else first_img.get("url")
+        
         item = RecItem(
             title=title,
             url=url,
@@ -449,6 +460,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             size=filters.size,
             variantId=variant_id,
             price=price_val,
+            imageUrl=image_url,  # ✨ PHASE 6: Product image
             # Rich product details for fact extraction
             material=meta.get("material"),
             fit=meta.get("fit"),

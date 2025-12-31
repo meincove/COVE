@@ -58,6 +58,23 @@
             ],
             "default_style": "athletic",
             "description": "Athletic or fitness activity"
+        },
+        "outdoor": {
+            "keywords": [
+                "outdoor",
+                "hiking",
+                "mountains",
+                "camping",
+                "beach",
+                "park",
+                "nature",
+                "trail",
+                "adventure",
+                "travel",
+                "vacation"
+            ],
+            "default_style": "relaxed",
+            "description": "Outdoor adventures and activities"
         }
     },
     "styles": {
@@ -117,14 +134,15 @@
         "date": "Stylish and attractive {category}",
         "casual": "Comfortable and relaxed {category}",
         "formal": "Elegant and refined {category}",
-        "gym": "Comfortable and functional {category}"
+        "gym": "Comfortable and functional {category}",
+        "outdoor": "Durable and comfortable {category} for your adventure"
     },
     "default_occasion": "casual",
     "default_style": "casual",
     "default_budget": 500,
     "default_categories": [
-        "top",
-        "bottom"
+        "sweatshirt",
+        "sweater"
     ],
     "category_mapping": {
         "top": [

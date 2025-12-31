@@ -85,10 +85,13 @@ async function fetchCatalogProductForItem(
 ): Promise<CatalogProduct | null> {
   const params = new URLSearchParams();
 
+  // Always pass variantId if available
   if (item.variantId) {
     params.set("variantId", item.variantId);
   }
-  if (!item.variantId && item.slug) {
+
+  // Always pass slug if available (needed for the backend URL)
+  if (item.slug) {
     params.set("slug", item.slug);
   }
 

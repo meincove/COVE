@@ -1,0 +1,129 @@
+2025-12-30 02:13:34,357 [INFO] cove.conversation: 🧠 LLM Extracting slots from: 'Casual weekend outfit under €200'
+[92m02:13:34 - LiteLLM:INFO[0m: utils.py:3421 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+2025-12-30 02:13:34,363 [INFO] LiteLLM: 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+2025-12-30 02:13:35,307 [INFO] cove.conversation: 🚀 One-Shot Extraction from 'Casual weekend outfit under €200': {'occasion': 'Casual weekend', 'budget': 200}
+2025-12-30 02:13:35,307 [INFO] cove.conversation: ⏭️ Skipping step 'occasion' - already answered via one-shot
+2025-12-30 02:13:35,307 [INFO] cove.conversation: ⏭️ Skipping step 'budget' - already answered via one-shot
+2025-12-30 02:13:35,308 [INFO] cove.conversation: 🧠 LLM Extracting slots from: 'yes'
+[92m02:13:35 - LiteLLM:INFO[0m: utils.py:3421 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+2025-12-30 02:13:35,308 [INFO] LiteLLM: 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+2025-12-30 02:13:36,541 [INFO] cove.conversation: 🧠 extracted slots from 'yes': {}
+2025-12-30 02:13:36,541 [INFO] cove.conversation: ⏭️ Skipping step 'style' - already answered: yes
+2025-12-30 02:13:36,541 [INFO] cove.conversation: 💰 Extracted budget from answers: 200 -> 200.0
+2025-12-30 02:13:36,542 [INFO] cove.agents.orchestrator: 🚀 Starting workflow: Outfit Builder
+2025-12-30 02:13:36,542 [INFO] cove.agents.orchestrator:    Query: build an outfit for Casual weekend, style yes, budget 200.0
+2025-12-30 02:13:36,542 [INFO] cove.agents.orchestrator:    Budget: €200.0
+2025-12-30 02:13:36,542 [INFO] cove.agents.orchestrator:    Streaming: True
+2025-12-30 02:13:36,542 [INFO] cove.agents.orchestrator:    Execution plan: 2 groups
+2025-12-30 02:13:36,542 [INFO] cove.agents.orchestrator:    Group 1/2: ['stylist']
+2025-12-30 02:13:36,542 [INFO] cove.agents.base: Initialized stylist agent
+2025-12-30 02:13:36,542 [INFO] cove.agents.stylist: Building outfit for: casual (relaxed style), budget: €200.0
+2025-12-30 02:13:36,771 [INFO] cove.agent.intent: Loaded intent_config.json from /Users/ssg/Desktop/COVE/data/intent_config.json with intents=['cart_add', 'checkout_start', 'order_query', 'order_email', 'size_fit', 'policy', 'history_meta', 'product_question', 'lookup_product', 'discover', 'generic', 'greeting', 'small_talk']
+[92m02:13:36 - LiteLLM:INFO[0m: utils.py:3421 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+2025-12-30 02:13:36,806 [INFO] LiteLLM: 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+2025-12-30 02:13:40,517 [INFO] cove.agents.stylist: 📋 LLM defined structure: ['Tops', 'Bottoms', 'Shoes', 'Accessories']
+2025-12-30 02:13:40,518 [INFO] cove.agents.stylist: 🤖 Stylist Plan: For a casual weekend outfit, a streetwear style is perfect as it combines comfort with a trendy look. The outfit will consist of a relaxed top, comfortable bottoms, and stylish sneakers, which are essential for a laid-back yet fashionable appearance.
+2025-12-30 02:13:40,518 [INFO] cove.agents.stylist:    🔍 LLM Query for Tops: 'hoodie or sweatshirt under €50'
+2025-12-30 02:13:46,245 [INFO] cove.agents.stylist:    Budget for Tops: €120.00 (per-cat: €50.00, remaining: €200.00)
+2025-12-30 02:13:46,648 [WARNING] cove.agents.stylist: No affordable Tops within €200.0
+2025-12-30 02:13:46,648 [INFO] cove.agents.stylist:    🔍 LLM Query for Bottoms: 'pants or shorts under €70'
+2025-12-30 02:13:49,661 [WARNING] cove.agents.stylist: No products found for Bottoms
+2025-12-30 02:13:49,661 [INFO] cove.agents.stylist:    🔍 LLM Query for Shoes: 'sneakers under €80'
+2025-12-30 02:13:52,512 [INFO] cove.agents.stylist:    Budget for Shoes: €120.00 (per-cat: €100.00, remaining: €200.00)
+2025-12-30 02:13:52,913 [INFO] cove.agents.stylist: Selected way-sell-light (€96.71) for Shoes, remaining budget: €103.29
+2025-12-30 02:13:52,913 [INFO] cove.agents.stylist:    🔍 LLM Query for Accessories: 'casual accessories under €30'
+2025-12-30 02:13:56,963 [WARNING] cove.agents.stylist: No products found for Accessories
+2025-12-30 02:13:56,964 [INFO] cove.agents.orchestrator:    ✓ stylist: 20422ms
+2025-12-30 02:13:56,964 [INFO] cove.agents.orchestrator:    Group 2/2: ['fit', 'budget']
+2025-12-30 02:13:56,964 [INFO] cove.agents.orchestrator:    ⚡ Executing 2 agents in parallel
+2025-12-30 02:13:56,964 [INFO] cove.agents.base: Initialized fit agent
+2025-12-30 02:13:56,965 [INFO] cove.agents.fit: Analyzing sizes for 1 items (preference: regular)
+2025-12-30 02:13:56,965 [INFO] cove.agents.base: ✓ fit: Analyzed 1 items, recommended sizes for 1. 1 warnings (confidence: 70%, tools: 1)
+2025-12-30 02:13:56,965 [INFO] cove.agents.base: Initialized budget agent
+2025-12-30 02:13:56,965 [INFO] cove.agents.budget: Optimizing 1 items within €200.0 budget (maximize_value)
+2025-12-30 02:13:56,965 [INFO] cove.agents.base: ✓ budget: Applied FREESHIP50: saved €5.00. Within budget (€108.29 remaining) (confidence: 70%, tools: 2)
+2025-12-30 02:13:56,965 [INFO] cove.agents.orchestrator:    ✓ fit: 1ms
+2025-12-30 02:13:56,965 [INFO] cove.agents.orchestrator:    ✓ budget: 1ms
+
+
+🕵️‍♀️ DEEP DEBUG: 'Casual weekend outfit under €200' 🕵️‍♀️
+
+--- 1. CONVERSATION START ---
+Bot Question: Any style preferences? (optional)
+
+(e.g., "smart casual", "streetwear", "minimalist")
+Conversation State (extracted): {
+  "occasion": "Casual weekend",
+  "budget": 200
+}
+
+--- 2. USER CONFIRMATION ---
+Orchestrator Trigger: True
+Orchestrator Query: build an outfit for Casual weekend, style yes, budget 200.0
+Orchestrator Context: {
+  "budget_max": 200.0,
+  "occasion": "Casual weekend",
+  "style": "yes"
+}
+
+--- 3. EXECUTING WORKFLOW ---
+
+[PROGRESS] Group 1 - Agents: ['stylist']
+   [STYLIST EVENT] Tops: Searching for Tops... (None) - None
+   [STYLIST EVENT] Tops: Found 1 options for Tops (None) - None
+   [STYLIST EVENT] Tops: analyzing (nice-guy-large) - Checking UrbanPulse Pants...
+   [STYLIST EVENT] Tops: rejected (nice-guy-large) - Not a Tops (Found: UrbanPulse Pants)
+   [STYLIST EVENT] Bottoms: Searching for Bottoms... (None) - None
+   [STYLIST EVENT] Bottoms: No items found for Bottoms (None) - None
+   [STYLIST EVENT] Shoes: Searching for Shoes... (None) - None
+   [STYLIST EVENT] Shoes: Found 3 options for Shoes (None) - None
+   [STYLIST EVENT] Shoes: analyzing (way-sell-light) - Checking LuxeLine Tee...
+   [STYLIST EVENT] Shoes: accepted (way-sell-light) - Matches budget and style
+   [STYLIST EVENT] Shoes: Selected LuxeLine Tee for Shoes (None) - Matches Streetwear style
+   [STYLIST EVENT] Accessories: Searching for Accessories... (None) - None
+   [STYLIST EVENT] Accessories: No items found for Accessories (None) - None
+[STEP COMPLETE] Completed stylist
+
+[PROGRESS] Group 2 - Agents: ['fit', 'budget']
+[STEP COMPLETE] Completed fit, budget
+
+--- 4. FINAL RESULT ---
+Total: €91.71
+Within Budget: True
+
+[OUTFIT ITEMS DEBUG]
+ - Category: Shoes
+   Title: LuxeLine Tee
+   Price (dict): 96.71
+   PriceNumeric (dict): 96.71
+   Valid Relevance? (Manual Check): YES
+2025-12-30 02:13:57,071 [ERROR] asyncio: Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x1108f98a0>
+transport: <_SelectorSocketTransport closing fd=9>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 918, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/sslproto.py", line 684, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 924, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 719, in _fatal_error
+    self._force_close(exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 731, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 745, in call_soon
+    self._check_closed()
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 510, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed

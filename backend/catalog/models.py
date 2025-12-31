@@ -41,6 +41,18 @@ class ProductMasterGroup(models.Model):
     fit = models.CharField(max_length=50)
     description = models.TextField()
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Outfit Builder Enhancement Fields
+    style_tags = models.JSONField(default=list, help_text="Style tags for outfit matching (e.g., ['minimalist', 'streetwear'])")
+    pattern = models.CharField(max_length=50, default='solid', help_text="Pattern type: solid, striped, graphic, etc.")
+    season = models.JSONField(default=list, help_text="Suitable seasons: ['spring', 'summer', 'fall', 'winter']")
+    use_cases = models.JSONField(default=list, help_text="Use cases: ['casual', 'work', 'outdoor', etc.]")
+    formality_score = models.IntegerField(default=5, help_text="Formality level 1-10 (1=gym, 10=black tie)")
+    versatility = models.IntegerField(default=5, help_text="Versatility score 1-10 (how many outfits can use this?)")
+    statement_piece = models.BooleanField(default=False, help_text="Is this a focal/statement piece?")
+    color_family = models.CharField(max_length=20, default='neutral', help_text="Color family: neutral, warm, cool, bold")
+    in_stock = models.BooleanField(default=True, help_text="Product availability")
+    featured = models.BooleanField(default=False, help_text="Featured product for promotions")
 
     class Meta:
         verbose_name = "Product Master Group"

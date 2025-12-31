@@ -157,9 +157,11 @@ def pick_primary_color(meta: dict, desired_color: Optional[str] = None) -> Optio
     """
     Pick a representative color name.
     """
-    # Flat variant
+    # Flat variant - check both 'colorName' and 'color'
     if meta.get("colorName"):
         return meta["colorName"]
+    if meta.get("color"):
+        return meta["color"]
         
     # Nested
     colors = meta.get("colors") or []
