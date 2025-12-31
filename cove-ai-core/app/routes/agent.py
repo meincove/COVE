@@ -48,6 +48,12 @@ from app.core.performance_monitor import get_monitor
 # Phase 1: Context management - Fact extraction
 from app.services.fact_extractor import get_fact_extractor
 
+from app.services.session_state import (
+    SessionStateManager,
+    get_namespaced_session_id,
+    get_base_user_id,
+)
+
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
 log = logging.getLogger("cove.agent")
@@ -68,51 +74,6 @@ MAX_HISTORY_SUMMARY_CHARS = int(os.getenv("AGENT_MAX_HISTORY_SUMMARY_CHARS", "60
 
 # ===== SESSION NAMESPACING UTILITIES =====
 # Support for separate chat sessions (main, outfit_builder, cart, etc.)
-
-def get_namespaced_session_id(
-    guest_id: Optional[str],
-    clerk_id: Optional[str],
-    session_type: str = "main"
-) -> str:
-    """
-    Create namespaced session ID for separate chat sessions.
-    
-    Examples:
-        - guest_abc123:main
-        - guest_abc123:outfit_builder
-        - clerk_user_xyz:outfit_builder
-    
-    Args:
-        guest_id: Guest session ID
-        clerk_id: Clerk user ID
-        session_type: Type of session ("main", "outfit_builder", "cart")
-    
-    Returns:
-        Namespaced session ID
-    """
-    base_id = clerk_id or guest_id or "anonymous"
-    return f"{base_id}:{session_type}"
-
-
-def get_base_user_id(
-    guest_id: Optional[str],
-    clerk_id: Optional[str]
-) -> str:
-    """
-    Get base user ID without session namespace.
-    
-    Used for accessing user-level data (facts, preferences, history)
-    that should be shared across all sessions.
-    
-    Args:
-        guest_id: Guest session ID
-        clerk_id: Clerk user ID
-    
-    Returns:
-        Base user ID
-    """
-    return clerk_id or guest_id or "anonymous"
-
 
 class AgentIn(BaseModel):
     message: str
@@ -521,147 +482,13 @@ def _apply_profile_defaults_to_filters(
     return merged
 
 
-# ---------- In-memory session caches (single-process only) ----------
-
-_SESSION_RECS: Dict[str, List[Dict[str, Any]]] = {}
-_SESSION_LAST_USER_MSG: Dict[str, str] = {}
-# Week 4: Track when we asked user for size
-_SESSION_AWAITING_SIZE: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, ...}}
-_SESSION_AWAITING_COLOR: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, available_colors, ...}}
-_SESSION_AWAITING_QUANTITY: Dict[str, Dict[str, Any]] = {}  # {session_key: {product, variantId, color, size, ...}}
-# Phase 1: Track what products user has already seen (for "show more" queries)
-_SESSION_SHOWN_SLUGS: Dict[str, set] = {}  # {session_key: {slug1, slug2, ...}}
-
-
-def _session_key_from_body(body: AgentIn) -> Optional[str]:
-    """
-    Extract session key from request body with session namespacing support.
-    
-    Returns namespaced session ID (e.g., "guest_abc:main", "guest_abc:outfit_builder")
-    """
-    return get_namespaced_session_id(
-        body.guestSessionId,
-        body.clerkUserId,
-        body.sessionType
-    )
-
-
-def _store_session_recs(body: AgentIn, items: List[AgentItem]) -> None:
-    key = _session_key_from_body(body)
-    if not key:
-        return
-    _SESSION_RECS[key] = [it.dict() for it in items]
-
-
-def _get_session_recs(body: AgentIn) -> List[Dict[str, Any]]:
-    key = _session_key_from_body(body)
-    if not key:
-        return []
-    return _SESSION_RECS.get(key, [])
-
-
-def _set_awaiting_size(body: AgentIn, product_info: Dict[str, Any]) -> None:
-    """Store that we're waiting for size input from this session."""
-    key = _session_key_from_body(body)
-    if key:
-        _SESSION_AWAITING_SIZE[key] = product_info
-
-
-def _get_awaiting_size(body: AgentIn) -> Optional[Dict[str, Any]]:
-    """Get product info if we're waiting for size from this session."""
-    key = _session_key_from_body(body)
-    if not key:
-        return None
-    return _SESSION_AWAITING_SIZE.get(key)
-
-
-def _clear_awaiting_size(body: AgentIn) -> None:
-    """Clear size-awaiting state."""
-    key = _session_key_from_body(body)
-    if key and key in _SESSION_AWAITING_SIZE:
-        del _SESSION_AWAITING_SIZE[key]
-
-
-def _set_awaiting_color(body: AgentIn, product_info: Dict[str, Any]) -> None:
-    """Store that we're waiting for color input from this session."""
-    key = _session_key_from_body(body)
-    if key:
-        _SESSION_AWAITING_COLOR[key] = product_info
-
-
-def _get_awaiting_color(body: AgentIn) -> Optional[Dict[str, Any]]:
-    """Get product info if we're waiting for color from this session."""
-    key = _session_key_from_body(body)
-    if not key:
-        return None
-    return _SESSION_AWAITING_COLOR.get(key)
-
-
-def _clear_awaiting_color(body: AgentIn) -> None:
-    """Clear color-awaiting state."""
-    key = _session_key_from_body(body)
-    if key and key in _SESSION_AWAITING_COLOR:
-        del _SESSION_AWAITING_COLOR[key]
-
-
-def _set_awaiting_quantity(body: AgentIn, product_info: Dict[str, Any]) -> None:
-    """Store that we're waiting for quantity input from this session."""
-    key = _session_key_from_body(body)
-    if key:
-        _SESSION_AWAITING_QUANTITY[key] = product_info
-
-
-def _get_awaiting_quantity(body: AgentIn) -> Optional[Dict[str, Any]]:
-    """Get product info if we're waiting for quantity from this session."""
-    key = _session_key_from_body(body)
-    if not key:
-        return None
-    return _SESSION_AWAITING_QUANTITY.get(key)
-
-
-def _clear_awaiting_quantity(body: AgentIn) -> None:
-    """Clear quantity-awaiting state."""
-    key = _session_key_from_body(body)
-    if key and key in _SESSION_AWAITING_QUANTITY:
-        del _SESSION_AWAITING_QUANTITY[key]
-
-
-def _update_last_user_message(body: AgentIn) -> None:
-    key = _session_key_from_body(body)
-    if not key:
-        return
-    _SESSION_LAST_USER_MSG[key] = body.message
-
-
-def _get_last_user_message(body: AgentIn) -> Optional[str]:
-    key = _session_key_from_body(body)
-    if not key:
-        return None
-    return _SESSION_LAST_USER_MSG.get(key)
-
+from app.services.session_state import (
+    SessionStateManager,
+    get_namespaced_session_id
+)
 
 # Phase 1: Show More - Track shown items
-def _get_shown_slugs(body: AgentIn) -> set:
-    """Get set of slugs this user has already seen in this session."""
-    key = _session_key_from_body(body)
-    if not key:
-        return set()
-    return _SESSION_SHOWN_SLUGS.get(key, set())
-
-
-def _mark_slugs_as_shown(body: AgentIn, slugs: List[str]) -> None:
-    """Mark these slugs as shown to prevent showing again on 'show more'."""
-    key = _session_key_from_body(body)
-    if not key:
-        return
-    if key not in _SESSION_SHOWN_SLUGS:
-        _SESSION_SHOWN_SLUGS[key] = set()
-    _SESSION_SHOWN_SLUGS[key].update(slugs)
-
-
-def _filter_out_shown_items(items: List[AgentItem], shown_slugs: set) -> List[AgentItem]:
-    """Remove items user has already seen."""
-    return [item for item in items if item.slug not in shown_slugs]
+# Delegated to SessionStateManager
 
 
 def _get_available_colors(slug: str) -> List[str]:
@@ -1529,8 +1356,8 @@ async def _agent_query_impl(
     tool_tracker: ToolTracker
 ) -> AgentOut:
     q = body.message
-    prev_user_message = _get_last_user_message(body)
-    _update_last_user_message(body)
+    prev_user_message = SessionStateManager.get_last_user_message(body)
+    SessionStateManager.update_last_user_message(body)
     
     # Trackers are now passed as parameters (cleaner than re-creating)
     
@@ -1576,7 +1403,7 @@ async def _agent_query_impl(
     from app.services.user_preference_manager import get_preference_manager
     from app.core.conversation_flow import conversation_handler
     
-    session_key = _session_key_from_body(body)
+    session_key = SessionStateManager.get_session_key(body)
     
     # Flag to prevent conversation restart loop when falling through
     skip_conversation_check = False
@@ -2015,7 +1842,7 @@ async def _agent_query_impl(
     }
     
     # Week 4: Check if we were awaiting size input
-    awaiting = _get_awaiting_size(body)
+    awaiting = SessionStateManager.get_awaiting_size(body)
     if awaiting:
         # Check if this message looks like JUST a size answer (e.g., "M", "in M", "size L")
         # Simple pattern: message contains  S/M/L/XL but not other product keywords
@@ -2023,7 +1850,7 @@ async def _agent_query_impl(
         
         # Only clear awaiting if this is clearly a NEW product search, not a size response
         if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_size_only:
-            _clear_awaiting_size(body)
+            SessionStateManager.clear_awaiting_size(body)
             awaiting = None  # Treat as if no awaiting state
         
     if awaiting:
@@ -2042,7 +1869,7 @@ async def _agent_query_impl(
         
         if size:
             # Clear the awaiting state
-            _clear_awaiting_size(body)
+            SessionStateManager.clear_awaiting_size(body)
             
             # Recreate cart_proposal with the size
             product = awaiting["product"]
@@ -2055,7 +1882,7 @@ async def _agent_query_impl(
             product_with_size = product.copy()
             product_with_size["size"] = size
             
-            _set_awaiting_quantity(body, {"product": product_with_size})
+            SessionStateManager.set_awaiting_quantity(body, {"product": product_with_size})
             
             product_desc = f"{nice_color} {nice_type}".strip() if nice_color else nice_type
             
@@ -2070,14 +1897,14 @@ async def _agent_query_impl(
         # If has_cart_intent, just fall through - don't clear state, let normal flow handle it
 
     # Check if we were awaiting quantity input
-    awaiting_qty = _get_awaiting_quantity(body)
+    awaiting_qty = SessionStateManager.get_awaiting_quantity(body)
     if awaiting_qty:
         # Check if this looks like a quantity response (number)
         looks_like_qty_only = len(q.strip()) < 10  # Very short response
         
         # Only clear if clearly a new search
         if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_qty_only:
-            _clear_awaiting_quantity(body)
+            SessionStateManager.clear_awaiting_quantity(body)
             awaiting_qty = None
     
     if awaiting_qty:
@@ -2093,7 +1920,7 @@ async def _agent_query_impl(
         
         if quantity:
             # Clear the awaiting state
-            _clear_awaiting_quantity(body)
+            SessionStateManager.clear_awaiting_quantity(body)
             
             # Create final cart proposal with all info
             product = awaiting_qty["product"]
@@ -2136,14 +1963,14 @@ async def _agent_query_impl(
             )
 
     # Check if we were awaiting color input
-    awaiting_color = _get_awaiting_color(body)
+    awaiting_color = SessionStateManager.get_awaiting_color(body)
     if awaiting_color:
         # Check if this message looks like JUST a color response (e.g., "navy", "black", "in navy")
         looks_like_color_only = len(q.strip()) < 30  # Short response
         
         # Only clear awaiting if this is clearly a NEW product search
         if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_color_only:
-            _clear_awaiting_color(body)
+            SessionStateManager.clear_awaiting_color(body)
             awaiting_color = None
         
     if awaiting_color:
@@ -2169,7 +1996,7 @@ async def _agent_query_impl(
         
         if color:
             # Clear the awaiting state
-            _clear_awaiting_color(body)
+            SessionStateManager.clear_awaiting_color(body)
             
             # Now check if we need size
             product = awaiting_color["product"]
@@ -2180,7 +2007,7 @@ async def _agent_query_impl(
             top_dict["color"] = color
             
             # Ask for size if not provided
-            _set_awaiting_size(body, {"product": top_dict})
+            SessionStateManager.set_awaiting_size(body, {"product": top_dict})
             
             nice_type = (top.type or "").lower()
             available_sizes = ["S", "M", "L", "XL"]  # Could be dynamic from product data
@@ -2210,7 +2037,7 @@ async def _agent_query_impl(
     # --- Branch 1: cart_proposal -------------------------------------------------
     if wants_cart:
         log.info(f"🛒 [DEBUG] CART BRANCH TRIGGERED: wants_cart={wants_cart}, intent_kind={intent_kind}")
-        last_recs = _get_session_recs(body)
+        last_recs = SessionStateManager.get_session_recs(body)
         debug_plan["last_recs_count"] = len(last_recs)
 
         if last_recs:
@@ -2264,7 +2091,7 @@ async def _agent_query_impl(
                     
                     if available_colors and len(available_colors) > 1:
                         # Ask for color first
-                        _set_awaiting_color(body, {
+                        SessionStateManager.set_awaiting_color(body, {
                             "product": top.dict(),
                             "filters": rec_filters,
                             "available_colors": available_colors
@@ -2284,7 +2111,7 @@ async def _agent_query_impl(
                 if not chosen_size:
                     # No color needed, just ask for size
                     product_desc = (top.type or rec_filters.get("type") or "item").lower()
-                    _set_awaiting_size(body, {
+                    SessionStateManager.set_awaiting_size(body, {
                         "product": top.dict(),
                         "filters": rec_filters,
                     })
@@ -2715,7 +2542,7 @@ async def _agent_query_impl(
         
         try:
             # Phase 1: If user has seen items before, fetch MORE to ensure we have enough new ones
-            shown_slugs = _get_shown_slugs(body)
+            shown_slugs = SessionStateManager.get_shown_slugs(body)
             search_top_k = body.top_k
             if shown_slugs:
                 # Fetch significantly more to account for filtering (pagination effect)
@@ -2803,10 +2630,10 @@ async def _agent_query_impl(
         if items:
             log.debug(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
             # Phase 1: Filter out items user has already seen (for \"show more\")
-            shown_slugs = _get_shown_slugs(body)
+            shown_slugs = SessionStateManager.get_shown_slugs(body)
             if shown_slugs:
                 original_count = len(items)
-                items = _filter_out_shown_items(items, shown_slugs)
+                items = SessionStateManager.filter_out_shown_items(items, shown_slugs)
                 debug_plan["filtered_shown_items"] = original_count - len(items)
             
             # Limit to user's requested top_k (after filtering)
@@ -3013,9 +2840,9 @@ async def _agent_query_impl(
         log.info(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
         
         # Mark these NEW items as shown for this session
-        _mark_slugs_as_shown(body, [item.slug for item in items])
+        SessionStateManager.mark_slugs_as_shown(body, [item.slug for item in items])
         
-        _store_session_recs(body, items)
+        SessionStateManager.store_session_recs(body, items)
 
         # Generate personalized intro using LLM
         intro_info = await _build_discover_intro(

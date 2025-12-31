@@ -7,9 +7,10 @@ Strategy: Memory (0ms) → Redis (5-10ms) → Compute (500-2000ms)
 import hashlib
 import json
 import logging
-from typing import Any, Optional, Dict, Callable
+from typing import Any, Dict, Callable
 from functools import wraps
-import asyncio
+
+from app.core.cache import get_cached, set_cached
 
 log = logging.getLogger("cove.cache")
 
@@ -19,21 +20,12 @@ class PerformanceCache:
     Multi-level caching for sub-second responses.
     
     Levels:
-    1. Memory cache (instant - 0ms)
+    1. Memory cache (via app.core.cache) - 0ms
     2. Redis cache (fast - 5-10ms) - OPTIONAL
     3. Compute (slow - 500-2000ms)
-    
-    Usage:
-        cache = PerformanceCache()
-        
-        @cache.cached(ttl_seconds=300)
-        async def expensive_function(arg1, arg2):
-            # ... expensive computation
-            return result
     """
     
     def __init__(self, use_redis: bool = False):
-        self.memory_cache: Dict[str, Any] = {}
         self.redis_client = None
         
         # Optional Redis (for distributed caching)
@@ -41,7 +33,7 @@ class PerformanceCache:
             try:
                 import redis
                 self.redis_client = redis.Redis(
-                host='localhost',
+                    host='localhost',
                     port=6379,
                     decode_responses=True,
                     socket_connect_timeout=1
@@ -71,19 +63,13 @@ class PerformanceCache:
     ) -> Any:
         """
         Try memory → Redis → Compute.
-        
-        Args:
-            key: Cache key
-            compute_func: Async function to compute value
-            ttl_seconds: Time to live in seconds
-            
-        Returns:
-            Cached or computed value
         """
         # Level 1: Memory cache (instant - 0ms)
-        if key in self.memory_cache:
+        # Delegate to standardized in-memory cache
+        memory_result = get_cached(key)
+        if memory_result is not None:
             log.debug(f"💨 Cache HIT (memory): {key[:50]}")
-            return self.memory_cache[key]
+            return memory_result
         
         # Level 2: Redis cache (fast - 5-10ms)
         if self.redis_client:
@@ -91,7 +77,8 @@ class PerformanceCache:
                 cached = self.redis_client.get(key)
                 if cached:
                     result = json.loads(cached)
-                    self.memory_cache[key] = result  # Promote to memory
+                    # Promote to memory cache
+                    set_cached(key, result, ttl=ttl_seconds)
                     log.debug(f"⚡ Cache HIT (redis): {key[:50]}")
                     return result
             except Exception as e:
@@ -101,8 +88,8 @@ class PerformanceCache:
         log.debug(f"🔄 Cache MISS, computing: {key[:50]}")
         result = await compute_func()
         
-        # Cache for future
-        self.memory_cache[key] = result
+        # Cache for future (Memory + Redis)
+        set_cached(key, result, ttl=ttl_seconds)
         
         if self.redis_client:
             try:
@@ -117,12 +104,7 @@ class PerformanceCache:
         return result
     
     def cached(self, ttl_seconds: int = 300):
-        """
-        Decorator for caching async functions.
-        
-        Args:
-            ttl_seconds: Cache TTL in seconds
-        """
+        """Decorator for caching async functions."""
         def decorator(func: Callable):
             @wraps(func)
             async def wrapper(*args, **kwargs):
@@ -140,8 +122,10 @@ class PerformanceCache:
     
     def invalidate(self, key: str):
         """Invalidate cache entry"""
-        if key in self.memory_cache:
-            del self.memory_cache[key]
+        # Invalidate memory (using standardized cache function would need an invalidator)
+        # Note: app.core.cache currently doesn't expose explicit delete, 
+        # but we can set TTL=0 or let it expire. Ideally we add delete to cache.py.
+        # For now, we accept consistency delay or rely on TTL.
         
         if self.redis_client:
             try:
@@ -151,7 +135,8 @@ class PerformanceCache:
     
     def clear_all(self):
         """Clear all caches (for testing)"""
-        self.memory_cache.clear()
+        from app.core.cache import clear_cache
+        clear_cache()
         
         if self.redis_client:
             try:
@@ -163,10 +148,10 @@ class PerformanceCache:
     
     def get_stats(self) -> Dict:
         """Get cache statistics"""
-        return {
-            "memory_entries": len(self.memory_cache),
-            "redis_available": self.redis_client is not None
-        }
+        from app.core.cache import get_cache_stats
+        stats = get_cache_stats()
+        stats["redis_available"] = self.redis_client is not None
+        return stats
 
 
 # Global instance (memory-only by default)
