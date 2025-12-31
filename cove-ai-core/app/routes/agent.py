@@ -822,10 +822,10 @@ async def _fetch_history_for_llm(
         params["guestSessionId"] = guest_session_id or ""
 
     try:
-        print(f"[_get_history] Requesting {url} with params={params}", file=sys.stderr)
+        log.debug(f"[_get_history] Requesting {url} with params={params}", file=sys.stderr)
         async with httpx.AsyncClient(timeout=10) as cx:
             r = await cx.get(url, params=params)
-        print(f"[_get_history] Response {r.status_code}: {r.text}", file=sys.stderr)
+        log.debug(f"[_get_history] Response {r.status_code}: {r.text}", file=sys.stderr)
         if r.status_code != 200:
             log.warning("history_get non-200 %s: %s", r.status_code, r.text)
             return []
@@ -1350,39 +1350,37 @@ async def _trigger_fact_extraction_background(body: AgentIn, response: AgentOut)
         response: The agent's response
     """
     try:
-        log.debug("= * 80)
-        print("🔍 [FACT EXTRACTION] FUNCTION CALLED - STARTING EXTRACTION")
-        log.debug("= * 80)
+        log.debug("=" * 80)
+        log.debug("🔍 [FACT EXTRACTION] FUNCTION CALLED - STARTING EXTRACTION")
+        log.debug("=" * 80)
         log.info("🔍 [FACT EXTRACTION] Starting background extraction...")
-        print("DEBUG: After log.info")
+        log.debug("DEBUG: After log.info")
         
         # Extract items metadata
         items_meta = []
-        log.debug(f" hasattr(response, 'items') = {hasattr(response, 'items')}")
-        if hasattr(response, "items") and response.items:
-            log.debug(f" response.items exists, length = {len(response.items)}")
+        if hasattr(response, 'items') and response.items:
+            log.debug(f"response.items exists, length = {len(response.items)}")
             try:
                 items_meta = [item.dict() for item in response.items]
-                log.debug(f" Successfully converted {len(items_meta)} items to dict")
+                log.debug(f"Successfully converted {len(items_meta)} items to dict")
             except Exception as e:
-                log.debug(f" Exception in item.dict(): {e}")
-                items_meta = [dict(item) for item in response.items]
+                log.warning(f"Exception in item.dict(): {e}")
+                items_meta = []
         
-        log.debug(f" About to log items_meta length")
+        log.debug(f"About to log items_meta length")
         try:
-            log.info(f"🎯 [DEBUG] Extracted {len(items_meta)} items from response")
-            print("DEBUG: log.info succeeded")
+            log.info(f"🔍 [FACT EXTRACTION] items_meta={len(items_meta)} items")
+            log.debug("log.info succeeded")
         except Exception as e:
-            log.debug(f" log.info FAILED: {e}")
-            import traceback
-            traceback.print_exc()
+            log.warning(f"log.info FAILED: {e}")
         
+        # Skip if no items
         if not items_meta:
-            print("DEBUG: No items, returning")
+            log.debug("No items, returning")
             log.info("⏭️  No items to extract facts from, skipping")
             return
         
-        log.debug(f" Have {len(items_meta)} items, continuing...")
+        log.debug(f"Have {len(items_meta)} items, continuing...")
         
         # Extract debug plan
         debug_plan = getattr(response, "debug_plan", {}) or {}
@@ -1923,17 +1921,17 @@ async def _agent_query_impl(
 
     with get_conn() as conn:
         attrs = _parse_query_attrs(conn, q)
-        print(f"🎯 [AGENT] Received parsed attrs from _parse_query_attrs: {attrs}")
+        log.debug(f"🎯 [AGENT] Received parsed attrs from _parse_query_attrs: {attrs}")
         numeric_filters = parse_numeric_filters(q)
-        print(f"🎯 [AGENT] Numeric filters: {numeric_filters}")
+        log.debug(f"🎯 [AGENT] Numeric filters: {numeric_filters}")
         base_filters: Dict[str, Any] = build_filters(attrs, numeric_filters)
-        print(f"🎯 [AGENT] Base filters after build_filters: {base_filters}")
+        log.debug(f"🎯 [AGENT] Base filters after build_filters: {base_filters}")
 
     rec_filters: Dict[str, Any] = _apply_profile_defaults_to_filters(
         base_filters,
         ai_profile,
     )
-    print(f"🎯 [AGENT] Final rec_filters after profile defaults: {rec_filters}")
+    log.debug(f"🎯 [AGENT] Final rec_filters after profile defaults: {rec_filters}")
 
     # Event: Understanding request
     emit_event('thinking:step', {
@@ -2772,7 +2770,7 @@ async def _agent_query_impl(
 
         # --- RETRY LOGIC: If strict type filtering yielded 0 results, try loosening constraints ---
         if not items and rec_filters.get("type"):
-            print(f"🔄 [RETRY] Zero results for type='{rec_filters['type']}'. Retrying without type filter...")
+            log.info(f"🔄 [RETRY] Zero results for type='{rec_filters['type']}'. Retrying without type filter...")
             
             fallback_filters = rec_filters.copy()
             del fallback_filters["type"]
@@ -2787,7 +2785,7 @@ async def _agent_query_impl(
                     if isinstance(it, dict) and it.get("slug")
                 ]
                 if items:
-                    print(f"✅ [RETRY] Found {len(items)} items without type filter. Proceeding to Availability Checker.")
+                    log.info(f"✅ [RETRY] Found {len(items)} items without type filter. Proceeding to Availability Checker.")
             except Exception as e:
                 log.warning(f"Fallback search failed: {e}")
 
@@ -2810,7 +2808,7 @@ async def _agent_query_impl(
         }
 
         if items:
-            print(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
+            log.debug(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
             # Phase 1: Filter out items user has already seen (for \"show more\")
             shown_slugs = _get_shown_slugs(body)
             if shown_slugs:
@@ -2820,7 +2818,7 @@ async def _agent_query_impl(
             
             # Limit to user's requested top_k (after filtering)
             items = items[:body.top_k]
-            print(f"📦 [RECS] Items after shown filter + top_k limit: {len(items)} items")
+            log.debug(f"📦 [RECS] Items after shown filter + top_k limit: {len(items)} items")
             
             # ✨ WEEK 3 DAY 2: Honest Product Availability Check
             # Prevent recommending t-shirts for suits!
@@ -2841,15 +2839,15 @@ async def _agent_query_impl(
                 user_query=rec_query,
                 search_results=[it.dict() for it in items]
             )
-            print(f"🛡️ [AVAILABILITY] Checker returned: should_show={availability.get('should_show_results')}, exact={availability.get('exact_match')}, close={availability.get('has_close_alternative')}")
-            print(f"🛡️ [AVAILABILITY] Recommended items count: {len(availability.get('recommended_items', []))}")
-            print(f"🛡️ [AVAILABILITY] Honesty message: {availability.get('honesty_message')}")
+            log.debug(f"🛡️ [AVAILABILITY] Checker returned: should_show={availability.get('should_show_results')}, exact={availability.get('exact_match')}, close={availability.get('has_close_alternative')}")
+            log.debug(f"🛡️ [AVAILABILITY] Recommended items count: {len(availability.get('recommended_items', []))}")
+            log.debug(f"🛡️ [AVAILABILITY] Honesty message: {availability.get('honesty_message')}")
         
         # --- FALLBACK LOGIC (executes for empty results OR rejected results) ---
         should_show = availability.get("should_show_results", False)
         
         if not should_show:
-            print(f"❌ [AVAILABILITY] Initial search failed/rejected (items={len(items)}). Attempting Semantic Fallback.")
+            log.warning(f"❌ [AVAILABILITY] Initial search failed/rejected (items={len(items)}). Attempting Semantic Fallback.")
             
             # Check if we have a mapped category we can fall back to
             types_list = attrs.get("types", [])
@@ -2863,13 +2861,13 @@ async def _agent_query_impl(
                 
                 # NEW: Try semantically similar types first (e.g., pants -> joggers, jeans)
                 similar_types = _get_similar_types(current_type)
-                print(f"🔄 [SEMANTIC FALLBACK] Similar types for '{current_type}': {similar_types}")
+                log.info(f"🔄 [SEMANTIC FALLBACK] Similar types for '{current_type}': {similar_types}")
                 
                 fallback_success = False
                 
                 # Try each similar type in order of relevance
                 for similar_type in similar_types[:3]:  # Limit to top 3 most similar
-                    print(f"🔄 [FALLBACK] Trying similar type: '{similar_type}'")
+                    log.info(f"🔄 [FALLBACK] Trying similar type: '{similar_type}'")
                     
                     # Build query with color if available
                     parts = []
@@ -2900,7 +2898,7 @@ async def _agent_query_impl(
                             )
                             
                             if fb_availability.get("should_show_results", True):
-                                print(f"✅ [SEMANTIC FALLBACK] Success! Found {len(fb_items)} {similar_type}s")
+                                log.info(f"✅ [SEMANTIC FALLBACK] Success! Found {len(fb_items)} {similar_type}s")
                                 items = fb_items
                                 availability = fb_availability 
                                 availability["should_show_results"] = True
@@ -2913,7 +2911,7 @@ async def _agent_query_impl(
                 
                 # If semantic fallback didn't work, try broad category fallback (old strategy)
                 if not fallback_success:
-                    print(f"🔄 [FALLBACK] Semantic fallback exhausted. Trying broad category fallback.")
+                    log.info(f"🔄 [FALLBACK] Semantic fallback exhausted. Trying broad category fallback.")
                     
                     # Strategy 1: Broad Category Search with Color
                     # "{Color} {Type}" (e.g. "Black Jacket")
@@ -2926,7 +2924,7 @@ async def _agent_query_impl(
                     
                     # Strategy 2: If Strategy 1 is same as original query, DROP COLOR
                     if fallback_query.lower().strip() == rec_query.lower().strip():
-                        print(f"🔄 [FALLBACK] Strategy 1 failed (Same Query). Dropping color to broaden.")
+                        log.info(f"🔄 [FALLBACK] Strategy 1 failed (Same Query). Dropping color to broaden.")
                         fallback_query = current_type  # Just "jacket"
                         # Create new filters without color
                         fallback_filters = rec_filters.copy()
@@ -2935,7 +2933,7 @@ async def _agent_query_impl(
                         fallback_filters = rec_filters
                     
                     if fallback_query.lower().strip() != rec_query.lower().strip() or "color" not in fallback_filters:
-                        print(f"🔄 [FALLBACK] Attempting Category Search: '{fallback_query}'")
+                        log.info(f"🔄 [FALLBACK] Attempting Category Search: '{fallback_query}'")
                         
                         # Create new payload dict (not Pydantic model)
                         fallback_payload = {
@@ -2957,7 +2955,7 @@ async def _agent_query_impl(
                                 )
                                 
                                 if fb_availability.get("should_show_results", True):
-                                    print(f"✅ [FALLBACK] Success! Found {len(fb_items)} items for category '{fallback_query}'")
+                                    log.info(f"✅ [FALLBACK] Success! Found {len(fb_items)} items for category '{fallback_query}'")
                                     items = fb_items
                                     availability = fb_availability 
                                     availability["should_show_results"] = True
@@ -2966,7 +2964,7 @@ async def _agent_query_impl(
                             log.warning(f"Category fallback failed: {e}")
             else:
                 # No type extracted - try a very broad fallback by removing type filter
-                print(f"🔄 [FALLBACK] No type extracted. Trying broad search without type filter.")
+                log.info(f"🔄 [FALLBACK] No type extracted. Trying broad search without type filter.")
                 from app.agents.product_availability_checker import ProductAvailabilityChecker
                 checker = ProductAvailabilityChecker()
                 
@@ -2992,7 +2990,7 @@ async def _agent_query_impl(
                         )
                         
                         if fb_availability.get("should_show_results", True):
-                            print(f"✅ [FALLBACK] Success! Found {len(fb_items)} items with broad search")
+                            log.info(f"✅ [FALLBACK] Success! Found {len(fb_items)} items with broad search")
                             items = fb_items
                             availability = fb_availability
                             availability["should_show_results"] = True
@@ -3019,7 +3017,7 @@ async def _agent_query_impl(
                 debug_plan={**debug_plan, "availability_rejected": True}
             )
         
-        print(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
+        log.info(f"✅ [AVAILABILITY] Approved results - proceeding with {len(items)} items")
         
         # Mark these NEW items as shown for this session
         _mark_slugs_as_shown(body, [item.slug for item in items])
@@ -3064,7 +3062,7 @@ async def _agent_query_impl(
         # no items → fall through to RAG / chat below
 
     # --- Branch 4: generic fallback (LLM chat or RAG) --------------------------
-    print(f"💬 [DEBUG] FALLBACK BRANCH: wants_cart={wants_cart}, wants_recs={wants_recs}, intent_kind={intent_kind}")
+    log.debug(f"💬 [DEBUG] FALLBACK BRANCH: wants_cart={wants_cart}, wants_recs={wants_recs}, intent_kind={intent_kind}")
     use_llm_chat = intent_kind in (
         "generic",
         "policy",

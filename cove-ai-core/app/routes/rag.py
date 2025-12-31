@@ -797,14 +797,14 @@ from difflib import get_close_matches
 
 def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     tok = (tok or "").lower()
-    print(f"🔍 [NORMALIZE] Input token: '{tok}', catalog has {len(catalog_types)} types")
+    log.debug(f"🔍 [NORMALIZE] Input token: '{tok}', catalog has {len(catalog_types)} types")
     
     if not tok or not catalog_types:
-        print(f"🔍 [NORMALIZE] Empty token or catalog, returning None")
+        log.debug(f"🔍 [NORMALIZE] Empty token or catalog, returning None")
         return None
 
     if tok in catalog_types:
-        print(f"🔍 [NORMALIZE] ✓ Direct match found: '{tok}'")
+        log.debug(f"🔍 [NORMALIZE] ✓ Direct match found: '{tok}'")
         return tok
     
     # Load type synonyms from config (NO HARDCODING!)
@@ -815,7 +815,7 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     for canonical_type, synonym_list in synonyms.items():
         if tok in [s.lower() for s in synonym_list]:
             if canonical_type in catalog_types:
-                print(f"🔍 [NORMALIZE] ✓ Synonym match: '{tok}' → '{canonical_type}'")
+                log.debug(f"🔍 [NORMALIZE] ✓ Synonym match: '{tok}' → '{canonical_type}'")
                 return canonical_type
     
     # Check broad category map (e.g., "shoes" → ["boots", "heels", "loafers", "sneakers"])
@@ -825,9 +825,9 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
         if isinstance(mapped_types, list):
             for mt in mapped_types:
                 if mt.lower() in catalog_types:
-                    print(f"🔍 [NORMALIZE] ✓ Broad category match: '{tok}' → '{mt}'")
+                    log.debug(f"🔍 [NORMALIZE] ✓ Broad category match: '{tok}' → '{mt}'")
                     return mt.lower()
-            print(f"🔍 [NORMALIZE] ✗ Broad category '{tok}' has no catalog matches: {mapped_types}")
+            log.debug(f"🔍 [NORMALIZE] ✗ Broad category '{tok}' has no catalog matches: {mapped_types}")
 
     candidates = {tok}
     if tok.endswith("ies") and len(tok) > 3:
@@ -837,31 +837,31 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     if tok.endswith("s") and len(tok) > 1:
         candidates.add(tok[:-1])
 
-    print(f"🔍 [NORMALIZE] Candidates after pluralization: {candidates}")
+    log.debug(f"🔍 [NORMALIZE] Candidates after pluralization: {candidates}")
     
     for c in candidates:
         if c in catalog_types:
-            print(f"🔍 [NORMALIZE] ✓ Candidate match found: '{c}'")
+            log.debug(f"🔍 [NORMALIZE] ✓ Candidate match found: '{c}'")
             return c
 
     match = get_close_matches(tok, list(catalog_types), n=1, cutoff=0.84)
     if match:
-        print(f"🔍 [NORMALIZE] ✓ Fuzzy match found: '{match[0]}'")
+        log.debug(f"🔍 [NORMALIZE] ✓ Fuzzy match found: '{match[0]}'")
         return match[0]
 
-    print(f"🔍 [NORMALIZE] ✗ No match found for '{tok}'")
+    log.debug(f"🔍 [NORMALIZE] ✗ No match found for '{tok}'")
     return None
 
 
 def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
-    print(f"🔍 [PARSE] Starting _parse_query_attrs for query: '{q}'")
+    log.debug(f"🔍 [PARSE] Starting _parse_query_attrs for query: '{q}'")
     v = _get_vocab(conn)
-    print(f"🔍 [PARSE] Vocabulary types ({len(v['types'])} total): {sorted(list(v['types']))[:20]}...")  # Show first 20
-    print(f"🔍 [PARSE] Is 'skirt' in vocab? {'skirt' in v['types']}")
+    log.debug(f"🔍 [PARSE] Vocabulary types ({len(v['types'])} total): {sorted(list(v['types']))[:20]}...")  # Show first 20
+    log.debug(f"🔍 [PARSE] Is 'skirt' in vocab? {'skirt' in v['types']}")
     
     raw = re.findall(r"[a-zA-Z]+", q.lower())
     toks = set(raw)
-    print(f"🔍 [PARSE] Extracted tokens: {toks}")
+    log.debug(f"🔍 [PARSE] Extracted tokens: {toks}")
 
     # Color synonym mapping - expand simple colors to catalog variants
     COLOR_SYNONYMS = {
@@ -875,22 +875,22 @@ def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
     
     # Direct matches from vocab
     colors = sorted({t for t in toks if t in v["colors"]})
-    print(f"🔍 [PARSE] Direct color matches from vocab: {colors}")
+    log.debug(f"🔍 [PARSE] Direct color matches from vocab: {colors}")
     
     # Expand via synonyms
     expanded_colors = []
     for tok in toks:
         if tok in COLOR_SYNONYMS:
-            print(f"🔍 [PARSE] Found synonym key '{tok}', expanding to: {COLOR_SYNONYMS[tok]}")
+            log.debug(f"🔍 [PARSE] Found synonym key '{tok}', expanding to: {COLOR_SYNONYMS[tok]}")
             for catalog_color in COLOR_SYNONYMS[tok]:
                 if catalog_color in v["colors"] and catalog_color not in colors:
                     expanded_colors.append(catalog_color)
-                    print(f"🔍 [PARSE]   ✓ Added '{catalog_color}' (in catalog)")
+                    log.debug(f"🔍 [PARSE]   ✓ Added '{catalog_color}' (in catalog)")
                 elif catalog_color not in v["colors"]:
-                    print(f"🔍 [PARSE]   ✗ Skipped '{catalog_color}' (not in catalog)")
+                    log.debug(f"🔍 [PARSE]   ✗ Skipped '{catalog_color}' (not in catalog)")
     
     colors.extend(expanded_colors)
-    print(f"🔍 [PARSE] Colors after synonym expansion: {colors}")
+    log.debug(f"🔍 [PARSE] Colors after synonym expansion: {colors}")
     
     if "hot" in toks and "pink" in toks:
         colors.append("hotpink")
@@ -910,7 +910,7 @@ def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
     types = sorted(norm_types)
     
     result = {"colors": colors, "sizes": sizes, "types": types}
-    print(f"🔍 [PARSE] Final parsed attrs: {result}")
+    log.debug(f"🔍 [PARSE] Final parsed attrs: {result}")
     return result
 
 
