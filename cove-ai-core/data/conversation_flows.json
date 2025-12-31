@@ -5,7 +5,16 @@
             "help me build an outfit",
             "build me an outfit",
             "i need an outfit",
-            "outfit"
+            "outfit",
+            "look for",
+            "date night",
+            "business casual",
+            "what to wear",
+            "style me",
+            "casual look",
+            "smart casual",
+            "wedding guest",
+            "formal look"
         ],
         "flow": [
             {

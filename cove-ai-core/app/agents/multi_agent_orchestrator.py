@@ -186,8 +186,9 @@ Rules:
         self,
         workflow_name: str,
         query: str,
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        context: Dict[str, Any],
+        stream: bool = False  # NEW: Enable streaming progress updates
+    ):
         """
         Execute multi-agent workflow with 2024 best practices.
         
@@ -196,6 +197,17 @@ Rules:
         - Checkpointing for error recovery
         - Parallel execution where possible
         - Comprehensive observability
+        - Optional streaming for real-time progress (NEW)
+        
+        Args:
+            workflow_name: Name of workflow to execute
+            query: User query
+            context: Execution context
+            stream: If True, yields progress updates during execution
+            
+        Returns:
+            If stream=False: Dict with results
+            If stream=True: AsyncGenerator yielding progress updates
         """
         workflow = self.workflows.get(workflow_name)
         if not workflow:
@@ -211,7 +223,24 @@ Rules:
         log.info(f"🚀 Starting workflow: {workflow.get('name', workflow_name)}")
         log.info(f"   Query: {query}")
         log.info(f"   Budget: €{state.budget_max}")
+        log.info(f"   Streaming: {stream}")
         
+        if stream:
+            # Streaming mode - yield from async generator
+            async for update in self._execute_streaming_workflow(workflow, state, workflow_name):
+                yield update
+        else:
+            # Non-streaming mode - yield single result
+            result = await self._execute_standard_workflow(workflow, state, workflow_name)
+            yield result
+    
+    async def _execute_standard_workflow(
+        self,
+        workflow: Dict[str, Any],
+        state: WorkflowState,
+        workflow_name: str
+    ) -> Dict[str, Any]:
+        """Execute workflow without streaming (standard mode)."""
         try:
             # Execute agents with checkpointing
             await self._execute_with_checkpoints(workflow, state)
@@ -238,6 +267,171 @@ Rules:
                 "state": state.checkpoints,  # For debugging
                 "reasoning": "Workflow failed - please try again"
             }
+    
+    async def _execute_streaming_workflow(
+        self,
+        workflow: Dict[str, Any],
+        state: WorkflowState,
+        workflow_name: str
+    ):
+        """Execute workflow with streaming (async generator)."""
+        try:
+            # Stream progress updates
+            async for update in self._execute_streaming(workflow, state):
+                yield update
+            
+            # Yield final result
+            final = self._synthesize_results(state, workflow_name)
+            duration_ms = (time.time() - state.start_time) * 1000
+            self._update_metrics(success=final["success"], duration_ms=duration_ms)
+            
+            yield {
+                "type": "complete",
+                "result": final,
+                "duration_ms": duration_ms
+            }
+            
+        except Exception as e:
+            log.error(f"❌ Workflow failed: {e}")
+            self._update_metrics(success=False, duration_ms=0)
+            
+            # Yield error
+            yield {
+                "type": "error",
+                "error": str(e),
+                "result": {
+                    "success": False,
+                    "error": str(e),
+                    "state": state.checkpoints,
+                    "reasoning": "Workflow failed - please try again"
+                }
+            }
+    
+    
+    async def _execute_streaming(
+        self,
+        workflow: Dict[str, Any],
+        state: WorkflowState
+    ):
+        """
+        Execute workflow with streaming progress updates.
+        Yields progress events as agents complete.
+        ✨ PHASE 6: Now also yields agentic exploration events (category_start, category_candidates, item_selected)
+        """
+        steps_config = workflow.get("steps", [])
+        
+        # Parse steps from config
+        steps = [
+            AgentStep(
+                agent=s["agent"],
+                required=s["required"],
+                timeout_ms=s["timeout_ms"],
+                description=s["description"],
+                parallel_group=s.get("parallel_group", 0)
+            )
+            for s in steps_config
+        ]
+        
+        # Group steps by parallel_group
+        grouped_steps = self._group_steps_for_parallel(steps)
+        
+        total_groups = len(grouped_steps)
+        log.info(f"   Execution plan: {total_groups} groups")
+        
+        for i, group_steps in enumerate(grouped_steps, 1):
+            agent_names = [s.agent for s in group_steps]
+            log.info(f"   Group {i}/{total_groups}: {agent_names}")
+            
+            # Yield progress update
+            yield {
+                "type": "progress",
+                "step": i,
+                "total": total_groups,
+                "agents": agent_names,
+                "status": f"Running {', '.join(agent_names)}..."
+            }
+            
+            # Create checkpoint before group execution
+            checkpoint = self._create_checkpoint(state)
+            state.checkpoints.append(checkpoint)
+            
+            try:
+                if len(group_steps) == 1:
+                    step = group_steps[0]
+                    
+                    # ✨ PHASE 6: Create async queue for agentic events (stylist AND outfit_builder)
+                    if step.agent in ("stylist", "outfit_builder"):
+                        agentic_queue = asyncio.Queue()
+                        
+                        async def agentic_callback(event):
+                            """Callback for stylist/outfit_builder to emit exploration events"""
+                            await agentic_queue.put(event)
+                        
+                        # Run agent execution in background
+                        async def run_agent():
+                            await self._execute_agent_step(step, state, stream_callback=agentic_callback)
+                            await agentic_queue.put(None)  # Signal done
+                        
+                        agent_task = asyncio.create_task(run_agent())
+                        
+                        # Yield agentic events as they come in
+                        while True:
+                            event = await agentic_queue.get()
+                            if event is None:
+                                break  # Agent done
+                            yield {
+                                "type": "agentic_event",
+                                **event
+                            }
+                        
+                        # Wait for agent to fully complete
+                        await agent_task
+                    else:
+                        # Sequential execution (non-streaming agent)
+                        await self._execute_agent_step(group_steps[0], state)
+                else:
+                    # Parallel execution
+                    log.info(f"   ⚡ Executing {len(group_steps)} agents in parallel")
+                    await self._execute_parallel_steps(group_steps, state)
+                
+                # Yield completion update
+                # Yield completion update
+                step_results = {}
+                for name in agent_names:
+                    res = state.agent_results.get(name)
+                    if res and hasattr(res, "to_dict"):
+                        step_results[name] = res.to_dict()
+                    else:
+                        step_results[name] = res
+                
+                yield {
+                    "type": "step_complete",
+                    "step": i,
+                    "agents": agent_names,
+                    "results": step_results,
+                    "status": f"Completed {', '.join(agent_names)}"
+                }
+                    
+            except Exception as e:
+                # Roll back to checkpoint on error
+                log.warning(f"Error in step group, rolling back: {e}")
+                self._rollback_to_checkpoint(state, checkpoint)
+                
+                # Yield error update
+                yield {
+                    "type": "step_error",
+                    "step": i,
+                    "agents": agent_names,
+                    "error": str(e)
+                }
+                
+                # Check if required agent failed
+                if any(step.required for step in group_steps):
+                    raise  # Re-raise for required agents
+                else:
+                    # Continue for optional agents
+                    state.errors.append(f"Optional agent failed: {e}")
+    
     
     async def _execute_with_checkpoints(
         self,
@@ -334,7 +528,8 @@ Rules:
     async def _execute_agent_step(
         self,
         step: AgentStep,
-        state: WorkflowState
+        state: WorkflowState,
+        stream_callback: Optional[Any] = None  # ✨ PHASE 6: For agentic streaming
     ):
         """
         Execute single agent with timeout and retry.
@@ -356,11 +551,18 @@ Rules:
                 # Build task from state
                 task = self._build_agent_task(agent_name, state)
                 
-                # Execute with timeout
-                result = await asyncio.wait_for(
-                    agent_info["handler"](task, state.context),
-                    timeout=step.timeout_ms / 1000
-                )
+                # ✨ PHASE 6: Pass stream_callback to stylist/builder for live exploration
+                if (agent_name == "stylist" or agent_name == "outfit_builder") and stream_callback:
+                    result = await asyncio.wait_for(
+                        agent_info["handler"](task, state.context, stream_callback=stream_callback),
+                        timeout=step.timeout_ms / 1000
+                    )
+                else:
+                    # Execute with timeout
+                    result = await asyncio.wait_for(
+                        agent_info["handler"](task, state.context),
+                        timeout=step.timeout_ms / 1000
+                    )
                 
                 # Store result
                 duration_ms = (time.time() - start) * 1000
@@ -394,20 +596,30 @@ Rules:
         # Agent-specific task building
         if agent_name == "stylist":
             return base_task
-        
-        elif agent_name == "fit":
-            # Pass outfit items from stylist
+
+        elif agent_name == "outfit_builder":
+            # Pass candidates from stylist
             stylist_result = state.agent_results.get("stylist", {})
             return {
-                "items": stylist_result.get("data", {}).get("outfit_items", []),
+                "candidates": stylist_result.get("data", {}).get("candidates", {}),
+                "intent": stylist_result.get("data", {}).get("intent", {}),
+                "user_preferences": stylist_result.get("data", {}).get("user_preferences", {}),
+                "budget_max": state.budget_max
+            }
+        
+        elif agent_name == "fit":
+            # Pass outfit items from builder
+            builder_result = state.agent_results.get("outfit_builder", {})
+            return {
+                "items": builder_result.get("data", {}).get("outfit_items", []),
                 "user_size_history": state.context.get("user_size_history", {})
             }
         
         elif agent_name == "budget":
-            # Pass outfit items from stylist
-            stylist_result = state.agent_results.get("stylist", {})
+            # Pass outfit items from builder
+            builder_result = state.agent_results.get("outfit_builder", {})
             return {
-                "items": stylist_result.get("data", {}).get("outfit_items", []),
+                "items": builder_result.get("data", {}).get("outfit_items", []),
                 "budget_max": state.budget_max
             }
         
@@ -446,8 +658,14 @@ Rules:
         
         success = success_count >= min_required
         
+        
         # Build final outfit
-        outfit_items = stylist_result.get("data", {}).get("outfit_items", [])
+        builder_result = state.agent_results.get("outfit_builder", {})
+        
+        # Prefer Builder items, fallback to Stylist (legacy)
+        outfit_items = builder_result.get("data", {}).get("outfit_items") or \
+                       stylist_result.get("data", {}).get("outfit_items", [])
+                       
         size_recs = fit_result.get("data", {}).get("size_recommendations", [])
         budget_data = budget_result.get("data", {})
         
@@ -457,7 +675,9 @@ Rules:
         # Build reasoning
         reasoning_parts = []
         if stylist_result.get("reasoning"):
-            reasoning_parts.append(f"Styling: {stylist_result['reasoning']}")
+            reasoning_parts.append(f"Planning: {stylist_result['reasoning']}")
+        if builder_result.get("reasoning"):
+            reasoning_parts.append(f"Styling: {builder_result['reasoning']}")
         if fit_result.get("reasoning"):
             reasoning_parts.append(f"Sizing: {fit_result['reasoning']}")
         if budget_result.get("reasoning"):
@@ -465,12 +685,26 @@ Rules:
         
         reasoning = ". ".join(reasoning_parts) if reasoning_parts else "Outfit recommendation ready"
         
+        # Get calculated total (Builder > Stylist)
+        builder_total = builder_result.get("data", {}).get("total_cost", 0)
+        stylist_total = stylist_result.get("data", {}).get("total", 0)
+        base_total = builder_total if builder_total > 0 else stylist_total
+        
+        # Budget agent may override with discounts, but only if it calculated something
+        budget_final_total = budget_data.get("final_total")
+        budget_within_budget = budget_data.get("within_budget")
+        
+        # Use budget agent's total only if it actually computed one (not 0 or None)
+        # Otherwise use the base running total
+        final_total = budget_final_total if budget_final_total and budget_final_total > 0 else base_total
+        final_within_budget = budget_within_budget if budget_within_budget is not None else True
+        
         return {
             "success": success,
             "workflow": workflow_name,
             "outfit_items": enriched_items,
-            "total": budget_data.get("final_total", stylist_result.get("data", {}).get("total", 0)),
-            "within_budget": budget_data.get("within_budget", True),
+            "total": final_total,
+            "within_budget": final_within_budget,
             "discount_applied": budget_data.get("discount_applied"),
             "size_recommendations": size_recs,
             "reasoning": reasoning,

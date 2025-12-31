@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  transpilePackages: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@clerk/nextjs', '@clerk/themes'],
   webpack(config) {
     config.module.rules.push({
       test: /\.(glsl|vs|fs|vert|frag)$/,

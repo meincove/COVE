@@ -72,6 +72,11 @@ def apply_common_corrections(word: str, config: dict, catalog_types: set = None)
     common_corrections = config.get('common_corrections', {})
     word_lower = word.lower()
     
+    # 0. SAFETY CHECK: If word is already a valid catalog term, DON'T touch it!
+    # This prevents "skirt" -> "shirt" (distance 1) when both are valid.
+    if catalog_types and word_lower in catalog_types:
+        return word
+
     # Check if word is a known typo for any correct term
     for correct_term, typos in common_corrections.items():
         if word_lower in [t.lower() for t in typos]:

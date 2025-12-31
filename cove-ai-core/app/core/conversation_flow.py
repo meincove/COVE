@@ -57,22 +57,35 @@ class ConversationFlowHandler:
     # ... (skipping unchanged methods) ...
 
     async def _extract_slots_from_text(self, text: str) -> Dict[str, Any]:
-        """Attempt to extract budget, occasion, and style using LLM + Fallback."""
+        """Attempt to extract budget, occasion, and style using LLM."""
         try:
             log.info(f"🧠 LLM Extracting slots from: '{text}'")
             response = await acompletion(
                 model="openrouter/openai/gpt-4o-mini",
                 messages=[ 
-                    {"role": "system", "content": "Extract JSON keys: 'occasion', 'budget' (number/text), 'style'. Return proper JSON. If not found, use null."},
+                    {"role": "system", "content": """Extract outfit request details as JSON with these keys:
+- 'occasion': The context/purpose/event (e.g., "mountains", "beach", "wedding", "work meeting", "date night", "casual weekend")
+- 'budget': Numeric budget if mentioned (e.g., 200, 500)
+- 'style': Style preference if mentioned (e.g., "casual", "formal", "minimalist")
+
+Examples:
+"outfit for mountains" → {"occasion": "mountains", "budget": null, "style": null}
+"casual look for $300" → {"occasion": "casual", "budget": 300, "style": "casual"}
+"wedding guest outfit under 500 euros" → {"occasion": "wedding", "budget": 500, "style": null}
+
+Return valid JSON. Use null for values not found. Extract the ACTUAL words the user uses for occasion."""},
                     {"role": "user", "content": text}
                 ],
                 response_format={"type": "json_object"},
                 api_key=os.getenv("OPENROUTER_API_KEY")
             )
             content = response.choices[0].message.content
+            log.info(f"🧠 LLM extraction raw response: {content}")
             extracted = json.loads(content)
             # Filter nulls
-            return {k: v for k, v in extracted.items() if v}
+            result = {k: v for k, v in extracted.items() if v is not None}
+            log.info(f"✅ LLM extracted slots: {result}")
+            return result
         except Exception as e:
             log.warning(f"⚠️ LLM extraction failed: {e}. Falling back to heuristics.")
             return self._extract_slots_heuristic(text)
@@ -303,9 +316,13 @@ class ConversationFlowHandler:
         occasion = answers.get("occasion", "general")
         style = answers.get("style", "")
         
+        log.info(f"💰 Extracted budget from answers: {budget_str} -> {budget_num}")
+        
         query_parts = [f"build an outfit for {occasion}"]
         if style:
             query_parts.append(f"style {style}")
+        # Explicitly include budget in textual query as failsafe
+        query_parts.append(f"budget {budget_num}")
         
         query = ", ".join(query_parts)
         

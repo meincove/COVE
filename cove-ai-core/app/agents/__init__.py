@@ -8,8 +8,9 @@ Importing agents here triggers their auto-registration with the AgentRegistry.
 from app.agents.stylist_agent import StylistAgent
 from app.agents.fit_agent import FitAgent
 from app.agents.budget_agent import BudgetAgent
+from app.agents.outfit_builder_agent import OutfitBuilderAgent
 
 # Import orchestrator
 from app.agents.multi_agent_orchestrator import orchestrator
 
-__all__ = ["StylistAgent", "FitAgent", "BudgetAgent", "orchestrator"]
+__all__ = ["StylistAgent", "FitAgent", "BudgetAgent", "OutfitBuilderAgent", "orchestrator"]

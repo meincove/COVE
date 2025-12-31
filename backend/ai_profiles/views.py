@@ -4,6 +4,8 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.views.decorators.http import require_http_methods
 
 from .models import AiUserProfile, ChatSession, ChatMessage
 
@@ -381,3 +383,184 @@ def conversation_event_log(request):
         "source": event.source,
         "created_at": event.created_at.isoformat(),
     }, status=201)
+
+
+# ---------------------------------------------------------------------------
+# Conversation Facts Storage (Phase 1: Context Management)
+# ---------------------------------------------------------------------------
+
+def _merge_conversation_facts(existing_facts: dict, new_facts: dict) -> dict:
+    """
+    Intelligently merge new facts with existing facts.
+    
+    Rules:
+    - Product focus: replace current_products, append to product_history
+    - User preferences: merge (new overrides old)
+    - Active context: replace
+    - Decisions: append (keep history)
+    """
+    merged = existing_facts.copy() if existing_facts else {}
+    
+    # Merge product focus
+    if "product_focus" in new_facts:
+        if "product_focus" not in merged:
+            merged["product_focus"] = {}
+        
+        # Replace current products
+        if "current_products" in new_facts["product_focus"]:
+            merged["product_focus"]["current_products"] = new_facts["product_focus"]["current_products"]
+        
+        # Append to product history (limit to 20)
+        if "product_history" in new_facts["product_focus"]:
+            existing_history = merged["product_focus"].get("product_history", [])
+            merged["product_focus"]["product_history"] = (existing_history + new_facts["product_focus"]["product_history"])[-20:]
+        
+        # Update last search results
+        if "last_search_results" in new_facts["product_focus"]:
+            merged["product_focus"]["last_search_results"] = new_facts["product_focus"]["last_search_results"]
+    
+    # Merge user preferences (new overrides old)
+    if "user_preferences" in new_facts:
+        if "user_preferences" not in merged:
+            merged["user_preferences"] = {}
+        merged["user_preferences"].update(new_facts["user_preferences"])
+    
+    # Replace active context
+    if "active_context" in new_facts:
+        merged["active_context"] = new_facts["active_context"]
+    
+    # Append decisions (limit to 20)
+    if "decisions_made" in new_facts:
+        if "decisions_made" not in merged:
+            merged["decisions_made"] = []
+        merged["decisions_made"] = (merged["decisions_made"] + new_facts["decisions_made"])[-20:]
+    
+    return merged
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def update_session_facts(request):
+    """
+    POST /ai_profiles/session/facts/
+    
+    Atomically update conversation facts for a session.
+    
+    Body: {
+        "clerk_user_id": "...",  # optional
+        "guest_session_id": "...",  # optional (one of the two required)
+        "facts": {...}  # The extracted facts to store
+    }
+    
+    Returns: {"status": "ok", "session_id": ...}
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    
+    clerk_user_id = data.get("clerk_user_id", "").strip()
+    guest_session_id = data.get("guest_session_id", "").strip()
+    facts = data.get("facts", {})
+    
+    if not clerk_user_id and not guest_session_id:
+        return JsonResponse({"error": "Provide clerk_user_id or guest_session_id"}, status=400)
+    
+    if not isinstance(facts, dict):
+        return JsonResponse({"error": "facts must be a dictionary"}, status=400)
+    
+    try:
+        # Use atomic transaction with row-level locking to prevent race conditions
+        with transaction.atomic():
+            # Try to get existing session with lock
+            session_filter = {}
+            if clerk_user_id:
+                session_filter["clerk_user_id"] = clerk_user_id
+            if guest_session_id:
+                session_filter["guest_session_id"] = guest_session_id
+            
+            # Get or create session (with lock if exists)
+            try:
+                session = ChatSession.objects.select_for_update().filter(**session_filter).first()
+                
+                if not session:
+                    # Create new session
+                    session = ChatSession.objects.create(
+                        clerk_user_id=clerk_user_id,
+                        guest_session_id=guest_session_id,
+                        metadata={"conversation_facts": facts}
+                    )
+                else:
+                    # Merge facts with existing
+                    existing_metadata = session.metadata or {}
+                    existing_facts = existing_metadata.get("conversation_facts", {})
+                    merged_facts = _merge_conversation_facts(existing_facts, facts)
+                    
+                    # Update metadata
+                    if not session.metadata:
+                        session.metadata = {}
+                    session.metadata["conversation_facts"] = merged_facts
+                    session.save()
+            
+            except Exception as e:
+                return JsonResponse({"error": f"Database error: {str(e)}"}, status=500)
+        
+        return JsonResponse({
+            "status": "ok",
+            "session_id": session.id,
+            "facts_stored": True
+        }, status=200)
+    
+    except Exception as e:
+        # Non-critical error - log and return success to not break user experience
+        return JsonResponse({
+            "status": "ok",
+            "session_id": None,
+            "facts_stored": False,
+            "error": str(e)
+        }, status=200)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_session_facts(request):
+    """
+    GET /ai_profiles/session/facts/?clerk_user_id=...&guest_session_id=...
+    
+    Retrieve conversation facts for a session.
+    
+    Returns: {"facts": {...}}
+    """
+    clerk_user_id = request.GET.get("clerk_user_id", "").strip()
+    guest_session_id = request.GET.get("guest_session_id", "").strip()
+    
+    if not clerk_user_id and not guest_session_id:
+        return JsonResponse({"error": "Provide clerk_user_id or guest_session_id"}, status=400)
+    
+    try:
+        # Build filter
+        session_filter = {}
+        if clerk_user_id:
+            session_filter["clerk_user_id"] = clerk_user_id
+        if guest_session_id:
+            session_filter["guest_session_id"] = guest_session_id
+        
+        # Get most recent session
+        session = ChatSession.objects.filter(**session_filter).order_by("-created_at").first()
+        
+        if not session or not session.metadata:
+            return JsonResponse({"facts": {}}, status=200)
+        
+        facts = session.metadata.get("conversation_facts", {})
+        
+        return JsonResponse({
+            "facts": facts,
+            "session_id": session.id
+        }, status=200)
+    
+    except Exception as e:
+        # Return empty facts on error (graceful degradation)
+        return JsonResponse({
+            "facts": {},
+            "error": str(e)
+        }, status=200)

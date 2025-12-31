@@ -9,22 +9,29 @@
             {
                 "agent": "stylist",
                 "required": true,
-                "timeout_ms": 15000,
+                "timeout_ms": 60000,
                 "parallel_group": 0,
-                "description": "Select outfit items based on occasion and style"
+                "description": "Retrieve candidate items from catalog"
+            },
+            {
+                "agent": "outfit_builder",
+                "required": true,
+                "timeout_ms": 30000,
+                "parallel_group": 1,
+                "description": "Assemble outfit from candidates"
             },
             {
                 "agent": "fit",
                 "required": false,
                 "timeout_ms": 2000,
-                "parallel_group": 1,
+                "parallel_group": 2,
                 "description": "Recommend sizes for selected items"
             },
             {
                 "agent": "budget",
                 "required": true,
                 "timeout_ms": 3000,
-                "parallel_group": 1,
+                "parallel_group": 2,
                 "description": "Optimize pricing and apply discounts"
             }
         ],

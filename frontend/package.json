@@ -12,6 +12,9 @@
   "dependencies": {
     "@clerk/nextjs": "^6.22.0",
     "@clerk/themes": "^2.2.50",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@radix-ui/react-slot": "^1.2.3",
     "@react-spring/three": "^10.0.1",
     "@react-three/drei": "^10.3.0",
@@ -39,7 +42,8 @@
     "tailwind-merge": "^3.3.0",
     "three": "^0.177.0",
     "three-stdlib": "^2.36.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

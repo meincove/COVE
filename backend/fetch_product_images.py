@@ -46,6 +46,10 @@ SEARCH_QUERIES = {
     'skirt': 'skirt fashion model',
     'sweater': 'sweater fashion model',
     'accessories': 'fashion accessories',
+    'sneakers': 'sneakers fashion shoes',
+    'boots': 'fashion boots shoes',
+    'dress_shoes': 'leather dress shoes men',
+    'sandals': 'fashion sandals shoes',
 }
 
 def fetch_pexels_images(query, count=50):

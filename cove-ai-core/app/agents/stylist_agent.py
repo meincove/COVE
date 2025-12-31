@@ -7,12 +7,15 @@ Handles outfit building, style coordination, and product selection.
 
 from app.agents.base_agent import BaseAgent, AgentResult
 from app.core.agent_registry import Agent, registry
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import logging
 import json
 import os
+import asyncio
 import litellm
 from pathlib import Path
+from app.core.vibe_translator import VibeTranslator
+from app.vector.store import get_conn, catalog_vocab
 
 log = logging.getLogger("cove.agents.stylist")
 
@@ -59,7 +62,8 @@ class StylistAgent(BaseAgent):
     async def execute(
         self, 
         task: Dict[str, Any], 
-        context: Dict[str, Any]
+        context: Dict[str, Any],
+        stream_callback: Optional[Any] = None  # ✨ PHASE 6: Callback for streaming events
     ) -> AgentResult:
         """
         Build outfit based on query using real product search.
@@ -80,6 +84,11 @@ class StylistAgent(BaseAgent):
             AgentResult with outfit_items list
         """
         query = task.get("query", "")
+        # ✨ PHASE 4: Detect Vibe Keywords
+        vibe_keywords = VibeTranslator.translate(query)
+        if vibe_keywords:
+            log.info(f"🔮 Detected Vibe Keywords: {vibe_keywords}")
+
         budget = task.get("budget_max", _STYLIST_CONFIG.get("default_budget", 500))
         categories = task.get("categories", _STYLIST_CONFIG.get("default_categories", ["top", "bottom"]))
         
@@ -89,12 +98,13 @@ class StylistAgent(BaseAgent):
         log.info(f"Building outfit for: {occasion} ({style} style), budget: €{budget}")
         
         # Search products per category
-        outfit_items = []
-        tools_used = []
-        errors = []
-        total_cost = 0.0
+        # Search products per category
+        candidates = {}
         remaining_budget = budget
-        selected_slugs = set()  # Track to avoid duplicates
+        errors = []
+        tools_used = []
+        
+        # Import here to avoid circular dependency
         
         # Import here to avoid circular dependency
         from app.routes.agent import _call_recs_suggest
@@ -136,9 +146,17 @@ class StylistAgent(BaseAgent):
         
         # ✨ WEEK 3 DAY 2: Intelligent Analysis (LLM)
         # Replaces simple config parsing with full reasoning
-        analysis = await self._analyze_request_with_llm(query, budget, categories, user_preferences)
+        analysis = await self._analyze_request_with_llm(query, budget, categories, user_preferences, vibe_keywords)
         occasion = analysis.get("occasion", occasion) # Override heuristic
         style = analysis.get("style", style) # Override heuristic
+        
+        # KEY CHANGE: Allow LLM to expand categories (e.g. add shoes)
+        # If LLM returns a specific list of categories, use it.
+        # This breaks the reliance on static "default_categories"
+        if analysis.get("categories"):
+            categories = analysis["categories"]
+            log.info(f"📋 LLM defined structure: {categories}")
+            
         cat_queries = analysis.get("category_queries", {})
         
         log.info(f"🤖 Stylist Plan: {analysis.get('reasoning', 'No reasoning')}")
@@ -146,33 +164,44 @@ class StylistAgent(BaseAgent):
         try:
             for idx, category in enumerate(categories):
                 try:
-                    # 1. Use LLM-generated query if available (Smart)
-                    if cat_queries.get(category):
-                        category_query = cat_queries[category]
-                        # Ensure we still use valid types logic if needed? 
-                        # Actually, trust the LLM's query text, but maybe verify types later?
-                        # For now, trust the Semantic Search.
-                    else:
-                        # 2. Fallback to Config Logic (Heuristic)
-                        category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
-                        valid_types = category_mapping.get(category, [category])
-                        
-                        # Build rich semantic query with SPECIFIC product types
-                        if valid_types and valid_types != [category]:
-                            type_str = " OR ".join(valid_types)
-                            category_query = f"{style} {type_str} for {occasion}"
-                        else:
-                            category_query = f"{style} {category} for {occasion}"
+                    # ✨ PHASE 6: Emit category_start event for live exploration
+                    if stream_callback:
+                        await stream_callback({
+                            "event_type": "category_start",
+                            "category": category,
+                            "index": idx,
+                            "total_categories": len(categories),
+                            "status": f"Searching for {category}..."
+                        })
+                    
+                    # ✨ HYBRID SEARCH IMPLEMENTATION
+                    
+                    # 1. Get Plan (Query + Filters)
+                    cat_plan = analysis.get("category_plans", {}).get(category) or {}
+                    category_query = cat_plan.get("query")
+                    hard_filters = cat_plan.get("filters", {})
+                    
+                    # Fallback to simple query logic if no plan
+                    if not category_query:
+                         if cat_queries.get(category):
+                             category_query = cat_queries[category]
+                         else:
+                             category_query = f"{style} {category} for {occasion}"
+                    
+                    # ✨ PHASE 4: Vibe Injection
+                    if vibe_keywords:
+                        vibe_boost = " ".join(vibe_keywords)
+                        category_query += f" {vibe_boost}"
+                        log.info(f"   🔮 Boosting based on Vibe: {vibe_boost}")
                     
                     # ✨ WEEK 2 DAY 4: Inject Preferences into Query (The Picky Client Check)
-                    # Ensure preferred colors/styles are explicitly searched for
+                    # Even with hard filters, keeping this helps the Vector Search rank better
                     if user_preferences.get("colors"):
                         color_boost = " ".join(user_preferences["colors"])
                         category_query += f" {color_boost}"
                         log.info(f"   🎨 Boosting colors in query: {color_boost}")
                     
                     if user_preferences.get("likes"):
-                        # Only add relevant likes (e.g. don't add "blazer" to "pants" search)
                         relevant_likes = [
                             like for like in user_preferences["likes"] 
                             if like in category_query or len(like.split()) > 1
@@ -182,19 +211,81 @@ class StylistAgent(BaseAgent):
                             category_query += f" {like_boost}"
                             log.info(f"   👍 Boosting likes in query: {like_boost}")
                         
-                    # Call product recommendation - semantic search
+                    # Build Search Payload
                     search_payload = {
                         "query": category_query,
                         "clerkUserId": context.get("user_id"),
                         "guestSessionId": context.get("guest_session_id"),
                         "filters": {
-                            "price_max": remaining_budget  # Use full remaining budget, not 60%
+                            "price_max": remaining_budget
                         },
                         "top_k": 20
                     }
                     
+                    # ✨ APPLY HARD FILTERS FROM LLM
+                    if hard_filters:
+                        # Only apply valid filters
+                        if hard_filters.get("type"):
+                            search_payload["filters"]["type"] = hard_filters["type"]
+                        if hard_filters.get("color"):
+                            search_payload["filters"]["color"] = hard_filters["color"]
+                        log.info(f"   🛡️ Applied Hard Filters for {category}: {search_payload['filters']}")
+                    
                     result = await _call_recs_suggest(search_payload)
                     items = result.get("items", [])
+                    
+                    # ✨ FALLBACK LOGIC (Retry strategies)
+                    if not items:
+                        # Strategy 1: Remove Color Filter
+                        if search_payload["filters"].get("color"):
+                            log.info(f"   ⚠️ No items found for {category} with color={search_payload['filters']['color']}. Retrying without color...")
+                            del search_payload["filters"]["color"]
+                            # Add simple boost
+                            if hard_filters.get("color"):
+                                search_payload["query"] += f" {hard_filters['color']}"
+                            
+                            result = await _call_recs_suggest(search_payload)
+                            items = result.get("items", [])
+
+                        # Strategy 2: Remove Type Filter (Extreme Fallback) - ONLY if still 0 items
+                        if not items and search_payload["filters"].get("type"):
+                            log.info(f"   ⚠️ Still no items for {category}. Retrying without strict type filter...")
+                            del search_payload["filters"]["type"]
+                             # The query usually contains the type (e.g. "hoodie"), so we just rely on semantic search
+                            
+                            result = await _call_recs_suggest(search_payload)
+                            items = result.get("items", [])
+                            log.info(f"   🔄 Extreme fallback found {len(items)} items for {category}")
+
+                    # ✨ PHASE 6: Emit category_candidates event with discovered products
+                    # Use a robust check for items
+                    if stream_callback and items and len(items) > 0:
+                        # Send top 5 candidates with essential info for UI
+                        preview_candidates = []
+                        for item in items[:5]:
+                            try:
+                                candidate_data = self._extract_product_data(item)
+                                if candidate_data:
+                                    preview_candidates.append(candidate_data)
+                            except Exception as exc:
+                                log.warning(f"Error parsing item for candidates: {exc}")
+
+                        await stream_callback({
+                            "event_type": "category_candidates",
+                            "category": category,
+                            "candidates": preview_candidates,
+                            "total_found": len(items),
+                            "status": f"Found {len(items)} options for {category}"
+                        })
+                    elif stream_callback:
+                         # Emit empty candidates validation
+                        await stream_callback({
+                            "event_type": "category_candidates",
+                            "category": category,
+                            "candidates": [],
+                            "total_found": 0,
+                            "status": f"No {category} found matching your criteria"
+                        })
                     
                     if items:
                         # ✨ WEEK 2 DAY 4: Filter based on user preferences
@@ -231,77 +322,50 @@ class StylistAgent(BaseAgent):
                             if len(items) < original_count:
                                 log.info(f"   Filtered out {original_count - len(items)} items based on preferences")
 
-                        # Map outfit category to product types
-                        category_mapping = _STYLIST_CONFIG.get("category_mapping", {})
-                        valid_types = category_mapping.get(category, [category])
+                        # ✨ RETRIEVAL ONLY - Hand off to Outfit Builder
+                        valid_items = []
+                        for item in items:
+                            clean = self._extract_product_data(item)
+                            if clean and self._validate_category_relevance(category, clean['title']):
+                                valid_items.append(clean)
                         
-                        # STRICT filter: only valid types, no fallback!
-                        category_items = [
-                            item for item in items 
-                            if item.get("type") in valid_types
-                            and item.get("slug") not in selected_slugs  # No duplicates!
-                        ]
-                        
-                        # ✨ SMART BUDGET ALLOCATION
-                        # Divide remaining budget among remaining categories
-                        remaining_categories = len(categories) - idx
-                        per_category_budget = remaining_budget / remaining_categories if remaining_categories > 0 else remaining_budget
-                        
-                        log.info(f"   Budget for {category}: €{per_category_budget:.2f} (€{remaining_budget:.2f} / {remaining_categories} remaining)")
-                        
-                        # Select best item that fits per-category budget
-                        best_item = None
-                        for item in category_items:
-                            slug = item.get("slug", "")
-                            item_price = float(item.get("price", 0) or 0)
-                            
-                            # Budget check: use per-category budget
-                            if slug and (item_price == 0 or item_price <= per_category_budget):
-                                best_item = item
-                                break
-                            
-                        if best_item:
-                            slug = best_item.get("slug", "")
-                            item_price = float(best_item.get("price", 0) or 0)
-                            
-                            outfit_items.append({
-                                "category": category,
-                                "product": best_item,
-                                "reason": self._get_selection_reason(category, occasion, style)
-                            })
-                            
-                            selected_slugs.add(slug)  # Track to avoid duplicates
-                            total_cost += item_price
-                            remaining_budget -= item_price
-                            tools_used.append(f"hybrid_search({category})")
-                            
-                            log.info(f"Selected {slug} (€{item_price}) for {category}, remaining budget: €{remaining_budget}")
-                        else:
-                            errors.append(f"No {category} found within budget")
-                            log.warning(f"No affordable {category} within €{remaining_budget}")
-                    else:
-                        errors.append(f"No {category} found")
-                        log.warning(f"No products found for {category}")
-                        
+                        candidates[category] = valid_items
+                        log.info(f"   Stored {len(valid_items)} candidates for {category}")
+
                 except Exception as e:
                     log.error(f"Search failed for {category}: {e}")
-                    errors.append(f"Search error: {category}")
+                    candidates[category] = []
+                    continue
             
-            # Calculate success and confidence
-            success = len(outfit_items) >= 2  # Need at least 2 items
-            within_budget = total_cost <= budget
+            # Return Candidates for Builder
+            found_count = len(candidates)
+            if found_count == 0:
+                user_msg = "I looked through our catalog but couldn't find items matching your exact criteria. Try broadening your style or budget preferences."
+            else:
+                user_msg = f"I've found some great options for your {occasion} outfit across {found_count} categories. Take a look!"
+
+            return AgentResult(
+                success=True,
+                data={
+                    "candidates": candidates,
+                    "intent": analysis,
+                    "#debug_info": "Candidates retrieved, passed to OutfitBuilder",
+                    "user_preferences": user_preferences or {}
+                },
+                reasoning=user_msg,
+                confidence=1.0,
+                tools_used=["hybrid_search"]
+            )
             
-            # Confidence based on completeness and budget adherence
-            confidence = (len(outfit_items) / len(categories)) * 0.9
-            if within_budget:
-                confidence += 0.1
-            
-            # Build reasoning
-            reasoning_parts = []
-            if outfit_items:
-                reasoning_parts.append(f"Selected {len(outfit_items)} items for {occasion} ({style} style)")
-            if errors:
-                reasoning_parts.append(f"Issues: {', '.join(errors[:2])}")  # Show first 2 errors
+        except Exception as e:
+            log.error(f"Stylist execution failed: {e}")
+            return AgentResult(
+                success=False,
+                errors=[str(e)],
+                data={"candidates": {}},
+                reasoning="Failed to retrieve candidates",
+                confidence=0.0
+            )
 
             # ✨ WEEK 3 DAY 1: Visual Validation (GPT-4o)
             if len(outfit_items) >= 2:
@@ -314,8 +378,17 @@ class StylistAgent(BaseAgent):
                     
                     if validation:
                         reasoning_parts.append(f"Stylist Check: {validation.get('critique')}")
+                        
+                        # Check Harmony
                         if validation.get("score", 1.0) < 0.6:
-                            log.warning(f"⚠️ Outfit visual clash detected: {validation.get('issues')}")
+                            log.warning(f"⚠️ Outfit visual clash: {validation.get('issues')}")
+                            
+                        # Check Completeness
+                        comp = validation.get("completeness_check", {})
+                        if not comp.get("is_complete", True):
+                            missing = comp.get("missing", [])
+                            log.warning(f"⚠️ Outfit incomplete: Missing {', '.join(missing)}")
+                            reasoning_parts.append(f"Note: Missing {', '.join(missing)}")
                         
                 except Exception as e:
                     log.error(f"Visual validation failed (skipping): {e}")
@@ -388,17 +461,22 @@ class StylistAgent(BaseAgent):
         self, 
         query: str, 
         budget: float, 
-        categories: List[str],
-        user_preferences: Dict[str, Any] = None
+        provided_categories: List[str], 
+        user_preferences: Dict[str, Any] = None,
+        vibe_keywords: List[str] = None
     ) -> Dict[str, Any]:
         """
-        Use LLM to interpret style/occasion and generate search queries.
-        Replaces brittle regex/keyword matching.
+        Use LLM to interpret style/occasion and generate Hybrid Search plans (Query + Filters).
         """
         try:
             model = os.getenv("LLM_REASONING_MODEL", "openrouter/openai/gpt-4o-mini")
             
-            # Construct context-aware system prompt
+            # ✨ HYBRID SEARCH: Fetch valid vocab to enforce valid filters
+            vocab = await asyncio.to_thread(self._get_vocab)
+            valid_types = ", ".join(vocab.get("types", []))
+            valid_colors = ", ".join(vocab.get("colors", []))
+            
+            # Context regarding user preferences
             prefs_text = ""
             if user_preferences:
                 if user_preferences.get("likes"):
@@ -408,28 +486,48 @@ class StylistAgent(BaseAgent):
                 if user_preferences.get("colors"):
                     prefs_text += f"\nPreferred Colors: {', '.join(user_preferences['colors'])}"
 
-            prompt = f"""You are an Expert Fashion Stylist AI.
+            # Vibe Context
+            vibe_context = ""
+            if vibe_keywords:
+                 vibe_context = f"DETECTED AESTHETIC VIBE: This query matches specific visual styles. You MUST prioritize items with these attributes: {', '.join(vibe_keywords)}"
+            
+            category_constraint = ""
+            if provided_categories and provided_categories != ["top", "bottom"] and provided_categories != ["sweatshirt", "sweater"]:
+                 category_constraint = f"CONSTRAINT: You MUST generate plans for EXACTLY these categories: {', '.join(provided_categories)}. Do not add or remove."
+            else:
+                 category_constraint = "CONSTRAINT: You are the stylist. Decide what items make a COMPLETE outfit for this occasion. usually Top + Bottom + Shoes."
+
+            prompt = f"""You are an Expert Fashion Stylist AI using HYBRID SEARCH.
 User Request: "{query}"
 Budget: €{budget}
-Categories to fill: {', '.join(categories)}
+{category_constraint}
 {prefs_text}
+{vibe_context}
+
+DATABASE VOCABULARY (Use these EXACT values for filters):
+- Allowed Types: {valid_types}
+- Allowed Colors: {valid_colors}
 
 Task:
-1. Analyze the implied Occasion and Style.
-2. Generate a precise Semantic Search Query for EACH category.
-3. BE SPECIFIC. "casual press conference" -> "smart casual blazer", NOT "hoodie".
-4. "Streetwear" = Hoodies/Baggy. "Casual" (for work/meeting) = Relaxed Blazer/Smart Shirt.
-5. Respect the Budget.
+1. Analyze Occasion/Style.
+2. Decide categories.
+3. For EACH category, generate a search PLAN:
+   - "query": KEYWORD description for search (e.g. "beige hoodie"). Keep it simple and objective. Avoid subjective adjectives like "stunning" or "perfect" as they break keyword search. Include VIBE keywords only if visual (e.g. "patterned", "silk").
+   - "filters": Strict metadata constraints.
+     - "type": MUST be one of Allowed Types (e.g. "hoodie"). Crucial for relevance.
+     - "color": MUST be one of Allowed Colors if user specified a color preference. Otherwise null.
 
 Response JSON Format:
 {{
     "occasion": "detected occasion",
     "style": "detected style",
-    "reasoning": "why you chose this style",
-    "category_queries": {{
-        "top": "specific search query for top",
-        "bottom": "specific search query for bottom",
-        "shoes": "specific search query for shoes"
+    "reasoning": "thought process",
+    "categories": ["list", "of", "categories"],
+    "category_plans": {{
+        "CategoryName": {{
+            "query": "semantic text",
+            "filters": {{ "type": "valid_type_or_null", "color": "valid_color_or_null" }}
+        }}
     }}
 }}
 DO NOT output markdown. Just the JSON object.
@@ -445,12 +543,13 @@ DO NOT output markdown. Just the JSON object.
             
         except Exception as e:
             log.error(f"LLM analysis failed: {e}")
-            # Fallback to heuristic parsing
+            # Fallback
             occ, style = self._parse_query(query)
             return {
                 "occasion": occ,
                 "style": style,
-                "category_queries": {} # Will trigger fallback in execute
+                "categories": provided_categories,
+                "category_plans": {}
             }
 
     def _get_selection_reason(self, category: str, occasion: str, style: str) -> str:
@@ -470,12 +569,102 @@ DO NOT output markdown. Just the JSON object.
         template = reasons.get(occasion, f"Matches {style} style")
         return template.format(category=category)
 
+    def _extract_product_data(self, item: Any) -> Optional[Dict[str, Any]]:
+        """Safe extraction of product data handling various formats (dict, Pydantic, etc)."""
+        try:
+            # Helper to get value from dict or object
+            def get_val(obj, key, default=None):
+                if isinstance(obj, dict):
+                    return obj.get(key, default)
+                return getattr(obj, key, default)
+
+            # Handle price (float, int, or string like "$100")
+            raw_price = get_val(item, "price", 0)
+            price = 0.0
+            if isinstance(raw_price, (int, float)):
+                price = float(raw_price)
+            elif isinstance(raw_price, str):
+                import re
+                nums = re.findall(r"[\d\.]+", raw_price)
+                if nums:
+                    price = float(nums[0])
+            
+            # Handle image (imageUrl, image_url, image, images[])
+            image_url = get_val(item, "imageUrl") or get_val(item, "image_url") or get_val(item, "image")
+            
+            # Check for images list
+            if not image_url:
+                images = get_val(item, "images")
+                if images and isinstance(images, list) and len(images) > 0:
+                    image_url = images[0]
+                
+            return {
+                "title": get_val(item, "title", "Unknown Product"),
+                "price": price,
+                "imageUrl": image_url,
+                "slug": get_val(item, "slug", ""),
+                "type": get_val(item, "type", "product"),
+                "color": get_val(item, "color"),  # For compatibility matching
+            }
+        except Exception as e:
+            log.warning(f"Failed to extract product data: {e}")
+            return None
+
+    def _validate_category_relevance(self, category: str, item_title: str) -> bool:
+        """
+        Check if item title seems relevant to the category.
+        Prevents 'Pants' appearing in 'Tops' search results.
+        """
+        title = item_title.lower()
+        category = category.lower()
+        
+        # Negative Keywords (What to REJECT)
+        reject_map = {
+            "tops": ["pants", "jeans", "shorts", "skirt", "trouser", "shoe", "sneaker", "boot", "sandal", "heel", "loafer"],
+            "bottoms": ["shirt", "blouse", "tee", "top", "sweat", "hoodie", "jacket", "coat", "sweater", "cardigan", "shoe", "sneaker", "boot"],
+            "shoes": ["shirt", "blouse", "tee", "top", "sweat", "hoodie", "jacket", "coat", "pant", "jean", "skirt", "dress", "hat", "belt", "bag"],
+            "accessories": ["shirt", "blouse", "tee", "top", "sweat", "pant", "jean", "skirt", "shoe", "sneaker", "boot"]
+        }
+        
+        rejects = reject_map.get(category, [])
+        for word in rejects:
+            if word in title:
+                # Exception: "shirt" in "t-shirt" (handled by simple 'word in title'?)
+                # Wait, "shirt" is in "t-shirt".
+                # If bottoms rejects "shirt". "t-shirt" is rejected. Correct.
+                # If tops rejects "pants". "sweatpants" is rejected. Correct.
+                # Exception: "shorts" in "short sleeve"?
+                if word == "shorts" and "short sleeve" in title:
+                    continue 
+                return False
+                
+        return True
+
+    def _get_vocab(self):
+        """
+        Helper to fetch catalog vocabulary for LLM prompt.
+        Runs synchronously in thread.
+        """
+        try:
+            with get_conn() as conn:
+                v = catalog_vocab(conn)
+                return {
+                    "types": sorted(list(v.get("types", []))),
+                    "colors": sorted(list(v.get("colors", [])))
+                }
+        except Exception as e:
+            log.warning(f"Failed to load vocab for hybrid search prompt: {e}")
+            return {"types": [], "colors": []}
+
 
 # Auto-register agent in global registry
-async def stylist_handler(task: dict, context: dict) -> dict:
-    """Handler function for registry - wraps StylistAgent.execute()"""
+async def stylist_handler(task: dict, context: dict, stream_callback=None) -> dict:
+    """Handler function for registry - wraps StylistAgent.execute()
+    
+    ✨ PHASE 6: Added stream_callback for live product exploration
+    """
     agent = StylistAgent("stylist")
-    result = await agent.run(task, context)
+    result = await agent.execute(task, context, stream_callback=stream_callback)
     return result.to_dict()
 
 

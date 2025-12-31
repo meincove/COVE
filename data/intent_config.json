@@ -138,6 +138,33 @@
       ]
     },
     {
+      "name": "product_question",
+      "priority": 75,
+      "keywords": [
+        "first one",
+        "second one",
+        "third one",
+        "first hoodie",
+        "second hoodie",
+        "first tee",
+        "second tee",
+        "that one",
+        "that hoodie",
+        "that tee",
+        "that jacket",
+        "you showed",
+        "you recommended",
+        "from earlier",
+        "from before",
+        "the one you",
+        "what about the",
+        "tell me about the",
+        "about that",
+        "about the first",
+        "about the second"
+      ]
+    },
+    {
       "name": "lookup_product",
       "priority": 70,
       "keywords": [
