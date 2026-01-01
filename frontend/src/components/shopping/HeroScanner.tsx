@@ -495,7 +495,9 @@ export default function HeroScanner({
                                                     exit={{ opacity: 0, scale: 0.99 }}
                                                     transition={{ duration: 0.22, ease: "easeOut" }}
                                                     onError={(e) => {
-                                                        ; (e.currentTarget as HTMLImageElement).src = "/clothing-images/fallback.jpg"
+                                                        const target = e.currentTarget as HTMLImageElement
+                                                        if (target.src.includes("fallback.jpg")) return
+                                                        target.src = "/clothing-images/fallback.jpg"
                                                     }}
                                                 />
                                             </AnimatePresence>
@@ -622,7 +624,9 @@ export default function HeroScanner({
                                         className="w-full h-full object-cover"
                                         draggable={false}
                                         onError={(e) => {
-                                            ; (e.currentTarget as HTMLImageElement).src = "/clothing-images/fallback.jpg"
+                                            const target = e.currentTarget as HTMLImageElement
+                                            if (target.src.includes("fallback.jpg")) return
+                                            target.src = "/clothing-images/fallback.jpg"
                                         }}
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/10" />
