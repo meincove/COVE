@@ -44,6 +44,8 @@ class RAGIn(BaseModel):
     top_k: int = 6
     # NEW: optional context from UI / orchestrator
     context_slugs: Optional[List[str]] = None
+    filters: Optional[Dict[str, Any]] = None
+    intent: Optional[str] = None
 
 
 
@@ -97,10 +99,20 @@ async def embed(texts: list[str]) -> list[list[float]]:
         }
         payload = {"model": model, "input": texts}
 
-    async with httpx.AsyncClient(timeout=30) as cx:
-        r = await cx.post(url, headers=headers, json=payload)
-        r.raise_for_status()
-        data = r.json()
+    for attempt in range(3):
+        try:
+            async with httpx.AsyncClient(timeout=30) as cx:
+                r = await cx.post(url, headers=headers, json=payload)
+                r.raise_for_status()
+                data = r.json()
+                break # Success
+        except Exception as e:
+            if attempt == 2:
+                log.error(f"Embedding failed after 3 attempts: {e}")
+                raise
+            log.warning(f"Embedding attempt {attempt+1} failed ({e}), retrying...")
+            import asyncio
+            await asyncio.sleep(0.5 * (attempt + 1))
 
     if "data" in data and data["data"] and "embedding" in data["data"][0]:
         return [d["embedding"] for d in data["data"]]
@@ -953,8 +965,11 @@ async def rag_query(body: RAGIn):
         # --- Parse attrs & intent ---
         attrs = _parse_query_attrs(conn, body.query)
         ask_shrink = _ask_shrinkage(body.query)
-        intent = await classify(body.query, attrs)
-        intent_kind = getattr(intent, "kind", "generic")
+        if body.intent:
+            intent_kind = body.intent
+        else:
+            intent = await classify(body.query, attrs)
+            intent_kind = getattr(intent, "kind", "generic")
         emit(
             "query_received",
             trace_id,
@@ -980,15 +995,11 @@ async def rag_query(body: RAGIn):
                     kind="product",
                     top_k=body.top_k,
                 )
-        except TypeError:
-            docs = (
-                await search_keyword(
-                    query=body.query, kind="product", top_k=body.top_k
-                )
-                if USE_KEYWORD_ONLY
-                else await search_hybrid(
-                    query=body.query, kind="product", top_k=body.top_k
-                )
+        except Exception as e:
+            # Fallback to keyword search if vector/embedding fails
+            log.warning(f"⚠️ Search failed (hybrid), falling back to keyword: {e}")
+            docs = search_keyword(
+                conn, query=body.query, kind="product", top_k=body.top_k
             )
 
         emit(
@@ -1040,7 +1051,19 @@ async def rag_query(body: RAGIn):
             return ordinal_resp
 
         # -------- Optional rules-based fit recommendation --------
-        fit_params = _parse_fit_params(body.query)
+        fit_params = None
+        if body.filters:
+            f = body.filters
+            if f.get("height_cm") and f.get("weight_kg"):
+                fit_params = _FitParams(
+                    height_cm=float(f["height_cm"]),
+                    weight_kg=float(f["weight_kg"]),
+                    gender=f.get("gender"),
+                    fit_preference=f.get("fit")
+                )
+        
+        if not fit_params:
+            fit_params = _parse_fit_params(body.query)
 
         if intent_kind == "size_fit" and fit_params is not None:
             # Generic fallback instead of hardcoded "hoodie"

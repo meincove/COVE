@@ -183,6 +183,9 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
         
         # ✨ ONE-SHOT: Extract slots from the triggering message immediately
         if initial_message:
+            # CRITICAL: Store original message for context preservation (e.g., "boyfriend" for gender)
+            state["original_query"] = initial_message
+            
             extracted = await self._extract_slots_from_text(initial_message)
             log.info(f"🚀 One-Shot Extraction from '{initial_message}': {extracted}")
             for key, val in extracted.items():
@@ -279,6 +282,9 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
                 }
         
         # 3. Conversation complete! Build orchestrator query
+        # Preserve original query for context (gender, etc.)
+        state["answers"]["_original_query"] = state.get("original_query", "")
+        
         del self._active_conversations[session_id]
         
         return self._build_orchestrator_trigger(flow, state["answers"])
@@ -342,7 +348,8 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
             "orchestrator_context": {
                 "budget_max": budget_num,
                 "occasion": occasion,
-                "style": style
+                "style": style,
+                "original_query": answers.get("_original_query", "")  # Preserve original for gender/context
             }
         }
     

@@ -339,6 +339,58 @@ def get_variant_by_id(conn: psycopg.Connection, variant_id: str) -> dict | None:
         }
 
 
+def get_product_embedding_by_slug(conn: psycopg.Connection, slug: str) -> List[float] | None:
+    """
+    Fetch the vector embedding for a product by its slug.
+    Used for 'visual similar' / 'more like this' search.
+    """
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            SELECT embedding
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND COALESCE(meta->>'slug','') = %s
+              AND embedding IS NOT NULL
+            LIMIT 1
+            """,
+            (slug,),
+        )
+        row = cur.fetchone()
+        
+        if row and row['embedding'] is not None:
+            # pgvector returns numpy array or list depending on adapter, 
+            # but psycopg 3 + pgvector usually returns a list/array object that casts to list
+            return list(row['embedding'])
+            
+        return None
+
+def get_product_embeddings_by_slugs(conn: psycopg.Connection, slugs: List[str]) -> Dict[str, List[float]]:
+    """
+    Fetch embeddings for multiple products in one query.
+    Returns dict: { slug: embedding_list }
+    """
+    if not slugs:
+        return {}
+        
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            SELECT meta->>'slug' as slug, embedding
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND COALESCE(meta->>'slug','') = ANY(%s)
+              AND embedding IS NOT NULL
+            """,
+            (slugs,),
+        )
+        rows = cur.fetchall()
+        
+        result = {}
+        for row in rows:
+            if row['slug'] and row['embedding'] is not None:
+                result[row['slug']] = list(row['embedding'])
+        return result
 # ---------------------------------------------------------------------
 # CATALOG VOCAB (colors/types) + CACHE
 # ---------------------------------------------------------------------

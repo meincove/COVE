@@ -64,12 +64,16 @@ class ProductAvailabilityChecker:
     async def check_and_recommend(
         self,
         user_query: str,
-        search_results: List[Dict],
-        min_results: int = 3
+        search_results: List[Dict]
     ) -> Dict:
-        """Analyze if search results match user's request."""
+        """Analyze if search results match user's request.
         
-        if len(search_results) < min_results:
+        Note: We do NOT reject based on result count. Even 1 perfect match
+        is better than 0 results. Let the LLM decide relevance, not arbitrary thresholds.
+        """
+        
+        # Empty results = nothing to analyze
+        if not search_results:
             return {
                 "exact_match": False,
                 "has_close_alternative": False,

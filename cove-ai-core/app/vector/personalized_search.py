@@ -123,6 +123,138 @@ def apply_brand_affinity(
     return {r.id: 0.0 for r in results}
 
 
+def calculate_profile_affinity_scores(
+    results: List[SearchResult],
+    user_profile: Dict[str, Any]
+) -> Dict[str, float]:
+    """
+    Calculate affinity scores based on user profile (session or permanent).
+    
+    Boosts items that match:
+    - Affinity Price Tier (e.g. < avg_price_max)
+    - Preferred Color
+    - Preferred Type
+    """
+    if not user_profile:
+        return {r.id: 0.0 for r in results}
+        
+    scores = {}
+    
+    # Extract preferences
+    avg_price = user_profile.get("avg_price_max")
+    pref_color = user_profile.get("preferred_color")
+    
+    for r in results:
+        score = 0.0
+        meta = r.meta
+        
+        # 1. Price Affinity Boost (Soft boost for items within budget)
+        if avg_price and meta.get("price"):
+            price = float(meta["price"])
+            if price <= avg_price:
+                score += 0.3  # Within budget +30%
+            elif price <= avg_price * 1.2:
+                score += 0.1  # Slightly over +10%
+                
+        # 2. Color Affinity
+        if pref_color and meta.get("color"):
+            # Simple substring match for now
+            if pref_color.lower() in str(meta["color"]).lower():
+                score += 0.2
+                
+        scores[r.id] = min(score, 1.0) # Cap at 1.0
+        
+    return scores
+
+
+def calculate_session_affinity_scores(
+    results: List[SearchResult],
+    recently_viewed_slugs: List[str],
+    embedding_map: Optional[Dict[str, List[float]]] = None
+) -> Dict[str, float]:
+    """
+    Calculate session affinity scores based on recently viewed products.
+    
+    Boosts products that are similar (by vector) to what the user has viewed
+    during this session. More recent views count more.
+    
+    Args:
+        results: Search results to score
+        recently_viewed_slugs: Slugs of recently viewed products (most recent first)
+        embedding_map: Optional preloaded embeddings {slug: vector}
+        
+    Returns:
+        Dict mapping result IDs to session affinity scores (0.0 to 1.0)
+    """
+    import numpy as np
+    
+    if not recently_viewed_slugs:
+        return {r.id: 0.0 for r in results}
+    
+    # If no embedding map provided, we can't calculate vector similarity
+    # Fall back to simple slug matching
+    if not embedding_map:
+        scores = {}
+        viewed_set = set(recently_viewed_slugs)
+        for r in results:
+            slug = r.meta.get("slug", "")
+            # Simple boost if exact match
+            if slug in viewed_set:
+                scores[r.id] = 0.8  # Strong boost for exact match
+            else:
+                scores[r.id] = 0.0
+        return scores
+    
+    # Calculate vector similarity to recently viewed items
+    scores = {}
+    
+    for r in results:
+        slug = r.meta.get("slug", "")
+        result_vec = embedding_map.get(slug)
+        
+        if result_vec is None:
+            scores[r.id] = 0.0
+            continue
+        
+        result_vec = np.array(result_vec)
+        norm_result = np.linalg.norm(result_vec)
+        if norm_result == 0:
+            scores[r.id] = 0.0
+            continue
+        
+        # Weighted average similarity to recently viewed items
+        # More recent items have higher weight
+        total_sim = 0.0
+        total_weight = 0.0
+        
+        for idx, viewed_slug in enumerate(recently_viewed_slugs):
+            viewed_vec = embedding_map.get(viewed_slug)
+            if viewed_vec is None:
+                continue
+                
+            viewed_vec = np.array(viewed_vec)
+            norm_viewed = np.linalg.norm(viewed_vec)
+            if norm_viewed == 0:
+                continue
+            
+            # Cosine similarity
+            sim = np.dot(result_vec, viewed_vec) / (norm_result * norm_viewed)
+            
+            # Recency weight: 1.0 for most recent, decaying by 0.1 per position
+            recency_weight = max(0.1, 1.0 - (idx * 0.1))
+            
+            total_sim += sim * recency_weight
+            total_weight += recency_weight
+        
+        if total_weight > 0:
+            avg_sim = total_sim / total_weight
+            # Convert similarity (-1 to 1) to score (0 to 1)
+            scores[r.id] = max(0.0, min(1.0, (avg_sim + 1) / 2))
+        else:
+            scores[r.id] = 0.0
+    
+    return scores
+
 def personalized_search(
     conn: psycopg.Connection,
     query: str,
@@ -131,34 +263,30 @@ def personalized_search(
     kind: str = "product",
     top_k: int = 6,
     cf_model: Optional[Any] = None,
-    search_weight: float = 0.6,
-    cf_weight: float = 0.4
+    search_weight: float = 0.5,
+    cf_weight: float = 0.2,
+    visual_vibe: Optional[str] = None,
+    user_profile: Optional[Dict[str, Any]] = None,
+    sku_boost: bool = False,
+    recently_viewed_slugs: Optional[List[str]] = None,
+    embedding_map: Optional[Dict[str, List[float]]] = None
 ) -> List[PersonalizedResult]:
     """
-    Personalized search with CF reranking.
+    Personalized search with CF, Profile, and Session-based reranking.
     
     Pipeline:
     1. Hybrid search (BM25 + Vector + RRF) → relevance scores
-    2. CF scoring → personalization scores  
-    3. Weighted fusion → final ranking
-    
-    Industry standard weights:
-    - 60% search relevance (what matches the query)
-    - 40% CF personalization (what user might like)
+    2. CF scoring → history-based personalization  
+    3. Profile scoring → intent-based personalization
+    4. Session scoring → real-time behavior personalization
+    5. Weighted fusion → final ranking
     
     Args:
-        conn: Database connection
-        query: Search query text
-        query_embedding: Query vector
-        user_id: Optional user ID for personalization
-        kind: Document kind filter
-        top_k: Number of final results
-        cf_model: Optional CF model instance
-        search_weight: Weight for search relevance (default 0.6)
-        cf_weight: Weight for CF personalization (default 0.4)
-        
-    Returns:
-        List of PersonalizedResult objects with fused scores
+        visual_vibe: Optional visual style description for vector boosting
+        user_profile: Optional user preferences (price, color, etc.)
+        sku_boost: Boolean to boost BM25 for exact/SKU queries
+        recently_viewed_slugs: Slugs of recently viewed products for session affinity
+        embedding_map: Preloaded embeddings for session affinity calculation
     """
     # 1. Get hybrid search results (larger pool for reranking)
     search_results = search_hybrid_rrf(
@@ -166,63 +294,62 @@ def personalized_search(
         query=query,
         query_embedding=query_embedding,
         kind=kind,
-        top_k=top_k * 3,  # Get 3x results for CF reranking
+        top_k=top_k * 3,  # Get 3x results for reranking
         bm25_k=30,
         vector_k=30,
-        rrf_constant=60
+        rrf_constant=60,
+        visual_vibe=visual_vibe,
+        sku_boost=sku_boost
     )
     
-    # 2. If no user or no CF model, return search results as-is
-    if not user_id or cf_model is None:
-        return [
-            PersonalizedResult(
-                id=r.id,
-                title=r.title,
-                text=r.text,
-                url=r.url,
-                meta=r.meta,
-                search_score=r.score,
-                cf_score=0.0,
-                final_score=r.score,
-                source='search_only'
-            )
-            for r in search_results[:top_k]
-        ]
+    # 2. Calculate scores
+    # A. Search Score (already in results)
     
-    # 3. Get user purchase history
-    user_items = get_user_purchase_history(user_id)
-    
-    if not user_items:
-        # User has no history - return search results
-        return [
-            PersonalizedResult(
-                id=r.id,
-                title=r.title,
-                text=r.text,
-                url=r.url,
-                meta=r.meta,
-                search_score=r.score,
-                cf_score=0.0,
-                final_score=r.score,
-                source='no_history'
-            )
-            for r in search_results[:top_k]
-        ]
-    
-    # 4. Calculate CF scores
+    # B. CF Score (Purchase History)
+    user_items = get_user_purchase_history(user_id) if user_id else []
     cf_scores = calculate_cf_scores_for_results(search_results, user_items, cf_model)
     
-    # 5. Apply weighted fusion
+    # C. Profile Score (Session Intent)
+    profile_scores = calculate_profile_affinity_scores(search_results, user_profile or {})
+    
+    # D. Session Affinity Score (Real-time behavior)
+    session_scores = calculate_session_affinity_scores(
+        search_results, 
+        recently_viewed_slugs or [], 
+        embedding_map
+    )
+    
+    # 3. Fuse Scores
+    # Updated weights: Search (50%) + CF (20%) + Profile (15%) + Session (15%)
+    # If signals are missing, redistribute weights
+    
     personalized_results = []
     for result in search_results:
         cf_score = cf_scores.get(result.id, 0.0)
+        profile_score = profile_scores.get(result.id, 0.0)
+        session_score = session_scores.get(result.id, 0.0)
         
         # Normalize search score (RRF scores are typically 0.01-0.03)
-        # Scale to 0-1 range for fair comparison with CF
-        normalized_search = min(result.score * 20, 1.0)  # RRF * 20 ≈ 0-1
+        normalized_search = min(result.score * 20, 1.0) 
         
-        # Weighted fusion
-        final_score = (search_weight * normalized_search) + (cf_weight * cf_score)
+        # Dynamic Weighting depending on available signals
+        w_search = search_weight
+        w_cf = cf_weight if user_items else 0
+        w_profile = 0.15 if user_profile else 0
+        w_session = 0.15 if recently_viewed_slugs else 0
+        
+        # Fallback to pure search if no personalization signals
+        if w_cf == 0 and w_profile == 0 and w_session == 0:
+             final_score = normalized_search
+        else:
+             # Normalize weights to sum to 1.0
+             total_w = w_search + w_cf + w_profile + w_session
+             final_score = (
+                 (w_search * normalized_search) + 
+                 (w_cf * cf_score) + 
+                 (w_profile * profile_score) +
+                 (w_session * session_score)
+             ) / total_w
         
         personalized_results.append(
             PersonalizedResult(
@@ -238,7 +365,7 @@ def personalized_search(
             )
         )
     
-    # 6. Sort by final score and return top_k
+    # 4. Sort by final score and return top_k
     personalized_results.sort(key=lambda x: x.final_score, reverse=True)
     
     return personalized_results[:top_k]

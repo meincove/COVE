@@ -14,7 +14,8 @@
     "filters": {
         "type": "type",
         "tier": "tier",
-        "color": "color"
+        "color": "color",
+        "gender": "gender"
     },
     "retrieval": {
         "overfetch_multiplier": 4,

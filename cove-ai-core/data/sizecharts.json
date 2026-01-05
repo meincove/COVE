@@ -1,0 +1,294 @@
+[
+    {
+        "type": "hoodie",
+        "gender": "unisex",
+        "key": "hoodie_unisex_regular",
+        "bands": {
+            "XS": {
+                "chest_min": 84,
+                "chest_max": 90,
+                "length": 64
+            },
+            "S": {
+                "chest_min": 88,
+                "chest_max": 94,
+                "length": 66
+            },
+            "M": {
+                "chest_min": 93,
+                "chest_max": 100,
+                "length": 69
+            },
+            "L": {
+                "chest_min": 99,
+                "chest_max": 106,
+                "length": 72
+            },
+            "XL": {
+                "chest_min": 105,
+                "chest_max": 112,
+                "length": 74
+            },
+            "XXL": {
+                "chest_min": 111,
+                "chest_max": 118,
+                "length": 76
+            }
+        }
+    },
+    {
+        "type": "tee",
+        "gender": "men",
+        "key": "tee_men_regular",
+        "bands": {
+            "XS": {
+                "chest_min": 86,
+                "chest_max": 92,
+                "length": 66
+            },
+            "S": {
+                "chest_min": 90,
+                "chest_max": 96,
+                "length": 68
+            },
+            "M": {
+                "chest_min": 96,
+                "chest_max": 102,
+                "length": 71
+            },
+            "L": {
+                "chest_min": 102,
+                "chest_max": 108,
+                "length": 74
+            },
+            "XL": {
+                "chest_min": 108,
+                "chest_max": 115,
+                "length": 77
+            },
+            "XXL": {
+                "chest_min": 114,
+                "chest_max": 122,
+                "length": 79
+            }
+        }
+    },
+    {
+        "type": "tee",
+        "gender": "women",
+        "key": "tee_women_regular",
+        "bands": {
+            "XS": {
+                "chest_min": 78,
+                "chest_max": 84,
+                "length": 58
+            },
+            "S": {
+                "chest_min": 82,
+                "chest_max": 88,
+                "length": 60
+            },
+            "M": {
+                "chest_min": 88,
+                "chest_max": 94,
+                "length": 63
+            },
+            "L": {
+                "chest_min": 94,
+                "chest_max": 100,
+                "length": 65
+            },
+            "XL": {
+                "chest_min": 100,
+                "chest_max": 108,
+                "length": 67
+            }
+        }
+    },
+    {
+        "type": "jacket",
+        "gender": "unisex",
+        "key": "jacket_unisex_regular",
+        "bands": {
+            "XS": {
+                "chest_min": 82,
+                "chest_max": 88,
+                "length": 60,
+                "sleeve": 60
+            },
+            "S": {
+                "chest_min": 86,
+                "chest_max": 92,
+                "length": 63,
+                "sleeve": 62
+            },
+            "M": {
+                "chest_min": 91,
+                "chest_max": 98,
+                "length": 66,
+                "sleeve": 64
+            },
+            "L": {
+                "chest_min": 97,
+                "chest_max": 104,
+                "length": 69,
+                "sleeve": 66
+            },
+            "XL": {
+                "chest_min": 103,
+                "chest_max": 110,
+                "length": 72,
+                "sleeve": 68
+            },
+            "XXL": {
+                "chest_min": 109,
+                "chest_max": 116,
+                "length": 74,
+                "sleeve": 70
+            }
+        }
+    },
+    {
+        "type": "pants",
+        "gender": "men",
+        "key": "pants_men_regular",
+        "bands": {
+            "XS": {
+                "waist_min": 68,
+                "waist_max": 72,
+                "inseam": 76
+            },
+            "S": {
+                "waist_min": 72,
+                "waist_max": 78,
+                "inseam": 78
+            },
+            "M": {
+                "waist_min": 78,
+                "waist_max": 84,
+                "inseam": 80
+            },
+            "L": {
+                "waist_min": 84,
+                "waist_max": 92,
+                "inseam": 82
+            },
+            "XL": {
+                "waist_min": 92,
+                "waist_max": 102,
+                "inseam": 82
+            },
+            "XXL": {
+                "waist_min": 102,
+                "waist_max": 112,
+                "inseam": 82
+            }
+        }
+    },
+    {
+        "type": "pants",
+        "gender": "women",
+        "key": "pants_women_regular",
+        "bands": {
+            "XS": {
+                "waist_min": 58,
+                "waist_max": 64,
+                "inseam": 72
+            },
+            "S": {
+                "waist_min": 64,
+                "waist_max": 70,
+                "inseam": 74
+            },
+            "M": {
+                "waist_min": 70,
+                "waist_max": 78,
+                "inseam": 76
+            },
+            "L": {
+                "waist_min": 78,
+                "waist_max": 86,
+                "inseam": 76
+            },
+            "XL": {
+                "waist_min": 86,
+                "waist_max": 96,
+                "inseam": 76
+            }
+        }
+    },
+    {
+        "type": "joggers",
+        "gender": "unisex",
+        "key": "joggers_unisex_relaxed",
+        "bands": {
+            "XS": {
+                "waist_min": 66,
+                "waist_max": 74,
+                "inseam": 70
+            },
+            "S": {
+                "waist_min": 72,
+                "waist_max": 80,
+                "inseam": 72
+            },
+            "M": {
+                "waist_min": 78,
+                "waist_max": 88,
+                "inseam": 74
+            },
+            "L": {
+                "waist_min": 86,
+                "waist_max": 96,
+                "inseam": 76
+            },
+            "XL": {
+                "waist_min": 94,
+                "waist_max": 106,
+                "inseam": 76
+            },
+            "XXL": {
+                "waist_min": 104,
+                "waist_max": 116,
+                "inseam": 76
+            }
+        }
+    },
+    {
+        "type": "sweatshirt",
+        "gender": "unisex",
+        "key": "sweatshirt_unisex_regular",
+        "bands": {
+            "XS": {
+                "chest_min": 84,
+                "chest_max": 90,
+                "length": 62
+            },
+            "S": {
+                "chest_min": 88,
+                "chest_max": 94,
+                "length": 64
+            },
+            "M": {
+                "chest_min": 93,
+                "chest_max": 100,
+                "length": 67
+            },
+            "L": {
+                "chest_min": 99,
+                "chest_max": 106,
+                "length": 70
+            },
+            "XL": {
+                "chest_min": 105,
+                "chest_max": 112,
+                "length": 72
+            },
+            "XXL": {
+                "chest_min": 111,
+                "chest_max": 118,
+                "length": 74
+            }
+        }
+    }
+]

@@ -20,7 +20,6 @@ from app.vector.store import get_conn
 from app.agent.orchestrator import classify
 from app.routes.rag import _parse_query_attrs  # reuse the same attrs logic as RAG
 from app.agent.filters import (
-    parse_numeric_filters,
     build_filters,
     is_structured_product_query,
     build_rec_query,
@@ -41,6 +40,7 @@ from app.core.policy_cache import get_policy_answer
 from app.core.performance import measure_time
 # Week 5-6: Intelligent LLM-based intent classification
 from app.mcp_agents.intent_classifier import get_classifier
+from app.mcp_agents.verifier.verifier import get_verifier
 # Phase 1: Agentic enhancements - Thinking display (feature-flagged)
 from app.core.thinking_tracker import ThinkingTracker
 from app.core.tool_tracker import ToolTracker
@@ -53,20 +53,16 @@ from app.services.session_state import (
     get_namespaced_session_id,
     get_base_user_id,
 )
+from app.services.history_manager import HistoryManager
 
 USE_TOOLS_LAYER = os.getenv("USE_TOOLS_LAYER", "true").lower() == "true"
 DISABLE_TOOLS_HTTP_FALLBACK = os.getenv("DISABLE_TOOLS_HTTP_FALLBACK", "false").lower() == "true"
 log = logging.getLogger("cove.agent")
 router = APIRouter()
 
-# How much history we send per LLM call (after trimming)
-# Phase 2: Expanded context window for better conversation memory
-# Increased from 8 to 15 to remember ~7-8 conversation turns
-MAX_HISTORY_MESSAGES = int(os.getenv("AGENT_MAX_HISTORY_MESSAGES", "15"))
 
-# Phase 2: Delay summarization for longer conversations
-# Increased from 16 to 30 to preserve more detail in recent history
-HISTORY_SUMMARY_THRESHOLD = int(os.getenv("AGENT_HISTORY_SUMMARY_THRESHOLD", "30"))
+# ------------------ Data Models ------------------
+
 
 # Safety cap on summary length (characters)
 MAX_HISTORY_SUMMARY_CHARS = int(os.getenv("AGENT_MAX_HISTORY_SUMMARY_CHARS", "600"))
@@ -75,347 +71,25 @@ MAX_HISTORY_SUMMARY_CHARS = int(os.getenv("AGENT_MAX_HISTORY_SUMMARY_CHARS", "60
 # ===== SESSION NAMESPACING UTILITIES =====
 # Support for separate chat sessions (main, outfit_builder, cart, etc.)
 
-class AgentIn(BaseModel):
-    message: str
-    top_k: int = 6
-
-    # optional context for cart + user
-    cartId: Optional[str] = None
-    clerkUserId: Optional[str] = None
-    guestSessionId: Optional[str] = None
-    sessionType: Optional[str] = "main"  # NEW: "main", "outfit_builder", "cart"
-    email: Optional[str] = None
-
-    # how much per-user history to use in the LLM fallback
-    # "user" = normal behavior, "none" = treat as fresh chat turn
-    historyScope: Literal["user", "session", "none"] = "user"
-    
-    # Config-driven validation (cached)
-    _validation_config: ClassVar[Optional[dict]] = None
-    
-    @classmethod
-    def get_validation_config(cls) -> dict:
-        """Load validation config once and cache it"""
-        if cls._validation_config is None:
-            # Path from agent.py: .../cove-ai-core/app/routes/agent.py
-            # Need to go up 3 levels: routes -> app -> cove-ai-core -> data
-            config_path = Path(__file__).resolve().parent.parent.parent / "data" / "validation_config.json"
-            with open(config_path) as f:
-                cls._validation_config = json.load(f)
-        return cls._validation_config
-    
-    @validator('message')
-    def validate_message(cls, v: str) -> str:
-        """Config-driven message validation - no hardcoded rules"""
-        config = cls.get_validation_config()['query_validation']['message']
-        errors = cls.get_validation_config()['error_messages']
-        
-        # Handle None explicitly (config-driven)
-        if v is None:
-            if not config.get('allow_null', False):
-                raise ValueError(errors['empty_message'])
-            return None
-        
-        # Trim if configured
-        if config.get('trim_before_validation', True) and v:
-            v = v.strip()
-        
-        # Check empty/whitespace (config-driven)
-        if not config.get('allow_whitespace_only', False):
-            if not v or not v.strip():
-                raise ValueError(errors['empty_message'])
-        
-        # Check length (config-driven limits)
-        max_len = config.get('max_length', 5000)
-        if len(v) > max_len:
-            raise ValueError(errors['message_too_long'].format(max_length=max_len))
-        
-        return v
-    
-    @validator('top_k')
-    def validate_top_k(cls, v: int) -> int:
-        """Config-driven top_k validation - no hardcoded limits"""
-        config = cls.get_validation_config()['query_validation']['top_k']
-        errors = cls.get_validation_config()['error_messages']
-        
-        min_val = config.get('min', 1)
-        max_val = config.get('max', 100)
-        
-        # Config-driven boundary check
-        if v < min_val or v > max_val:
-            raise ValueError(errors['invalid_top_k'].format(min=min_val, max=max_val))
-        
-        return v
-
-
-async def _summarise_history_chunk(
-    history_chunk: List[Dict[str, Any]],
-) -> Optional[str]:
-    """
-    Summarise older conversation turns into a compact text that
-    preserves only what matters for future shopping/size/policy questions.
-    """
-    if not history_chunk:
-        return None
-
-    simplified: List[Dict[str, str]] = []
-    for row in history_chunk:
-        role = (row.get("role") or "user").lower()
-        if role not in ("user", "assistant", "system"):
-            role = "user"
-        content = str(row.get("content") or "").strip()
-        if not content:
-            continue
-        simplified.append({"role": role, "content": content})
-
-    if not simplified:
-        return None
-
-    from app.core.rules import get_prompt
-    
-    client = LLMClient()
-    messages = [
-        {
-            "role": "system",
-            "content": get_prompt(
-                "agent_summary",
-                default="You summarise previous conversation turns. Write a concise summary."
-            ),
-        },
-        {
-            "role": "user",
-            "content": json.dumps(simplified, ensure_ascii=False),
-        },
-    ]
-
-    try:
-        text = await client.generate(messages)
-        if not text:
-            return None
-        text = text.strip()
-        if len(text) > MAX_HISTORY_SUMMARY_CHARS:
-            text = text[:MAX_HISTORY_SUMMARY_CHARS]
-        return text or None
-    except Exception as e:
-        log.warning("history summarisation failed: %s", e, exc_info=True)
-        return None
-
-
-async def _prepare_history_for_llm(
-    history: List[Dict[str, Any]],
-) -> tuple[Optional[str], List[Dict[str, Any]]]:
-    """
-    Apply the 'context diet':
-
-      - If history is short (<= MAX_HISTORY_MESSAGES):
-          → no summary, use history as-is.
-      - If history is longer:
-          → keep only the last MAX_HISTORY_MESSAGES entries as the tail,
-            and (optionally) summarise the older part into a short text.
-    """
-    if not history:
-        return None, []
-
-    if len(history) <= MAX_HISTORY_MESSAGES:
-        return None, history
-
-    tail_count = MAX_HISTORY_MESSAGES
-    older = history[:-tail_count]
-    tail = history[-tail_count:]
-
-    summary: Optional[str] = None
-
-    if len(history) >= HISTORY_SUMMARY_THRESHOLD:
-        summary = await _summarise_history_chunk(older)
-
-    return summary, tail
-
-
-from app.core.rules import get_regex_rules
-
-def _is_short_smalltalk(msg: str, intent_kind: str) -> bool:
-    """
-    Detect very short, non-question messages that are likely just casual smalltalk.
-    """
-    q = (msg or "").strip()
-    if not q:
-        return False
-
-    if intent_kind not in ("generic", "unknown"):
-        return False
-
-    rules = get_regex_rules().get("smalltalk", {})
-    max_len = rules.get("max_length", 40)
-    max_tokens = rules.get("max_tokens", 4)
-
-    if len(q) > max_len:
-        return False
-
-    if "?" in q:
-        return False
-
-    tokens = re.findall(r"\w+", q.lower())
-    if len(tokens) == 0:
-        return False
-    if len(tokens) > max_tokens:
-        return False
-
-    return True
-
-
-class AgentItem(BaseModel):
-    title: str
-    url: str
-    slug: str
-    score: Optional[float] = None
-    reason: Optional[str] = None
-    type: Optional[str] = None
-    tier: Optional[str] = None
-    color: Optional[str] = None
-    size: Optional[str] = None
-    variantId: Optional[str] = None
-    price: Optional[float] = None  # Product price for display
-    imageUrl: Optional[str] = None  # ✨ PHASE 6: Product image URL
-    
-    # Rich product details for fact extraction (match RecItem)
-    material: Optional[str] = None
-    fit: Optional[str] = None
-    fabric: Optional[Dict[str, Any]] = None
-    care: Optional[Dict[str, Any]] = None
-    style: Optional[Dict[str, Any]] = None
-    description: Optional[str] = None
-    styleNotes: Optional[str] = None
-    fitNotes: Optional[str] = None
-
-
-# Week 4: Agentic Enhancement - Visible Thinking Status
-class AgentStatus(BaseModel):
-    """Status updates to show agent's thinking process"""
-    kind: Literal["status"]
-    status: Literal[
-        "searching",
-        "analyzing",
-        "reasoning",
-        "comparing",
-        "recommending",
-        "adding_to_cart",
-        "creating_checkout"
-    ]
-    message: str
-    details: Optional[str] = None
-
-
-class AgentOut(BaseModel):
-    kind: Literal["answer", "recommendations", "cart_proposal", "checkout_ready"]
-    answer: str
-    citations: List[Dict[str, Any]] = Field(default_factory=list)
-    items: List[AgentItem] = Field(default_factory=list)
-    cart_payload: Optional[Dict[str, Any]] = None
-    checkout: Optional[Dict[str, Any]] = None  # Week 4: For checkout_ready responses
-    thinking_steps: Optional[List[Dict[str, str]]] = None  # Week 4: Agentic - Show reasoning
-    debug_plan: Optional[Dict[str, Any]] = None
-    # Phase 1: Agentic enhancements - Detailed thinking display (feature-flagged)
-    thinking_events: Optional[List[Dict[str, Any]]] = None  # Detailed AI reasoning steps
-    tools_used: Optional[List[Dict[str, Any]]] = None  # Tools called with duration/results
-
-
-class AgentCartAddIn(BaseModel):
-    variantId: str
-    size: Optional[str] = None  # Allow None for cart proposals without size
-    quantity: int = 1
-
-    cartId: Optional[str] = None
-    clerkUserId: Optional[str] = None
-    guestSessionId: Optional[str] = None
-    email: Optional[str] = None
-    idempotencyKey: Optional[str] = None
-
-
-class AgentCartAddOut(BaseModel):
-    ok: bool
-    message: str
-    cart: Dict[str, Any]
-    cartId: Optional[str] = None
-    items: List[Dict[str, Any]] = Field(default_factory=list)
+from app.schemas.agent import (
+    AgentIn,
+    AgentOut,
+    AgentItem,
+    AgentStatus,
+    AgentCartAddIn,
+    AgentCartAddOut
+)
+from app.services.product import get_available_colors
+# from app.services.intent import looks_like_cart_add, get_recently_discussed_product_index
 
 
 # ---------- Small helpers ----------
 
 
-def _looks_like_cart_add(msg: str) -> bool:
-    """
-    Conservative detector for "add to cart" / "buy this" intents.
-    """
-    q = msg.lower()
-    rules = get_regex_rules().get("cart", {})
-
-    # 1. Phrases
-    phrases = rules.get("phrases", [])
-    if "cart" in q and any(kw in q for kw in phrases):
-        return True
-
-    # 2. Buy verbs
-    if pattern := rules.get("buy_verbs"):
-        if re.search(pattern, q):
-            return True
-
-    # 3. "Add this" + product type
-    add_pat = rules.get("add_pattern")
-    prod_pat = rules.get("product_types")
-    
-    if add_pat and prod_pat:
-        if re.search(add_pat, q) and re.search(prod_pat, q):
-            return True
-
-    return False
 
 
-def _get_recently_discussed_product_index(
-    history: List[Dict[str, Any]],
-    last_recs: List[Dict[str, Any]],
-) -> Optional[int]:
-    """
-    Check conversation history for ordinal references to products
-    (e.g., "second one", "first product") and return the matching index.
-    
-    This enables context-aware cart add when user says "add this" after
-    discussing a specific product.
-    """
-    if not history or not last_recs:
-        return None
-    
-    # Ordinal word to index mapping
-    ordinal_map = {
-        'first': 0, '1st': 0, 
-        'second': 1, '2nd': 1,
-        'third': 2, '3rd': 2,
-        'fourth': 3, '4th': 3,
-        'fifth': 4, '5th': 4,
-        'sixth': 5, '6th': 5,
-    }
-    
-    # Look at recent messages for ordinal product references
-    for msg in reversed(history[-6:]):  # Check last 6 messages
-        content = (msg.get("content") or "").lower()
-        role = msg.get("role", "user")
-        
-        # Skip system messages
-        if role == "system":
-            continue
-            
-        # Check for ordinal references
-        ordinal_match = re.search(
-            r'\b(first|second|third|fourth|fifth|sixth|1st|2nd|3rd|4th|5th|6th)\b\s*(one|product|item)?',
-            content
-        )
-        if ordinal_match:
-            word = ordinal_match.group(1).lower()
-            idx = ordinal_map.get(word)
-            if idx is not None and 0 <= idx < len(last_recs):
-                log.info(f"[CONTEXT_CART] Found ordinal reference '{word}' -> index {idx}")
-                return idx
-    
-    return None
+
+
 
 
 # ---------- AI profile integration ----------
@@ -479,6 +153,12 @@ def _apply_profile_defaults_to_filters(
         if sz_top:
             merged["size"] = sz_top
 
+    # Gender fallback from profile
+    if not merged.get("gender"):
+        gender = (profile.get("gender") or "").lower().strip()
+        if gender in ("male", "female", "unisex"):
+            merged["gender"] = gender
+
     return merged
 
 
@@ -491,27 +171,7 @@ from app.services.session_state import (
 # Delegated to SessionStateManager
 
 
-def _get_available_colors(slug: str) -> List[str]:
-    """Get available colors for a product by querying database for variants."""
-    try:
-        # Extract base slug (e.g., 'pg-hoodie-corebasics-119' → 'pg-hoodie-corebasics')
-        base_slug = slug.rsplit('-', 1)[0] if '-' in slug else slug
-        
-        query = """
-            SELECT DISTINCT color
-            FROM cove_product_embeddings
-            WHERE slug LIKE %s AND color IS NOT NULL AND color != ''
-            ORDER BY color
-        """
-        
-        with _get_pg_conn() as conn:
-            with conn.cursor() as cur:
-                cur.execute(query, (f"{base_slug}%",))
-                colors = [row[0] for row in cur.fetchall()]
-                return colors if len(colors) > 1 else []  # Only return if multiple colors
-    except Exception as e:
-        log.warning(f"Failed to get colors for {slug}: {e}")
-        return []
+
 
 
 async def _select_from_last_recs_via_llm(
@@ -624,150 +284,14 @@ Always respond with JSON only.
 async def _fetch_history_for_llm(
     clerk_user_id: Optional[str],
     guest_session_id: Optional[str],
-    limit: int = 20,
+    limit: int,
 ) -> List[Dict[str, Any]]:
     """
-    Pull recent chat history from Django and return the raw message dicts.
+    Fetch history for LLM, ensuring it's not too long.
     """
-    if not clerk_user_id and not guest_session_id:
-        return []
-
-    base = DJANGO_BASE_URL.rstrip("/")
-    url = f"{base}/ai_profiles/history/"
-
-    params: Dict[str, str] = {"limit": str(max(1, min(limit, 100)))}
-    if clerk_user_id:
-        params["clerkUserId"] = clerk_user_id
-    else:
-        params["guestSessionId"] = guest_session_id or ""
-
-    try:
-        log.debug(f"[_get_history] Requesting {url} with params={params}", file=sys.stderr)
-        async with httpx.AsyncClient(timeout=10) as cx:
-            r = await cx.get(url, params=params)
-        log.debug(f"[_get_history] Response {r.status_code}: {r.text}", file=sys.stderr)
-        if r.status_code != 200:
-            log.warning("history_get non-200 %s: %s", r.status_code, r.text)
-            return []
-        data = r.json()
-        msgs = data.get("items") or data.get("messages") or []  # Support both new and old format
-        if isinstance(msgs, list):
-            return msgs
-    except Exception as e:
-        log.warning("history_get failed: %s", e)
-
-    return []
-
-
-def _history_to_llm_messages(
-    history: List[Dict[str, Any]],
-    user_message: str,
-    *,
-    smalltalk: bool = False,
-    summary: Optional[str] = None,
-    conversation_facts: Optional[Dict[str, Any]] = None,
-) -> List[Dict[str, str]]:
-    """
-    Convert history rows (already trimmed) into OpenAI-style messages,
-    optionally prepending a summary of older turns and conversation facts.
-    """
-    from app.core.rules import get_prompt
-    
-    is_first_turn = len(history) == 0
-
-    system_content = get_prompt(
-        "agent_chat",
-        default="You are Cove AI, a helpful assistant."
-    )
-
-    if smalltalk:
-        system_content += (
-            "\n\nThe user's current message is a very short, non-question smalltalk message. "
-            "Reply with a warm, brief greeting that fits a premium fashion brand vibe. "
-            "Do NOT list services or be robotic. Just say hello and offer to help style them "
-            "or find the perfect piece."
-        )
-    elif is_first_turn:
-        system_content += (
-            "\n\nThis is the first message in the current chat session. "
-            "You only see the user's current message; do NOT assume they are still "
-            "asking about anything from a previous visit."
-        )
-    else:
-        system_content += (
-            "\n\nUse the conversation history below when it is clearly relevant to the user's "
-            "current message, but do not hallucinate topics that were never mentioned."
-        )
-
-    messages: List[Dict[str, str]] = [
-        {"role": "system", "content": system_content}
-    ]
-    
-    # Inject conversation facts if available
-    if conversation_facts:
-        from app.services.fact_extractor import get_fact_extractor
-        fact_extractor = get_fact_extractor()
-        facts_context = fact_extractor.get_context_for_llm(conversation_facts)
-        
-        if facts_context:
-            messages.append({
-                "role": "system",
-                "content": (
-                    "📋 CONVERSATION CONTEXT - USE THIS TO PROVIDE PERSONALIZED RESPONSES:\n\n"
-                    "IMPORTANT: When the user asks about products, preferences, or references earlier conversation:\n"
-                    "- Check this context FIRST before responding\n"
-                    "- Reference specific products by name when relevant\n"
-                    "- Use their stated preferences to personalize recommendations\n"
-                    "- If they say 'go back to X', look for X in the products below\n\n"
-                    + facts_context
-                )
-            })
-
-    if summary:
-        messages.append(
-            {
-                "role": "system",
-                "content": (
-                    "Summary of earlier conversation (for context only; "
-                    "do not repeat verbatim unless the user asks): "
-                    + summary
-                ),
-            }
-        )
-
-    for row in history:
-        role = row.get("role") or "user"
-        if role not in ("user", "assistant", "system"):
-            if role.lower() in ("bot", "assistant", "ai"):
-                role = "assistant"
-            else:
-                role = "user"
-
-        content = str(row.get("content") or "").strip()
-        if not content:
-            continue
-
-        # ✨ Fix for "second product" context awareness
-        # If this message resulted in showing items (usually assistant message), log them here
-        # so the LLM knows what "the second one" refers to.
-        meta = row.get("meta") or {}
-        items_shown = meta.get("items") or meta.get("items_shown")
-        
-        if items_shown and isinstance(items_shown, list):
-            items_context = "\n\n[System Note: The following products were shown in this turn:]"
-            for i, item in enumerate(items_shown):
-                if isinstance(item, dict):
-                    title = item.get("title", "Item")
-                    color = item.get("color", "")
-                    kind = item.get("type", "")
-                    details = f"{color} {kind}".strip()
-                    items_context += f"\n{i+1}. {title} ({details})"
-            content += items_context
-
-        messages.append({"role": role, "content": content})
-
-    messages.append({"role": "user", "content": user_message})
-    return messages
+    # This function is now deprecated. Use HistoryManager.fetch_history instead.
+    # It's kept for backward compatibility during transition.
+    return await HistoryManager.fetch_history(clerk_user_id, guest_session_id, limit)
 
 
 async def _build_discover_intro(
@@ -793,10 +317,10 @@ async def _build_discover_intro(
     summary = ""
     
     if body.historyScope != "none":
-        raw_history = await _fetch_history_for_llm(body.clerkUserId, body.guestSessionId, limit=20)
+        raw_history = await HistoryManager.fetch_history(body.clerkUserId, body.guestSessionId, limit=20)
         history_len = len(raw_history)
         if history_len > 0:
-            summary, _ = await _prepare_history_for_llm(raw_history)
+            summary, _ = await HistoryManager.prepare_history_for_llm(raw_history)
 
     # Small preview of items
     items_preview = []
@@ -815,24 +339,25 @@ async def _build_discover_intro(
 Input JSON has: message (user query), items_preview (products found), history_len, summary.
 
 Rules:
-- Write ONE short, engaging sentence (max 22 words).
+- Write ONE short, engaging sentence (max 25 words).
+- If multiple items are found, summarize the VARIETY (e.g. "Found a mix of [Type A] and [Type B]"). Do NOT focus on just one single item unless only one was found.
+- If specific gender items were found (e.g. "men's hoodies"), mention it to confirm understanding (e.g. "Found some men's hoodies...").
 - If history_len > 0 AND summary exists: Lightly reference their style/preferences.
-- If history_len == 0: Still be engaging! Reference what they asked for and what you found.
 - Be friendly, modern, minimal vibe. Sound like a cool stylist, not a robot.
 - Output ONLY the sentence. No quotes, no JSON, no explanations.
 
 Examples (NO history):
-- "Found 4 hoodies that match your vibe. Let's see what speaks to you."
-- "Here are some bombers I think you'll love. Clean, minimal, premium."
-- "Picked out some tees that fit what you're looking for. Check them out."
+- "Found 4 hoodies including some classic and graphic options. Take a look."
+- "Here are a few men's bombers that match your vibe. Clean and minimal."
+- "Picked out a mix of tees, from basic to premium. Check them out."
 
 Examples (WITH history):
-- "Based on what you usually like, here are some hoodies that fit your aesthetic."
-- "Found some bombers in your style. Think you'll dig these."
+- "Based on your love for black, here are some dark hoodies that fit your aesthetic."
+- "Found some bombers that match your usual style. Think you'll dig these."
 """
 
     if honesty_message:
-        system_prompt += f"\n\nIMPORTANT: The system has already analyzed the search results and determined we don't have exactly what the user wanted. HONESTY MESSAGE: {honesty_message}. Use this information to explain the situation gently."
+        system_prompt += f"\\n\\nIMPORTANT: The system has already analyzed the search results and determined we don't have exactly what the user wanted. HONESTY MESSAGE: {honesty_message}. Use this information to explain the situation gently."
 
     # Inject conversation facts if available
     if conversation_facts:
@@ -841,7 +366,7 @@ Examples (WITH history):
         facts_context = fact_extractor.get_context_for_llm(conversation_facts)
         
         if facts_context:
-            system_prompt += f"\n\n📋 CONVERSATION CONTEXT (use this to personalize your intro):\n\n{facts_context}"
+            system_prompt += f"\\n\\n📋 CONVERSATION CONTEXT (use this to personalize your intro):\\n\\n{facts_context}"
 
     user_payload = {
         "message": body.message,
@@ -880,6 +405,7 @@ Examples (WITH history):
         return {"text": default_text, "llm_used": False, "history_len": history_len, "summary_used": bool(summary)}
 
 
+
 async def _call_llm_with_history(
     body: AgentIn,
     intent_kind: str,
@@ -893,17 +419,25 @@ async def _call_llm_with_history(
     if body.historyScope == "none":
         history: List[Dict[str, Any]] = []
     else:
-        raw_history = await _fetch_history_for_llm(
+        # If we have a lot of history, we might need to fetch more to get context
+        # but usually the summary + recent is enough.
+        # We'll just fetch a safe amount.
+        limit = HistoryManager.MAX_HISTORY_MESSAGES + HistoryManager.HISTORY_SUMMARY_THRESHOLD + 5
+        
+        # 1. Fetch raw history
+        raw_history = await HistoryManager.fetch_history(
             body.clerkUserId,
             body.guestSessionId,
-            limit=20,
+            limit=limit
         )
         raw_history_len = len(raw_history)
-        summary, history = await _prepare_history_for_llm(raw_history)
+
+        # 2. Prepare history for LLM (summarize and trim)
+        summary, history = await HistoryManager.prepare_history_for_llm(raw_history)
 
     smalltalk = intent_kind in ("greeting", "small_talk")
     if not smalltalk:
-        smalltalk = _is_short_smalltalk(body.message, intent_kind)
+        smalltalk = HistoryManager.is_short_smalltalk(body.message, intent_kind)
 
     # Renaming variables to match the provided snippet for consistency,
     # assuming these renames are part of a larger context.
@@ -925,12 +459,12 @@ async def _call_llm_with_history(
     except Exception as e:
         log.warning(f"Failed to retrieve conversation facts (non-critical): {e}")
 
-    messages = _history_to_llm_messages(
-        trimmed_history,
-        q,
-        smalltalk=is_smalltalk,
-        summary=summary_text,
-        conversation_facts=conversation_facts,
+    messages = HistoryManager.format_messages(
+        history=history,
+        user_message=q,
+        smalltalk=smalltalk,
+        summary=summary,
+        conversation_facts=conversation_facts
     )
 
     client = LLMClient()
@@ -948,7 +482,7 @@ async def _call_llm_with_history(
 # ---------- RAG / RECS / FIT delegates ----------
 
 
-async def _call_rag(query: str, top_k: int) -> Dict[str, Any]:
+async def _call_rag(query: str, top_k: int, filters: Optional[Dict[str, Any]] = None, intent: Optional[str] = None) -> Dict[str, Any]:
     """
     Delegate to /ai/rag/query via HTTP.
     """
@@ -956,7 +490,7 @@ async def _call_rag(query: str, top_k: int) -> Dict[str, Any]:
         async with httpx.AsyncClient(timeout=12) as cx:
             r = await cx.post(
                 "http://127.0.0.1:8000/ai/rag/query",
-                json={"query": query, "top_k": top_k},
+                json={"query": query, "top_k": top_k, "filters": filters, "intent": intent},
             )
         if r.status_code == 200:
             return r.json()
@@ -1021,56 +555,36 @@ async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
 # --- FIT integration helpers -------------------------------------------------
 
 
-def _extract_body_metrics(msg: str) -> Optional[Dict[str, float]]:
-    q = msg.lower()
 
-    h_match = re.search(r"(\d{2,3})\s*cm", q)
-    w_match = re.search(r"(\d{2,3})\s*kg", q)
-
-    if not h_match or not w_match:
-        return None
-
-    try:
-        height_cm = float(h_match.group(1))
-        weight_kg = float(w_match.group(1))
-    except Exception:
-        return None
-
-    if not (140 <= height_cm <= 210 and 40 <= weight_kg <= 160):
-        return None
-
-    return {"height_cm": height_cm, "weight_kg": weight_kg}
-
-
-def _infer_fit_preference(msg: str) -> str:
-    q = msg.lower()
-
-    if any(k in q for k in ("oversize", "oversized", "baggy", "very loose")):
-        return "oversized"
-    if any(k in q for k in ("loose", "relaxed")):
-        return "loose"
-    if any(k in q for k in ("tight", "snug", "body fit", "slim fit", "slim")):
-        return "slim"
-    if any(k in q for k in ("regular fit", "standard fit", "normal fit")):
-        return "regular"
-
-    return "regular"
 
 
 async def _call_fit_recommend(
     message: str,
     attrs: Dict[str, Any],
     profile: Optional[Dict[str, Any]] = None,
+    entities: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
-    metrics = _extract_body_metrics(message)
-    if not metrics:
+    # Use LLM entities for body metrics
+    entities = entities or {}
+    metrics = None
+    
+    if entities.get("height_cm") and entities.get("weight_kg"):
+        metrics = {
+            "height_cm": float(entities["height_cm"]),
+            "weight_kg": float(entities["weight_kg"])
+        }
+    
+    # Fallback to regex removed (User requested no regex).
+    # If no metrics via LLM, we return None (or check profile).
+    if not metrics and not profile:
         return None
 
     product_type = None
     if attrs.get("types"):
         product_type = attrs["types"][0]
 
-    fit_pref = _infer_fit_preference(message)
+    # Use LLM entities for fit preference
+    fit_pref = entities.get("fit", "regular")
     if fit_pref == "regular" and profile:
         prof_pref = (profile.get("preferred_fit") or "").lower().strip()
         if prof_pref in (
@@ -1293,19 +807,36 @@ async def agent_query(body: AgentIn) -> AgentOut:
                 # Get debug plan for intent kind
                 debug_plan = getattr(out, "debug_plan", {}) or {}
                 
+                # Prepare agent metadata
+                agent_metadata = {
+                    "items": items_meta,
+                    "intent_kind": debug_plan.get("intent_kind"),
+                    "kind": getattr(out, "kind", "answer"),
+                    "cart_payload": getattr(out, "cart_payload", None),
+                }
+                
                 # Enqueue Celery task (non-blocking, instant)
-                from app.tasks.fact_extraction import extract_and_store_facts_task
-                
-                task = extract_and_store_facts_task.delay(
-                    user_message=body.message,
-                    assistant_response=getattr(out, "answer", ""),
-                    items_meta=items_meta,
-                    intent_kind=debug_plan.get("intent_kind", "unknown"),
-                    clerk_user_id=body.clerkUserId or "",
-                    guest_session_id=body.guestSessionId or ""
-                )
-                
-                log.info(f"📤 [CELERY] Fact extraction task {task.id} enqueued for session {body.guestSessionId}")
+                try:
+                    from app.tasks.fact_extraction import extract_and_store_facts_task
+                    
+                    # Prepare agent metadata if not already available
+                    # Note: We rely on variables from scope (agent_metadata)
+                    # Ensuring agent_metadata is passed correctly
+                    
+                    
+                    task = extract_and_store_facts_task.delay(
+                        body.message,
+                        out.answer,
+                        items_meta,
+                        debug_plan.get("intent_kind"),
+                        body.clerkUserId,
+                        body.guestSessionId
+                    )
+                    log.info(f"📤 [CELERY] Fact extraction task {task.id} enqueued for session {body.guestSessionId}")
+                except ImportError:
+                    log.warning("Celery/tasks module not available, skipping background fact extraction")
+                except Exception as e:
+                    log.warning(f"Failed to enqueue fact extraction task: {e}")
             else:
                 log.info("⏭️  No items to extract facts from, skipping")
     except Exception as e:
@@ -1462,10 +993,50 @@ async def _agent_query_impl(
 
     # Classify intent with context awareness (LLM-based, not hardcoded!)
     classifier = get_classifier()
-    classification = await classifier.classify(q, context=conversation_context)
+    
+    # CRITICAL: Use original_query if available for context preservation (e.g., "boyfriend" for gender)
+    # The conversation flow preserves the original user query in gathered_context
+    original_query = getattr(body, '_gathered_context', {}).get('original_query', '')
+    classification_query = f"{original_query} {q}" if original_query else q
+    
+    classification = await classifier.classify(classification_query, context=conversation_context)
     intent = classification.get("intent")
     confidence = classification.get("confidence", 0.0)
-    
+
+    # === ZALANDO-STYLE SEARCH STRATEGY ===
+    # Translate user query into detailed search attributes using ContextTranslator
+    # This runs in parallel with classification to enrich the final search filters
+    try:
+        from app.agents.context_translator import get_context_translator
+        translator = get_context_translator()
+        
+        # Get user profile for personalization
+        user_profile = SessionStateManager.get_accumulated_profile(body)
+        
+        # Translate query into semantic strategy
+        search_strategy = await translator.translate(q, user_profile, body.history or [])
+        
+        # Merge translated filters into classification entities
+        translated_filters = search_strategy.filters
+        if "entities" not in classification:
+            classification["entities"] = {}
+            
+        # Prioritize translated filters (they are more intelligent)
+        for key, val in translated_filters.items():
+            if val is not None:
+                classification["entities"][key] = val
+                
+        # Store semantic query and boost attributes for later use in Recs
+        # We attach them to classification entities with special keys
+        classification["entities"]["_semantic_query"] = search_strategy.semantic_query
+        classification["entities"]["_boost_attributes"] = search_strategy.boost_attributes
+        classification["entities"]["_visual_vibe"] = search_strategy.visual_vibe
+        
+        log.info(f"🧠 [STRATEGY] Applied Strategy: {search_strategy.semantic_query}")
+        
+    except Exception as e:
+        log.error(f"❌ [STRATEGY] Translation failed, proceeding with basic classification: {e}")
+
     log.debug(f" 🧭 Routing: intent='{intent}' confidence={confidence}")
     
     # ===== CONVERSATION FLOW HANDLER =====
@@ -1473,6 +1044,40 @@ async def _agent_query_impl(
     # This uses LLM classification instead of hardcoded patterns!
     should_skip_flow = skip_conversation_check
     is_outfit_intent = (intent == "outfit_builder" and confidence > 0.6) or body.sessionType == "outfit_builder"
+    
+    # SMART VAGUE QUERY DETECTION
+    # If user says "something casual for the weekend" (no explicit "outfit"/"look" keyword),
+    # skip the conversation flow and use default budget for immediate results
+    # BUT: If user explicitly opened outfit builder (sessionType), keep normal flow
+    vague_occasion_query = False
+    is_explicit_outfit_session = (body.sessionType == "outfit_builder")
+    
+    if is_outfit_intent and not should_skip_flow and not is_explicit_outfit_session:
+        # Check if query contains EXPLICIT outfit keywords (as full words, not substrings)
+        q_lower = q.lower()
+        # "looking" should NOT match "look" - use regex word boundaries
+        import re
+        explicit_outfit_patterns = [
+            r'\boutfit\b', r'\blook\b', r'\bstyle me\b', r'\bdress me\b', 
+            r'\bput together\b', r'\bbuild me\b', r'\bcomplete look\b'
+        ]
+        has_explicit_keyword = any(re.search(p, q_lower) for p in explicit_outfit_patterns)
+        
+        if not has_explicit_keyword:
+            # This is a vague occasion-based query like "something casual for the weekend"
+            # Skip conversation flow, use default budget, show products immediately
+            vague_occasion_query = True
+            log.info(f"📚 [VAGUE QUERY] Detected vague occasion query: '{q}' - Using €150 default budget")
+            
+            # Set default budget context
+            body._gathered_context = {
+                'budget_max': 150,  # Default €150 budget
+                'occasion': 'casual',  # Default occasion
+                '_used_default_budget': True,  # Flag for response customization
+                '_vague_query': q,  # Store original query
+            }
+            # Mark flow as complete so we proceed to outfit building
+            should_skip_flow = True
     
     if is_outfit_intent and not should_skip_flow:
         # Check if we should start conversation flow to gather requirements
@@ -1555,7 +1160,8 @@ async def _agent_query_impl(
                     "session_id": outfit_session_key,  # Namespaced session for conversation
                     "user_id": user_id,  # Base user ID for facts (shared across sessions)
                     "budget_max": budget_max,
-                    "user_size_history": {}  # Could load from profile
+                    "user_size_history": {},  # Could load from profile
+                    "original_query": gathered_context.get("original_query", "")  # Preserve for gender detection
                 },
                 stream=True  # Enable streaming!
             ):
@@ -1742,8 +1348,10 @@ async def _agent_query_impl(
     with get_conn() as conn:
         attrs = _parse_query_attrs(conn, q)
         log.debug(f"🎯 [AGENT] Received parsed attrs from _parse_query_attrs: {attrs}")
-        numeric_filters = parse_numeric_filters(q)
-        log.debug(f"🎯 [AGENT] Numeric filters: {numeric_filters}")
+        # numeric_filters = parse_numeric_filters(q)
+        # Use LLM-extracted entities (Slot Filling) for robust non-regex handling
+        numeric_filters = classification.get("entities") or {}
+        log.debug(f"🎯 [AGENT] LLM extracted filters: {numeric_filters}")
         base_filters: Dict[str, Any] = build_filters(attrs, numeric_filters)
         log.debug(f"🎯 [AGENT] Base filters after build_filters: {base_filters}")
 
@@ -1751,7 +1359,49 @@ async def _agent_query_impl(
         base_filters,
         ai_profile,
     )
+
+    # SESSION GENDER PERSISTENCE
+    # If user specified gender, store it for the entire session
+    if rec_filters.get("gender"):
+        SessionStateManager.set_gender_preference(body, rec_filters["gender"])
+        log.info(f"👤 [GENDER] Stored gender preference for session: {rec_filters['gender']}")
+    else:
+        # Use stored gender from session if available
+        session_gender = SessionStateManager.get_gender_preference(body)
+        if session_gender:
+            rec_filters["gender"] = session_gender
+            log.info(f"👤 [GENDER] Using stored session gender: {session_gender}")
+
+    # CONVERSATIONAL REFINEMENT (Sticky Context)
+    # If current query doesn't specify type/gender, inherit from Hot Search Context
+    search_ctx = SessionStateManager.get_search_context(body)
+    if search_ctx and "filters" in search_ctx:
+        prev_filters = search_ctx["filters"]
+        context_updates = []
+        
+        # Inherit TYPE if not present in current query
+        if not rec_filters.get("type") and prev_filters.get("type"):
+            rec_filters["type"] = prev_filters["type"]
+            context_updates.append(f"type={rec_filters['type']}")
+            
+        # Inherit GENDER if not present
+        if not rec_filters.get("gender") and prev_filters.get("gender"):
+            rec_filters["gender"] = prev_filters["gender"]
+            context_updates.append(f"gender={rec_filters['gender']}")
+            
+        if context_updates:
+            log.info(f"🧩 [CONTEXT] Refined query with context: {', '.join(context_updates)}")
     log.debug(f"🎯 [AGENT] Final rec_filters after profile defaults: {rec_filters}")
+
+    # USER INTELLIGENCE: Accumulate entities for session-level learning
+    # This builds a profile from query patterns (guests get this for the session)
+    SessionStateManager.accumulate_entities(body, numeric_filters)
+    accumulated_profile = SessionStateManager.get_accumulated_profile(body)
+    if accumulated_profile.get("query_count", 0) > 1:
+        log.info(f"🧠 [INTELLIGENCE] Accumulated profile: {accumulated_profile}")
+
+    # NOTE: "Show more" context detection now uses LLM classification (semantic_intent == "show_more")
+    # instead of hardcoded regex patterns. See handling after intelligent_classifier.classify() below.
 
     # Event: Understanding request
     emit_event('thinking:step', {
@@ -1785,12 +1435,64 @@ async def _agent_query_impl(
     from app.mcp_agents.intent_mapping import map_semantic_intent_to_orchestrator
     semantic_intent = classification_result["intent"]
     confidence = classification_result.get("confidence", 0.95)
+    
+    # === LLM-BASED "SHOW MORE" HANDLING ===
+    # When LLM detects user wants more of same (e.g., "I'm not impressed", "got anything else?")
+    # inherit the product type from conversation context
+    if semantic_intent == "show_more" and not rec_filters.get("type"):
+        inherited_type = None
+        
+        # Priority 1: Hot Search Context (Synchronous, Production Grade)
+        # This is the exact context from the last successful search in this session
+        search_ctx = SessionStateManager.get_search_context(body)
+        if search_ctx and search_ctx.get("filters", {}).get("type"):
+            inherited_type = search_ctx["filters"]["type"]
+            log.info(f"📚 [SHOW MORE] Inherited type '{inherited_type}' from Hot Search Context")
+
+        # Priority 2: Conversation Context (Fact DB - Async/Cross-Session)
+        if not inherited_type:
+            products_shown = conversation_context.get("products_shown", [])
+            if products_shown:
+                # Find the dominant product type from recently shown products
+                type_counts = {}
+                for prod in products_shown:
+                    prod_type = prod.get("details", {}).get("type") or prod.get("type")
+                    if prod_type:
+                        type_counts[prod_type] = type_counts.get(prod_type, 0) + 1
+                if type_counts:
+                    inherited_type = max(type_counts, key=type_counts.get)
+                    log.info(f"📚 [SHOW MORE] Inherited type '{inherited_type}' from Fact DB context")
+        
+        # Priority 3: Message History Fallback (For stateless/fresh sessions)
+        if not inherited_type and body.history:
+            import re
+            # Common product type patterns
+            type_patterns = ["hoodie", "tee", "t-shirt", "pants", "jacket", "bomber", "sweater", "shorts", "shoes", "sneakers", "blazer"]
+            for msg in reversed(body.history):
+                if msg.get("role") == "user":
+                    content = msg.get("content", "").lower()
+                    for pt in type_patterns:
+                        if pt in content:
+                            inherited_type = pt if pt != "t-shirt" else "tee"
+                            log.info(f"📚 [SHOW MORE] Inherited type '{inherited_type}' from message history (fallback)")
+                            break
+                    if inherited_type:
+                        break
+        
+        if inherited_type:
+            rec_filters["type"] = inherited_type
+        else:
+            log.warning(f"[SHOW MORE] No context found - proceeding with no type filter")
+        
+        # Treat as product discovery for the rest of the flow
+        semantic_intent = "recommendations"
+    
     intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
     
     # Phase 1: Complete thinking event
     thinking_tracker.complete(
         thinking_event_1,
-        details=f"Intent: {semantic_intent} → {intent_kind}",
+        details=f"Intent: {classification_result['intent']} → {intent_kind}",
         confidence=confidence * 100
     )
     
@@ -1812,6 +1514,13 @@ async def _agent_query_impl(
         classifier._classifier = None
 
     # --- Branch 1: cart_proposal -------------------------------------------------
+    
+    # ⚡ HEURISTIC OVERRIDE Removed
+        
+        # Update derived values
+        api_response_kind = ORCHESTRATOR_TO_API_KIND.get(intent_kind, "answer")
+        confidence = 1.0
+
     api_response_kind = ORCHESTRATOR_TO_API_KIND.get(intent_kind, "answer")
     
     # Production monitoring - using print for immediate visibility
@@ -1849,7 +1558,7 @@ async def _agent_query_impl(
         looks_like_size_only = bool(re.search(r'\b(?:in\s+)?(?:size\s+)?([smlxSMLX]{1,3})\b', q.lower())) and len(q.strip()) < 20
         
         # Only clear awaiting if this is clearly a NEW product search, not a size response
-        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_size_only:
+        if intent_kind == "discover" and not (intent_kind == "cart_add") and not looks_like_size_only:
             SessionStateManager.clear_awaiting_size(body)
             awaiting = None  # Treat as if no awaiting state
         
@@ -1859,7 +1568,7 @@ async def _agent_query_impl(
         size = None
         
         # Check if message looks like cart add intent using existing function
-        has_cart_intent = _looks_like_cart_add(q)
+        has_cart_intent = (intent_kind == "cart_add")
         
         # Extract size from message - prioritize short responses like "M" or "in M"
         if not has_cart_intent:
@@ -1903,14 +1612,14 @@ async def _agent_query_impl(
         looks_like_qty_only = len(q.strip()) < 10  # Very short response
         
         # Only clear if clearly a new search
-        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_qty_only:
+        if intent_kind == "discover" and not (intent_kind == "cart_add") and not looks_like_qty_only:
             SessionStateManager.clear_awaiting_quantity(body)
             awaiting_qty = None
     
     if awaiting_qty:
         # Extract quantity from message
         quantity = None
-        has_cart_intent = _looks_like_cart_add(q)
+        has_cart_intent = (intent_kind == "cart_add")
         
         if not has_cart_intent:
             # Try to find a number in the message (1-10 typical range)
@@ -1969,14 +1678,14 @@ async def _agent_query_impl(
         looks_like_color_only = len(q.strip()) < 30  # Short response
         
         # Only clear awaiting if this is clearly a NEW product search
-        if intent_kind == "discover" and not _looks_like_cart_add(q) and not looks_like_color_only:
+        if intent_kind == "discover" and not (intent_kind == "cart_add") and not looks_like_color_only:
             SessionStateManager.clear_awaiting_color(body)
             awaiting_color = None
         
     if awaiting_color:
         # Extract color from message
         color = None
-        has_cart_intent = _looks_like_cart_add(q)
+        has_cart_intent = (intent_kind == "cart_add")
         
         if not has_cart_intent:
             # Try to match against available colors
@@ -2043,16 +1752,19 @@ async def _agent_query_impl(
         if last_recs:
             # NEW: Context-aware cart add - check if user references a recently discussed product
             # When user says "add this to cart" after discussing "the second one", resolve it
+            import re
             vague_reference = re.search(r'\b(this|it|that|the one)\b', q.lower())
             context_idx = None
             
             if vague_reference:
                 # Fetch conversation history to resolve vague references
-                cart_history = await _fetch_history_for_llm(
-                    body.clerkUserId, body.guestSessionId, limit=10
+                cart_history = await HistoryManager.fetch_history(
+                    body.clerkUserId,
+                    body.guestSessionId,
+                    limit=5
                 )
                 if cart_history:
-                    context_idx = _get_recently_discussed_product_index(cart_history, last_recs)
+                    context_idx = numeric_filters.get("target_index")
                     if context_idx is not None:
                         log.info(f"🛒 [CONTEXT_CART] Resolved '{vague_reference.group(1)}' to product index {context_idx}")
                         debug_plan["cart_context_resolved"] = True
@@ -2087,7 +1799,7 @@ async def _agent_query_impl(
                 
                 if needs_color:
                     # Query database for available colors
-                    available_colors = _get_available_colors(top.slug)
+                    available_colors = get_available_colors(top.slug)
                     
                     if available_colors and len(available_colors) > 1:
                         # Ask for color first
@@ -2255,12 +1967,12 @@ async def _agent_query_impl(
             citations=[],
             items=[],
             cart_payload=None,
-            debug_plan=debug_plan,
         )
 
     # --- Branch 2: size & fit advisor -------------------------------------------
     if intent_kind == "size_fit" and not wants_cart:
-        fit_resp = await _call_fit_recommend(q, attrs, profile=ai_profile)
+
+        fit_resp = await _call_fit_recommend(q, attrs, profile=ai_profile, entities=numeric_filters)
         if fit_resp:
             size = fit_resp.get("size")
             confidence = fit_resp.get("confidence")
@@ -2552,18 +2264,72 @@ async def _agent_query_impl(
                 debug_plan["search_top_k"] = search_top_k
 
 
-            rec_query = build_rec_query(q, rec_filters)
 
+            # Facet Query Handling: "What [facet]?" (Generic)
+            # If asking for colors/styles/fabrics of a specific type, reset query to text-less to get top items
+            import re
+            # Facet Neutralization (LLM)
+            facet_query = numeric_filters.get("facet_query")
+            
+            if facet_query and rec_filters.get("type"):
+                facet_type = facet_query.lower()
+                log.info(f"🎨 [FACET] Detected facet query '{facet_type}' - neutralizing text search to show top items")
+                # Use the type itself as query to ensure results (empty string might fail)
+                rec_query = rec_filters["type"]
+            else:
+                rec_query = build_rec_query(q, rec_filters)
+
+            # Detect SKU/Exact Match intent
+            # If query looks like a SKU (e.g. "SKU-123", "Ref 456") or explicit specific search
+            import re
+            sku_pattern = re.compile(r'\b(sku|ref|id|code)[:\-\s]*[a-zA-Z0-9]+', re.IGNORECASE)
+            is_sku_query = bool(sku_pattern.search(rec_query))
+
+            # Pass exclude_slugs for proper "show more" pagination
+            # This tells the recs endpoint to skip products user has already seen
             rec_payload = {
                 "query": rec_query,
                 "filters": rec_filters,
                 "top_k": search_top_k,  # Use expanded top_k
+                "exclude_slugs": list(shown_slugs) if shown_slugs else None,
+                "visual_vibe": rec_filters.get("_visual_vibe"), # Pass vibe signal
+                "user_profile": accumulated_profile, # Pass session preferences for ranking
+                "sku_boost": is_sku_query # Boost BM25 for exact matches
             }
             rec_resp = await _call_recs_suggest(rec_payload)
             
             # Phase 1: Complete tool tracking
             item_count = len(rec_resp.get("items", []))
             tool_tracker.complete(search_tool, outputs={"count": item_count})
+            
+            # SYNCHRONOUS STATE UPDATE (Production Grade)
+            # Save hot context so "Show More" works reliably in next turn
+            if item_count > 0:
+                ctx_filters = rec_filters.copy()
+                
+                # Auto-infer type from results if missing in query
+                if not ctx_filters.get("type"):
+                    found_items = rec_resp.get("items", [])
+                    # item can be dict or AgentItem object
+                    types = []
+                    for it in found_items:
+                        t = it.get("type") if isinstance(it, dict) else getattr(it, "type", None)
+                        if t:
+                            types.append(t)
+                            
+                    if types:
+                        from collections import Counter
+                        most_common = Counter(types).most_common(1)
+                        # If >50% of items are same type, adopt it as context
+                        if most_common and most_common[0][1] >= len(types) * 0.5:
+                            ctx_filters["type"] = most_common[0][0]
+                            log.info(f"🧠 [CONTEXT] Auto-inferred context type: '{ctx_filters['type']}' from results")
+
+                SessionStateManager.set_search_context(
+                    body, 
+                    filters=ctx_filters, 
+                    intent=intent_kind
+                )
             
             # Phase 1: Complete thinking
             thinking_tracker.complete(
@@ -2631,13 +2397,23 @@ async def _agent_query_impl(
             log.debug(f"📦 [RECS] Items before filtering/checking: {len(items)} items")
             # Phase 1: Filter out items user has already seen (for \"show more\")
             shown_slugs = SessionStateManager.get_shown_slugs(body)
+            original_items_before_filter = list(items)  # Keep a copy
             if shown_slugs:
                 original_count = len(items)
                 items = SessionStateManager.filter_out_shown_items(items, shown_slugs)
                 debug_plan["filtered_shown_items"] = original_count - len(items)
+                
+                # CRITICAL: If ALL items were filtered out, don't fallback to different products!
+                # Instead, re-show the original items with a helpful message
+                if not items and original_items_before_filter:
+                    log.info(f"📚 [SHOW MORE] User has seen all {original_count} items in this category. Re-showing original items.")
+                    items = original_items_before_filter
+                    debug_plan["all_items_shown"] = True
+                    # Set a flag to add a message like "You've seen all our hoodies!"
+                    debug_plan["user_seen_all"] = True
             
             # Limit to user's requested top_k (after filtering)
-            items = items[:body.top_k]
+            items = list(items)[:body.top_k]
             log.debug(f"📦 [RECS] Items after shown filter + top_k limit: {len(items)} items")
             
             # ✨ WEEK 3 DAY 2: Honest Product Availability Check
@@ -2651,9 +2427,12 @@ async def _agent_query_impl(
                 'status': 'Validating product matches'
             })
             
+            
             log.debug(f"🔍 [DEBUG] Calling availability checker with:")
-            print(f"   - rec_query: '{rec_query}'")
-            print(f"   - items: {[{'title': it.title, 'type': it.type, 'color': it.color} for it in items]}")
+            
+            # Defensive: Ensure items are valid objects before passing to checker
+            # This prevents 500 errors if session state corrupts items into strings
+            items = [it for it in items if hasattr(it, "dict")]
             
             availability = await checker.check_and_recommend(
                 user_query=rec_query,
@@ -2864,6 +2643,33 @@ async def _agent_query_impl(
 
         intro_line = intro_info.get("text", availability.get("honesty_message") or "Here are some options.")
 
+        # Facet Answer Override: Generic (Color, Style, Fabric)
+        # Re-run regex to match the facet requested
+        # Facet Answer Override (LLM)
+        facet_query_ans = numeric_filters.get("facet_query")
+        
+        if facet_query_ans and rec_filters.get("type"):
+             try:
+                 facet_key = facet_query_ans.lower()
+                 # Normalize facet key for backend (e.g. materials -> material)
+                 normalized_facet = facet_key.rstrip('s') 
+                 
+                 from app.services.product import get_available_facet_values
+                 avail_values = get_available_facet_values(rec_filters["type"], normalized_facet)
+                 
+                 if avail_values:
+                     # Filter readable values
+                     readable_vals = [v for v in avail_values if v and len(v) < 30]
+                     if readable_vals:
+                         vals_str = ", ".join(readable_vals[:5])  # top 5
+                         if len(readable_vals) > 5:
+                             vals_str += f", and {len(readable_vals)-5} more"
+                         
+                         intro_line = f"We have {rec_filters['type']} with these {facet_key}: {vals_str}. Here are some popular options:"
+                         log.info(f"🎨 [FACET] Overrode answer with {facet_key} list: {vals_str}")
+             except Exception as e:
+                 log.warning(f"Failed to fetch facet values for answer: {e}")
+
         # Event: Ranking complete
         emit_event('thinking:step', {
             'icon': '✓',
@@ -2871,13 +2677,62 @@ async def _agent_query_impl(
             'done': True
         })
 
+        if items:
+            SessionStateManager.store_session_recs(body, items)
+
+        # --- Verification ---
+        verifier = get_verifier()
+        
+        # Get accumulated user profile for personalized verification
+        user_profile = SessionStateManager.get_accumulated_profile(body)
+        
+        verify_ctx = {
+            "intent": intent_kind,
+            "filters": numeric_filters,
+            "history_len": len(body.history) if body.history else 0,
+            "user_profile": user_profile  # Session-learned preferences
+        }
+        verify_tools = {
+            "items_found": len(items),
+            "top_item": items[0].dict() if items else None
+        }
+        
+        verification = await verifier.verify(
+            query=body.message,
+            draft_answer=intro_line,
+            context=verify_ctx,
+            tool_outputs=verify_tools
+        )
+        if verification.get("status") == "RETRY" and body.retry_count < 1:
+            refined_q = verification.get("refined_query")
+            if refined_q:
+                log.warning(f"🔄 [CRAG] Verifier requested RETRY (Attempt {body.retry_count+1}/2). New Query: '{refined_q}'")
+                
+                # Create deep copy of messages to modify the last one
+                new_msgs = [m.copy() for m in body.messages]
+                if new_msgs and new_msgs[-1].role == "user":
+                    new_msgs[-1].content = refined_q
+                
+                # Recursive call with refined query
+                new_body = body.copy(update={
+                    "messages": new_msgs,
+                    "retry_count": body.retry_count + 1
+                })
+                
+                return await agent_chat(new_body)
+
+        intro_line = verification["refined_answer"]
+        suggestions = verification["suggestions"]
+        print(f"✅ [VERIFIER] Status: {verification['status']} | Suggestions: {len(suggestions)}")
+
         return AgentOut(
             kind="recommendations",
             answer=intro_line,
             citations=[],
-                items=items,
-                debug_plan=debug_plan,
-            )
+            items=items,
+            debug_plan=debug_plan,
+            suggestions=suggestions,
+        )
 
         # no items → fall through to RAG / chat below
 
@@ -2926,9 +2781,35 @@ async def _agent_query_impl(
 
     debug_plan["llm_used"] = debug_plan.get("llm_used", False)
 
-    rag_resp = await _call_rag(q, body.top_k)
+    rag_resp = await _call_rag(q, body.top_k, filters=numeric_filters, intent=intent_kind)
     answer = rag_resp.get("answer") or "Sorry, I couldn’t find that."
     citations = rag_resp.get("citations") or []
+
+    # --- Verification ---
+    verifier = get_verifier()
+    
+    # Get accumulated user profile for personalized verification
+    user_profile = SessionStateManager.get_accumulated_profile(body)
+    
+    verify_ctx = {
+        "intent": intent_kind,
+        "rag_filters": numeric_filters,
+        "user_profile": user_profile  # Session-learned preferences
+    }
+    verify_tools = {
+        "citations_count": len(citations),
+        "found_answer": rag_resp.get("answer") is not None
+    }
+
+    verification = await verifier.verify(
+        query=q,
+        draft_answer=answer,
+        context=verify_ctx,
+        tool_outputs=verify_tools
+    )
+    answer = verification["refined_answer"]
+    suggestions = verification["suggestions"]
+    print(f"✅ [VERIFIER] Status: {verification['status']} | Suggestions: {len(suggestions)}")
 
     return AgentOut(
         kind=api_response_kind,  # Use mapped API kind for Pydantic validation
@@ -2936,6 +2817,7 @@ async def _agent_query_impl(
         citations=citations,
         items=[],
         debug_plan=debug_plan,
+        suggestions=suggestions,
     )
 
 

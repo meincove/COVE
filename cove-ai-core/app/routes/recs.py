@@ -37,12 +37,18 @@ class RecsFilters(BaseModel):
     size: Optional[str] = None
     price_min: Optional[float] = None
     price_max: Optional[float] = None
+    sort: Optional[str] = None
+    gender: Optional[str] = None  # male, female, unisex
 
 class RecsIn(BaseModel):
     anchor_slug: Optional[str] = None
     query: Optional[str] = None
     filters: RecsFilters = RecsFilters()
     top_k: int = 8
+    exclude_slugs: Optional[List[str]] = None  # For "show more" pagination - exclude already shown
+    visual_vibe: Optional[str] = None # Visual style description for vibe-boosting
+    user_profile: Optional[Dict[str, Any]] = None # User preferences for affinity boosting (size, price, etc.)
+    sku_boost: bool = False # Boost BM25 for exact/SKU matches
     
     # Config-driven validation (cached) - shared with AgentIn
     _validation_config: ClassVar[Optional[dict]] = None
@@ -128,6 +134,16 @@ class RecItem(BaseModel):
     # For budget filtering
 
 
+
+class RecsSimilarIn(BaseModel):
+    slug: str
+    top_k: int = 12
+    filters: RecsFilters = RecsFilters()
+
+class RecsCompleteLookIn(BaseModel):
+    anchor_slug: str
+    budget: float = 500.0
+
 class RecsOut(BaseModel):
     items: List[RecItem]
 
@@ -156,6 +172,37 @@ def _build_anchor_query_text(meta: dict) -> str:
             pieces.append(f"{prefix}: " + ", ".join(tags))
     
     return " | ".join(pieces)
+
+
+def _search_result_to_rec_item(r, reason: str = "visual_match") -> RecItem:
+    """
+    Map a SearchResult to RecItem with ALL fields populated.
+    Single source of truth for result-to-item conversion.
+    """
+    meta = r.meta or {}
+    return RecItem(
+        title=r.title,
+        url=r.url,
+        slug=meta.get("slug", ""),
+        score=r.score or 0.0,
+        reason=reason,
+        type=meta.get("type"),
+        tier=meta.get("tier"),
+        color=meta.get("color"),
+        size=meta.get("size"),
+        variantId=meta.get("variantId"),
+        price=meta.get("price"),
+        imageUrl=meta.get("imageUrl"),
+        material=meta.get("material"),
+        fit=meta.get("fit"),
+        fabric=meta.get("fabric"),
+        care=meta.get("care"),
+        style=meta.get("style"),
+        description=meta.get("description"),
+        styleNotes=meta.get("styleNotes"),
+        fitNotes=meta.get("fitNotes"),
+    )
+
 
 # -------------------------------------------------------------------
 # /ai/recs/suggest
@@ -243,20 +290,35 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
         # Use config-driven overfetch multiplier (was: top_k * 4)
         overfetch = top_k * search_config['retrieval']['overfetch_multiplier']
 
-        if USE_KEYWORD_ONLY:
-            docs = search_keyword(
-                conn,
-                query=retrieval_query,
-                kind="product",
-                top_k=overfetch,  # Config-driven!
-            )
-        else:
-            docs = await search_hybrid(
-                query=retrieval_query,
-                kind="product",
-                top_k=overfetch,  # Config-driven!
-            )
-
+        # 1. Get embedding for query if present
+        query_vec = None
+        if body.query:
+            from app.providers.embedding import embed_query
+            # If visual_vibe is present, append it to the query for embedding generation
+            # This creates a "Hybrid Vector" that captures both semantic request + visual style
+            embedding_text = body.query
+            if body.visual_vibe:
+                 embedding_text += f", visual style: {body.visual_vibe}"
+                 
+            query_vec = await embed_query(embedding_text)
+        
+        # 2. Run personalized search
+        from app.vector.personalized_search import personalized_search, personalized_results_to_dict
+        
+        # Pass optional visual_vibe and sku_boost to enable dynamic weighting
+        results = personalized_search(
+            conn=conn,
+            query=body.query or "",
+            query_embedding=query_vec,
+            user_id=None, # TODO: Add user_id from session/clerk
+            kind="product",
+            top_k=body.top_k,
+            cf_model=None, # Load CF model here if available
+            visual_vibe=body.visual_vibe,
+            user_profile=body.user_profile,
+            sku_boost=body.sku_boost
+        )
+        docs = personalized_results_to_dict(results)
 
         emit(
             "recs_retrieval_done",
@@ -328,6 +390,15 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 if filters.price_max is not None and price_val > filters.price_max:
                     return False
 
+            # Gender filter (unisex products always pass)
+            if filters.gender:
+                product_gender = (m.get("gender") or "").lower().strip()
+                filter_gender = filters.gender.lower().strip()
+                # Unisex products match any gender filter
+                if product_gender and product_gender != "unisex":
+                    if product_gender != filter_gender:
+                        return False
+
             return True
 
         for d in docs:
@@ -391,6 +462,13 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     if not candidates:
         emit("recs_no_candidates_after_filter", trace_id, {"filters": filters.dict()})
         return RecsOut(items=[])
+    
+    # Filter out already-shown products for "show more" pagination
+    if body.exclude_slugs:
+        exclude_set = set(s.lower().strip() for s in body.exclude_slugs if s)
+        original_count = len(candidates)
+        candidates = [(d, m) for d, m in candidates if (m.get("groupSlug") or "").lower().strip() not in exclude_set]
+        log.debug(f"📚 [PAGINATION] Excluded {original_count - len(candidates)} already-shown products")
 
     raw_sim_scores = [float(c[0].get("score", 0) or 0) for c in candidates]
     norm_sim_scores = normalize_score_range(raw_sim_scores)
@@ -473,7 +551,19 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
         )
         scored_items.append((final_score, item))
 
-    scored_items.sort(key=lambda x: x[0], reverse=True)
+    # Sort items
+    # Check if explicit sort is requested
+    if filters.sort == "price_asc":
+        # Sort by price ASC (None price goes last)
+        scored_items.sort(key=lambda x: (x[1].price is None, x[1].price))
+    elif filters.sort == "price_desc":
+        # Sort by price DESC (None price goes last)
+        # Key: (Has Price, Price Value). True > False. 
+        scored_items.sort(key=lambda x: (x[1].price is not None, x[1].price), reverse=True)
+    else:
+        # Default: Sort by relevance score DESC
+        scored_items.sort(key=lambda x: x[0], reverse=True)
+        
     top_items = [r for _, r in scored_items[:top_k]]
 
     emit(
@@ -488,3 +578,202 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     )
 
     return RecsOut(items=top_items)
+
+@router.post("/ai/recs/similar", response_model=RecsOut)
+async def recs_similar(body: RecsSimilarIn) -> RecsOut:
+    """
+    Get visually/semantically similar items effectively "More Like This".
+    Uses pure vector search based on the anchor product's embedding.
+    Applies optional filters for type, color, price, etc.
+    """
+    trace_id = new_trace_id()
+    emit('similar_request', trace_id, {'slug': body.slug, 'filters': body.filters.dict() if body.filters else {}})
+    
+    from app.vector.store import get_product_embedding_by_slug, get_conn
+    from app.vector.hybrid_search import search_vector
+    
+    filters = body.filters or RecsFilters()
+    
+    with get_conn() as conn:
+        # 1. Get anchor embedding
+        anchor_vec = get_product_embedding_by_slug(conn, body.slug)
+        
+        if not anchor_vec:
+            log.warning(f"recs_similar: Anchor slug '{body.slug}' not found or has no embedding")
+            return RecsOut(items=[])
+            
+        # 2. Run vector search (pure semantic/visual similarity)
+        # Fetch extra buffer to account for self + duplicates + filter rejections
+        results = search_vector(
+            conn=conn,
+            query_embedding=anchor_vec,
+            kind="product",
+            top_k=body.top_k * 3  # Buffer for filtering
+        )
+        
+        # 3. Filter out self, apply user filters, and format using helper
+        items: List[RecItem] = []
+        for r in results:
+            meta = r.meta or {}
+            r_slug = meta.get("slug", "")
+            
+            # Skip the anchor item itself
+            if r_slug == body.slug:
+                continue
+            
+            # Apply filters (type, color, price, gender, etc.)
+            if filters.type and meta.get("type", "").lower() != filters.type.lower():
+                continue
+            if filters.color and meta.get("color", "").lower() != filters.color.lower():
+                continue
+            if filters.tier and meta.get("tier", "").lower() != filters.tier.lower():
+                continue
+            if filters.gender:
+                product_gender = (meta.get("gender") or "").lower().strip()
+                filter_gender = filters.gender.lower().strip()
+                if product_gender and product_gender != "unisex" and product_gender != filter_gender:
+                    continue
+            
+            # Price filter
+            try:
+                price = float(meta.get("price", 0))
+                if filters.price_min and price < filters.price_min:
+                    continue
+                if filters.price_max and price > filters.price_max:
+                    continue
+            except (ValueError, TypeError):
+                pass  # No valid price, skip filter
+            
+            # Use helper for consistent full field mapping
+            items.append(_search_result_to_rec_item(r, reason="visual_match"))
+            
+            if len(items) >= body.top_k:
+                break
+                
+        emit('similar_done', trace_id, {'count': len(items)})
+        return RecsOut(items=items)
+
+@router.post("/ai/recs/complete-look")
+async def recs_complete_look(body: RecsCompleteLookIn) -> Dict[str, Any]:
+    """
+    "Complete the Look": Takes an anchor item and builds a full outfit around it.
+    Uses config-driven complements logic and Vector-Aware OutfitBuilder.
+    """
+    trace_id = new_trace_id()
+    emit('complete_look_request', trace_id, {'slug': body.anchor_slug})
+    
+    from app.vector.store import get_product_by_slug, get_conn
+    from app.agents.outfit_builder_agent import outfit_builder_handler
+    
+    # Load outfit config (NO HARDCODING!)
+    import json
+    from pathlib import Path
+    config_path = Path(__file__).resolve().parent.parent.parent / "data" / "outfit_config.json"
+    with open(config_path) as f:
+        outfit_config = json.load(f)
+    
+    complements_map = outfit_config.get("complements_map", {})
+    category_mappings = outfit_config.get("category_mappings", {})
+    default_complements = outfit_config.get("default_complements", ["top", "bottom", "shoes"])
+    style_stop_words = set(outfit_config.get("style_stop_words", []))
+    
+    # 1. Fetch Anchor
+    with get_conn() as conn:
+        anchor = get_product_by_slug(conn, body.anchor_slug)
+    
+    if not anchor:
+        return {"error": "Anchor item not found"}
+        
+    anchor_meta = anchor.get("meta", {})
+    anchor_type = anchor_meta.get("type", "product").lower()
+    anchor_title = anchor.get("title", "")
+    anchor_slug = anchor_meta.get("slug")
+    
+    # 2. Determine Complements using CONFIG-DRIVEN logic
+    # Try exact match first, then fuzzy match
+    needed_cats = complements_map.get(anchor_type, None)
+    if not needed_cats:
+        # Fuzzy match: check if anchor_type contains any key
+        for key in complements_map:
+            if key in anchor_type or key in anchor_title.lower():
+                needed_cats = complements_map[key]
+                break
+    
+    # Fallback to default
+    if not needed_cats:
+        needed_cats = default_complements
+            
+    # 3. Retrieve Candidates for each needed category
+    candidates = {}
+    
+    # Map anchor to generic category using CONFIG
+    anchor_cat_key = category_mappings.get(anchor_type, "anchor")
+    # Fallback: check for partial matches
+    if anchor_cat_key == "anchor":
+        for type_key, cat in category_mappings.items():
+            if type_key in anchor_type:
+                anchor_cat_key = cat
+                break
+    
+    candidates[anchor_cat_key] = [{
+        "slug": anchor_slug,
+        "title": anchor_title,
+        "price": anchor_meta.get("price", 0),
+        "type": anchor_type,
+        "color": anchor_meta.get("color"),
+        "imageUrl": anchor_meta.get("imageUrl"),
+        "id": anchor.get("id")
+    }]
+    
+    # Extract gender context (critical for correct outfit)
+    gender_context = ""
+    if anchor_meta.get("gender"):
+        gender_context = anchor_meta["gender"]
+    else:
+        title_lower = anchor_title.lower()
+        if "women" in title_lower: gender_context = "women"
+        elif "men" in title_lower: gender_context = "men"
+    
+    # Extract style keywords using CONFIG-DRIVEN stop words
+    style_words = [w for w in anchor_title.split() if w.lower() not in style_stop_words]
+    style_context = " ".join(style_words)
+    
+    for cat in needed_cats:
+        # Enforce gender in query
+        query = f"{gender_context} {style_context} {cat}".strip()
+        
+        # Uses store.search_hybrid (async, returns dicts)
+        results = await search_hybrid(query, kind="product", top_k=5)
+        
+        cat_candidates = []
+        for r in results:
+            # r is a dict
+            r_meta = r.get("meta") or {}
+            r_slug = r_meta.get("slug")
+            
+            if r_slug == anchor_slug: continue
+            
+            cat_candidates.append({
+                "slug": r_slug,
+                "title": r.get("title"),
+                "price": r_meta.get("price", 0),
+                "type": r_meta.get("type"),
+                "color": r_meta.get("color"),
+                "imageUrl": r_meta.get("imageUrl"),
+                "id": r.get("id")
+            })
+        candidates[cat] = cat_candidates
+
+    # 4. Run Outfit Builder
+    task = {
+        "candidates": candidates,
+        "budget_max": body.budget,
+        "user_preferences": {} # Could inject session prefs here
+    }
+    
+    context = {"user_id": "api_user"}
+    
+    result = await outfit_builder_handler(task, context)
+    
+    emit('complete_look_done', trace_id, {'success': True})
+    return result

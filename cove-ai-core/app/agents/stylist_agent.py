@@ -150,6 +150,19 @@ class StylistAgent(BaseAgent):
         occasion = analysis.get("occasion", occasion) # Override heuristic
         style = analysis.get("style", style) # Override heuristic
         
+        # ✨ CRITICAL: Gender Detection / Clarification
+        # If the LLM is unsure about gender, stop and ask the user!
+        detected_gender = analysis.get("gender")
+        if detected_gender == "ask_gender":
+            log.info("✋ Stylist requesting gender clarification")
+            return AgentResult(
+                success=True,
+                data={},
+                reasoning="To give you the best recommendations, are you shopping for men, women, or looking for unisex styles?",
+                confidence=1.0,
+                tools_used=["stylist_clarification"]
+            )
+        
         # KEY CHANGE: Allow LLM to expand categories (e.g. add shoes)
         # If LLM returns a specific list of categories, use it.
         # This breaks the reliance on static "default_categories"
@@ -230,6 +243,27 @@ class StylistAgent(BaseAgent):
                         if hard_filters.get("color"):
                             search_payload["filters"]["color"] = hard_filters["color"]
                         log.info(f"   🛡️ Applied Hard Filters for {category}: {search_payload['filters']}")
+                    
+                    # ✨ CRITICAL: Apply gender from LLM analysis
+                    detected_gender = analysis.get("gender")
+                    
+                    # Use original_query for gender detection (preserves "boyfriend", "girlfriend" etc.)
+                    original_query = context.get("original_query", "") or query
+                    log.info(f"   🔍 Gender Check - Original Query: '{original_query[:100]}'")
+                    
+                    # FALLBACK: If LLM didn't detect gender, use keyword matching on ORIGINAL query
+                    if not detected_gender or detected_gender == "unisex":
+                        query_lower = original_query.lower()
+                        if any(kw in query_lower for kw in ["boyfriend", "husband", "for him", "for men", "men's", "mens", "male"]):
+                            detected_gender = "male"
+                            log.info(f"   👤 Gender detected via keyword fallback: male")
+                        elif any(kw in query_lower for kw in ["girlfriend", "wife", "for her", "for women", "women's", "womens", "female"]):
+                            detected_gender = "female"
+                            log.info(f"   👤 Gender detected via keyword fallback: female")
+                    
+                    if detected_gender and detected_gender not in ["unisex", None]:
+                        search_payload["filters"]["gender"] = detected_gender
+                        log.info(f"   👤 Enforcing gender filter: {detected_gender}")
                     
                     result = await _call_recs_suggest(search_payload)
                     items = result.get("items", [])
@@ -469,7 +503,9 @@ class StylistAgent(BaseAgent):
         Use LLM to interpret style/occasion and generate Hybrid Search plans (Query + Filters).
         """
         try:
-            model = os.getenv("LLM_REASONING_MODEL", "openrouter/openai/gpt-4o-mini")
+            raw_model = os.getenv("LLM_REASONING_MODEL", "openrouter/openai/gpt-4o-mini")
+            # LiteLLM uses forward slash, not colon for providers
+            model = raw_model.replace("openrouter:", "openrouter/")
             
             # ✨ HYBRID SEARCH: Fetch valid vocab to enforce valid filters
             vocab = await asyncio.to_thread(self._get_vocab)
@@ -507,18 +543,26 @@ Budget: €{budget}
 DATABASE VOCABULARY (Use these EXACT values for filters):
 - Allowed Types: {valid_types}
 - Allowed Colors: {valid_colors}
+- Allowed Genders: women, men, unisex
 
 Task:
 1. Analyze Occasion/Style.
-2. Decide categories.
-3. For EACH category, generate a search PLAN:
-   - "query": KEYWORD description for search (e.g. "beige hoodie"). Keep it simple and objective. Avoid subjective adjectives like "stunning" or "perfect" as they break keyword search. Include VIBE keywords only if visual (e.g. "patterned", "silk").
+2. CRITICAL: Detect Gender.
+   - If user says "men", "boyfriend", "him" -> "male"
+   - If user says "women", "girlfriend", "her" -> "female"
+   - If user says multiple specific genders, likely specific.
+   - If completely ambiguous (e.g. "I need a hoodie"), set gender to "ask_gender".
+   - If phrasing implies self (e.g. "for me") and no profile, set "ask_gender".
+3. Decide categories.
+4. For EACH category, generate a search PLAN:
+   - "query": KEYWORD description for search (e.g. "beige hoodie"). Keep it simple and objective.
    - "filters": Strict metadata constraints.
      - "type": MUST be one of Allowed Types (e.g. "hoodie"). Crucial for relevance.
      - "color": MUST be one of Allowed Colors if user specified a color preference. Otherwise null.
 
 Response JSON Format:
 {{
+    "gender": "detected gender (women/men/unisex/ask_gender)",
     "occasion": "detected occasion",
     "style": "detected style",
     "reasoning": "thought process",

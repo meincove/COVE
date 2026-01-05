@@ -163,12 +163,14 @@ def reciprocal_rank_fusion(
     bm25_results: List[SearchResult],
     vector_results: List[SearchResult],
     k: int = 60,
-    top_k: int = 6
+    top_k: int = 6,
+    bm25_weight: float = 1.0,
+    vector_weight: float = 1.0
 ) -> List[SearchResult]:
     """
-    Reciprocal Rank Fusion (RRF) - Industry standard for hybrid search.
+    Reciprocal Rank Fusion (RRF) with Dynamic Weighting.
     
-    Formula: RRF_score(d) = Σ 1 / (k + rank_i(d))
+    Standard Formula: RRF_score(d) = weight * (1 / (k + rank_i(d)))
     
     Where:
     - d = document
@@ -180,6 +182,8 @@ def reciprocal_rank_fusion(
         vector_results: Results from vector search
         k: RRF constant (default 60 per industry research)
         top_k: Final number of results to return
+        bm25_weight: Weight to apply to BM25 scores
+        vector_weight: Weight to apply to vector scores
         
     Returns:
         Fused results sorted by RRF score
@@ -199,11 +203,11 @@ def reciprocal_rank_fusion(
         
         # Add BM25 contribution
         if doc_id in bm25_ranks:
-            score += 1.0 / (k + bm25_ranks[doc_id])
+            score += bm25_weight * (1.0 / (k + bm25_ranks[doc_id]))
         
         # Add vector contribution
         if doc_id in vector_ranks:
-            score += 1.0 / (k + vector_ranks[doc_id])
+            score += vector_weight * (1.0 / (k + vector_ranks[doc_id]))
         
         rrf_scores[doc_id] = score
     
@@ -226,8 +230,6 @@ def reciprocal_rank_fusion(
     
     return results
     
-    return results
-
 
 def search_hybrid_rrf(
     conn: psycopg.Connection,
@@ -237,21 +239,21 @@ def search_hybrid_rrf(
     top_k: int = 6,
     bm25_k: int = 20,
     vector_k: int = 20,
-    rrf_constant: int = 60
+    rrf_constant: int = 60,
+    visual_vibe: Optional[str] = None,
+    sku_boost: bool = False
 ) -> List[SearchResult]:
     """
-    Complete hybrid search pipeline: BM25 + Vector + RRF fusion.
+    Complete hybrid search pipeline with Dynamic Weights (Zalando Style).
     
     Industry-standard implementation combining:
     1. BM25 keyword search (catches exact matches)
     2. Vector semantic search (catches conceptual matches)
     3. RRF fusion (best-of-both-worlds ranking)
     
-    Example:
-        Query: "COVE black hoodie"
-        - BM25 catches: "COVE", "black", "hoodie" exact matches
-        - Vector catches: semantically similar items
-        - RRF boosts items that appear in both (high confidence)
+    Dynamic Weighting:
+    - visual_vibe: Boosts Vector Search (semantic)
+    - sku_boost: Boosts BM25 Search (exact keyword/SKU)
     
     Args:
         conn: Database connection with pgvector registered
@@ -262,10 +264,29 @@ def search_hybrid_rrf(
         bm25_k: BM25 candidate pool size (default: 20)
         vector_k: Vector candidate pool size (default: 20)
         rrf_constant: RRF k parameter (default: 60 per research)
+        visual_vibe: Optional string for vibe boosting
+        sku_boost: Boolean to boost BM25 for exact/SKU queries
         
     Returns:
         List of top_k SearchResult objects sorted by RRF score
     """
+    # Dynamic Weighting Logic
+    bm25_weight = 1.0
+    vector_weight = 1.0
+    
+    if visual_vibe:
+        # Vibe-based query: Boost Vector Search (semantic)
+        vector_weight = 3.0  # 3x boost for vibe queries
+        # Expand vector candidate pool to capture more semantic matches
+        vector_k = 40 
+        
+    if sku_boost:
+        # Exact/SKU query: Boost BM25 Search (keyword)
+        # This overrides vibe boost if both are present (exact match takes precedence)
+        bm25_weight = 3.0
+        # Expand BM25 pool to ensure the exact match is found
+        bm25_k = 40
+
     # 1. Get BM25 candidates
     bm25_results = search_bm25(conn, query, kind, bm25_k)
     
@@ -277,7 +298,9 @@ def search_hybrid_rrf(
         bm25_results, 
         vector_results, 
         k=rrf_constant, 
-        top_k=top_k
+        top_k=top_k,
+        bm25_weight=bm25_weight,
+        vector_weight=vector_weight
     )
     
     return hybrid_results

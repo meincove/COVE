@@ -1,0 +1,433 @@
+[
+    {
+        "type": "hoodie",
+        "gender": "unisex",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 155,
+                "height_max": 165,
+                "weight_min": 45,
+                "weight_max": 55
+            },
+            {
+                "size": "S",
+                "height_min": 160,
+                "height_max": 170,
+                "weight_min": 50,
+                "weight_max": 65
+            },
+            {
+                "size": "M",
+                "height_min": 165,
+                "height_max": 178,
+                "weight_min": 60,
+                "weight_max": 75
+            },
+            {
+                "size": "L",
+                "height_min": 173,
+                "height_max": 185,
+                "weight_min": 70,
+                "weight_max": 85
+            },
+            {
+                "size": "XL",
+                "height_min": 180,
+                "height_max": 193,
+                "weight_min": 80,
+                "weight_max": 100
+            },
+            {
+                "size": "XXL",
+                "height_min": 185,
+                "height_max": 200,
+                "weight_min": 95,
+                "weight_max": 120
+            }
+        ]
+    },
+    {
+        "type": "hoodie",
+        "gender": "unisex",
+        "fit": "oversized",
+        "ranges": [
+            {
+                "size": "S",
+                "height_min": 155,
+                "height_max": 170,
+                "weight_min": 45,
+                "weight_max": 65
+            },
+            {
+                "size": "M",
+                "height_min": 160,
+                "height_max": 175,
+                "weight_min": 55,
+                "weight_max": 75
+            },
+            {
+                "size": "L",
+                "height_min": 165,
+                "height_max": 183,
+                "weight_min": 65,
+                "weight_max": 85
+            },
+            {
+                "size": "XL",
+                "height_min": 173,
+                "height_max": 190,
+                "weight_min": 75,
+                "weight_max": 100
+            },
+            {
+                "size": "XXL",
+                "height_min": 180,
+                "height_max": 200,
+                "weight_min": 90,
+                "weight_max": 120
+            }
+        ]
+    },
+    {
+        "type": "tee",
+        "gender": "men",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 160,
+                "height_max": 168,
+                "weight_min": 50,
+                "weight_max": 60
+            },
+            {
+                "size": "S",
+                "height_min": 165,
+                "height_max": 173,
+                "weight_min": 55,
+                "weight_max": 68
+            },
+            {
+                "size": "M",
+                "height_min": 170,
+                "height_max": 180,
+                "weight_min": 65,
+                "weight_max": 78
+            },
+            {
+                "size": "L",
+                "height_min": 175,
+                "height_max": 188,
+                "weight_min": 73,
+                "weight_max": 90
+            },
+            {
+                "size": "XL",
+                "height_min": 180,
+                "height_max": 195,
+                "weight_min": 85,
+                "weight_max": 105
+            },
+            {
+                "size": "XXL",
+                "height_min": 185,
+                "height_max": 200,
+                "weight_min": 100,
+                "weight_max": 130
+            }
+        ]
+    },
+    {
+        "type": "tee",
+        "gender": "women",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 150,
+                "height_max": 160,
+                "weight_min": 40,
+                "weight_max": 50
+            },
+            {
+                "size": "S",
+                "height_min": 155,
+                "height_max": 165,
+                "weight_min": 48,
+                "weight_max": 58
+            },
+            {
+                "size": "M",
+                "height_min": 160,
+                "height_max": 172,
+                "weight_min": 55,
+                "weight_max": 68
+            },
+            {
+                "size": "L",
+                "height_min": 165,
+                "height_max": 178,
+                "weight_min": 63,
+                "weight_max": 78
+            },
+            {
+                "size": "XL",
+                "height_min": 170,
+                "height_max": 185,
+                "weight_min": 75,
+                "weight_max": 95
+            }
+        ]
+    },
+    {
+        "type": "jacket",
+        "gender": "unisex",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 155,
+                "height_max": 165,
+                "weight_min": 45,
+                "weight_max": 55
+            },
+            {
+                "size": "S",
+                "height_min": 160,
+                "height_max": 170,
+                "weight_min": 52,
+                "weight_max": 65
+            },
+            {
+                "size": "M",
+                "height_min": 168,
+                "height_max": 180,
+                "weight_min": 63,
+                "weight_max": 78
+            },
+            {
+                "size": "L",
+                "height_min": 175,
+                "height_max": 188,
+                "weight_min": 73,
+                "weight_max": 90
+            },
+            {
+                "size": "XL",
+                "height_min": 182,
+                "height_max": 195,
+                "weight_min": 85,
+                "weight_max": 105
+            },
+            {
+                "size": "XXL",
+                "height_min": 188,
+                "height_max": 203,
+                "weight_min": 100,
+                "weight_max": 125
+            }
+        ]
+    },
+    {
+        "type": "pants",
+        "gender": "men",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 160,
+                "height_max": 168,
+                "weight_min": 50,
+                "weight_max": 60,
+                "waist_cm": 70
+            },
+            {
+                "size": "S",
+                "height_min": 165,
+                "height_max": 175,
+                "weight_min": 58,
+                "weight_max": 70,
+                "waist_cm": 76
+            },
+            {
+                "size": "M",
+                "height_min": 170,
+                "height_max": 182,
+                "weight_min": 68,
+                "weight_max": 82,
+                "waist_cm": 82
+            },
+            {
+                "size": "L",
+                "height_min": 175,
+                "height_max": 188,
+                "weight_min": 78,
+                "weight_max": 95,
+                "waist_cm": 88
+            },
+            {
+                "size": "XL",
+                "height_min": 180,
+                "height_max": 195,
+                "weight_min": 90,
+                "weight_max": 110,
+                "waist_cm": 96
+            },
+            {
+                "size": "XXL",
+                "height_min": 185,
+                "height_max": 200,
+                "weight_min": 105,
+                "weight_max": 130,
+                "waist_cm": 104
+            }
+        ]
+    },
+    {
+        "type": "pants",
+        "gender": "women",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 150,
+                "height_max": 162,
+                "weight_min": 42,
+                "weight_max": 52,
+                "waist_cm": 62
+            },
+            {
+                "size": "S",
+                "height_min": 155,
+                "height_max": 167,
+                "weight_min": 50,
+                "weight_max": 60,
+                "waist_cm": 68
+            },
+            {
+                "size": "M",
+                "height_min": 160,
+                "height_max": 173,
+                "weight_min": 58,
+                "weight_max": 70,
+                "waist_cm": 74
+            },
+            {
+                "size": "L",
+                "height_min": 165,
+                "height_max": 180,
+                "weight_min": 68,
+                "weight_max": 85,
+                "waist_cm": 82
+            },
+            {
+                "size": "XL",
+                "height_min": 170,
+                "height_max": 185,
+                "weight_min": 80,
+                "weight_max": 100,
+                "waist_cm": 90
+            }
+        ]
+    },
+    {
+        "type": "joggers",
+        "gender": "unisex",
+        "fit": "relaxed",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 155,
+                "height_max": 165,
+                "weight_min": 45,
+                "weight_max": 58
+            },
+            {
+                "size": "S",
+                "height_min": 160,
+                "height_max": 172,
+                "weight_min": 52,
+                "weight_max": 68
+            },
+            {
+                "size": "M",
+                "height_min": 168,
+                "height_max": 180,
+                "weight_min": 62,
+                "weight_max": 80
+            },
+            {
+                "size": "L",
+                "height_min": 175,
+                "height_max": 188,
+                "weight_min": 75,
+                "weight_max": 95
+            },
+            {
+                "size": "XL",
+                "height_min": 182,
+                "height_max": 195,
+                "weight_min": 88,
+                "weight_max": 110
+            },
+            {
+                "size": "XXL",
+                "height_min": 188,
+                "height_max": 200,
+                "weight_min": 102,
+                "weight_max": 130
+            }
+        ]
+    },
+    {
+        "type": "sweatshirt",
+        "gender": "unisex",
+        "fit": "regular",
+        "ranges": [
+            {
+                "size": "XS",
+                "height_min": 155,
+                "height_max": 165,
+                "weight_min": 45,
+                "weight_max": 55
+            },
+            {
+                "size": "S",
+                "height_min": 160,
+                "height_max": 170,
+                "weight_min": 50,
+                "weight_max": 65
+            },
+            {
+                "size": "M",
+                "height_min": 165,
+                "height_max": 178,
+                "weight_min": 60,
+                "weight_max": 75
+            },
+            {
+                "size": "L",
+                "height_min": 173,
+                "height_max": 185,
+                "weight_min": 70,
+                "weight_max": 85
+            },
+            {
+                "size": "XL",
+                "height_min": 180,
+                "height_max": 193,
+                "weight_min": 80,
+                "weight_max": 100
+            },
+            {
+                "size": "XXL",
+                "height_min": 185,
+                "height_max": 200,
+                "weight_min": 95,
+                "weight_max": 120
+            }
+        ]
+    }
+]
