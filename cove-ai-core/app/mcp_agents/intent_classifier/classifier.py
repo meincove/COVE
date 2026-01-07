@@ -29,6 +29,7 @@ class IntentClassifier:
     QUALITY_QUESTION = "quality_question"
     ORDER_HISTORY = "order_history"
     OUTFIT_BUILDER = "outfit_builder"  # NEW: Build complete outfits
+    SHOW_MORE = "show_more"  # NEW: User wants more of the same type
     GREETING = "greeting"
     NONE = "none"
     
@@ -47,14 +48,28 @@ class IntentClassifier:
 
 Learn the PATTERN from these examples, then apply to new queries.
 
-## Product Discovery (user wants to see NEW products)
+## Product Discovery (user wants to see NEW/DIFFERENT products)
 - "show me hoodies" → recommendations
 - "I'm looking for tees" → recommendations  
 - "what bombers do you have?" → recommendations
-- "show me more options" → recommendations
 - "any black hoodies?" → recommendations
 
-Pattern: User wants to BROWSE/SEE products, not asking about specific ones already shown.
+Pattern: User wants to BROWSE/SEE a specific product type, not asking about ones already shown.
+
+## Show More (user wants MORE of the SAME type already shown)
+- "show me more options" → show_more
+- "got anything else?" → show_more
+- "I'm not impressed" → show_more
+- "these aren't what I'm looking for" → show_more
+- "what else you got?" → show_more
+- "meh, next" → show_more
+- "show me alternatives" → show_more
+- "any other options?" → show_more
+- "not feeling these" → show_more
+- "keep going" → show_more
+- "more like this" → show_more
+
+Pattern: User wants to see MORE products of the SAME type they were just shown. They're not specifying a new type - they want alternatives to what's on screen.
 
 ## Product Question (asking about ALREADY SHOWN products)
 - "what's the material of the first one?" → product_question
@@ -74,11 +89,10 @@ Pattern: User wants to COMPARE products (difference, which, compare)
 
 ## Cart Operation (add/remove from cart)
 - "add the first one to cart" → cart_proposal
-- "add to cart" → cart_proposal
 - "I'll take it" → cart_proposal
 - "cop this" → cart_proposal
 
-Pattern: User wants to ADD product to cart
+Pattern: User expresses PURCHASE INTENT for a specific product. Look for verbs like: add, buy, take, get, want, cop, grab, purchase + reference to product (first one, second, this, it, the hoodie, etc.). The user wants to ADD the item to their cart, not just browse.
 
 ## Checkout (ready to pay)
 - "checkout" → checkout_ready
@@ -108,23 +122,36 @@ Pattern: User asking about QUALITY/MATERIALS
 
 Pattern: User asking about PAST orders
 
-## Outfit Builder (build complete outfits)
+## Outfit Builder (EXPLICIT outfit requests only!)
 - "build me an outfit" → outfit_builder
 - "create an outfit for a date" → outfit_builder
 - "style me for a wedding" → outfit_builder
 - "put together a casual look" → outfit_builder
 - "I need a complete outfit" → outfit_builder
-- "casual outfit" → outfit_builder
-- "formal outfit" → outfit_builder
-- "date night outfit" → outfit_builder
-- "business outfit" → outfit_builder
+- "casual outfit please" → outfit_builder
+- "formal outfit for work" → outfit_builder
 - "weekend outfit" → outfit_builder
 - "what should I wear to a party" → outfit_builder
 - "help me dress for an interview" → outfit_builder
-- "outfit for summer" → outfit_builder
-- "smart casual look" → outfit_builder
+- "got a job interview, what do you suggest?" → outfit_builder
+- "meeting with clients tomorrow, suggestions?" → outfit_builder
+- "date night tonight, any ideas?" → outfit_builder
+- "first day at new job, what should I wear?" → outfit_builder
 
-Pattern: User wants a COMPLETE OUTFIT built (multiple items that go together). Key words: "outfit", "look", "style me", "dress for", "wear to"
+Pattern: User asks for OUTFIT or STYLING ADVICE. Key triggers: "outfit", "look" (as noun), "style me", "dress me", "wear to", OR asking "what should I wear/suggest" for a SPECIFIC OCCASION (interview, date, wedding, meeting).
+
+## Recommendations (Vague occasion-based queries - NO explicit outfit keyword)
+- "looking for something casual" → recommendations  # "looking" is a verb, NOT "look" as outfit noun
+- "need something for the weekend" → recommendations  # no "outfit/look" = browse products
+- "something formal for work" → recommendations  # vague, just show products
+- "casual weekend wear" → recommendations  # no "outfit" mentioned
+- "something nice for a date" → recommendations  # no "outfit/look" = browse
+
+Pattern: User mentions an occasion/style but does NOT explicitly say "outfit", "look", "style me". They just want to browse products, not build a complete coordinated outfit.
+
+CRITICAL: "looking FOR something" ≠ "a casual LOOK". 
+- "looking for casual clothes" → recommendations (verb form, browsing)
+- "casual look for the weekend" → outfit_builder (noun form, outfit request)
 
 ## Greeting (casual greetings)
 - "hey" → greeting
@@ -154,53 +181,76 @@ Pattern: Casual greeting, no specific request
             context = {}
         
         # Use LLM for semantic classification with context
-        intent, confidence, reasoning = await self._llm_classify_with_context(query, context)
+        # Returns: intent, confidence, extra_data (dict or str)
+        intent, confidence, extra_data = await self._llm_classify_with_context(query, context)
+        
+        reasoning = ""
+        entities = {}
+        
+        if isinstance(extra_data, dict):
+            reasoning = extra_data.get("reasoning", "")
+            entities = extra_data.get("filters", {})
+        else:
+            reasoning = str(extra_data)
         
         return {
             "intent": intent,
             "confidence": confidence,
             "reasoning": reasoning,
-            "entities": {},
+            "entities": entities,
             "classification_method": "llm_with_context"
         }
     
-    async def _llm_classify_with_context(self, query: str, context: Dict) -> Tuple[str, float, str]:
+    async def _llm_classify_with_context(self, query: str, context: Dict) -> Tuple[str, float, Any]:
         """
-        LLM-based classification with conversation context.
-        
-        This is the key enhancement - passes products shown to LLM!
+        LLM-based classification with conversation context + Slot Filling.
+        Returns: (intent, confidence, {"filters": {...}, "reasoning": "..."})
         """
         from litellm import acompletion
         
         # Build context summary
         context_summary = self._build_context_summary(context)
         
-        # Build prompt with few-shot examples + context
-        system_prompt = f"""You are an intent classifier for a conversational AI shopping assistant.
+        # Build prompt: Request JSON with Intent + Filters
+        system_prompt = f"""You are an intent classifier and slot filler for a conversational AI shopping assistant.
 
-Your job: Understand what the user WANTS from their message, using conversation context.
+Your job: 
+1. Classify the user's INTENT (what they want to do).
+2. Extract any FILTERS or ENTITIES (price, color, sort order, etc.).
 
 {self.few_shot_examples}
+
+## Filter Extraction Rules
+Extract these specific fields into "filters" object if present:
+- `price_min` (float): Minimum price
+- `price_max` (float): Maximum price
+- `sort` (str): 'price_asc' (if user asks for cheapest, lowest price, budget), 'price_desc' (expensive, premium, luxury)
+- `type` (str): Product type (hoodie, tee, etc.)
+- `color` (str): Color name
+- `gender` (str): CRITICAL! Extract gender from context:
+  - 'male' if: "boyfriend", "husband", "for him", "for my guy", "men's", "mens", "for men", "male", "son", "brother", "dad", "father"
+  - 'female' if: "girlfriend", "wife", "for her", "for my girl", "women's", "womens", "for women", "female", "daughter", "sister", "mom", "mother"
+  - Leave empty if unclear/unisex
+- `fit` (str): 'oversized', 'slim', 'regular', etc.
+- `size` (str): S, M, L, XL, etc.
+- `height_cm` (int): User height in cm
+- `weight_kg` (int): User weight in kg
+- `facet_query` (str): The attribute user is asking about (e.g., 'color', 'fabric', 'style')
+- `target_index` (int): 0-based index if user refers to a specific item (0 for "first", 1 for "second").
 
 ## Current Conversation Context
 {context_summary}
 
-## Classification Rules
-1. If user references products from context (first, second, that one) → product_question
-2. If user wants to see NEW products → recommendations
-3. If user wants to compare products → product_comparison
-4. If user wants to add to cart → cart_proposal
-5. If user wants to checkout → checkout_ready
-6. If user asks about sizing → size_help
-7. If user asks about quality → quality_question
-8. If user asks about orders → order_history
-9. If user wants a COMPLETE OUTFIT built → outfit_builder
-10. If casual greeting → greeting
-11. If off-topic → none
-
-**Critical**: Use the context above to understand references like "first one", "second one", "that premium tee"
-
-Output ONLY the intent name (e.g., "recommendations"), nothing else.
+## Output Format
+Return ONLY a valid JSON object:
+{{
+  "intent": "cart_proposal",
+  "filters": {{
+      "target_index": 0,
+      "quantity": 1
+  }},
+  "reasoning": "User wants to buy the first item"
+}}
 """
         
         print(f"🔍 [INTENT_CLASSIFIER] Classifying: '{query}'")
@@ -214,41 +264,49 @@ Output ONLY the intent name (e.g., "recommendations"), nothing else.
                     {"role": "user", "content": f"Query: {query}"}
                 ],
                 api_key=os.getenv("OPENROUTER_API_KEY"),
-                temperature=0.1,
-                max_tokens=50,
+                temperature=0.0,
+                max_tokens=300,  # Increased for larger JSON
+                response_format={ "type": "json_object" },
                 extra_headers={
-                    "HTTP-Referer": "http://localhost:8000",
+                    "HTTP-Referer": os.getenv("COVE_CORE_BASE_URL", "http://localhost:8000"),
                     "X-Title": "COVE AI Intent Classifier"
                 }
             )
             
-            result = response.choices[0].message.content.strip().lower()
+            content = response.choices[0].message.content.strip()
+            # Safety cleanup for markdown
+            if content.startswith("```json"):
+                content = content.replace("```json", "").replace("```", "").strip()
             
-            # Extract intent (should be just the intent name)
-            intent = result.split()[0] if result.split() else self.NONE
+            data = json.loads(content)
+            intent = data.get("intent", self.NONE).lower()
+            filters = data.get("filters", {})
+            reasoning = data.get("reasoning", "")
             
-            # Map to valid intents
+            # Sanitize intent
             valid_intents = {
                 "recommendations", "product_question", "product_comparison",
                 "cart_proposal", "checkout_ready", "size_help",
                 "quality_question", "order_history", "outfit_builder",
-                "greeting", "none"
+                "show_more", "greeting", "none"
             }
-            
             if intent not in valid_intents:
-                print(f"⚠️ [INTENT_CLASSIFIER] Invalid intent '{intent}', defaulting to 'none'")
-                log.warning(f"Invalid intent '{intent}' from LLM, defaulting to 'none'")
                 intent = self.NONE
             
-            print(f"✅ [INTENT_CLASSIFIER] Result: {intent} (conf: 0.90)")
-            log.info(f"Intent classified: {intent} (confidence: 0.90) for query: '{query[:50]}'")
+            # Heuristic: If we extracted filters but intent is none/greeting, it's likely a search
+            if intent in (self.NONE, "greeting") and any(k in filters for k in ("type", "price_max", "price_min", "sort", "gender", "fit", "size")):
+                print(f"⚠️ [INTENT_CLASSIFIER] Intent '{intent}' but filters found {filters.keys()} -> promoting to 'recommendations'")
+                intent = "recommendations"
             
-            return intent, 0.90, result
-        
+            print(f"✅ [INTENT_CLASSIFIER] Intent: {intent}, Filters: {filters}")
+            log.info(f"Intent: {intent}, Filters: {filters}")
+            
+            return intent, 0.90, {"filters": filters, "reasoning": reasoning}
+            
         except Exception as e:
             print(f"❌ [INTENT_CLASSIFIER] Failed: {e}")
             log.error(f"Intent classification failed: {e}", exc_info=True)
-            return self.NONE, 0.5, str(e)
+            return self.NONE, 0.5, {}
     
     def _build_context_summary(self, context: Dict) -> str:
         """

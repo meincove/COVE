@@ -16,18 +16,18 @@ type Props = {
 
 export default function InvoicePreviewModal({ items, total, userEmail, onClose, firstName, orderId, visible }: Props) {
   const handleDownload = async (attempt = 1) => {
-  try {
-    const res = await fetch(`http://localhost:8000/api/download-invoice/?order_id=${orderId}`)
-    if (!res.ok) throw new Error('Not ready')
-    window.open(`http://localhost:8000/api/download-invoice/?order_id=${orderId}`, '_blank')
-  } catch (err) {
-    if (attempt < 3) {
-      setTimeout(() => handleDownload(attempt + 1), 1500)
-    } else {
-      alert('⚠️ Invoice not ready yet. Please try again in a few seconds.')
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/download-invoice/?order_id=${orderId}`)
+      if (!res.ok) throw new Error('Not ready')
+      window.open(`${process.env.NEXT_PUBLIC_API_BASE}/api/download-invoice/?order_id=${orderId}`, '_blank')
+    } catch (err) {
+      if (attempt < 3) {
+        setTimeout(() => handleDownload(attempt + 1), 1500)
+      } else {
+        alert('⚠️ Invoice not ready yet. Please try again in a few seconds.')
+      }
     }
   }
-}
 
   console.log('🧾 Invoice Items Sent to PDF:', items)
   return (
@@ -62,7 +62,7 @@ export default function InvoicePreviewModal({ items, total, userEmail, onClose, 
         <div className="mt-6 text-lg font-bold">
           Total: € {total.toFixed(2)}
         </div>
-        
+
 
 
         {/* Actions */}
@@ -73,7 +73,7 @@ export default function InvoicePreviewModal({ items, total, userEmail, onClose, 
           >
             ❌ Close
           </button>
-          
+
           {/* <button
   onClick={() => {
     if (!orderId) {
@@ -87,9 +87,9 @@ export default function InvoicePreviewModal({ items, total, userEmail, onClose, 
   📥 Download PDF
 </button> */}
 
-<button onClick={() => handleDownload()}>
-  📥 Download PDF
-</button>
+          <button onClick={() => handleDownload()}>
+            📥 Download PDF
+          </button>
 
 
 

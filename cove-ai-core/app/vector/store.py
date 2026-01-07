@@ -277,6 +277,124 @@ def connect() -> psycopg.Connection:
 
 
 # ---------------------------------------------------------------------
+# OUTFIT CATEGORY SEARCH (v2 Architecture)
+# ---------------------------------------------------------------------
+
+async def search_by_outfit_category(
+    outfit_category: str,
+    style_query: str = "",
+    gender: Optional[str] = None,
+    price_max: Optional[float] = None,
+    exclude_slugs: Optional[List[str]] = None,
+    top_k: int = 10,
+) -> List[Dict[str, Any]]:
+    """
+    Category-constrained vector search for outfit building.
+    
+    CRITICAL: Filters are applied at the DATABASE level, not post-retrieval.
+    This ensures we always get results in the correct category.
+    
+    Args:
+        outfit_category: One of "tops", "bottoms", "shoes", "outerwear", "accessories", "dress"
+        style_query: Style context for semantic matching (e.g., "casual weekend")
+        gender: Optional gender filter ("men", "women", "unisex")
+        price_max: Optional maximum price filter
+        exclude_slugs: Products to exclude (for generating multiple unique outfits)
+        top_k: Number of results to return
+        
+    Returns:
+        List of product dicts sorted by vector similarity
+    """
+    import logging
+    log = logging.getLogger("cove.outfit")
+    
+    # Generate embedding for style context
+    query_text = f"{style_query} {outfit_category}" if style_query else outfit_category
+    q_emb = await async_embed_query(query_text)
+    
+    # Run constrained search in threadpool
+    return await run_in_threadpool(
+        _search_by_category_sync,
+        outfit_category=outfit_category,
+        q_emb=q_emb,
+        gender=gender,
+        price_max=price_max,
+        exclude_slugs=exclude_slugs or [],
+        top_k=top_k,
+    )
+
+
+def _search_by_category_sync(
+    outfit_category: str,
+    q_emb: List[float],
+    gender: Optional[str],
+    price_max: Optional[float],
+    exclude_slugs: List[str],
+    top_k: int,
+) -> List[Dict[str, Any]]:
+    """Synchronous category-constrained ANN search."""
+    import logging
+    log = logging.getLogger("cove.outfit")
+    
+    with get_conn_sync() as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
+            # Build query with category constraint at DB level
+            sql = """
+                SELECT 
+                    id, title, url, meta,
+                    1 - (embedding <=> %s::vector) as similarity
+                FROM ai_core.docs
+                WHERE kind = 'product'
+                  AND embedding IS NOT NULL
+                  AND meta->>'outfit_category' = %s
+            """
+            params = [q_emb, outfit_category]
+            
+            # Gender filter (allow unisex to match any)
+            if gender:
+                gender_normalized = {"male": "men", "men": "men", "female": "women", "women": "women"}.get(gender.lower(), gender.lower())
+                sql += " AND (LOWER(meta->>'gender') = %s OR LOWER(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)"
+                params.append(gender_normalized)
+            
+            # Price filter
+            if price_max:
+                sql += " AND (meta->>'price')::float <= %s"
+                params.append(price_max)
+            
+            # Exclude already-used items
+            if exclude_slugs:
+                sql += " AND NOT (COALESCE(meta->>'slug', '') = ANY(%s))"
+                params.append(list(exclude_slugs))
+            
+            sql += " ORDER BY embedding <=> %s::vector LIMIT %s"
+            params.extend([q_emb, top_k])
+            
+            log.info(f"🔍 Category search: {outfit_category}, gender={gender}, price_max={price_max}, top_k={top_k}")
+            
+            cur.execute(sql, params)
+            rows = cur.fetchall()
+            
+            log.info(f"   ✅ Found {len(rows)} items in {outfit_category}")
+            
+            return [
+                {
+                    "title": r["title"],
+                    "url": r["url"],
+                    "slug": (r["meta"] or {}).get("slug", ""),
+                    "type": (r["meta"] or {}).get("type", ""),
+                    "outfit_category": (r["meta"] or {}).get("outfit_category", ""),
+                    "price": (r["meta"] or {}).get("price"),
+                    "imageUrl": (r["meta"] or {}).get("imageUrl") or (r["meta"] or {}).get("image"),
+                    "color": (r["meta"] or {}).get("color"),
+                    "gender": (r["meta"] or {}).get("gender"),
+                    "similarity": r["similarity"],
+                    "meta": r["meta"],
+                }
+                for r in rows
+            ]
+
+
+# ---------------------------------------------------------------------
 # PRODUCT HELPERS
 # ---------------------------------------------------------------------
 
@@ -339,6 +457,58 @@ def get_variant_by_id(conn: psycopg.Connection, variant_id: str) -> dict | None:
         }
 
 
+def get_product_embedding_by_slug(conn: psycopg.Connection, slug: str) -> List[float] | None:
+    """
+    Fetch the vector embedding for a product by its slug.
+    Used for 'visual similar' / 'more like this' search.
+    """
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            SELECT embedding
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND COALESCE(meta->>'slug','') = %s
+              AND embedding IS NOT NULL
+            LIMIT 1
+            """,
+            (slug,),
+        )
+        row = cur.fetchone()
+        
+        if row and row['embedding'] is not None:
+            # pgvector returns numpy array or list depending on adapter, 
+            # but psycopg 3 + pgvector usually returns a list/array object that casts to list
+            return list(row['embedding'])
+            
+        return None
+
+def get_product_embeddings_by_slugs(conn: psycopg.Connection, slugs: List[str]) -> Dict[str, List[float]]:
+    """
+    Fetch embeddings for multiple products in one query.
+    Returns dict: { slug: embedding_list }
+    """
+    if not slugs:
+        return {}
+        
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            SELECT meta->>'slug' as slug, embedding
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND COALESCE(meta->>'slug','') = ANY(%s)
+              AND embedding IS NOT NULL
+            """,
+            (slugs,),
+        )
+        rows = cur.fetchall()
+        
+        result = {}
+        for row in rows:
+            if row['slug'] and row['embedding'] is not None:
+                result[row['slug']] = list(row['embedding'])
+        return result
 # ---------------------------------------------------------------------
 # CATALOG VOCAB (colors/types) + CACHE
 # ---------------------------------------------------------------------

@@ -1,240 +1,13 @@
 # app/routes/rag.py
-# Triggering reload to clear type config cache
+"""RAG (Retrieval Augmented Generation) queries for product and policy information."""
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional, NamedTuple
-
-from fastapi import APIRouter
 from pathlib import Path
-from pydantic import BaseModel
-
-from app.agent.verify import apply_guardrails, cross_check
-from app.core.config import RERANK_MODEL
-from app.core.catalog import (
-    get_product_meta,
-    clean_title,
-    ordered_size_names,
-    extract_slug,
-)
-from app.providers.llm import LLMClient
-from app.telemetry.trace import emit
-from app.vector.store import get_conn_sync, search_hybrid
-from app.nlp.ordinals import parse_ordinal_from_text
-
-# Optional rerank
-try:
-    import httpx
-    from app.core.config import COHERE_API_KEY
-except ImportError:
-    COHERE_API_KEY = None
-
-RAG_DEBUG = os.getenv("RAG_DEBUG", "false").lower() == "true"
-
-router = APIRouter()
-_llm = LLMClient()
-log = logging.getLogger("cove.rag")
-
-# ------------------ I/O ------------------
-
-class RAGIn(BaseModel):
-    query: str
-    top_k: int = 6
-    context_slugs: Optional[List[str]] = None
-
-# ------------------ Rerank ------------------
-
-async def rerank(query: str, docs: list[dict]) -> list[dict]:
-    if os.getenv("DISABLE_RERANK", "false").lower() == "true":
-        return docs
-    if not COHERE_API_KEY or not docs:
-        return docs
-    try:
-        async with httpx.AsyncClient(timeout=15) as cx:
-            r = await cx.post(
-                "https://api.cohere.ai/v1/rerank",
-                headers={
-                    "Authorization": f"Bearer {COHERE_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": RERANK_MODEL or "rerank-3",
-                    "query": query,
-                    "documents": [d.get("text", "") for d in docs],
-                },
-            )
-        r.raise_for_status()
-        order = [x["index"] for x in r.json().get("results", [])]
-        return [docs[i] for i in order] if order else docs
-    except Exception as e:
-        log.warning("Cohere rerank skipped: %s", e)
-        return docs
-
-# ------------------ Helpers ------------------
-
-async def _answer_for_ordinal_product(
-    conn,
-    trace_id: str,
-    query: str,
-    context_slugs: Optional[List[str]],
-) -> Optional[Dict[str, Any]]:
-    if not context_slugs:
-        return None
-
-    idx = parse_ordinal_from_text(query)
-    if idx is None or idx < 0 or idx >= len(context_slugs):
-        return None
-
-    slug = context_slugs[idx]
-    prod = get_product_meta(conn, slug)
-    if not prod:
-        return None
-
-    meta = prod.get("meta") or {}
-    sizes_map = meta.get("sizes") or {}
-    if not isinstance(sizes_map, dict) or not sizes_map:
-        return None
-
-    size_names = ordered_size_names(list(sizes_map.keys()))
-    if not size_names:
-        return None
-
-    title = clean_title(prod.get("title") or meta.get("name") or "this product")
-    ord_label = f"{idx + 1}st" if idx == 0 else f"{idx + 1}nd" if idx == 1 else f"{idx + 1}rd" if idx == 2 else f"{idx + 1}th"
-
-    answer_text = (
-        f"The {ord_label} product, {title}, has sizes {', '.join(size_names)} available."
-    )
-
-    citations = [
-        {
-            "title": prod.get("title") or title,
-            "url": prod.get("url") or f"/product/{slug}",
-            "score": 1.0,
-        }
-    ]
-
-    corrections = await cross_check(answer_text, citations)
-    final_answer = apply_guardrails(answer_text, corrections)
-    emit(
-        "verification_done",
-        trace_id,
-        {"had_corrections": bool(corrections), "corrections": corrections},
-    )
-
-    return {
-        "answer": final_answer,
-        "citations": citations,
-    }
-
-def _fallback_cites(docs: list[dict]) -> list[dict]:
-    return [
-        {
-            "title": d.get("title", ""),
-            "url": d.get("url", ""),
-            "score": float(d.get("score", 0)),
-        }
-        for d in docs
-    ]
-
-def _normalize_citations(raw: Any, docs: list[dict]) -> list[dict]:
-    if isinstance(raw, list) and raw and isinstance(raw[0], dict) and "title" in raw[0]:
-        return raw
-    idxs: List[int] = []
-    for x in (raw or []):
-        if isinstance(x, int):
-            idxs.append(x - 1)
-        elif isinstance(x, str):
-            m = re.search(r"\[(\d+)\]", x)
-            if m:
-                idxs.append(int(m.group(1)) - 1)
-    out: List[dict] = []
-    for i in idxs:
-        if 0 <= i < len(docs):
-            d = docs[i]
-            out.append(
-                {
-                    "title": d.get("title", ""),
-                    "url": d.get("url", ""),
-                    "score": float(d.get("score", 0)),
-                }
-            )
-    return out or _fallback_cites(docs)
-
-from app.core.rules import get_prompt
-
-def _build_system_prompt(intent_kind: str) -> str:
-    base = get_prompt("rag", default="You are Cove AI. Return JSON: {answer, citations}.")
-    
-    ik = (intent_kind or "generic").lower()
-    if ik == "policy":
-        return base + " Focus on store policies (shipping, returns)."
-    elif ik == "size_fit":
-        return base + " Focus on size and fit information."
-    elif ik == "lookup_product":
-        return base + " Focus on product details (material, price)."
-    return base
-
-def _strip_code_fences(s: str) -> str:
-    s = s.strip()
-    if s.startswith("```"):
-        s = re.sub(r"^```(?:json)?\s*|\s*```$", "", s, flags=re.S).strip()
-    return s
-
-# ------------------ Endpoints ------------------
-
-@router.post("/ai/rag/query")
-async def rag_query(body: RAGIn):
-    """
-    Standard RAG endpoint.
-    """
-    # 1. Retrieval (Async)
-    # Search all kinds (product, policy, etc.)
-    docs = await search_hybrid(body.query, kind=None, top_k=body.top_k)
-    
-    # 2. Rerank (Async)
-    docs = await rerank(body.query, docs)
-    
-    # 3. LLM Generation
-    context_text = "\n\n".join(
-        f"[{i+1}] {d.get('title','')}\n{d.get('text','')}" 
-        for i, d in enumerate(docs)
-    )
-    
-    sys_prompt = _build_system_prompt("generic")
-    messages = [
-        {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {body.query}"}
-    ]
-    
-    raw = await _llm.generate(messages)
-    
-    # 4. Parse response (supports both JSON and plain text)
-    try:
-        clean = _strip_code_fences(raw)
-        # Try JSON parsing first (backwards compatibility)
-        if clean.startswith("{"):
-            import json
-            data = json.loads(clean)
-        else:
-            # Plain text response (new behavior)
-            data = {"answer": clean, "citations": []}
-    except Exception:
-        # Fallback: treat as plain text
-        data = {"answer": raw.strip(), "citations": []}
-        
-    # 5. Normalize citations
-    if not data.get("citations"):
-        data["citations"] = _fallback_cites(docs[:3])
-    else:
-        data["citations"] = _normalize_citations(data["citations"], docs)
-        
-    return data
-
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
 from app.nlp.ordinals import parse_ordinal_from_text
 
@@ -271,6 +44,8 @@ class RAGIn(BaseModel):
     top_k: int = 6
     # NEW: optional context from UI / orchestrator
     context_slugs: Optional[List[str]] = None
+    filters: Optional[Dict[str, Any]] = None
+    intent: Optional[str] = None
 
 
 
@@ -324,10 +99,20 @@ async def embed(texts: list[str]) -> list[list[float]]:
         }
         payload = {"model": model, "input": texts}
 
-    async with httpx.AsyncClient(timeout=30) as cx:
-        r = await cx.post(url, headers=headers, json=payload)
-        r.raise_for_status()
-        data = r.json()
+    for attempt in range(3):
+        try:
+            async with httpx.AsyncClient(timeout=30) as cx:
+                r = await cx.post(url, headers=headers, json=payload)
+                r.raise_for_status()
+                data = r.json()
+                break # Success
+        except Exception as e:
+            if attempt == 2:
+                log.error(f"Embedding failed after 3 attempts: {e}")
+                raise
+            log.warning(f"Embedding attempt {attempt+1} failed ({e}), retrying...")
+            import asyncio
+            await asyncio.sleep(0.5 * (attempt + 1))
 
     if "data" in data and data["data"] and "embedding" in data["data"][0]:
         return [d["embedding"] for d in data["data"]]
@@ -797,14 +582,14 @@ from difflib import get_close_matches
 
 def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     tok = (tok or "").lower()
-    print(f"🔍 [NORMALIZE] Input token: '{tok}', catalog has {len(catalog_types)} types")
+    log.debug(f"🔍 [NORMALIZE] Input token: '{tok}', catalog has {len(catalog_types)} types")
     
     if not tok or not catalog_types:
-        print(f"🔍 [NORMALIZE] Empty token or catalog, returning None")
+        log.debug(f"🔍 [NORMALIZE] Empty token or catalog, returning None")
         return None
 
     if tok in catalog_types:
-        print(f"🔍 [NORMALIZE] ✓ Direct match found: '{tok}'")
+        log.debug(f"🔍 [NORMALIZE] ✓ Direct match found: '{tok}'")
         return tok
     
     # Load type synonyms from config (NO HARDCODING!)
@@ -815,7 +600,7 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     for canonical_type, synonym_list in synonyms.items():
         if tok in [s.lower() for s in synonym_list]:
             if canonical_type in catalog_types:
-                print(f"🔍 [NORMALIZE] ✓ Synonym match: '{tok}' → '{canonical_type}'")
+                log.debug(f"🔍 [NORMALIZE] ✓ Synonym match: '{tok}' → '{canonical_type}'")
                 return canonical_type
     
     # Check broad category map (e.g., "shoes" → ["boots", "heels", "loafers", "sneakers"])
@@ -825,9 +610,9 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
         if isinstance(mapped_types, list):
             for mt in mapped_types:
                 if mt.lower() in catalog_types:
-                    print(f"🔍 [NORMALIZE] ✓ Broad category match: '{tok}' → '{mt}'")
+                    log.debug(f"🔍 [NORMALIZE] ✓ Broad category match: '{tok}' → '{mt}'")
                     return mt.lower()
-            print(f"🔍 [NORMALIZE] ✗ Broad category '{tok}' has no catalog matches: {mapped_types}")
+            log.debug(f"🔍 [NORMALIZE] ✗ Broad category '{tok}' has no catalog matches: {mapped_types}")
 
     candidates = {tok}
     if tok.endswith("ies") and len(tok) > 3:
@@ -837,31 +622,31 @@ def _normalize_type_token(tok: str, catalog_types: set[str]) -> Optional[str]:
     if tok.endswith("s") and len(tok) > 1:
         candidates.add(tok[:-1])
 
-    print(f"🔍 [NORMALIZE] Candidates after pluralization: {candidates}")
+    log.debug(f"🔍 [NORMALIZE] Candidates after pluralization: {candidates}")
     
     for c in candidates:
         if c in catalog_types:
-            print(f"🔍 [NORMALIZE] ✓ Candidate match found: '{c}'")
+            log.debug(f"🔍 [NORMALIZE] ✓ Candidate match found: '{c}'")
             return c
 
     match = get_close_matches(tok, list(catalog_types), n=1, cutoff=0.84)
     if match:
-        print(f"🔍 [NORMALIZE] ✓ Fuzzy match found: '{match[0]}'")
+        log.debug(f"🔍 [NORMALIZE] ✓ Fuzzy match found: '{match[0]}'")
         return match[0]
 
-    print(f"🔍 [NORMALIZE] ✗ No match found for '{tok}'")
+    log.debug(f"🔍 [NORMALIZE] ✗ No match found for '{tok}'")
     return None
 
 
 def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
-    print(f"🔍 [PARSE] Starting _parse_query_attrs for query: '{q}'")
+    log.debug(f"🔍 [PARSE] Starting _parse_query_attrs for query: '{q}'")
     v = _get_vocab(conn)
-    print(f"🔍 [PARSE] Vocabulary types ({len(v['types'])} total): {sorted(list(v['types']))[:20]}...")  # Show first 20
-    print(f"🔍 [PARSE] Is 'skirt' in vocab? {'skirt' in v['types']}")
+    log.debug(f"🔍 [PARSE] Vocabulary types ({len(v['types'])} total): {sorted(list(v['types']))[:20]}...")  # Show first 20
+    log.debug(f"🔍 [PARSE] Is 'skirt' in vocab? {'skirt' in v['types']}")
     
     raw = re.findall(r"[a-zA-Z]+", q.lower())
     toks = set(raw)
-    print(f"🔍 [PARSE] Extracted tokens: {toks}")
+    log.debug(f"🔍 [PARSE] Extracted tokens: {toks}")
 
     # Color synonym mapping - expand simple colors to catalog variants
     COLOR_SYNONYMS = {
@@ -875,22 +660,22 @@ def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
     
     # Direct matches from vocab
     colors = sorted({t for t in toks if t in v["colors"]})
-    print(f"🔍 [PARSE] Direct color matches from vocab: {colors}")
+    log.debug(f"🔍 [PARSE] Direct color matches from vocab: {colors}")
     
     # Expand via synonyms
     expanded_colors = []
     for tok in toks:
         if tok in COLOR_SYNONYMS:
-            print(f"🔍 [PARSE] Found synonym key '{tok}', expanding to: {COLOR_SYNONYMS[tok]}")
+            log.debug(f"🔍 [PARSE] Found synonym key '{tok}', expanding to: {COLOR_SYNONYMS[tok]}")
             for catalog_color in COLOR_SYNONYMS[tok]:
                 if catalog_color in v["colors"] and catalog_color not in colors:
                     expanded_colors.append(catalog_color)
-                    print(f"🔍 [PARSE]   ✓ Added '{catalog_color}' (in catalog)")
+                    log.debug(f"🔍 [PARSE]   ✓ Added '{catalog_color}' (in catalog)")
                 elif catalog_color not in v["colors"]:
-                    print(f"🔍 [PARSE]   ✗ Skipped '{catalog_color}' (not in catalog)")
+                    log.debug(f"🔍 [PARSE]   ✗ Skipped '{catalog_color}' (not in catalog)")
     
     colors.extend(expanded_colors)
-    print(f"🔍 [PARSE] Colors after synonym expansion: {colors}")
+    log.debug(f"🔍 [PARSE] Colors after synonym expansion: {colors}")
     
     if "hot" in toks and "pink" in toks:
         colors.append("hotpink")
@@ -910,7 +695,7 @@ def _parse_query_attrs(conn, q: str) -> Dict[str, List[str]]:
     types = sorted(norm_types)
     
     result = {"colors": colors, "sizes": sizes, "types": types}
-    print(f"🔍 [PARSE] Final parsed attrs: {result}")
+    log.debug(f"🔍 [PARSE] Final parsed attrs: {result}")
     return result
 
 
@@ -1180,8 +965,11 @@ async def rag_query(body: RAGIn):
         # --- Parse attrs & intent ---
         attrs = _parse_query_attrs(conn, body.query)
         ask_shrink = _ask_shrinkage(body.query)
-        intent = await classify(body.query, attrs)
-        intent_kind = getattr(intent, "kind", "generic")
+        if body.intent:
+            intent_kind = body.intent
+        else:
+            intent = await classify(body.query, attrs)
+            intent_kind = getattr(intent, "kind", "generic")
         emit(
             "query_received",
             trace_id,
@@ -1207,15 +995,11 @@ async def rag_query(body: RAGIn):
                     kind="product",
                     top_k=body.top_k,
                 )
-        except TypeError:
-            docs = (
-                await search_keyword(
-                    query=body.query, kind="product", top_k=body.top_k
-                )
-                if USE_KEYWORD_ONLY
-                else await search_hybrid(
-                    query=body.query, kind="product", top_k=body.top_k
-                )
+        except Exception as e:
+            # Fallback to keyword search if vector/embedding fails
+            log.warning(f"⚠️ Search failed (hybrid), falling back to keyword: {e}")
+            docs = search_keyword(
+                conn, query=body.query, kind="product", top_k=body.top_k
             )
 
         emit(
@@ -1267,7 +1051,19 @@ async def rag_query(body: RAGIn):
             return ordinal_resp
 
         # -------- Optional rules-based fit recommendation --------
-        fit_params = _parse_fit_params(body.query)
+        fit_params = None
+        if body.filters:
+            f = body.filters
+            if f.get("height_cm") and f.get("weight_kg"):
+                fit_params = _FitParams(
+                    height_cm=float(f["height_cm"]),
+                    weight_kg=float(f["weight_kg"]),
+                    gender=f.get("gender"),
+                    fit_preference=f.get("fit")
+                )
+        
+        if not fit_params:
+            fit_params = _parse_fit_params(body.query)
 
         if intent_kind == "size_fit" and fit_params is not None:
             # Generic fallback instead of hardcoded "hoodie"

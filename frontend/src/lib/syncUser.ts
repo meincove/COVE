@@ -7,7 +7,7 @@ export async function syncClerkUserToBackendClientSide(token: string) {
   }
 
   try {
-    const res = await fetch('http://localhost:8000/api/sync-user/', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/sync-user/`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

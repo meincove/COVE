@@ -7,6 +7,7 @@ Maps LLM-based semantic intents to orchestrator intent kinds
 INTENT_MAPPING = {
     # Our semantic intents → Orchestrator intents
     "recommendations": "discover",  # Product browsing/discovery
+    "show_more": "discover",        # User wants more of same - treat as discovery
     "cart_proposal": "cart_add",    # Add to cart intent
     "checkout_ready": "checkout_start",  # Ready to pay
     "order_history": "order_query",  # Order tracking

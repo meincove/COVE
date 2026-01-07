@@ -115,31 +115,39 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
 
         
         # === GENERATE SUGGESTED ACTIONS ===
-        # Build context from result for suggestions engine
-        suggestions_context = {
-            "items": [item.dict() for item in result.items] if result.items else [],
-            "cart_payload": result.cart_payload if hasattr(result, 'cart_payload') else None,
-            "checkout_data": result.checkout if hasattr(result, 'checkout') else None,
-            "orders": result.orders if hasattr(result, 'orders') else [],
-            # User context would come from AgentIn body
-            "user_has_size": bool(body.userPreferences and body.userPreferences.get('size')) if hasattr(body, 'userPreferences') else False,
-            "user_has_orders": False,  # TODO: Check user order history
-            "has_color_variants": False,  # TODO: Check from product catalog
-        }
+        # PREFER Verifier suggestions (context-aware) over engine suggestions
+        suggested_actions = None
         
-        # Generate contextual suggestions
-        suggestions_engine = get_suggestions_engine()
-        suggested_actions = suggestions_engine.generate(
-            intent=result.kind,
-            context=suggestions_context
-        )
+        # Check if Verifier provided suggestions
+        if hasattr(result, 'suggestions') and result.suggestions:
+            # Convert Verifier's string suggestions to UI format
+            suggested_actions = [
+                {"id": f"verifier_{i}", "text": s, "query": s, "type": "question", "icon": "sparkles", "priority": i+1}
+                for i, s in enumerate(result.suggestions)
+            ]
+            print(f"[SUGGESTIONS DEBUG] Using {len(suggested_actions)} Verifier suggestions: {result.suggestions}")
+        else:
+            # Fallback to engine-generated suggestions
+            suggestions_context = {
+                "items": [item.dict() for item in result.items] if result.items else [],
+                "cart_payload": result.cart_payload if hasattr(result, 'cart_payload') else None,
+                "checkout_data": result.checkout if hasattr(result, 'checkout') else None,
+                "orders": result.orders if hasattr(result, 'orders') else [],
+                "user_has_size": bool(body.userPreferences and body.userPreferences.get('size')) if hasattr(body, 'userPreferences') else False,
+                "user_has_orders": False,
+                "has_color_variants": False,
+            }
+            
+            suggestions_engine = get_suggestions_engine()
+            suggested_actions = suggestions_engine.generate(
+                intent=result.kind,
+                context=suggestions_context
+            )
+            print(f"[SUGGESTIONS DEBUG] Using {len(suggested_actions) if suggested_actions else 0} engine suggestions")
         
         # Emit suggestions if any were generated
         if suggested_actions:
-            print(f"[SUGGESTIONS DEBUG] Generated {len(suggested_actions)} suggestions: {suggested_actions}")
             yield f"event: suggestions\ndata: {json.dumps({'suggestions': suggested_actions})}\n\n"
-        else:
-            print(f"[SUGGESTIONS DEBUG] No suggestions generated for intent={result.kind}, context keys={list(suggestions_context.keys())}")
         
         # Final event: done
         done_data = {

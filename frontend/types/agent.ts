@@ -12,6 +12,7 @@ export type AgentItem = {
   price?: number;
   imageUrl?: string;  // For displaying in UI
   image_url?: string; // Potential backend key
+  outfit_id?: string; // Multi-outfit grouping
 };
 
 export type AgentCartPayload = {

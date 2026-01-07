@@ -580,3 +580,158 @@ async def fit_recommend(body: FitIn) -> FitOut:
         notes=notes,
         citations=citations,
     )
+
+
+# --- Quick-check endpoint for "Will This Fit?" UI -----------------------------
+
+class QuickFitIn(BaseModel):
+    """Lightweight fit check using only slug and size - uses session profile"""
+    slug: str
+    selected_size: str
+    guest_id: Optional[str] = None
+    user_id: Optional[str] = None
+    # Optional overrides if session profile not available
+    height_cm: Optional[float] = None
+    weight_kg: Optional[float] = None
+    gender: Optional[str] = None
+    fit_preference: Optional[str] = None
+
+
+class QuickFitOut(BaseModel):
+    """Quick fit assessment result"""
+    will_fit: str  # "yes", "likely", "maybe", "no"
+    confidence: float
+    recommendation: str
+    suggested_size: Optional[str] = None
+    message: str
+
+
+@router.post("/ai/fit/quick-check", response_model=QuickFitOut)
+async def fit_quick_check(body: QuickFitIn) -> QuickFitOut:
+    """
+    Quick "Will This Fit?" check for PDP.
+    
+    Uses session body profile if available, otherwise requires height/weight.
+    Returns a fast assessment without detailed sizing breakdown.
+    """
+    from app.services.session_state import SessionStateManager
+    
+    # Try to get body profile from session
+    mock_body = type('obj', (object,), {
+        'guest_id': body.guest_id,
+        'user_id': body.user_id,
+    })()
+    
+    profile = SessionStateManager.get_body_profile(mock_body)
+    
+    # Determine measurements (session > request > missing)
+    height = body.height_cm or profile.get("height_cm")
+    weight = body.weight_kg or profile.get("weight_kg")
+    gender = body.gender or profile.get("gender")
+    fit_pref = body.fit_preference or profile.get("fit_preference", "regular")
+    usual_sizes = profile.get("usual_sizes", {})
+    
+    # Quick check: if user has usual size for this category, use that
+    prod = await _fetch_product_sizes(body.slug)
+    product_type = (prod.get("type") if prod else "hoodie").lower() if prod else "hoodie"
+    
+    # Check usual size match first (highest confidence)
+    if product_type in usual_sizes:
+        usual = usual_sizes[product_type]
+        selected_upper = body.selected_size.upper()
+        
+        if usual == selected_upper:
+            return QuickFitOut(
+                will_fit="yes",
+                confidence=0.9,
+                recommendation="perfect_match",
+                suggested_size=None,
+                message=f"✓ {body.selected_size} is your usual size for {product_type}s!"
+            )
+        else:
+            # Calculate how far off
+            if usual in _SIZE_ORDER and selected_upper in _SIZE_ORDER:
+                diff = _SIZE_ORDER.index(selected_upper) - _SIZE_ORDER.index(usual)
+                if diff == 1:
+                    return QuickFitOut(
+                        will_fit="likely",
+                        confidence=0.75,
+                        recommendation="slightly_large",
+                        suggested_size=usual,
+                        message=f"This may run slightly large. Your usual is {usual}."
+                    )
+                elif diff == -1:
+                    return QuickFitOut(
+                        will_fit="likely",
+                        confidence=0.75,
+                        recommendation="slightly_small",
+                        suggested_size=usual,
+                        message=f"This may run slightly small. Your usual is {usual}."
+                    )
+                elif abs(diff) >= 2:
+                    return QuickFitOut(
+                        will_fit="maybe",
+                        confidence=0.5,
+                        recommendation="size_mismatch",
+                        suggested_size=usual,
+                        message=f"This is {abs(diff)} sizes {'larger' if diff > 0 else 'smaller'} than your usual {usual}."
+                    )
+    
+    # No usual size - need measurements
+    if not height or not weight:
+        return QuickFitOut(
+            will_fit="maybe",
+            confidence=0.3,
+            recommendation="need_measurements",
+            suggested_size=None,
+            message="Add your height and weight for personalized fit advice."
+        )
+    
+    # Calculate recommended size
+    entry = _find_rules_entry(product_type, gender, fit_pref)
+    if entry:
+        base = _pick_size_from_rules(entry, height, weight)
+        if not base:
+            chest = _estimate_chest_from_bmi(height, weight)
+            base = _nearest_size(chest, product_type)
+    else:
+        chest = _estimate_chest_from_bmi(height, weight)
+        base = _nearest_size(chest, product_type)
+    
+    rec = _adjust_by_pref(base, fit_pref)
+    selected_upper = body.selected_size.upper()
+    
+    if rec == selected_upper:
+        return QuickFitOut(
+            will_fit="yes",
+            confidence=0.8,
+            recommendation="calculated_match",
+            suggested_size=None,
+            message=f"✓ {body.selected_size} should fit well based on your measurements."
+        )
+    elif rec in _SIZE_ORDER and selected_upper in _SIZE_ORDER:
+        diff = _SIZE_ORDER.index(selected_upper) - _SIZE_ORDER.index(rec)
+        if abs(diff) == 1:
+            return QuickFitOut(
+                will_fit="likely",
+                confidence=0.65,
+                recommendation="close_match",
+                suggested_size=rec,
+                message=f"We recommend {rec} based on your measurements, but {selected_upper} could work."
+            )
+        else:
+            return QuickFitOut(
+                will_fit="no",
+                confidence=0.7,
+                recommendation="size_mismatch",
+                suggested_size=rec,
+                message=f"Based on your measurements, we recommend {rec} instead."
+            )
+    
+    return QuickFitOut(
+        will_fit="maybe",
+        confidence=0.4,
+        recommendation="uncertain",
+        suggested_size=rec,
+        message=f"Consider size {rec} based on your measurements."
+    )

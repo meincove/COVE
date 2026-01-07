@@ -22,6 +22,7 @@
     "@react-three/postprocessing": "^3.0.4",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.4.0",
+    "@tanstack/react-virtual": "^3.13.16",
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -12,8 +12,10 @@ from typing import Dict, Any, Optional
 
 log = logging.getLogger("cove.fact_storage")
 
-# Django API base URL
-DJANGO_BASE_URL = "http://localhost:8001"  # Django runs on 8001
+import os
+
+# Django API base URL (from environment, falls back to localhost for dev)
+DJANGO_BASE_URL = os.getenv("DJANGO_BASE_URL", "http://localhost:8001")
 
 
 async def store_facts(

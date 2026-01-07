@@ -1,0 +1,43 @@
+{
+    "categories": [
+        "tops",
+        "bottoms",
+        "shoes"
+    ],
+    "budget_allocation": {
+        "shoes": 0.35,
+        "bottoms": 0.30,
+        "tops": 0.20,
+        "dress": 0.40,
+        "outerwear": 0.25,
+        "accessories": 0.15
+    },
+    "occasions": {
+        "fancy": {
+            "excluded_types": [
+                "tee",
+                "hoodie",
+                "sweatshirt",
+                "shorts",
+                "joggers",
+                "tracksuit"
+            ],
+            "preferred_categories": [
+                "dress",
+                "shoes",
+                "outerwear"
+            ]
+        },
+        "casual": {
+            "excluded_types": [
+                "gown",
+                "tuxedo"
+            ],
+            "preferred_categories": [
+                "tops",
+                "bottoms",
+                "shoes"
+            ]
+        }
+    }
+}

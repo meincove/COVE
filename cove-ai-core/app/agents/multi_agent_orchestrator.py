@@ -369,8 +369,11 @@ Rules:
                         
                         # Run agent execution in background
                         async def run_agent():
-                            await self._execute_agent_step(step, state, stream_callback=agentic_callback)
-                            await agentic_queue.put(None)  # Signal done
+                            try:
+                                await self._execute_agent_step(step, state, stream_callback=agentic_callback)
+                            finally:
+                                # Ensure we ALWAYS signal completion, even if agent crashes/times out
+                                await agentic_queue.put(None)
                         
                         agent_task = asyncio.create_task(run_agent())
                         
@@ -731,6 +734,11 @@ Rules:
             )
             
             enriched_item = item.copy()
+            
+            # ✨ PHASE 7: Preserve outfit_id if present
+            if item.get("outfit_id"):
+                enriched_item["outfit_id"] = item["outfit_id"]
+                
             if size_rec:
                 enriched_item["recommended_size"] = size_rec.get("recommended_size")
                 enriched_item["size_confidence"] = size_rec.get("confidence")

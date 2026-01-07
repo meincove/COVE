@@ -1,5 +1,6 @@
 # app/main.py
 from dotenv import load_dotenv
+# Forced reload for filter fix
 load_dotenv()
 
 # Week 6: Validate configuration on startup

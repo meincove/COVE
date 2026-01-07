@@ -7,11 +7,14 @@ This module configures Celery for distributed task processing with Redis as the 
 from celery import Celery
 import os
 
+# Redis configuration from environment (falls back to localhost for dev)
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
 # Celery configuration
 celery_app = Celery(
     'cove_tasks',
-    broker='redis://localhost:6379/0',
-    backend='redis://localhost:6379/0',
+    broker=REDIS_URL,
+    backend=REDIS_URL,
     include=['app.tasks.fact_extraction']  # Auto-discover tasks
 )
 

@@ -1,13 +1,15 @@
 """
 Simple in-memory LLM cache for performance optimization.
 Caches LLM responses to avoid redundant API calls.
+Delegates to app.core.cache for actual storage.
 """
 
 import hashlib
 import json
 import logging
 from typing import Any, Dict, Optional
-from datetime import datetime, timedelta
+
+from app.core.cache import get_cached, set_cached, clear_cache, get_cache_stats
 
 log = logging.getLogger("cove.cache")
 
@@ -16,11 +18,8 @@ class LLMCache:
     """Simple in-memory cache for LLM responses with TTL."""
     
     def __init__(self, maxsize: int = 1000, ttl_seconds: int = 3600):
-        self.cache: Dict[str, Dict[str, Any]] = {}
-        self.maxsize = maxsize
+        # maxsize is controlled globally by app.core.cache, but we keep the arg for compat
         self.ttl_seconds = ttl_seconds
-        self.hits = 0
-        self.misses = 0
     
     def _create_key(self, model: str, messages: list, **kwargs) -> str:
         """Create cache key from LLM call parameters."""
@@ -35,64 +34,29 @@ class LLMCache:
     
     def get(self, key: str) -> Optional[Any]:
         """Get cached response if exists and not expired."""
-        if key not in self.cache:
-            self.misses += 1
-            return None
-        
-        entry = self.cache[key]
-        
-        # Check TTL
-        if datetime.now() > entry["expires"]:
-            del self.cache[key]
-            self.misses += 1
-            return None
-        
-        self.hits += 1
-        hit_rate = (self.hits / (self.hits + self.misses)) * 100
-        log.info(f"✅ LLM cache hit: {key[:8]}... (hit rate: {hit_rate:.1f}%)")
-        return entry["response"]
+        value = get_cached(key)
+        if value:
+            # We don't track hits/misses here as cache.py handles it globally
+            # But we can log for debug if needed
+            log.debug(f"✅ LLM cache hit: {key[:8]}...")
+        return value
     
     def set(self, key: str, response: Any):
         """Cache response with TTL."""
-        # Evict oldest if at capacity
-        if len(self.cache) >= self.maxsize:
-            oldest_key = min(
-                self.cache.keys(),
-                key=lambda k: self.cache[k]["created"]
-            )
-            del self.cache[oldest_key]
-            log.debug(f"Evicted oldest cache entry: {oldest_key[:8]}...")
-        
-        self.cache[key] = {
-            "response": response,
-            "created": datetime.now(),
-            "expires": datetime.now() + timedelta(seconds=self.ttl_seconds)
-        }
+        set_cached(key, response, ttl=self.ttl_seconds)
         log.debug(f"💾 Cached LLM response: {key[:8]}...")
     
     def clear(self):
         """Clear all cached entries."""
-        self.cache.clear()
-        self.hits = 0
-        self.misses = 0
+        clear_cache()
         log.info("🗑️ Cache cleared")
     
     def stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
-        total_requests = self.hits + self.misses
-        hit_rate = (self.hits / total_requests * 100) if total_requests > 0 else 0
-        
-        return {
-            "size": len(self.cache),
-            "maxsize": self.maxsize,
-            "hits": self.hits,
-            "misses": self.misses,
-            "hit_rate": hit_rate,
-            "ttl_seconds": self.ttl_seconds
-        }
+        return get_cache_stats()
 
 
 # Global cache instance
 llm_cache = LLMCache(maxsize=1000, ttl_seconds=3600)
 
-log.info("✓ LLM cache initialized (maxsize=1000, ttl=3600s)")
+log.info("✓ LLM cache initialized (using core cache)")

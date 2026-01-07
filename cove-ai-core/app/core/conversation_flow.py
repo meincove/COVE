@@ -12,7 +12,7 @@ Handles outfit builder conversation:
 8. Bot triggers orchestrator with: "build an outfit for business meeting, budget $300, smart casual"
 """
 
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from pathlib import Path
 import json
 import logging
@@ -67,13 +67,18 @@ class ConversationFlowHandler:
 - 'occasion': The context/purpose/event (e.g., "mountains", "beach", "wedding", "work meeting", "date night", "casual weekend")
 - 'budget': Numeric budget if mentioned (e.g., 200, 500)
 - 'style': Style preference if mentioned (e.g., "casual", "formal", "minimalist")
+- 'gender': Target gender if mentioned. Rules:
+  - "girlfriend", "wife", "for her", "for women", "women's" → "women"
+  - "boyfriend", "husband", "for him", "for men", "men's" → "men"
+  - If not specified or unclear → null
 
 Examples:
-"outfit for mountains" → {"occasion": "mountains", "budget": null, "style": null}
-"casual look for $300" → {"occasion": "casual", "budget": 300, "style": "casual"}
-"wedding guest outfit under 500 euros" → {"occasion": "wedding", "budget": 500, "style": null}
+"outfit for my girlfriend under 500" → {"occasion": null, "budget": 500, "style": null, "gender": "women"}
+"casual look for my boyfriend" → {"occasion": "casual", "budget": null, "style": "casual", "gender": "men"}
+"wedding guest outfit under 500 euros" → {"occasion": "wedding", "budget": 500, "style": null, "gender": null}
+"I want to build an outfit for my girlfriend under 500 euros" → {"occasion": null, "budget": 500, "style": null, "gender": "women"}
 
-Return valid JSON. Use null for values not found. Extract the ACTUAL words the user uses for occasion."""},
+Return valid JSON. Use null for values not found."""},
                     {"role": "user", "content": text}
                 ],
                 response_format={"type": "json_object"},
@@ -157,7 +162,7 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
         
         return None
     
-    async def start_conversation(self, session_id: str, flow_name: str, initial_message: str = "") -> str:
+    async def start_conversation(self, session_id: str, flow_name: str, initial_message: str = "") -> Union[str, Dict[str, Any]]:
         """
         Start a new conversation flow.
         
@@ -183,6 +188,9 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
         
         # ✨ ONE-SHOT: Extract slots from the triggering message immediately
         if initial_message:
+            # CRITICAL: Store original message for context preservation (e.g., "boyfriend" for gender)
+            state["original_query"] = initial_message
+            
             extracted = await self._extract_slots_from_text(initial_message)
             log.info(f"🚀 One-Shot Extraction from '{initial_message}': {extracted}")
             for key, val in extracted.items():
@@ -203,24 +211,17 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
                 return self._format_question(next_step_def)
                 
         # If we skipped ALL steps, we are done immediately!
-        # But start_conversation expects to return a string (question).
-        # We should return a "Processing..." message or trigger completion logic?
-        # Ideally, we trigger completion here. But the agent expects a question.
-        # We'll return a special "All set!" message that implies we are working.
+        # Return completion status to allow immediate execution
+        log.info(f"🚀 One-shot extraction complete! Triggering immediate execution.")
         
-        # Trigger orchestrator immediately?
-        # The agent.py logic handles the response from `start_conversation` as a simple string answer.
-        # It doesn't know to trigger functionality yet.
-        # Workaround: Return a confirmation that looks like a question/statement, 
-        # and rely on the NEXT 'handle_response' (which won't happen?)
+        # Preserve original query
+        state["answers"]["_original_query"] = state.get("original_query", "")
         
-        # Actually, if we return "Done", the user has to type something else.
-        # WE NEED `agent.py` to handle immediate completion.
+        # Clean up session since we are done
+        del self._active_conversations[session_id]
         
-        # For now, let's just return a "Confirm details" step or allow one final confirmation?
-        # Or simply Ask: "Ready to build?" 
-        # This allows the user to say "Yes".
-        return "I have everything I need! Ready to see your outfit?"
+        # Build trigger payload
+        return self._build_orchestrator_trigger(flow, state["answers"])
     
     def is_in_conversation(self, session_id: str) -> bool:
         """Check if session has an active conversation."""
@@ -279,6 +280,9 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
                 }
         
         # 3. Conversation complete! Build orchestrator query
+        # Preserve original query for context (gender, etc.)
+        state["answers"]["_original_query"] = state.get("original_query", "")
+        
         del self._active_conversations[session_id]
         
         return self._build_orchestrator_trigger(flow, state["answers"])
@@ -342,7 +346,9 @@ Return valid JSON. Use null for values not found. Extract the ACTUAL words the u
             "orchestrator_context": {
                 "budget_max": budget_num,
                 "occasion": occasion,
-                "style": style
+                "style": style,
+                "gender": answers.get("gender"),  # Extracted gender (women/men)
+                "original_query": answers.get("_original_query", "")  # Preserve original for context
             }
         }
     

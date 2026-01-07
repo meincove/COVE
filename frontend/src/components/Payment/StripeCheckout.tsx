@@ -105,7 +105,7 @@ useEffect(() => {
   const guestSessionId = !isLoggedIn ? getOrCreateGuestId() : null;
 
   axios
-    .post("http://localhost:8000/api/payments/create-payment-intent/", {
+    .post(`${process.env.NEXT_PUBLIC_API_BASE}/api/payments/create-payment-intent/`, {
       // 🚨 Backend now expects EUR as a decimal; it converts to cents
       amount: Number(grandTotal.toFixed(2)),
       currency: "eur",
@@ -219,7 +219,7 @@ useEffect(() => {
         formData.append('email', userEmail || '')
         formData.append('name', props.firstName)
         try {
-          await axios.post('http://localhost:8000/api/send-invoice-email/', formData, {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/api/send-invoice-email/`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
           })
           console.log('✅ Invoice sent to user email')
@@ -233,7 +233,7 @@ useEffect(() => {
         // use the DB order id for consistency
         saveDownloadForm.append('order_id', String(order_id))
         try {
-          await axios.post('http://localhost:8000/api/save-invoice-file/', saveDownloadForm, {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/api/save-invoice-file/`, saveDownloadForm, {
             headers: { 'Content-Type': 'multipart/form-data' },
           })
           console.log('📄 Invoice file saved for backend download.')
