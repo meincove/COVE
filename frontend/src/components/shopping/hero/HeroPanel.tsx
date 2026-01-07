@@ -17,8 +17,8 @@ function rubberBand(value: number, min: number, max: number, maxOver = 240, stre
 }
 
 function makeLayout(count: number, seed: number): Layout[] {
-    const RX = 1300
-    const RY = 780
+    const RX = 1305
+    const RY = 775
     const DEPTH = 240
 
     const out: Layout[] = []
