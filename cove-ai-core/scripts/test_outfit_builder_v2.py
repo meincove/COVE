@@ -1,126 +1,79 @@
+#!/usr/bin/env python3
+"""
+Test Outfit Builder v2 end-to-end.
+
+Usage:
+    PYTHONPATH=/Users/ssg/Desktop/COVE/cove-ai-core python3 scripts/test_outfit_builder_v2.py
+"""
+
 import asyncio
-import sys
 import logging
-from pathlib import Path
 
-# Ensure we can import app modules
-sys.path.append(str(Path(__file__).parent.parent))
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-from app.agents.stylist_agent import StylistAgent
 
-# Configure Logging
-logging.basicConfig(level=logging.INFO)
-# Mute bulky logs
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("app.vector.store").setLevel(logging.WARNING)
-
-async def run_tests():
-    print("🚀 Initializing Stylist Agent for End-to-End Test...\n")
-    agent = StylistAgent(name="stylist")
+async def test_outfit_builder_v2():
+    from app.agents.outfit_builder_v2 import outfit_builder_v2_handler
     
-    test_cases = [
-        {
-            "name": "💃 Formal Gala (New Occasion)",
-            "query": "I need a stunning outfit for a formal charity gala. I want to look respectful but stylish.",
-            "budget": 2500,
-            "expected_types": ["dress", "gown", "heels", "pumps"]
-        },
-        {
-            "name": "💼 Business Meeting (New Occasion)",
-            "query": "I have a big board meeting. I need a professional power suit look.",
-            "budget": 1500,
-            "expected_types": ["blazer", "trousers", "pants", "shirt", "loafers"]
-        },
-        {
-            "name": "🏃 Morning Jog (New Activity)",
-            "query": "I'm starting to run every morning. Need a functional outfit.",
-            "budget": 600,
-            "expected_types": ["sneakers", "activewear", "hoodie"]
-        },
-        {
-            "name": "🚫 Negative Constraint (No Shoes)",
-            "query": "I need a business outfit but I don't need shoes. I already have them.",
-            "budget": 1000,
-            "expected_types": ["blazer", "trousers", "pants", "shirt"] # Should NOT have shoes
-        }
-    ]
-
-    for test in test_cases:
-        print(f"--------------------------------------------------")
-        print(f"✨ SCENARIO: {test['name']}")
-        print(f"   Query: \"{test['query']}\"")
-        print(f"   Budget: €{test['budget']}")
+    print("🧪 Testing Outfit Builder v2\n")
+    print("=" * 60)
+    
+    task = {
+        "budget_max": 500,
+        "gender": "men",
+        "style": "casual weekend",
+        "num_outfits": 3,
+    }
+    
+    context = {
+        "user_id": None,
+        "guest_session_id": "test_v2_session",
+    }
+    
+    result = await outfit_builder_v2_handler(task, context)
+    
+    print("\n" + "=" * 60)
+    print(f"✅ Result: success={result.success}")
+    print(f"📦 Reasoning: {result.reasoning}")
+    print()
+    
+    # Group items by outfit
+    outfits = {}
+    for item in result.data.get("outfit_items", []):
+        oid = item["outfit_id"]
+        if oid not in outfits:
+            outfits[oid] = []
+        outfits[oid].append(item)
+    
+    # Display each outfit
+    for outfit_id, items in sorted(outfits.items()):
+        total = sum(item.get("price", 0) for item in items)
+        print(f"\n--- {outfit_id} ({len(items)} items) ---")
+        print(f"Total Cost: €{total:.2f}")
         
-        task = {
-            "query": test["query"],
-            "budget_max": test["budget"],
-            "categories": [] # Let agent decide
-        }
+        categories_found = set()
+        for item in items:
+            cat = item.get("category", "?")
+            categories_found.add(cat)
+            price = item.get("price", 0)
+            print(f"  * [{cat}] {item['title']} (€{price:.2f})")
         
-        context = {
-            "user_id": "test_user_terminal",
-            "preferences": {"colors": ["black", "navy", "emerald"]} 
-        }
+        # Check for missing categories
+        missing = set(["tops", "bottoms", "shoes"]) - categories_found
+        if missing:
+            print(f"  ⚠️ Missing: {', '.join(missing)}")
+        else:
+            print(f"  ✅ Complete outfit!")
+    
+    # Check for missing categories in result
+    if result.data.get("missing_categories"):
+        print("\n⚠️ Missing categories noted:")
+        for mc in result.data["missing_categories"]:
+            print(f"   - {mc['outfit_id']}: {mc['category']} (budget: €{mc['budget']:.2f})")
+    
+    print("\n" + "=" * 60)
+    print("✅ Outfit Builder v2 test complete!")
 
-        try:
-            result = await agent.run(task, context)
-            
-            if result.success:
-                items = result.data.get("outfit_items", [])
-                
-                # FALLBACK: StylistAgent returns 'candidates' dict?
-                if not items and "candidates" in result.data:
-                    print("   ℹ️ Agent returned 'candidates' dict instead of 'outfit_items'. Flattening...")
-                    candidates = result.data["candidates"]
-                    for cat, cat_items in candidates.items():
-                        items.extend(cat_items)
-
-                print(f"   ✅ AGENT SUCCESS! Found {len(items)} items.")
-                print(f"   📝 Reasoning: {result.reasoning[:150]}...")
-                
-                print("\n   👕 SELECTED OUTFIT:")
-                found_types = set()
-                for item in items:
-                    title = item.get("title", "Unknown")
-                    meta = item.get("meta", {})
-                    # Handle both 'brand' and 'brandId'
-                    brand = meta.get("brandId") or meta.get("brand") or "Unknown Brand"
-                    price = meta.get("price", 0)
-                    type_ = meta.get("type", "unknown")
-                    found_types.add(type_.lower())
-                    
-                    found_keyword_match = False
-                    for exp in test["expected_types"]:
-                        if exp in type_.lower() or exp in title.lower():
-                            found_keyword_match = True
-                    
-                    match_icon = "🎯" if found_keyword_match else "❓"
-                    print(f"      {match_icon} {title} (${price})")
-                    print(f"         Brand: {brand} | Type: {type_}")
-                
-                # Validation
-                print("\n   🕵️ MATCH VALIDATION:")
-                matched_any = False
-                for exp in test["expected_types"]:
-                    # Check if any found type matches expected
-                    if any(exp in ft for ft in found_types):
-                        matched_any = True
-                        break
-                
-                if matched_any:
-                    print("      ✅ At least one expected product type found.")
-                else:
-                    print(f"      ❌ WARNING: Expected {test['expected_types']} but got {found_types}")
-
-            else:
-                print(f"   ❌ AGENT FAILED: {result.errors}")
-
-        except Exception as e:
-            print(f"   ⚠️ Exception: {e}")
-            # import traceback
-            # traceback.print_exc()
-        
-        print("\n")
 
 if __name__ == "__main__":
-    asyncio.run(run_tests())
+    asyncio.run(test_outfit_builder_v2())

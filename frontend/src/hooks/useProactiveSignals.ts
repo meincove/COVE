@@ -54,7 +54,7 @@ export function useProactiveSignals(onOffer: (offer: ProactiveResponse) => void)
 
             // 2. Send Signal
             try {
-                const res = await fetch('http://localhost:8000/ai/events', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_AI_CORE_URL}/ai/events`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

@@ -8,7 +8,7 @@ import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
 import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactiveSignals";
 
 import { useLayoutStore } from "@/src/store/layoutStore";
-import OutfitCanvas from "@/src/components/cove-ai/OutfitCanvas";
+import OutfitModal from "@/src/components/cove-ai/OutfitModal";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,7 @@ export default function FloatingChatbot() {
     const [activeView, setActiveView] = useState<'chat' | 'outfit_builder' | 'cart'>('chat');
 
     // Layout Store
-    const { isCanvasOpen, closeCanvas } = useLayoutStore();
+    const { isCanvasOpen, closeCanvas, generatedOutfit } = useLayoutStore();
 
     // Proactive Offer State
     const [activeOffer, setActiveOffer] = useState<ProactiveResponse | null>(null);
@@ -83,6 +83,21 @@ export default function FloatingChatbot() {
                 }}
                 onDismiss={() => setActiveOffer(null)}
             />
+
+            {/* Outfit Modal - Separate panel to the LEFT of chatbox */}
+            <OutfitModal
+                isOpen={isCanvasOpen && !!generatedOutfit && generatedOutfit.length > 0}
+                onClose={closeCanvas}
+                items={(generatedOutfit || []).map(item => ({
+                    slug: item.slug,
+                    title: item.title,
+                    price: item.price || 0,
+                    imageUrl: item.imageUrl,
+                    type: item.type,
+                    outfit_id: item.outfit_id,
+                }))}
+                budgetMax={500}
+            />
             {/* Floating Chat Button - Enhanced */}
             <button
                 onClick={toggleChat}
@@ -129,11 +144,11 @@ export default function FloatingChatbot() {
                         onClick={toggleChat}
                     />
 
-                    {/* Main Assistant Container - WIDER & More Features */}
+                    {/* Main Assistant Container - FIXED WIDTH */}
                     <div className={`
             fixed z-[999]
             bottom-6 right-6
-            ${isCanvasOpen ? 'w-[95vw] h-[90vh] max-w-[1600px]' : 'w-[calc(100vw-3rem)] md:w-[600px] lg:w-[680px] h-[calc(100vh-8rem)] md:h-[720px]'}
+            w-[calc(100vw-3rem)] md:w-[600px] lg:w-[680px] h-[calc(100vh-8rem)] md:h-[720px]
             rounded-3xl
             bg-gradient-to-br from-neutral-900/98 via-neutral-950/98 to-black/98
             backdrop-blur-2xl
@@ -227,15 +242,9 @@ export default function FloatingChatbot() {
                                 </div>
                             </div>
 
-                            {/* Content Area - Split View */}
-                            {/* Fixed height calc - header is ~200px (py-5 + quick actions + tabs + spacing) */}
-                            <div className="flex flex-1 min-h-0">
-                                {/* Left Panel: Chat (Always visible, shrinks when canvas open) */}
-                                <div className={`
-                                relative h-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
-                                ${isCanvasOpen ? 'w-1/3 border-r border-white/10' : 'w-full'}
-                            `}>
-                                    {/* Header (Moved inside left panel) */}
+                            {/* Content Area - Single View */}
+                            <div className="flex flex-1 min-h-0 relative">
+                                <div className="w-full h-full">
                                     {activeView === 'chat' && (
                                         <CoveChatWidget ref={chatWidgetRef} mode="chat" />
                                     )}
@@ -251,17 +260,8 @@ export default function FloatingChatbot() {
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Right Panel: Outfit Canvas (Slides in) */}
-                                <div className={`
-                                h-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden
-                                ${isCanvasOpen ? 'w-2/3 opacity-100' : 'w-0 opacity-0'}
-                            `}>
-                                    {isCanvasOpen && <OutfitCanvas />}
-                                </div>
                             </div>
                         </div>
-                        {/* Close flex wrapper */}
                     </div>
                 </>
             )}

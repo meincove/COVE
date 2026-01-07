@@ -151,8 +151,17 @@ class StylistAgent(BaseAgent):
         style = analysis.get("style", style) # Override heuristic
         
         # ✨ CRITICAL: Gender Detection / Clarification
-        # If the LLM is unsure about gender, stop and ask the user!
-        detected_gender = analysis.get("gender")
+        # FIRST: Check if gender was already extracted by conversation flow
+        context_gender = context.get("gender")
+        if context_gender:
+            log.info(f"👤 Using gender from context: {context_gender}")
+            # Override LLM's gender detection with context-provided gender
+            analysis["gender"] = context_gender
+            detected_gender = context_gender
+        else:
+            detected_gender = analysis.get("gender")
+        
+        # If the LLM is unsure about gender AND context didn't provide it, ask the user!
         if detected_gender == "ask_gender":
             log.info("✋ Stylist requesting gender clarification")
             return AgentResult(
@@ -201,6 +210,16 @@ class StylistAgent(BaseAgent):
                          else:
                              category_query = f"{style} {category} for {occasion}"
                     
+                    # ✨ QUERY KEYWORD EXPANSION: Boost search with actual product type names
+                    # e.g., "casual shoes" -> "casual shoes sneakers boots"
+                    expanded_types = self._expand_type_filter(category.lower())
+                    if expanded_types and len(expanded_types) > 1:
+                        # Add product type keywords to improve vector search recall
+                        type_keywords = " ".join(t for t in expanded_types if t.lower() != category.lower())
+                        if type_keywords:
+                            category_query += f" {type_keywords}"
+                            log.info(f"   🔍 Query expanded with types: {type_keywords}")
+                    
                     # ✨ PHASE 4: Vibe Injection
                     if vibe_keywords:
                         vibe_boost = " ".join(vibe_keywords)
@@ -239,7 +258,16 @@ class StylistAgent(BaseAgent):
                     if hard_filters:
                         # Only apply valid filters
                         if hard_filters.get("type"):
-                            search_payload["filters"]["type"] = hard_filters["type"]
+                            # ✨ TYPE EXPANSION: Map generic categories to actual product types
+                            # e.g., "shoes" -> ["sneakers", "boots", "loafers", "heels"]
+                            type_value = hard_filters["type"]
+                            expanded_types = self._expand_type_filter(type_value)
+                            if expanded_types and len(expanded_types) > 1:
+                                # Use list of types for OR matching
+                                search_payload["filters"]["type"] = expanded_types
+                                log.info(f"   🔄 Expanded type '{type_value}' -> {expanded_types}")
+                            else:
+                                search_payload["filters"]["type"] = type_value
                         if hard_filters.get("color"):
                             search_payload["filters"]["color"] = hard_filters["color"]
                         log.info(f"   🛡️ Applied Hard Filters for {category}: {search_payload['filters']}")
@@ -262,8 +290,16 @@ class StylistAgent(BaseAgent):
                             log.info(f"   👤 Gender detected via keyword fallback: female")
                     
                     if detected_gender and detected_gender not in ["unisex", None]:
-                        search_payload["filters"]["gender"] = detected_gender
-                        log.info(f"   👤 Enforcing gender filter: {detected_gender}")
+                        # Normalize LLM gender output to database values
+                        gender_map = {
+                            "male": "men",
+                            "female": "women",
+                            "men": "men",
+                            "women": "women"
+                        }
+                        normalized_gender = gender_map.get(detected_gender.lower(), detected_gender)
+                        search_payload["filters"]["gender"] = normalized_gender
+                        log.info(f"   👤 Enforcing gender filter: {detected_gender} -> {normalized_gender}")
                     
                     result = await _call_recs_suggest(search_payload)
                     items = result.get("items", [])
@@ -683,6 +719,44 @@ DO NOT output markdown. Just the JSON object.
                 return False
                 
         return True
+
+    def _expand_type_filter(self, type_value: str) -> List[str]:
+        """
+        Expand a generic type filter to include all specific product types.
+        Uses reverse mapping from outfit_config.json category_mappings.
+        
+        e.g., "shoes" -> ["sneakers", "boots", "loafers", "heels", "shoes"]
+              "top" -> ["tee", "shirt", "blouse", "sweater", "hoodie", "sweatshirt", "top"]
+        """
+        try:
+            from pathlib import Path
+            import json
+            
+            config_path = Path(__file__).parent.parent.parent / "data" / "outfit_config.json"
+            with open(config_path) as f:
+                outfit_config = json.load(f)
+            
+            category_mappings = outfit_config.get("category_mappings", {})
+            
+            # Build reverse mapping: generic -> [specific types]
+            reverse_map = {}
+            for specific_type, generic_category in category_mappings.items():
+                if generic_category not in reverse_map:
+                    reverse_map[generic_category] = []
+                if specific_type not in reverse_map[generic_category]:
+                    reverse_map[generic_category].append(specific_type)
+            
+            # Return expanded types if mapping exists
+            type_lower = type_value.lower()
+            if type_lower in reverse_map:
+                return reverse_map[type_lower]
+            
+            # No expansion needed
+            return [type_value]
+            
+        except Exception as e:
+            log.warning(f"Failed to expand type filter: {e}")
+            return [type_value]
 
     def _get_vocab(self):
         """

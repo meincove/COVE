@@ -60,7 +60,7 @@ class VerifierAgent:
                 max_tokens=500,
                 response_format={ "type": "json_object" },
                 extra_headers={
-                    "HTTP-Referer": "http://localhost:8000",
+                    "HTTP-Referer": os.getenv("COVE_CORE_BASE_URL", "http://localhost:8000"),
                     "X-Title": "COVE AI Verifier"
                 }
             )

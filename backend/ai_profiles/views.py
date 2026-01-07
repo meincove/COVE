@@ -66,6 +66,7 @@ def ai_profile_get(request):
             "clerkUserId": clerk_user_id,
             "preferred_size_top": profile.preferred_size_top,
             "preferred_size_bottom": profile.preferred_size_bottom,
+            "gender": profile.gender,  # Gender preference
             "preferred_fit": profile.preferred_fit,
             "preferred_colors": profile.preferred_colors,
             "disliked_colors": profile.disliked_colors,
@@ -114,6 +115,7 @@ def ai_profile_update(request):
     for field in [
         "preferred_size_top",
         "preferred_size_bottom",
+        "gender",  # Gender preference
         "preferred_fit",
         "preferred_colors",
         "disliked_colors",

@@ -16,7 +16,7 @@
             {
                 "agent": "outfit_builder",
                 "required": true,
-                "timeout_ms": 30000,
+                "timeout_ms": 90000,
                 "parallel_group": 1,
                 "description": "Assemble outfit from candidates"
             },

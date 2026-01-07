@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import os
 import json
-from typing import Any, Dict, List, Optional, Tuple, ClassVar
+from typing import Any, Dict, List, Optional, Tuple, ClassVar, Union
 from pathlib import Path
 
 from fastapi import APIRouter
@@ -31,7 +31,7 @@ router = APIRouter()
 # -------------------------------------------------------------------
 
 class RecsFilters(BaseModel):
-    type: Optional[str] = None
+    type: Optional[Union[str, List[str]]] = None  # Supports single type or list for OR matching
     tier: Optional[str] = None
     color: Optional[str] = None
     size: Optional[str] = None
@@ -354,10 +354,17 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 val = getattr(filters, filter_key, None)
                 if val:
                     # Check if metadata has the corresponding field
-                    meta_val = m.get(meta_key) or ""
-                    # Allow partial match (e.g. "grey" matching "grey heather")
-                    if str(val).lower().strip() not in str(meta_val).lower().strip():
-                        return False
+                    meta_val = (m.get(meta_key) or "").lower().strip()
+                    
+                    # Handle list-based filters (OR matching)
+                    if isinstance(val, list):
+                        # Product must match at least one of the filter values
+                        if not any(str(v).lower().strip() in meta_val or meta_val == str(v).lower().strip() for v in val):
+                            return False
+                    else:
+                        # Single value: allow partial match (e.g. "grey" matching "grey heather")
+                        if str(val).lower().strip() not in meta_val:
+                            return False
 
             # size (require that size exists and is in stock, if numeric)
 
@@ -394,11 +401,24 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             if filters.gender:
                 product_gender = (m.get("gender") or "").lower().strip()
                 filter_gender = filters.gender.lower().strip()
-                # Unisex products match any gender filter
-                if product_gender and product_gender != "unisex":
-                    if product_gender != filter_gender:
-                        return False
+                
+                # Normalize gender synonyms for comparison
+                gender_normalize = {
+                    "male": "men", "men": "men",
+                    "female": "women", "women": "women",
+                    "unisex": "unisex"
+                }
+                norm_product = gender_normalize.get(product_gender, product_gender)
+                norm_filter = gender_normalize.get(filter_gender, filter_gender)
+                
+                log.info(f"🧐 Filter Check: Product '{m.get('title')}' G='{product_gender}'->'{norm_product}' vs Filter='{filter_gender}'->'{norm_filter}'")
 
+                # Unisex products match any gender filter
+                if norm_product and norm_product != "unisex":
+                    if norm_product != norm_filter:
+                        log.info(f"   ❌ REJECTED due to gender mismatch")
+                        return False
+            
             return True
 
         for d in docs:
@@ -631,7 +651,11 @@ async def recs_similar(body: RecsSimilarIn) -> RecsOut:
             if filters.gender:
                 product_gender = (meta.get("gender") or "").lower().strip()
                 filter_gender = filters.gender.lower().strip()
-                if product_gender and product_gender != "unisex" and product_gender != filter_gender:
+                # Normalize gender synonyms
+                gender_normalize = {"male": "men", "men": "men", "female": "women", "women": "women", "unisex": "unisex"}
+                norm_product = gender_normalize.get(product_gender, product_gender)
+                norm_filter = gender_normalize.get(filter_gender, filter_gender)
+                if norm_product and norm_product != "unisex" and norm_product != norm_filter:
                     continue
             
             # Price filter

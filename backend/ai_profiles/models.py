@@ -31,6 +31,20 @@ class AiUserProfile(models.Model):
         max_length=8, blank=True, null=True
     )
 
+    # Gender preference for recommendations (male, female, unisex)
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('unisex', 'Unisex'),
+    ]
+    gender = models.CharField(
+        max_length=16, 
+        choices=GENDER_CHOICES,
+        blank=True, 
+        null=True,
+        help_text="User's gender preference for product recommendations"
+    )
+
     preferred_fit = models.CharField(
         max_length=32, blank=True, null=True
     )

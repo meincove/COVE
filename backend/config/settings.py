@@ -230,13 +230,15 @@ USE_RDS = os.getenv("USE_RDS", "0") in ("1", "true", "True")
 
 if USE_RDS:
     # Neon DB Configuration - Optimized for serverless PostgreSQL
+    # SECURITY: DATABASE_URL MUST be set in environment. No default allowed.
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        raise ValueError("DATABASE_URL environment variable is required for production. Set USE_RDS=0 for local SQLite.")
+    
     DATABASES = {
         "default": dj_database_url.config(
             env="DATABASE_URL",
-            default=os.environ.get(
-                "DATABASE_URL",
-                "postgresql://neondb_owner:npg_L5mXATyRf6nF@ep-mute-dream-ag0ojpws-pooler.c-2.eu-central-1.aws.neon.tech:5432/neondb?sslmode=require",
-            ),
+            default=db_url,
             # Neon-optimized settings:
             conn_max_age=0,  # ← FIX: Disable persistent connections for Neon
             conn_health_checks=True,  # Check connection before use

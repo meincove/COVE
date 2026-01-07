@@ -1,229 +1,43 @@
 {
-    "description": "Outfit completion configuration - replaces hardcoded complements logic",
-    "version": "1.0",
-    "complements_map": {
-        "dress": [
-            "shoes",
-            "accessories"
-        ],
-        "skirt": [
-            "top",
-            "shoes"
-        ],
-        "top": [
-            "bottom",
-            "shoes"
-        ],
-        "tee": [
-            "bottom",
-            "shoes"
-        ],
-        "shirt": [
-            "bottom",
-            "shoes"
-        ],
-        "blouse": [
-            "bottom",
-            "shoes"
-        ],
-        "sweater": [
-            "bottom",
-            "shoes"
-        ],
-        "hoodie": [
-            "bottom",
-            "shoes"
-        ],
-        "sweatshirt": [
-            "bottom",
-            "shoes"
-        ],
-        "bottom": [
-            "top",
-            "shoes"
-        ],
-        "pants": [
-            "top",
-            "shoes"
-        ],
-        "jeans": [
-            "top",
-            "shoes"
-        ],
-        "shorts": [
-            "top",
-            "shoes"
-        ],
-        "joggers": [
-            "top",
-            "shoes"
-        ],
-        "shoes": [
-            "top",
-            "bottom"
-        ],
-        "sneakers": [
-            "top",
-            "bottom"
-        ],
-        "boots": [
-            "top",
-            "bottom"
-        ],
-        "loafers": [
-            "top",
-            "bottom"
-        ],
-        "heels": [
-            "dress",
-            "skirt"
-        ],
-        "jacket": [
-            "top",
-            "bottom",
-            "shoes"
-        ],
-        "blazer": [
-            "top",
-            "bottom",
-            "shoes"
-        ],
-        "coat": [
-            "top",
-            "bottom",
-            "shoes"
-        ],
-        "accessories": [
-            "top",
-            "bottom"
-        ]
-    },
-    "category_mappings": {
-        "dress": "dress",
-        "skirt": "skirt",
-        "top": "top",
-        "tee": "top",
-        "shirt": "top",
-        "blouse": "top",
-        "sweater": "top",
-        "hoodie": "top",
-        "sweatshirt": "top",
-        "bottom": "bottom",
-        "pants": "bottom",
-        "jeans": "bottom",
-        "shorts": "bottom",
-        "joggers": "bottom",
-        "trousers": "bottom",
-        "shoes": "shoes",
-        "sneakers": "shoes",
-        "boots": "shoes",
-        "loafers": "shoes",
-        "heels": "shoes",
-        "jacket": "jacket",
-        "blazer": "jacket",
-        "coat": "jacket",
-        "accessories": "accessories",
-        "bag": "accessories",
-        "hat": "accessories",
-        "scarf": "accessories"
-    },
-    "default_complements": [
-        "top",
-        "bottom",
+    "categories": [
+        "tops",
+        "bottoms",
         "shoes"
     ],
-    "style_stop_words": [
-        "dress",
-        "top",
-        "pant",
-        "pants",
-        "shoe",
-        "shoes",
-        "womens",
-        "mens",
-        "women",
-        "men",
-        "unisex",
-        "the",
-        "a",
-        "an",
-        "for",
-        "with",
-        "in",
-        "of"
-    ],
-    "color_families": {
-        "neutrals": [
-            "black",
-            "white",
-            "grey",
-            "beige",
-            "navy",
-            "denim",
-            "charcoal",
-            "cream",
-            "ivory",
-            "khaki",
-            "taupe"
-        ],
-        "earth": [
-            "brown",
-            "olive",
-            "rust",
-            "tan",
-            "mustard",
-            "sage",
-            "terracotta",
-            "chocolate",
-            "sand",
-            "camel"
-        ],
-        "cool": [
-            "blue",
-            "green",
-            "teal",
-            "purple",
-            "lavender",
-            "cyan",
-            "mint",
-            "emerald",
-            "turquoise",
-            "indigo"
-        ],
-        "warm": [
-            "red",
-            "orange",
-            "yellow",
-            "pink",
-            "coral",
-            "burgundy",
-            "peach",
-            "rose",
-            "fuchsia",
-            "magenta"
-        ]
+    "budget_allocation": {
+        "shoes": 0.35,
+        "bottoms": 0.30,
+        "tops": 0.20,
+        "dress": 0.40,
+        "outerwear": 0.25,
+        "accessories": 0.15
     },
-    "semantic_thresholds": {
-        "strong_match": 0.6,
-        "good_match": 0.45,
-        "clash": 0.2
-    },
-    "semantic_scores": {
-        "strong_match": 20,
-        "good_match": 10,
-        "clash": -10
-    },
-    "color_scores": {
-        "neutral_match": 5,
-        "monochrome_match": 15,
-        "tonal_match": 10
-    },
-    "notes": [
-        "complements_map: What categories should be suggested alongside a given type",
-        "category_mappings: Maps specific types to generic outfit categories",
-        "style_stop_words: Words to exclude when extracting style context from titles",
-        "color_families: Color groupings for harmony detection (replaces hardcoded values)",
-        "semantic_thresholds: Cosine similarity thresholds for vector compatibility scoring",
-        "semantic_scores: Points awarded/deducted based on semantic similarity"
-    ]
+    "occasions": {
+        "fancy": {
+            "excluded_types": [
+                "tee",
+                "hoodie",
+                "sweatshirt",
+                "shorts",
+                "joggers",
+                "tracksuit"
+            ],
+            "preferred_categories": [
+                "dress",
+                "shoes",
+                "outerwear"
+            ]
+        },
+        "casual": {
+            "excluded_types": [
+                "gown",
+                "tuxedo"
+            ],
+            "preferred_categories": [
+                "tops",
+                "bottoms",
+                "shoes"
+            ]
+        }
+    }
 }

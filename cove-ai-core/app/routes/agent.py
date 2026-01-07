@@ -1087,13 +1087,21 @@ async def _agent_query_impl(
             log.info(f"🎯 Intent classified as outfit_builder - Starting conversation flow")
             
             # Start conversation (with one-shot extraction from initial message)
-            first_question = await conversation_handler.start_conversation(session_key, flow_name, initial_message=q)
+            conv_result = await conversation_handler.start_conversation(session_key, flow_name, initial_message=q)
             
-            return AgentOut(
-                kind="answer",
-                answer=first_question,  # "What's your budget?" or "I have everything I need!"
-                items=[]
-            )
+            # Check for immediate one-shot completion
+            if isinstance(conv_result, dict) and conv_result.get("complete"):
+                log.info(f"🚀 [One-Shot] All slots filled immediately from '{q}'. Proceeding to orchestrator.")
+                # Populate context and allow fall-through to orchestrator logic below
+                body._gathered_context = conv_result.get("orchestrator_context", {})
+                # Note: We effectively skipped the multi-turn flow
+            else:
+                # Still need more info, return question to user
+                return AgentOut(
+                    kind="answer",
+                    answer=conv_result,
+                    items=[]
+                )
     # ===== END CONVERSATION FLOW HANDLER =====
 
     # Route outfit requests to orchestrator (if we get here, conversation is complete or skipped)
@@ -1161,7 +1169,8 @@ async def _agent_query_impl(
                     "user_id": user_id,  # Base user ID for facts (shared across sessions)
                     "budget_max": budget_max,
                     "user_size_history": {},  # Could load from profile
-                    "original_query": gathered_context.get("original_query", "")  # Preserve for gender detection
+                    "original_query": gathered_context.get("original_query", ""),  # Preserve for gender detection
+                    "gender": gathered_context.get("gender")  # Pass explicitly extracted gender
                 },
                 stream=True  # Enable streaming!
             ):
@@ -1284,9 +1293,9 @@ async def _agent_query_impl(
                     color=product.get("color", ""),
                     size=product.get("size", ""),
                     variantId=product.get("variantId", ""),
-                    # ✨ PHASE 6: Add price and imageUrl for proper outfit display
                     price=product.get("price"),
                     imageUrl=product.get("imageUrl"),
+                    outfit_id=item.get("outfit_id"), # ✨ PHASE 7: Map outfit ID from orchestrator
                 ))
             
             # Build outfit description
@@ -1294,7 +1303,12 @@ async def _agent_query_impl(
             within_budget = result.get("within_budget", True)
             discount = result.get("discount_applied")
             
-            answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
+            # ✨ PHASE 7: Multi-Outfit Response
+            num_outfits = result.get("num_outfits", 1)
+            if num_outfits > 1:
+                answer_parts = [f"I've prepared {num_outfits} different outfit options for you! 🎨"]
+            else:
+                answer_parts = [f"I've built a complete outfit for you! (€{total:.2f} total)"]
             
             if discount:
                 answer_parts.append(f"Applied {discount.get('code')}: saved €{discount.get('savings', 0):.2f}")

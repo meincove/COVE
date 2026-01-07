@@ -93,6 +93,7 @@ class AgentItem(BaseModel):
     variantId: Optional[str] = None
     price: Optional[float] = None  # Product price for display
     imageUrl: Optional[str] = None  # ✨ PHASE 6: Product image URL
+    outfit_id: Optional[str] = None  # ✨ PHASE 7: Multi-outfit grouping (e.g. "outfit_1")
     
     # Rich product details for fact extraction (match RecItem)
     material: Optional[str] = None
