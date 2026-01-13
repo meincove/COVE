@@ -119,7 +119,15 @@ export function useAgentStream() {
                     if (!eventLine || !dataLine) continue;
 
                     const eventType = eventLine.replace('event:', '').trim();
-                    const data = JSON.parse(dataLine.replace('data:', '').trim());
+
+                    // Defensive JSON parsing for SSE events
+                    let data;
+                    try {
+                        data = JSON.parse(dataLine.replace('data:', '').trim());
+                    } catch (parseError) {
+                        console.warn('[useAgentStream] Failed to parse SSE data:', parseError);
+                        continue;
+                    }
 
                     handleEvent(eventType, data);
                 }

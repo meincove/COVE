@@ -31,9 +31,7 @@ type LShapedNavbarProps = {
 
     filterGroups?: FilterGroup[]
 
-    /** ✅ HERO SLOT: rendered ABOVE navbar + body (NOT inside grid) */
     hero?: React.ReactNode
-
     children: React.ReactNode
 }
 
@@ -58,8 +56,7 @@ export default function LshapedNavbar({
     hero,
     children,
 }: LShapedNavbarProps) {
-    const surfaceClass =
-        "bg-white/90 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+    const surfaceClass = "bg-white/90 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
 
     const [hoveredFilter, setHoveredFilter] = useState<string | null>(null)
     const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null)
@@ -86,11 +83,21 @@ export default function LshapedNavbar({
         if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
     }
 
-    const navGap = edgeGap ?? `${edgeGapPx}px`
-    const topH = topHeight ?? `${topHeightPx}px`
-    const railW = railWidth ?? `${railWidthPx}px`
+    // ✅ clamp-based sizes = “90% zoom look” naturally (no transform scale)
+    const navGap = edgeGap ?? `clamp(12px, 1.4vw, ${edgeGapPx}px)`
+    const topH = topHeight ?? `clamp(62px, 6.5vh, ${topHeightPx}px)`
+    const railW = railWidth ?? `clamp(88px, 9vw, ${railWidthPx}px)`
 
     const railStickyTop = `calc(var(--nav-gap) + var(--top-h))`
+
+    React.useEffect(() => {
+        const onScroll = () => {
+            setHoveredFilter(null)
+            setHoveredRect(null)
+        }
+        window.addEventListener("scroll", onScroll, { passive: true })
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [])
 
     return (
         <div
@@ -103,14 +110,11 @@ export default function LshapedNavbar({
                 } as React.CSSProperties
             }
         >
-            {/* ✅ HERO FIRST (so it is not “under navbar / inside body”) */}
             {hero ? <div className="pointer-events-auto relative p-0 m-0">{hero}</div> : null}
 
-
-            {/* STICKY HEADER ROW (will stick only once you scroll past hero) */}
-            <div className="sticky top-0 z-50">
+            <div className="sticky top-0 z-50 pointer-events-none">
                 <div
-                    className="w-full bg-gradient-to-b from-white/70 via-white/85 to-white/92 backdrop-blur-xl"
+                    className="w-full bg-gradient-to-b from-white/70 via-white/85 to-white/92 backdrop-blur-xl pointer-events-auto"
                     style={{
                         paddingTop: "var(--nav-gap)",
                         paddingLeft: "var(--nav-gap)",
@@ -119,37 +123,18 @@ export default function LshapedNavbar({
                     }}
                 >
                     <div className="flex items-stretch gap-[var(--nav-gap)]">
-                        {/* Logo */}
                         <div
-                            className={cn(
-                                "shrink-0 flex items-center justify-center",
-                                surfaceClass,
-                                "border border-black/10",
-                                "rounded-[28px]"
-                            )}
-                            style={{
-                                width: "var(--rail-w)",
-                                height: "var(--top-h)",
-                            }}
+                            className={cn("shrink-0 flex items-center justify-center", surfaceClass, "border border-black/10", "rounded-[28px]")}
+                            style={{ width: "var(--rail-w)", height: "var(--top-h)" }}
                         >
-                            <div className="text-black font-bold tracking-[0.2em] text-sm">
-                                COVE
-                            </div>
+                            <div className="text-black font-bold tracking-[0.2em] text-sm">COVE</div>
                         </div>
 
-                        {/* Top bar */}
                         <header
-                            className={cn(
-                                "flex-1",
-                                surfaceClass,
-                                "border border-black/10",
-                                "rounded-[28px]"
-                            )}
-                            style={{
-                                height: "var(--top-h)",
-                            }}
+                            className={cn("flex-1", surfaceClass, "border border-black/10", "rounded-[28px]")}
+                            style={{ height: "var(--top-h)" }}
                         >
-                            <div className="flex h-full w-full items-center gap-4 px-6">
+                            <div className="flex h-full w-full items-center gap-4 px-4 sm:px-6">
                                 <div className="flex-1 flex justify-center">
                                     <div className="w-full max-w-[520px]">
                                         <div className="relative group">
@@ -194,78 +179,62 @@ export default function LshapedNavbar({
                     paddingTop: "var(--nav-gap)",
                 }}
             >
-                <div
-                    className="grid w-full gap-[var(--nav-gap)]"
-                    style={{
-                        gridTemplateColumns: `var(--rail-w) minmax(0, 1fr)`,
-                    }}
-                >
-                    {/* Left rail */}
+                <div className="grid w-full gap-[var(--nav-gap)] grid-cols-1 md:grid-cols-[var(--rail-w)_minmax(0,1fr)]">
+                    {/* Left rail (stacks on mobile) */}
                     <aside
-                        className={cn(
-                            "self-start",
-                            surfaceClass,
-                            "border border-black/10",
-                            "rounded-[28px]"
-                        )}
+                        className={cn("self-start", surfaceClass, "border border-black/10", "rounded-[28px]")}
                         style={{
-                            position: "sticky",
-                            top: railStickyTop,
-                            height: `calc(100dvh - (${railStickyTop}) - var(--nav-gap))`,
+                            position: "relative",
                             overflow: "hidden",
                         }}
                     >
-                        <div className="h-full flex flex-col">
-                            <div className="flex-1 overflow-y-auto no-scrollbar py-6 px-3 flex flex-col items-center gap-2">
-                                <div className="text-[10px] text-black/40 font-bold tracking-widest mb-4 w-full text-center">
-                                    FILTERS
+                        <div className="md:sticky" style={{ top: railStickyTop }}>
+                            <div className="h-full flex flex-col">
+                                <div className="flex-1 overflow-y-auto no-scrollbar py-6 px-3 flex flex-col items-center gap-2">
+                                    <div className="text-[10px] text-black/40 font-bold tracking-widest mb-4 w-full text-center">
+                                        FILTERS
+                                    </div>
+
+                                    {filterGroups.map((group) => {
+                                        const selectedCount = activeFilters[group.label]?.length || 0
+                                        const isAnyOptionActive = selectedCount > 0
+
+                                        return (
+                                            <FilterItem
+                                                key={group.label}
+                                                group={group}
+                                                isActive={isAnyOptionActive}
+                                                selectedCount={selectedCount}
+                                                onHoverStart={(rect) => handleHoverStart(group.label, rect)}
+                                                onHoverEnd={handleHoverEnd}
+                                            />
+                                        )
+                                    })}
+
+                                    <div className="my-2 w-1/2 h-px bg-black/5 mx-auto" />
+
+                                    <button
+                                        onClick={onResetAll}
+                                        className="w-full rounded-xl border px-2 py-3 text-[12px] font-medium transition-all hover:bg-black/5 hover:text-black text-black/60 border-transparent bg-transparent"
+                                    >
+                                        Reset All
+                                    </button>
                                 </div>
 
-                                {filterGroups.map((group) => {
-                                    const selectedCount = activeFilters[group.label]?.length || 0
-                                    const isAnyOptionActive = selectedCount > 0
-
-                                    return (
-                                        <FilterItem
-                                            key={group.label}
-                                            group={group}
-                                            isActive={isAnyOptionActive}
-                                            selectedCount={selectedCount}
-                                            onHoverStart={(rect) =>
-                                                handleHoverStart(group.label, rect)
-                                            }
-                                            onHoverEnd={handleHoverEnd}
-                                        />
-                                    )
-                                })}
-
-                                <div className="my-2 w-1/2 h-px bg-black/5 mx-auto" />
-
-                                <button
-                                    onClick={onResetAll}
-                                    className="w-full rounded-xl border px-2 py-3 text-[12px] font-medium transition-all hover:bg-black/5 hover:text-black text-black/60 border-transparent bg-transparent"
-                                >
-                                    Reset All
-                                </button>
-                            </div>
-
-                            <div className="p-3 w-full flex flex-col gap-2 border-t border-black/5">
-                                <button className="w-full rounded-xl bg-black/5 hover:bg-black/10 text-black/70 font-medium py-3 text-xs transition-colors border border-black/5">
-                                    Cart
-                                </button>
-                                <div className="w-full text-center text-[10px] text-black/20 pb-1">
-                                    © 2025
+                                <div className="p-3 w-full flex flex-col gap-2 border-t border-black/5">
+                                    <button className="w-full rounded-xl bg-black/5 hover:bg-black/10 text-black/70 font-medium py-3 text-xs transition-colors border border-black/5">
+                                        Cart
+                                    </button>
+                                    <div className="w-full text-center text-[10px] text-black/20 pb-1">© 2025</div>
                                 </div>
                             </div>
                         </div>
                     </aside>
 
-                    {/* Main content */}
                     <div className="min-w-0">{children}</div>
                 </div>
             </div>
 
-            {/* Flyout */}
             <AnimatePresence>
                 {hoveredFilter && hoveredRect && (
                     <FlyoutMenu
@@ -315,15 +284,9 @@ function FilterItem({
         >
             <div className="flex flex-col items-center leading-tight">
                 <span>{group.label}</span>
-                {isActive && (
-                    <span className="text-[9px] opacity-60 font-normal">
-                        ({selectedCount})
-                    </span>
-                )}
+                {isActive && <span className="text-[9px] opacity-60 font-normal">({selectedCount})</span>}
             </div>
-            {isActive && (
-                <div className="absolute right-2 top-2 w-1.5 h-1.5 rounded-full bg-black/40" />
-            )}
+            {isActive && <div className="absolute right-2 top-2 w-1.5 h-1.5 rounded-full bg-black/40" />}
         </button>
     )
 }
@@ -352,19 +315,14 @@ function FlyoutMenu({
             exit={{ opacity: 0, x: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className="fixed z-[70] min-w-[220px] pointer-events-auto"
-            style={{
-                top: rect.top,
-                left: rect.right + 12,
-            }}
+            style={{ top: rect.top, left: rect.right + 12 }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
             <div className="rounded-2xl border border-black/10 bg-white/92 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.12)] p-2 flex flex-col gap-1">
                 <div className="px-3 py-2 text-[10px] font-bold text-black/40 uppercase tracking-widest border-b border-black/5 mb-1 flex justify-between items-center">
                     <span>{group.label}</span>
-                    <span className="text-[9px] bg-black/5 px-1.5 py-0.5 rounded text-black/50">
-                        {group.options.length} options
-                    </span>
+                    <span className="text-[9px] bg-black/5 px-1.5 py-0.5 rounded text-black/50">{group.options.length} options</span>
                 </div>
 
                 <div className="max-h-[300px] overflow-y-auto no-scrollbar flex flex-col gap-1">
@@ -379,9 +337,7 @@ function FlyoutMenu({
                                 }}
                                 className={cn(
                                     "text-left px-3 py-2.5 rounded-lg text-sm transition-all flex items-center justify-between group",
-                                    isSelected
-                                        ? "bg-black text-white font-medium shadow-md"
-                                        : "text-black/70 hover:bg-black/5 hover:text-black"
+                                    isSelected ? "bg-black text-white font-medium shadow-md" : "text-black/70 hover:bg-black/5 hover:text-black"
                                 )}
                             >
                                 <span>{option}</span>

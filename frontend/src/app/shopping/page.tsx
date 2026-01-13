@@ -39,13 +39,17 @@ function num(v: unknown, fallback = 0) {
     return Number.isFinite(n) ? n : fallback
 }
 
-function mapApi(p: ApiProduct): UiProduct {
-    const img0 =
-        p.color_variants?.[0]?.images?.[0]?.url ||
-        p.color_variants?.[0]?.images?.[0]?.image_name ||
-        FALLBACK_IMG
+function pickBestApiImage(p: ApiProduct): string {
+    const img = p.color_variants?.[0]?.images?.[0]
+    // IMPORTANT:
+    // Prefer image_name (your public/clothing-images pipeline),
+    // because url may be S3 signed/blocked and show AccessDenied text.
+    const preferred = img?.image_name || img?.url || FALLBACK_IMG
+    return resolveImgPath(String(preferred))
+}
 
-    const img = resolveImgPath(String(img0))
+function mapApi(p: ApiProduct): UiProduct {
+    const img = pickBestApiImage(p)
 
     return {
         id: String(p.product_id),
@@ -69,53 +73,15 @@ function uniq(arr: string[]) {
     return Array.from(new Set(arr)).filter(Boolean)
 }
 
-function FpsMeter() {
-    const [mounted, setMounted] = useState(false)
-    const [fps, setFps] = useState<number | null>(null)
-
-    useEffect(() => setMounted(true), [])
-
-    useEffect(() => {
-        if (!mounted) return
-        let raf = 0
-        let last = performance.now()
-        let frames = 0
-
-        const loop = () => {
-            frames += 1
-            const now = performance.now()
-            const dt = now - last
-
-            if (dt >= 500) {
-                setFps(Math.round((frames * 1000) / dt))
-                frames = 0
-                last = now
-            }
-
-            raf = requestAnimationFrame(loop)
-        }
-
-        raf = requestAnimationFrame(loop)
-        return () => cancelAnimationFrame(raf)
-    }, [mounted])
-
-    if (!mounted) return null
-
-    return (
-        <div className="fixed top-3 right-3 z-[9999]">
-            <div className="px-2.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-semibold backdrop-blur">
-                {fps ?? "--"} FPS
-            </div>
-        </div>
-    )
-}
-
 export default function ShoppingPage() {
     const { open, type, openBrowse, closeBrowse } = useBrowseModal()
 
     const [searchValue, setSearchValue] = useState("")
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
     const [allProducts, setAllProducts] = useState<UiProduct[]>([])
+
+    // Hero pill selector state
+    const [heroType, setHeroType] = useState<string>("curated") // "curated" | one of types
 
     useEffect(() => {
         let cancelled = false
@@ -199,10 +165,22 @@ export default function ShoppingPage() {
             .filter((p) => (p.type ?? "").toLowerCase().includes(type))
     }, [type, allProducts, activeFilters, searchValue])
 
+    // Hero options for pill (from data, fall back to TYPE_SECTIONS)
+    const heroTypes = useMemo(() => {
+        const found = uniq(allProducts.map((p) => (p.type ?? "").trim()).filter(Boolean))
+        const fallback = TYPE_SECTIONS.map((s) => s.type)
+        const types = found.length ? found : fallback
+        return ["curated", ...types]
+    }, [allProducts])
+
+    const heroProducts = useMemo(() => {
+        const base = allProducts.filter(passesFilters)
+        if (heroType === "curated") return base
+        return base.filter((p) => (p.type ?? "").toLowerCase().includes(heroType.toLowerCase()))
+    }, [allProducts, activeFilters, searchValue, heroType])
+
     return (
         <>
-            <FpsMeter />
-
             <LshapedNavbar
                 searchValue={searchValue}
                 onSearchChange={setSearchValue}
@@ -210,21 +188,25 @@ export default function ShoppingPage() {
                 activeFilters={activeFilters}
                 onFilterToggle={onFilterToggle}
                 onResetAll={onResetAll}
-                hero={<HeroScanner products={allProducts.filter(passesFilters)} heightVh={70} minHeight={600} />}
+                hero={
+                    <HeroScanner
+                        products={heroProducts}
+                        heightVh={70}
+                        minHeight={600}
+                    // splineSrc="https://my.spline.design/particlesmoment-kW3xvVny6weThXJ3vbs2M2bB/"
+                    />
+                }
             >
                 <div className="relative">
                     <div className="px-4 md:px-6 py-6 space-y-8">
                         <div>
                             <div className="text-lg font-semibold text-black/85">Browse</div>
-                            <div className="text-xs text-black/45">
-                                Curated shelves (fast) → open “Show more” for full inventory
-                            </div>
+                            <div className="text-xs text-black/45">Curated shelves (fast) → open “Show more” for full inventory</div>
                         </div>
 
                         {sections.map((s) => (
                             <div key={s.type} className="space-y-3">
                                 <CatalogSection title={s.title.toLowerCase()} items={s.items} />
-
                                 <div className="flex justify-end">
                                     <button
                                         onClick={() => openBrowse(s.type)}
@@ -243,6 +225,269 @@ export default function ShoppingPage() {
         </>
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client"
+
+// import { useEffect, useMemo, useState } from "react"
+// import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
+// import HeroScanner from "@/src/components/shopping/HeroScanner"
+// import CatalogSection from "@/src/components/shopping/CatalogSection"
+// import CatalogBrowseModal from "@/src/components/shopping/CatalogBrowseModal"
+// import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
+// import { useBrowseModal } from "@/src/hooks/useBrowseModal"
+
+// type ApiImage = { image_name?: string; url?: string }
+// type ApiVariant = { images?: ApiImage[] }
+// type ApiProduct = {
+//     product_id: string
+//     slug?: string
+//     name: string
+//     brand_id?: string
+//     base_price?: number | string
+//     old_price?: number | string
+//     is_new?: boolean
+//     type?: string
+//     fit?: string
+//     tier?: string
+//     color_variants?: ApiVariant[]
+// }
+
+// const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001"
+
+// const TYPE_SECTIONS = [
+//     { type: "jacket", title: "Jacket" },
+//     { type: "hoodie", title: "Hoodie" },
+//     { type: "shirt", title: "Shirt" },
+//     { type: "tee", title: "Tee" },
+//     { type: "pants", title: "Pants" },
+// ] as const
+
+// function num(v: unknown, fallback = 0) {
+//     const n = Number(v)
+//     return Number.isFinite(n) ? n : fallback
+// }
+
+// function mapApi(p: ApiProduct): UiProduct {
+//     const img0 =
+//         p.color_variants?.[0]?.images?.[0]?.url ||
+//         p.color_variants?.[0]?.images?.[0]?.image_name ||
+//         FALLBACK_IMG
+
+//     const img = resolveImgPath(String(img0))
+
+//     return {
+//         id: String(p.product_id),
+//         slug: p.slug,
+//         name: p.name,
+//         brandId: p.brand_id,
+//         price: num(p.base_price, 0),
+//         oldPrice: p.old_price != null ? num(p.old_price, 0) : undefined,
+//         badge: p.is_new ? "NEW" : "",
+//         type: p.type,
+//         fit: p.fit,
+//         tier: p.tier,
+//         images: [img],
+//         imageSrc: img,
+//         colorNames: [],
+//         sizes: [],
+//     } as UiProduct
+// }
+
+// function uniq(arr: string[]) {
+//     return Array.from(new Set(arr)).filter(Boolean)
+// }
+
+// function FpsMeter() {
+//     const [mounted, setMounted] = useState(false)
+//     const [fps, setFps] = useState<number | null>(null)
+
+//     useEffect(() => setMounted(true), [])
+
+//     useEffect(() => {
+//         if (!mounted) return
+//         let raf = 0
+//         let last = performance.now()
+//         let frames = 0
+
+//         const loop = () => {
+//             frames += 1
+//             const now = performance.now()
+//             const dt = now - last
+
+//             if (dt >= 500) {
+//                 setFps(Math.round((frames * 1000) / dt))
+//                 frames = 0
+//                 last = now
+//             }
+
+//             raf = requestAnimationFrame(loop)
+//         }
+
+//         raf = requestAnimationFrame(loop)
+//         return () => cancelAnimationFrame(raf)
+//     }, [mounted])
+
+//     if (!mounted) return null
+
+//     return (
+//         <div className="fixed top-3 right-3 z-[9999]">
+//             <div className="px-2.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-semibold backdrop-blur">
+//                 {fps ?? "--"} FPS
+//             </div>
+//         </div>
+//     )
+// }
+
+// export default function ShoppingPage() {
+//     const { open, type, openBrowse, closeBrowse } = useBrowseModal()
+
+//     const [searchValue, setSearchValue] = useState("")
+//     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
+//     const [allProducts, setAllProducts] = useState<UiProduct[]>([])
+
+//     useEffect(() => {
+//         let cancelled = false
+//             ; (async () => {
+//                 try {
+//                     const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=240`, { cache: "no-store" })
+//                     if (!res.ok) throw new Error(`HTTP ${res.status}`)
+//                     const json = await res.json()
+//                     const items: ApiProduct[] = json.results || []
+//                     const mapped = items.map(mapApi)
+//                     if (!cancelled) setAllProducts(mapped)
+//                 } catch {
+//                     if (!cancelled) setAllProducts([])
+//                 }
+//             })()
+//         return () => {
+//             cancelled = true
+//         }
+//     }, [])
+
+//     const filterGroups: FilterGroup[] = useMemo(() => {
+//         const types = uniq(allProducts.map((p) => (p.type ?? "").trim()).filter(Boolean))
+//         const tiers = uniq(allProducts.map((p) => (p.tier ?? "").trim()).filter(Boolean))
+//         const fits = uniq(allProducts.map((p) => (p.fit ?? "").trim()).filter(Boolean))
+//         const badges = uniq(allProducts.map((p) => (p.badge ?? "").trim()).filter(Boolean))
+
+//         return [
+//             { label: "Type", options: types.length ? types : TYPE_SECTIONS.map((s) => s.title) },
+//             ...(tiers.length ? [{ label: "Tier", options: tiers }] : []),
+//             ...(fits.length ? [{ label: "Fit", options: fits }] : []),
+//             ...(badges.length ? [{ label: "Badge", options: badges }] : []),
+//         ]
+//     }, [allProducts])
+
+//     const onFilterToggle = (group: string, option: string) => {
+//         setActiveFilters((prev) => {
+//             const set = new Set(prev[group] ?? [])
+//             if (set.has(option)) set.delete(option)
+//             else set.add(option)
+//             return { ...prev, [group]: Array.from(set) }
+//         })
+//     }
+
+//     const onResetAll = () => setActiveFilters({})
+
+//     const passesFilters = (p: UiProduct) => {
+//         const typeSel = new Set(activeFilters["Type"] ?? [])
+//         const tierSel = new Set(activeFilters["Tier"] ?? [])
+//         const fitSel = new Set(activeFilters["Fit"] ?? [])
+//         const badgeSel = new Set(activeFilters["Badge"] ?? [])
+
+//         if (typeSel.size && !typeSel.has((p.type ?? "").trim())) return false
+//         if (tierSel.size && !tierSel.has((p.tier ?? "").trim())) return false
+//         if (fitSel.size && !fitSel.has((p.fit ?? "").trim())) return false
+//         if (badgeSel.size && !badgeSel.has((p.badge ?? "").trim())) return false
+
+//         const q = searchValue.trim().toLowerCase()
+//         if (q) {
+//             const hay = `${p.name ?? ""} ${p.type ?? ""} ${p.tier ?? ""} ${p.fit ?? ""}`.toLowerCase()
+//             if (!hay.includes(q)) return false
+//         }
+
+//         return true
+//     }
+
+//     const sections = useMemo(() => {
+//         return TYPE_SECTIONS.map((s) => {
+//             const items = allProducts
+//                 .filter((p) => (p.type ?? "").toLowerCase().includes(s.type))
+//                 .filter(passesFilters)
+//                 .slice(0, 12)
+
+//             return { type: s.type, title: s.title, items }
+//         })
+//     }, [allProducts, activeFilters, searchValue])
+
+//     const modalItems = useMemo(() => {
+//         if (!type) return []
+//         return allProducts
+//             .filter(passesFilters)
+//             .filter((p) => (p.type ?? "").toLowerCase().includes(type))
+//     }, [type, allProducts, activeFilters, searchValue])
+
+//     return (
+//         <>
+//             <FpsMeter />
+
+//             <LshapedNavbar
+//                 searchValue={searchValue}
+//                 onSearchChange={setSearchValue}
+//                 filterGroups={filterGroups}
+//                 activeFilters={activeFilters}
+//                 onFilterToggle={onFilterToggle}
+//                 onResetAll={onResetAll}
+//                 hero={<HeroScanner products={allProducts.filter(passesFilters)} heightVh={70} minHeight={600} />}
+//             >
+//                 <div className="relative">
+//                     <div className="px-4 md:px-6 py-6 space-y-8">
+//                         <div>
+//                             <div className="text-lg font-semibold text-black/85">Browse</div>
+//                             <div className="text-xs text-black/45">
+//                                 Curated shelves (fast) → open “Show more” for full inventory
+//                             </div>
+//                         </div>
+
+//                         {sections.map((s) => (
+//                             <div key={s.type} className="space-y-3">
+//                                 <CatalogSection title={s.title.toLowerCase()} items={s.items} />
+
+//                                 <div className="flex justify-end">
+//                                     <button
+//                                         onClick={() => openBrowse(s.type)}
+//                                         className="rounded-full bg-black text-white px-4 py-2 text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition"
+//                                     >
+//                                         Show more
+//                                     </button>
+//                                 </div>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 </div>
+//             </LshapedNavbar>
+
+//             <CatalogBrowseModal open={open} type={type} items={modalItems} onClose={closeBrowse} />
+//         </>
+//     )
+// }
 
 
 

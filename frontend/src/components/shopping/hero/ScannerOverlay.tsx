@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { Scan, ShoppingBag, Zap } from "lucide-react"
 import type { UiProduct } from "@/src/lib/catalog/shared"
+import { useRouter } from "next/navigation"
 
 function safeImg(src?: string) {
     return src || "/clothing-images/fallback.jpg"
@@ -19,12 +20,19 @@ export function ScannerOverlay({
     scanPulseKey: number
     dragging: boolean
 }) {
+    const router = useRouter()
+
+    const goProduct = () => {
+        const slug = scannedProduct?.slug
+        if (!slug) return
+        router.push(`/product/${slug}`)
+    }
+
     return (
         <div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[40]"
             style={{ width: "min(380px, 75vw)", height: "min(260px, 38vh)" }}
         >
-            {/* corners */}
             {(["tl", "tr", "bl", "br"] as const).map((pos) => (
                 <div
                     key={pos}
@@ -78,15 +86,12 @@ export function ScannerOverlay({
                         exit={{ opacity: 0, scale: 0.98, y: 8 }}
                         transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
                         className="absolute inset-0 rounded-2xl border border-neutral-200/70 overflow-hidden"
-                        // IMPORTANT: while dragging, make it cheap (no backdrop blur, lighter shadow)
                         style={{
                             background: dragging ? "rgba(255,255,255,0.94)" : "rgba(255,255,255,0.98)",
                             backdropFilter: dragging ? "none" : "blur(14px)",
                             WebkitBackdropFilter: dragging ? "none" : "blur(14px)",
-                            boxShadow: dragging
-                                ? "0 18px 50px rgba(0,0,0,0.10)"
-                                : "0 28px 80px rgba(0,0,0,0.14)",
-                            pointerEvents: "none", // do not interfere with drag
+                            boxShadow: dragging ? "0 18px 50px rgba(0,0,0,0.10)" : "0 28px 80px rgba(0,0,0,0.14)",
+                            pointerEvents: dragging ? "none" : "auto",
                         }}
                     >
                         <div
@@ -128,18 +133,27 @@ export function ScannerOverlay({
                                 </div>
 
                                 <div className="flex flex-col gap-2">
-                                    <div className="w-full py-2.5 px-4 bg-neutral-900 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2">
+                                    <button
+                                        onClick={goProduct}
+                                        className="w-full py-2.5 px-4 bg-neutral-900 text-white text-sm font-medium rounded-xl hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+                                    >
                                         <ShoppingBag className="w-4 h-4" strokeWidth={1.5} />
-                                        Add to Cart
-                                    </div>
+                                        View Product
+                                    </button>
                                     <div className="flex gap-2">
-                                        <div className="flex-1 py-2 px-3 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-lg text-center">
-                                            View Details
-                                        </div>
-                                        <div className="flex-1 py-2 px-3 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-lg flex items-center justify-center gap-1">
+                                        <button
+                                            onClick={goProduct}
+                                            className="flex-1 py-2 px-3 bg-neutral-100 text-neutral-700 text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors"
+                                        >
+                                            Details
+                                        </button>
+                                        <button
+                                            onClick={goProduct}
+                                            className="flex-1 py-2 px-3 bg-neutral-100 text-neutral-700 text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1"
+                                        >
                                             <Zap className="w-3 h-3" strokeWidth={1.5} />
                                             Buy Now
-                                        </div>
+                                        </button>
                                     </div>
                                 </div>
                             </div>

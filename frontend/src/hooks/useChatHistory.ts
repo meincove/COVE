@@ -33,10 +33,14 @@ export function useChatHistory(guestSessionId: string) {
 
             const res = await fetch(`/api/history/load?${params}`);
             if (res.ok) {
-                const data = await res.json();
-                // Backend returns { messages: [...] } or { items: [...] }
-                const messages = data.messages || data.items || [];
-                setHistory(messages);
+                try {
+                    const data = await res.json();
+                    // Backend returns { messages: [...] } or { items: [...] }
+                    const messages = data.messages || data.items || [];
+                    setHistory(messages);
+                } catch (parseError) {
+                    console.warn('Failed to parse history response:', parseError);
+                }
             }
         } catch (error) {
             console.error('Failed to load history:', error);
