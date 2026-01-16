@@ -42,27 +42,26 @@ export default function SuggestedQueries({
 
     const getButtonStyle = (type: string) => {
         const baseStyle = `
-      px-4 py-2 rounded-full text-sm font-medium
+      px-3 py-1.5 rounded-full text-xs font-medium
       transition-all duration-200
-      flex items-center gap-2
+      flex items-center gap-1.5
       disabled:opacity-50 disabled:cursor-not-allowed
-      transform hover:scale-105
-      shadow-sm hover:shadow-md
+      transform hover:scale-[1.02]
     `;
 
         switch (type) {
             case "action":
-                return `${baseStyle} bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600`;
+                return `${baseStyle} bg-black text-white hover:bg-gray-800`;
             case "question":
-                return `${baseStyle} bg-neutral-800 text-neutral-100 hover:bg-neutral-700 border border-neutral-700`;
+                return `${baseStyle} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200`;
             case "navigation":
-                return `${baseStyle} bg-neutral-800/50 text-neutral-200 hover:bg-neutral-700/70 border border-neutral-700/50`;
+                return `${baseStyle} bg-white text-gray-600 hover:bg-gray-50 border border-gray-200`;
             case "discovery":
-                return `${baseStyle} bg-gradient-to-r from-purple-600/30 to-blue-600/30 text-purple-100 hover:from-purple-600/50 hover:to-blue-600/50 border border-purple-500/30`;
+                return `${baseStyle} bg-gray-800 text-white hover:bg-gray-700`;
             case "account":
-                return `${baseStyle} bg-neutral-700 text-neutral-100 hover:bg-neutral-600 border border-neutral-600`;
+                return `${baseStyle} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200`;
             default:
-                return `${baseStyle} bg-neutral-800 text-neutral-100 hover:bg-neutral-700`;
+                return `${baseStyle} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200`;
         }
     };
 

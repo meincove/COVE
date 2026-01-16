@@ -210,7 +210,7 @@ export default function ProductConfigurator({
             <div className="flex gap-3">
               {colors.map((color, i) => (
                 <button
-                  key={color.variantId}
+                  key={color.variantId || `color-${i}`}
                   onClick={() => {
                     setSelectedColorIndex(i)
                     setStockAlert('')

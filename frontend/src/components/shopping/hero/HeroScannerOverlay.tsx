@@ -205,8 +205,12 @@ export default function HeroScannerOverlay({
     const router = useRouter()
 
     const goProduct = (p: UiProduct) => {
-        if (p.slug) router.push(`/product/${p.slug}`)
-        else router.push(`/shopping`)
+        if (p.slug) {
+            const variantParam = p.variantId ? `?variantId=${p.variantId}` : ''
+            router.push(`/product/${p.slug}${variantParam}`)
+        } else {
+            router.push(`/shopping`)
+        }
     }
 
     return (

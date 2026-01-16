@@ -25,7 +25,8 @@ export function ScannerOverlay({
     const goProduct = () => {
         const slug = scannedProduct?.slug
         if (!slug) return
-        router.push(`/product/${slug}`)
+        const variantParam = scannedProduct?.variantId ? `?variantId=${scannedProduct.variantId}` : ''
+        router.push(`/product/${slug}${variantParam}`)
     }
 
     return (

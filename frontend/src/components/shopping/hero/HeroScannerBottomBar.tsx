@@ -76,7 +76,8 @@ export default function HeroScannerBottomBar({
                             className="pointer-events-auto rounded-full bg-black text-white hover:bg-black/90 transition px-4 py-2 text-xs font-medium"
                             onClick={() => {
                                 if (!scanned?.slug) return
-                                router.push(`/product/${scanned.slug}`)
+                                const variantParam = scanned.variantId ? `?variantId=${scanned.variantId}` : ''
+                                router.push(`/product/${scanned.slug}${variantParam}`)
                             }}
                         >
                             Go to Product

@@ -9,7 +9,7 @@ import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/share
 import { useBrowseModal } from "@/src/hooks/useBrowseModal"
 
 type ApiImage = { image_name?: string; url?: string }
-type ApiVariant = { images?: ApiImage[] }
+type ApiVariant = { variant_id?: string; images?: ApiImage[] }
 type ApiProduct = {
     product_id: string
     slug?: string
@@ -50,10 +50,12 @@ function pickBestApiImage(p: ApiProduct): string {
 
 function mapApi(p: ApiProduct): UiProduct {
     const img = pickBestApiImage(p)
+    const firstVariantId = p.color_variants?.[0]?.variant_id
 
     return {
         id: String(p.product_id),
         slug: p.slug,
+        variantId: firstVariantId,  // Include variant ID for product page redirects
         name: p.name,
         brandId: p.brand_id,
         price: num(p.base_price, 0),

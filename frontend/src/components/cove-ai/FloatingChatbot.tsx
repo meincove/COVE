@@ -1,20 +1,35 @@
 // src/components/cove-ai/FloatingChatbot.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { MessageCircle, X, Sparkles, Send, ShoppingBag, Package, HelpCircle, Shirt, TrendingUp, Heart, ShoppingCart } from "lucide-react";
+import { useState, useEffect, useRef, FormEvent } from "react";
+import { MessageCircle, X, Shirt, ShoppingCart, Plus, Smile, ArrowUp, Image as ImageIcon, ArrowLeft, Minus, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
 import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
+import BubblesStatusPill from "@/src/components/cove-ai/BubblesStatusPill";
 import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactiveSignals";
-
 import { useLayoutStore } from "@/src/store/layoutStore";
 import OutfitModal from "@/src/components/cove-ai/OutfitModal";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
-    const [isAnimating, setIsAnimating] = useState(false);
-    const [hasUnread, setHasUnread] = useState(false);
     const [activeView, setActiveView] = useState<'chat' | 'outfit_builder' | 'cart'>('chat');
+    const [isThinking, setIsThinking] = useState(false);
+    const [thinkingSteps, setThinkingSteps] = useState<Array<{ icon: string; status: string; done?: boolean }>>([]);
+
+    // Round 4: Window State
+    const [isMinimized, setIsMinimized] = useState(false);
+    const [hasOutfitReady, setHasOutfitReady] = useState(false);
+
+    // Track if user has interacted to keep pill visible for feedback
+    const [hasInteracted, setHasInteracted] = useState(false);
+
+    // Input state - managed here and passed to CoveChatWidget
+    const [inputValue, setInputValue] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
+    const [uploadedImage, setUploadedImage] = useState<{ file: File; preview: string } | null>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Layout Store
     const { isCanvasOpen, closeCanvas, generatedOutfit } = useLayoutStore();
@@ -31,34 +46,19 @@ export default function FloatingChatbot() {
     });
 
     // Ref to chat widget for triggering messages
-    const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string) => void }>(null);
-
-    // Bounce animation on mount
-    useEffect(() => {
-        const timer = setTimeout(() => setIsAnimating(true), 500);
-        return () => clearTimeout(timer);
-    }, []);
+    // Ref to chat widget for triggering messages
+    const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>(null);
 
     const toggleChat = () => {
         const newState = !isOpen;
         setIsOpen(newState);
         if (newState) {
-            setHasUnread(false);
             setActiveOffer(null);
+            // Focus input when opening
+            setTimeout(() => inputRef.current?.focus(), 100);
         }
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('cove_chat_open', String(newState));
-        }
-    };
-
-    // Handle quick action clicks
-    const handleQuickAction = (action: string) => {
-        // Ensure chat view is active
-        setActiveView('chat');
-
-        // Send message via chat widget
-        if (chatWidgetRef.current) {
-            chatWidgetRef.current.sendQuickMessage(action);
         }
     };
 
@@ -72,6 +72,63 @@ export default function FloatingChatbot() {
         }
     }, []);
 
+    // Monitor thinking state to enable pill persistence
+    useEffect(() => {
+        if (isThinking) {
+            setHasInteracted(true);
+        }
+    }, [isThinking]);
+
+    // Handle form submission
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        if (!inputValue.trim() && !uploadedImage) return;
+
+        if (chatWidgetRef.current) {
+            chatWidgetRef.current.sendQuickMessage(inputValue.trim(), uploadedImage?.file);
+        }
+        setInputValue("");
+        setUploadedImage(null);
+    };
+
+    // Handle quick action/prompt clicks
+    const handleQuickAction = (text: string) => {
+        if (chatWidgetRef.current) {
+            chatWidgetRef.current.sendQuickMessage(text);
+        }
+    };
+
+    // Handle image upload
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Image must be less than 5MB");
+            return;
+        }
+
+        // Check file type
+        if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type)) {
+            alert("Only JPEG, PNG, and SVG images are allowed");
+            return;
+        }
+
+        const preview = URL.createObjectURL(file);
+        setUploadedImage({ file, preview });
+    };
+
+    const removeUploadedImage = () => {
+        if (uploadedImage) {
+            URL.revokeObjectURL(uploadedImage.preview);
+            setUploadedImage(null);
+        }
+    };
+
+    // Determine if send button should be active
+    const canSend = inputValue.trim().length > 0 || uploadedImage !== null;
+
     return (
         <>
             <ProactiveBubble
@@ -84,7 +141,7 @@ export default function FloatingChatbot() {
                 onDismiss={() => setActiveOffer(null)}
             />
 
-            {/* Outfit Modal - Separate panel to the LEFT of chatbox */}
+            {/* Outfit Modal */}
             <OutfitModal
                 isOpen={isCanvasOpen && !!generatedOutfit && generatedOutfit.length > 0}
                 onClose={closeCanvas}
@@ -98,210 +155,282 @@ export default function FloatingChatbot() {
                 }))}
                 budgetMax={500}
             />
-            {/* Floating Chat Button - Enhanced */}
-            <button
-                onClick={toggleChat}
-                className={`
-          fixed bottom-6 right-6 z-[999]
-          group
-          ${isAnimating && !isOpen ? 'animate-bounce-slow' : ''}
-        `}
-                aria-label={isOpen ? "Close your personal stylist" : "Chat with your personal stylist"}
-            >
-                {/* Enhanced Glow effect */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 opacity-75 blur-2xl group-hover:opacity-100 transition-opacity duration-300 animate-pulse-slow" />
 
-                {/* Main button - Larger & More Premium */}
-                <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700 shadow-2xl shadow-purple-500/50 flex items-center justify-center transform group-hover:scale-110 transition-all duration-300 ring-4 ring-purple-500/20">
-                    {isOpen ? (
-                        <X className="h-8 w-8 text-white transition-transform duration-300" />
-                    ) : (
-                        <>
-                            <Sparkles className="h-8 w-8 text-white transition-transform duration-300 group-hover:rotate-12" />
-                            {hasUnread && (
-                                <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 border-2 border-white animate-ping" />
-                            )}
-                        </>
-                    )}
-                </div>
-
-                {/* More Sparkle effects */}
-                {!isOpen && (
-                    <>
-                        <Sparkles className="absolute -top-3 -left-3 h-6 w-6 text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
-                        <Sparkles className="absolute -bottom-2 -right-2 h-5 w-5 text-pink-300 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse delay-150" />
-                        <Heart className="absolute top-0 right-0 h-4 w-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse delay-300" />
-                    </>
-                )}
-            </button>
-
-            {/* Enhanced Shopping Assistant Window */}
-            {isOpen && (
-                <>
-                    {/* Backdrop for mobile */}
-                    <div
-                        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[998] md:hidden"
-                        onClick={toggleChat}
-                    />
-
-                    {/* Main Assistant Container - FIXED WIDTH */}
-                    <div className={`
-            fixed z-[999]
-            bottom-6 right-6
-            w-[calc(100vw-3rem)] md:w-[600px] lg:w-[680px] h-[calc(100vh-8rem)] md:h-[720px]
-            rounded-3xl
-            bg-gradient-to-br from-neutral-900/98 via-neutral-950/98 to-black/98
-            backdrop-blur-2xl
-            border border-white/10
-            shadow-2xl shadow-purple-500/30
-            overflow-hidden
-            transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
-            ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'}
-          `}>
-                        {/* Wrapper for flex layout */}
-                        <div className="relative flex flex-col h-full">
-                            {/* Animated gradient overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 pointer-events-none animate-gradient" />
-
-                            {/* Premium Header */}
-                            <div className="relative bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-purple-600/30 backdrop-blur-md border-b border-white/10 px-6 py-5">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="relative">
-                                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center ring-2 ring-purple-400/50">
-                                                <Sparkles className="h-6 w-6 text-white" />
-                                            </div>
-                                            <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full bg-green-500 border-2 border-neutral-900 animate-pulse" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg text-white flex items-center gap-2">
-                                                Your Personal Stylist
-                                                <TrendingUp className="h-4 w-4 text-pink-400" />
-                                            </h3>
-                                            <p className="text-xs text-neutral-400">Powered by AI • Always learning your style</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={toggleChat}
-                                        className="h-9 w-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors group"
-                                        aria-label="Close assistant"
-                                    >
-                                        <X className="h-5 w-5 text-neutral-400 group-hover:text-white transition-colors" />
-                                    </button>
-                                </div>
-
-                                {/* Enhanced Quick Actions - More Shopping Focused */}
-                                <div className="mt-4 flex gap-2 overflow-x-auto hide-scrollbar">
-                                    {[
-                                        { icon: ShoppingBag, label: "Discover Styles", action: "Show me trending styles", gradient: "from-purple-500 to-pink-500" },
-                                        { icon: Shirt, label: "Build Outfit", action: "I want to build an outfit", gradient: "from-blue-500 to-cyan-500" },
-                                        { icon: Package, label: "My Orders", action: "Show my orders", gradient: "from-green-500 to-emerald-500" },
-                                        { icon: Heart, label: "Get Inspired", action: "Inspire me", gradient: "from-red-500 to-pink-500" }
-                                    ].map((chip, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleQuickAction(chip.action)}
-                                            className={`
-                      flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full
-                      bg-gradient-to-r ${chip.gradient} bg-opacity-10
-                      hover:bg-opacity-20
-                      border border-white/20 hover:border-white/30
-                      text-xs font-medium text-white
-                      transition-all duration-200
-                      hover:scale-105 hover:shadow-lg
-                    `}
-                                        >
-                                            <chip.icon className="h-4 w-4" />
-                                            {chip.label}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* View Tabs - Shopping Assistant Views */}
-                                <div className="mt-3 flex gap-1 bg-black/20 rounded-lg p-1">
-                                    {[
-                                        { id: 'chat', label: 'Chat', icon: MessageCircle },
-                                        { id: 'outfit_builder', label: 'Outfit Builder', icon: Shirt },
-                                        { id: 'cart', label: 'Cart', icon: ShoppingCart }
-                                    ].map((tab) => (
-                                        <button
-                                            key={tab.id}
-                                            onClick={() => setActiveView(tab.id as any)}
-                                            className={`
-                      flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all
-                      ${activeView === tab.id
-                                                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                                                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                                                }
-                    `}
-                                        >
-                                            <tab.icon className="h-3.5 w-3.5" />
-                                            {tab.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Content Area - Single View */}
-                            <div className="flex flex-1 min-h-0 relative">
-                                <div className="w-full h-full">
-                                    {activeView === 'chat' && (
-                                        <CoveChatWidget ref={chatWidgetRef} mode="chat" />
-                                    )}
-                                    {activeView === 'outfit_builder' && (
-                                        <CoveChatWidget ref={chatWidgetRef} mode="outfit_builder" />
-                                    )}
-                                    {activeView === 'cart' && (
-                                        <div className="h-full flex items-center justify-center text-neutral-500">
-                                            <div className="text-center">
-                                                <ShoppingCart className="h-12 w-12 mx-auto mb-3 text-pink-500" />
-                                                <p className="font-medium">Your Cart</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </>
+            {/* Floating Chat Button - Clean Minimal Design */}
+            {/* Round 4: Hide Launcher when Open (unless Minimized, but Minimized shows Pill, so Launcher usually hidden if interaction active) */}
+            {/* User said: "minimize... gone but Floating pill will become placeholder... Close icon should close... reappear" */}
+            {(!isOpen) && (
+                <button
+                    onClick={toggleChat}
+                    className="fixed bottom-6 right-6 z-[999] group"
+                    aria-label="Open Bubbles"
+                >
+                    <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="h-14 w-14 rounded-full bg-black shadow-lg flex items-center justify-center"
+                    >
+                        {isOpen ? (
+                            <X className="h-6 w-6 text-white" />
+                        ) : (
+                            <MessageCircle className="h-6 w-6 text-white" />
+                        )}
+                    </motion.div>
+                </button>
             )}
 
-            <style jsx global>{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.75; }
-          50% { opacity: 1; }
-        }
+            {/* Chat Window - Clean White Design */}
+            <AnimatePresence>
+                {isOpen && (
+                    <>
+                        {/* Backdrop for mobile */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[998] md:hidden"
+                            onClick={toggleChat}
+                        />
 
-        @keyframes gradient {
-          0%, 100% { opacity: 0.1; }
-          50% { opacity: 0.15; }
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 2s infinite;
-        }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 3s infinite;
-        }
+                        {/* Main Chat Container */}
+                        {/* Main Chat Container */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{
+                                opacity: 1,
+                                scale: 1,
+                                y: 0,
+                                height: isMinimized ? 'auto' : undefined,
+                                width: isMinimized ? 'auto' : undefined
+                            }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className={`fixed z-[999] bottom-6 right-6 ${isMinimized ? 'bg-transparent shadow-none' : 'w-[90vw] md:w-[380px] h-[60vh] md:h-[600px] max-h-[850px] max-w-[380px] rounded-2xl bg-white shadow-2xl border border-gray-200'} overflow-hidden flex flex-col`}
+                        >
+                            {/* Round 4: Minimized View (Click to Restore) */}
+                            {isMinimized ? (
+                                <div onClickCapture={() => setIsMinimized(false)} className="cursor-pointer">
+                                    <BubblesStatusPill isThinking={isThinking} thinkingSteps={thinkingSteps} />
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Header - Custom Top Bar with blur */}
+                                    <div className="bg-gray-50/80 backdrop-blur-sm h-10 border-b border-gray-100/50 flex items-center justify-between px-3 relative z-10 shrink-0">
+                                        <div className="flex items-center gap-2">
+                                            {/* Back Arrow (Visual only or maybe back to home?) */}
+                                            <button className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600">
+                                                <ArrowLeft className="h-4 w-4" />
+                                            </button>
+                                        </div>
 
-        .animate-gradient {
-          animation: gradient 8s ease-in-out infinite;
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => chatWidgetRef.current?.clearChat()}
+                                                className="p-1.5 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors text-gray-400"
+                                                title="Clear Chat"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => setIsMinimized(true)}
+                                                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
+                                                title="Minimize"
+                                            >
+                                                <Minus className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={toggleChat}
+                                                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
+                                                title="Close"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Bubbles Status Pill - Floating below header */}
+                                    <div className="absolute top-12 left-0 right-0 z-50 flex justify-center pointer-events-none">
+                                        <div className="pointer-events-auto">
+                                            <BubblesStatusPill
+                                                isThinking={isThinking}
+                                                thinkingSteps={thinkingSteps}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Chat Content */}
+                                    <div className="flex-1 min-h-0 overflow-hidden pt-2">
+                                        <div className={activeView === 'cart' ? 'hidden' : 'h-full'}>
+                                            <CoveChatWidget
+                                                ref={chatWidgetRef}
+                                                mode={activeView === 'outfit_builder' ? 'outfit_builder' : 'chat'}
+                                                onThinkingChange={(thinking, steps) => {
+                                                    setIsThinking(thinking);
+                                                    setThinkingSteps(steps || []);
+                                                }}
+                                                onQuickAction={handleQuickAction}
+                                                onTabChange={(tab) => {
+                                                    setActiveView(tab);
+                                                    // Note: You can clear Green Dot here if desired
+                                                    if (tab === 'outfit_builder') setHasOutfitReady(false);
+                                                }}
+                                                onOutfitReady={() => setHasOutfitReady(true)}
+                                            />
+                                        </div>
+                                        {activeView === 'cart' && (
+                                            <div className="h-full flex items-center justify-center text-gray-400">
+                                                <div className="text-center">
+                                                    <ShoppingCart className="h-12 w-12 mx-auto mb-3" />
+                                                    <p className="font-medium">Your Cart</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Uploaded Image Preview */}
+                                    <AnimatePresence>
+                                        {uploadedImage && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="px-4 py-2 border-t border-gray-100"
+                                            >
+                                                <div className="relative inline-block">
+                                                    <img
+                                                        src={uploadedImage.preview}
+                                                        alt="Upload preview"
+                                                        className="h-16 w-16 object-cover rounded-lg border border-gray-200"
+                                                    />
+                                                    <button
+                                                        onClick={removeUploadedImage}
+                                                        className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-xs"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Input Area */}
+                                    <form onSubmit={handleSubmit} className="border-t border-gray-100 px-4 py-3">
+                                        <motion.div
+                                            className={`flex items-center gap-2 rounded-full px-4 py-2 border-2 transition-colors ${isFocused
+                                                ? 'bg-white border-green-400 shadow-sm'
+                                                : 'bg-gray-50 border-gray-200'
+                                                }`}
+                                            animate={{
+                                                borderColor: isFocused ? '#4ade80' : '#e5e7eb',
+                                            }}
+                                        >
+                                            {/* Image Upload Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                                            >
+                                                <Plus className="h-5 w-5 text-gray-400" />
+                                            </button>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/svg+xml"
+                                                onChange={handleImageSelect}
+                                                className="hidden"
+                                            />
+
+                                            <input
+                                                ref={inputRef}
+                                                type="text"
+                                                placeholder="Write a message..."
+                                                value={inputValue}
+                                                onChange={(e) => setInputValue(e.target.value)}
+                                                onFocus={() => setIsFocused(true)}
+                                                onBlur={() => setIsFocused(false)}
+                                                className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
+                                            />
+
+                                            <button
+                                                type="button"
+                                                className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                                            >
+                                                <Smile className="h-5 w-5 text-gray-400" />
+                                            </button>
+
+                                            {/* Send Button - Animates based on canSend */}
+                                            <motion.button
+                                                type="submit"
+                                                disabled={!canSend}
+                                                className="flex items-center justify-center rounded-full transition-all"
+                                                animate={{
+                                                    backgroundColor: canSend ? '#22c55e' : 'transparent',
+                                                    width: canSend ? 36 : 32,
+                                                    height: canSend ? 36 : 32,
+                                                    borderWidth: canSend ? 0 : 2,
+                                                }}
+                                                style={{
+                                                    borderColor: '#22c55e',
+                                                }}
+                                                whileHover={canSend ? { scale: 1.05 } : {}}
+                                                whileTap={canSend ? { scale: 0.95 } : {}}
+                                            >
+                                                <motion.div
+                                                    animate={{
+                                                        scale: canSend ? 1.1 : 1,
+                                                    }}
+                                                >
+                                                    <ArrowUp
+                                                        className={`transition-colors ${canSend ? 'text-white h-5 w-5' : 'text-green-500 h-4 w-4'
+                                                            }`}
+                                                    />
+                                                </motion.div>
+                                            </motion.button>
+                                        </motion.div>
+                                    </form>
+
+                                    {/* View Mode Tabs - Bottom Pills */}
+                                    <div className="border-t border-gray-100 px-4 py-2">
+                                        <div className="flex justify-center gap-2">
+                                            {[
+                                                { id: 'chat', label: 'Chat', icon: MessageCircle },
+                                                { id: 'outfit_builder', label: 'Outfit Builder', icon: Shirt },
+                                                { id: 'cart', label: 'Cart', icon: ShoppingCart }
+                                            ].map((tab) => (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => {
+                                                        setActiveView(tab.id as any);
+                                                        if (tab.id === 'outfit_builder') setHasOutfitReady(false);
+                                                    }}
+                                                    className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeView === tab.id
+                                                        ? 'bg-black text-white'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        }`}
+                                                >
+                                                    {/* Green Dot Notification */}
+                                                    {tab.id === 'outfit_builder' && hasOutfitReady && activeView !== 'outfit_builder' && (
+                                                        <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" />
+                                                    )}
+                                                    <tab.icon className="h-3.5 w-3.5" />
+                                                    {tab.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Footer Branding */}
+                                    <div className="border-t border-gray-100 py-2 px-4 text-center">
+                                        <span className="text-xs text-gray-400">
+                                            Powered by <span className="text-gray-600 font-medium">🫧 CoveAI</span>
+                                        </span>
+                                    </div>
+                                </>
+                            )}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </>
     );
 }

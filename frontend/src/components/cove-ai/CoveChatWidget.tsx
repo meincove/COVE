@@ -19,16 +19,16 @@ import {
   RefreshCw,
   MoreHorizontal
 } from "lucide-react";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+// Note: react-markdown removed - not currently used
 
 import { useCartSessionStore } from "@/src/store/cartSessionStore";
 import { useCartStore } from "@/src/store/cartStore";
 import {
-  Message,
+  AgentItem,
   AgentCartPayload,
   AgentResponse,
 } from "@/types/agent";
+import type { CartItem } from "@/types/cart";
 import ProductCarousel from "@/src/components/cove-ai/ProductCarousel";
 import SuggestedQueries from "@/src/components/cove-ai/SuggestedQueries";
 import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
@@ -145,14 +145,22 @@ function isEmailConfirmationMeta(
 // ---------- COMPONENT ----------
 
 // ✨ PHASE 6: Props for mode-specific behavior
+// ✨ BUBBLES: Added onThinkingChange for status pill
 interface CoveChatWidgetProps {
   mode?: 'chat' | 'outfit_builder';
+  onThinkingChange?: (thinking: boolean, steps: { icon: string; status: string }[]) => void;
+  onQuickAction?: (text: string) => void;
+  onTabChange?: (tab: 'chat' | 'outfit_builder' | 'cart') => void;
+  onOutfitReady?: () => void;
 }
 
-function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string) => void }>) {
+function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, onTabChange, onOutfitReady }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Internal quick action handler - will be set after sendStreamingQuery is defined
+  const internalQuickActionRef = useRef<(msg: string) => void>(() => { });
 
   // Has the user sent at least one message in this widget?
   const [hasStartedChat, setHasStartedChat] = useState(false);
@@ -322,7 +330,111 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
   ]);
   */
 
+  // ✨ BUBBLES: Expose sendQuickMessage method to parent via ref
+  useImperativeHandle(ref, () => ({
+    clearChat: () => {
+      setMessages([]);
+      setHasStartedChat(false);
+      setHasSentGreeting(false);
+      setToast({ message: "Chat history cleared", type: 'success' });
+    },
+    sendQuickMessage: async (msg: string, image?: File) => {
+      if (!msg.trim() && !image) return;
 
+      const userMsg: ChatMessage = {
+        id: makeId(),
+        role: 'user',
+        content: msg.trim(),
+        // TODO: Handle image display in message if needed
+      };
+
+      setMessages(prev => [...prev, userMsg]);
+      setLoading(true);
+
+      if (!hasStartedChat) {
+        setHasStartedChat(true);
+      }
+
+      // Save user message to history
+      saveMessage({
+        role: 'user',
+        content: userMsg.content,
+      });
+
+      try {
+        const sessionId = guestSessionId ?? ensureGuestSessionId();
+
+        // Send via streaming query
+        await sendStreamingQuery(
+          userMsg.content,
+          isSignedIn && user ? user.id : undefined,
+          sessionId,
+          mode === 'outfit_builder' ? 'outfit_builder' : undefined
+        );
+      } catch (err: any) {
+        console.error("Error talking to agent:", err);
+        const errorMsg: ChatMessage = {
+          id: makeId(),
+          role: 'assistant',
+          content: 'Sorry, something went wrong talking to Cove AI. Please try again.',
+        };
+        setMessages(prev => [...prev, errorMsg]);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }), [hasStartedChat, isSignedIn, user, guestSessionId, ensureGuestSessionId, mode, saveMessage, sendStreamingQuery]);
+
+  // ✨ BUBBLES: Internal quick action handler for PersonalizedGreeting and suggested actions
+  const handleInternalQuickAction = async (text: string) => {
+    if (!text.trim()) return;
+
+    // If parent provides onQuickAction, use that (FloatingChatbot controls input)
+    if (onQuickAction) {
+      onQuickAction(text);
+      return;
+    }
+
+    // Otherwise, handle internally (fallback for standalone usage)
+    const userMsg: ChatMessage = {
+      id: makeId(),
+      role: 'user',
+      content: text.trim(),
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setLoading(true);
+
+    if (!hasStartedChat) {
+      setHasStartedChat(true);
+    }
+
+    saveMessage({
+      role: 'user',
+      content: userMsg.content,
+    });
+
+    try {
+      const sessionId = guestSessionId ?? ensureGuestSessionId();
+
+      await sendStreamingQuery(
+        userMsg.content,
+        isSignedIn && user ? user.id : undefined,
+        sessionId,
+        mode === 'outfit_builder' ? 'outfit_builder' : undefined
+      );
+    } catch (err: any) {
+      console.error("Error talking to agent:", err);
+      const errorMsg: ChatMessage = {
+        id: makeId(),
+        role: 'assistant',
+        content: 'Sorry, something went wrong talking to Cove AI. Please try again.',
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // -------- SUBMIT HANDLER --------
 
@@ -517,8 +629,26 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
   }
 
   // Week 6: Add thinking message when streaming starts
+  // ✨ BUBBLES: Track previous streaming state to prevent infinite loops
+  const prevStreamingRef = useRef(false);
+  // ✨ BUBBLES: Track processed responses to avoid duplicates
+  const lastProcessedIntroRef = useRef<string | null>(null);
+
   useEffect(() => {
+    // Only notify when streaming state actually changes
+    const streamingChanged = prevStreamingRef.current !== isStreamingProgress;
+
+    // ✨ BUBBLES: Reset response tracking when new streaming session starts
+    if (isStreamingProgress && streamingChanged) {
+      lastProcessedIntroRef.current = null;
+    }
+
     if (isStreamingProgress && thinkingSteps.length > 0) {
+      // Notify parent about thinking state (only if streaming just started or steps updated)
+      if (streamingChanged || thinkingSteps.length > 0) {
+        onThinkingChange?.(true, thinkingSteps);
+      }
+
       // Map streaming steps to EnhancedThinking format
       const mappedEvents = thinkingSteps.map((step, idx) => ({
         id: `stream - step - ${idx} `,
@@ -529,6 +659,9 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
         details: step.detail
       }));
 
+      // ✨ BUBBLES CHANGE: Do not show thinking bubble in chat list, only in the header pill
+      // The onThinkingChange callback above handles the pill update.
+      /* 
       setMessages(prev => {
         const hasThinkingMsg = prev.some(m => m.id === 'thinking-temp');
 
@@ -540,7 +673,7 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
             meta: {
               kind: 'recommendations',
               items: [],
-              thinking_events: mappedEvents as any // Cast to match AgentResponse type
+              thinking_events: mappedEvents as any 
             } as RecommendationsMeta
           }];
         }
@@ -558,7 +691,15 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
             : m
         );
       });
+      */
     }
+    // ✨ BUBBLES: Clear thinking state when streaming ends (only if it actually ended)
+    if (!isStreamingProgress && prevStreamingRef.current) {
+      onThinkingChange?.(false, []);
+    }
+
+    // Update ref for next comparison
+    prevStreamingRef.current = isStreamingProgress;
   }, [isStreamingProgress, thinkingSteps]);
 
   function getAgentFromIcon(icon: string): string {
@@ -572,7 +713,19 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
 
   // Week 6: Replace thinking message with final result
   useEffect(() => {
-    if (!isStreamingProgress && introText && streamedItems.length > 0) {
+    // Skip if still streaming or no intro text
+    if (isStreamingProgress || !introText) return;
+
+    // Skip if we already processed this exact response
+    if (lastProcessedIntroRef.current === introText) return;
+
+    console.log('[CoveChatWidget] Processing response:', { kind, introText: introText?.substring(0, 50), items: streamedItems.length });
+
+    // Handle recommendations WITH items
+    if (streamedItems.length > 0) {
+      // Mark as processed
+      lastProcessedIntroRef.current = introText;
+
       // ✨ TRIGGER VIRTUAL TRIAL ROOM (Fix for Streaming)
       // Only for outfit builder responses, not simple product queries
       // Use STRICT phrases to avoid false positives from casual "outfit" mentions
@@ -620,7 +773,32 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
         },
       });
     }
-  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage, streamThinkingEvents, streamToolsUsed]);
+    // ✨ BUBBLES FIX: Handle introText WITHOUT items (e.g., simple text response from recommendations intent)
+    else if (streamedItems.length === 0 && kind !== 'answer') {
+      // Mark as processed
+      lastProcessedIntroRef.current = introText;
+
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== 'thinking-temp');
+        // Only add if no message with this exact content exists already
+        const hasContent = filtered.some(m => m.content === introText);
+        if (hasContent) return filtered;
+
+        return [
+          ...filtered,
+          {
+            id: makeId(),
+            role: 'assistant',
+            content: introText,
+          }
+        ];
+      });
+      saveMessage({
+        role: 'assistant',
+        content: introText,
+      });
+    }
+  }, [isStreamingProgress, introText, streamedItems, suggestedActions, saveMessage, streamThinkingEvents, streamToolsUsed, kind]);
 
   // Week 6: Handle cart proposal from streaming
   useEffect(() => {
@@ -868,73 +1046,27 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
     );
   }
 
-  // Expose sendQuickMessage method to parent via ref
-  useImperativeHandle(ref, () => ({
-    sendQuickMessage: async (message: string) => {
-      const userMsg: ChatMessage = {
-        id: makeId(),
-        role: "user",
-        content: message,
-      };
-
-      setMessages((prev) => [...prev, userMsg]);
-      setLoading(true);
-
-      // Save user message to history
-      saveMessage({
-        role: 'user',
-        content: userMsg.content,
-      });
-
-      try {
-        const sessionId = guestSessionId ?? ensureGuestSessionId();
-
-        if (!hasStartedChat) {
-          setHasStartedChat(true);
-        }
-
-        // Send via streaming
-        // ✨ PHASE 6: Use mode prop to determine sessionType
-        await sendStreamingQuery(
-          userMsg.content,
-          isSignedIn && user ? user.id : undefined,
-          sessionId,
-          mode === 'outfit_builder' ? 'outfit_builder' : undefined
-        );
-
-      } catch (err: any) {
-        console.error("Error talking to agent:", err);
-        const errorMsg: ChatMessage = {
-          id: makeId(),
-          role: "assistant",
-          content: "Sorry, something went wrong talking to Cove AI. Please try again.",
-        };
-        setMessages((prev) => [...prev, errorMsg]);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }));
+  // NOTE: useImperativeHandle is defined earlier (around line 333) with both clearChat and sendQuickMessage
 
   // -------- RENDER --------
 
   return (
-    <div className="flex flex-col h-full rounded-2xl border border-neutral-800 bg-neutral-950/80 overflow-hidden">
+    <div className="flex flex-col h-full bg-white overflow-hidden">
       {/* Messages list */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50">
         {/* Personalized Greeting - Mode-specific */}
         {messages.length === 0 && !isStreamingProgress && (
           mode === 'outfit_builder' ? (
-            <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-purple-500/10 rounded-2xl p-4 border border-purple-500/20">
+            <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">✨</span>
-                <h3 className="text-lg font-semibold text-white">Outfit Builder</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Outfit Builder</h3>
               </div>
-              <p className="text-neutral-300 text-sm mb-4">
+              <p className="text-gray-600 text-sm mb-4">
                 I'll help you create the perfect look! Just tell me about your occasion, budget, or style preferences.
               </p>
               <div className="space-y-2">
-                <p className="text-xs text-neutral-500 uppercase tracking-wider">Try asking:</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Try asking:</p>
                 {[
                   "Casual weekend outfit under €200",
                   "Date night look for fancy restaurant",
@@ -943,10 +1075,11 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
                 ].map((suggestion, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => {
-                      setInput(suggestion);
+                      handleInternalQuickAction(suggestion);
                     }}
-                    className="block w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm text-neutral-300 hover:text-white transition-colors"
+                    className="block w-full text-left px-3 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-sm text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     "{suggestion}"
                   </button>
@@ -954,7 +1087,7 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
               </div>
             </div>
           ) : (
-            <PersonalizedGreeting />
+            <PersonalizedGreeting onQuickAction={handleInternalQuickAction} />
           )
         )}
 
@@ -984,12 +1117,16 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
               className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-300`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm text-neutral-50 overflow-hidden ${isUser ? "chat-msg-user" : "chat-msg-assistant"
-                  } `}
+                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed overflow-hidden ${isUser
+                  ? "bg-gray-800 text-white font-medium"
+                  : "bg-white border border-gray-200 shadow-sm text-gray-700"
+                  }`}
               >
                 {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
 
                 {/* Phase 1: Show enhanced thinking if available */}
+                {/* ✨ BUBBLES CHANGE: Hiding thinking details in chat, only shown in header pill */}
+                {/*
                 {recMeta && (recMeta.thinking_events || recMeta.tools_used) && (
                   <EnhancedThinking
                     thinking_events={recMeta.thinking_events}
@@ -997,19 +1134,23 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
                     loading={isStreamingProgress && m.id === messages[messages.length - 1].id}
                   />
                 )}
+                */}
 
                 {/* Show content (answer text) always */}
-                {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
+                {m.content && <p className="whitespace-pre-wrap font-normal">{m.content}</p>}
 
                 {/* Week 4: Fallback for original thinking steps if no enhanced thinking */}
+                {/*
                 {!recMeta?.thinking_events && !recMeta?.tools_used &&
                   recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
                     <AgentThinkingSteps steps={recMeta.thinking_steps} />
                   )}
+                */}
 
                 {/* Recommendations - hide in outfit_builder mode (shown in OutfitCanvas) */}
+                {/* Round 3: Added mt-4 for better separation */}
                 {recMeta?.items && recMeta.items.length > 0 && mode !== 'outfit_builder' && (
-                  <div className="mt-1">
+                  <div className="mt-4">
                     <ProductCarousel items={recMeta.items} />
                   </div>
                 )}
@@ -1108,36 +1249,64 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
 
         {/* Welcome suggestions removed - PersonalizedGreeting handles the empty state */}
 
-        {loading && thinkingSteps.length === 0 && <LoadingSkeleton />}
+        {/* Round 3: Skeleton hidden as thinking is in pill */}
+        {/* {loading && thinkingSteps.length === 0 && <LoadingSkeleton />} */}
 
         {/* ✨ PHASE 6: Live Product Exploration during outfit building */}
         {/* Render if we have active events OR if we have persistent outfit data in store */}
         {(agenticEvents.length > 0 || Object.keys(useOutfitStore.getState().categories).length > 0) && (
           <div className="px-3 mb-4">
-            <AgenticOutfitBuilder
-              streamEvents={agenticEvents}
-              isActive={true}
-            />
+            {mode === 'outfit_builder' ? (
+              <AgenticOutfitBuilder
+                streamEvents={agenticEvents}
+                isActive={true}
+              />
+            ) : isStreamingProgress ? (
+              /* While streaming - show progress indicator */
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm text-gray-600">Building your outfit...</span>
+              </div>
+            ) : agenticEvents.length > 0 ? (
+              /* Done streaming - show "Outfit Ready" notification */
+              <button
+                onClick={() => {
+                  onTabChange?.('outfit_builder');
+                  onOutfitReady?.(); // Notify parent
+                }}
+                className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                  <span className="text-base">✨</span>
+                </div>
+                <div className="text-left flex-1">
+                  <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
+                  <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
+                </div>
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              </button>
+            ) : null}
           </div>
         )}
 
+
       </div>
 
-      {/* Input */}
+      {/* Input - Hidden since FloatingChatbot has its own input */}
       <form
         onSubmit={handleSubmit}
-        className="border-t border-neutral-800 px-3 py-2 flex gap-2"
+        className="hidden"
       >
         <input
-          className="flex-1 bg-transparent text-sm text-neutral-100 placeholder:text-neutral-500 outline-none"
-          placeholder="Ask Cove AI anything about products, sizes, fits…"
+          className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
+          placeholder="Write a message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
         <button
           type="submit"
           disabled={!input.trim()}
-          className="px-3 py-1 text-sm rounded-full bg-neutral-100 text-black disabled:opacity-40"
+          className="px-3 py-1 text-sm rounded-full bg-black text-white disabled:opacity-40"
         >
           Send
         </button>
@@ -1158,5 +1327,5 @@ function CoveChatWidgetInner({ mode = 'chat' }: CoveChatWidgetProps, ref: React.
 }
 
 // Export with forwardRef
-const CoveChatWidget = forwardRef<{ sendQuickMessage: (msg: string) => void }, CoveChatWidgetProps>(CoveChatWidgetInner);
+const CoveChatWidget = forwardRef<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }, CoveChatWidgetProps>(CoveChatWidgetInner);
 export default CoveChatWidget;
