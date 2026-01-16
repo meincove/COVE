@@ -39,14 +39,14 @@ export default function BubblesStatusPill({
     return (
         <div className={`flex justify-center ${className}`}>
             <motion.div
-                layout
-                className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden relative z-50 -mt-2"
+                layout="position"
+                className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden relative z-50 -mt-4 w-[150px]"
                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
                 {/* Main Pill Content */}
-                <motion.div layout className="px-3 py-2 flex items-center gap-2.5">
+                <motion.div layout className="px-3 py-1.5 flex items-center gap-2">
                     {/* Logo - Black circular icon with B letter + green dot */}
                     <div className="relative">
                         <div className="h-7 w-7 rounded-full bg-black flex items-center justify-center flex-shrink-0">
@@ -66,17 +66,27 @@ export default function BubblesStatusPill({
                     </div>
 
                     {/* Name & Status */}
-                    <div className="flex flex-col min-w-[70px]">
+                    <div className="flex flex-col flex-1">
                         <span className="font-bold text-gray-900 text-sm tracking-tight">Bubbles</span>
                         <AnimatePresence mode="wait">
-                            {isThinking && (
+                            {isThinking ? (
                                 <motion.span
+                                    key="thinking"
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -5 }}
                                     className="text-[10px] text-gray-500 font-medium"
                                 >
                                     Thinking...
+                                </motion.span>
+                            ) : (
+                                <motion.span
+                                    key="chatbot"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-[10px] text-gray-400"
+                                >
+                                    chatbot
                                 </motion.span>
                             )}
                         </AnimatePresence>
@@ -93,7 +103,7 @@ export default function BubblesStatusPill({
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                             className="bg-gray-50/50 backdrop-blur-[2px] overflow-hidden"
                         >
-                            <div className="px-3 pb-2 pt-1 border-t border-gray-100 max-h-[60px] overflow-hidden relative">
+                            <div className="px-1.5 pb-1.5 pt-1 border-t border-gray-100 max-h-[55px] overflow-hidden relative">
                                 {/* Gradient Masks for blur effect */}
                                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-b from-white/60 to-transparent z-10 pointer-events-none" />
                                 <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-t from-white/60 to-transparent z-10 pointer-events-none" />
@@ -108,13 +118,13 @@ export default function BubblesStatusPill({
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                                className="flex items-center gap-2 py-0.5"
+                                                className="flex items-center gap-0.5 py-0.5"
                                             >
-                                                <span className="text-xs">{step.icon}</span>
-                                                <span className="text-[10px] text-gray-600 font-medium truncate max-w-[160px]">
+                                                <span className="text-[9px] flex-shrink-0 w-3 text-center">{step.icon}</span>
+                                                <span className="text-[9px] text-gray-600 font-medium flex-1 leading-tight -ml-0.5">
                                                     {step.status}
                                                 </span>
-                                                <div className="ml-auto">
+                                                <div className="flex-shrink-0">
                                                     {!step.done ? (
                                                         <motion.div
                                                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
