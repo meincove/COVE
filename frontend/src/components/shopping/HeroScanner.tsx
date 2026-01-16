@@ -323,36 +323,7 @@ import HeroScannerOverlay from "@/src/components/shopping/hero/HeroScannerOverla
 import DottedCanvasBg from "@/src/components/shopping/hero/DottedCanvasBg"
 import HeroScannerBottomBar from "@/src/components/shopping/hero/HeroScannerBottomBar"
 
-function FpsMeter() {
-    const [fps, setFps] = React.useState(0)
-    const rafRef = React.useRef<number | null>(null)
 
-    React.useEffect(() => {
-        let last = performance.now()
-        let frames = 0
-
-        const loop = (t: number) => {
-            frames++
-            if (t - last >= 250) {
-                setFps(Math.round((frames * 1000) / (t - last)))
-                frames = 0
-                last = t
-            }
-            rafRef.current = requestAnimationFrame(loop)
-        }
-
-        rafRef.current = requestAnimationFrame(loop)
-        return () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current)
-        }
-    }, [])
-
-    return (
-        <div className="fixed top-3 right-3 z-[200] rounded-full bg-black/70 text-white px-3 py-1 text-xs font-medium backdrop-blur">
-            FPS {fps}
-        </div>
-    )
-}
 
 type HeroScannerProps = {
     products: UiProduct[]
@@ -485,7 +456,7 @@ export default function HeroScanner({ products, heightVh = 70, minHeight = 600 }
                 {dragging ? "dragging…" : "idle"}
             </div>
 
-            <FpsMeter />
+
         </section>
     )
 }

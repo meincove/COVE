@@ -99,6 +99,8 @@ export default function LshapedNavbar({
         return () => window.removeEventListener("scroll", onScroll)
     }, [])
 
+    const [isHeroOpen, setIsHeroOpen] = useState(true)
+
     return (
         <div
             className={cn("relative w-full", className)}
@@ -110,128 +112,140 @@ export default function LshapedNavbar({
                 } as React.CSSProperties
             }
         >
-            {hero ? <div className="pointer-events-auto relative p-0 m-0">{hero}</div> : null}
-
-            <div className="sticky top-0 z-50 pointer-events-none">
-                <div
-                    className="w-full bg-gradient-to-b from-white/70 via-white/85 to-white/92 backdrop-blur-xl pointer-events-auto"
-                    style={{
-                        paddingTop: "var(--nav-gap)",
-                        paddingLeft: "var(--nav-gap)",
-                        paddingRight: "var(--nav-gap)",
-                        paddingBottom: 0,
-                    }}
-                >
-                    <div className="flex items-stretch gap-[var(--nav-gap)]">
-                        <div
-                            className={cn("shrink-0 flex items-center justify-center", surfaceClass, "border border-black/10", "rounded-[28px]")}
-                            style={{ width: "var(--rail-w)", height: "var(--top-h)" }}
-                        >
-                            <div className="text-black font-bold tracking-[0.2em] text-sm">COVE</div>
+            {/* HERO SECTION (Collapsible) */}
+            <AnimatePresence>
+                {hero && isHeroOpen && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{
+                            height: "auto",
+                            opacity: 1,
+                            transition: {
+                                height: { type: "spring", stiffness: 90, damping: 14, mass: 1.2 }, // Soft, fluid opening
+                                opacity: { duration: 0.8, ease: "circOut", delay: 0.3 } // Delayed, gradual fade-in
+                            }
+                        }}
+                        exit={{
+                            height: 0,
+                            opacity: 0,
+                            transition: {
+                                height: { type: "spring", stiffness: 250, damping: 30, mass: 0.8 }, // Snappy, clean closing
+                                opacity: { duration: 0.15 } // Quick fade out
+                            }
+                        }}
+                        className="overflow-hidden bg-white/50"
+                    >
+                        <div className="pointer-events-auto relative p-0 m-0">
+                            {hero}
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                        <header
-                            className={cn("flex-1", surfaceClass, "border border-black/10", "rounded-[28px]")}
-                            style={{ height: "var(--top-h)" }}
-                        >
-                            <div className="flex h-full w-full items-center gap-4 px-4 sm:px-6">
-                                <div className="flex-1 flex justify-center">
-                                    <div className="w-full max-w-[520px]">
-                                        <div className="relative group">
-                                            <input
-                                                value={searchValue}
-                                                onChange={(e) => onSearchChange?.(e.target.value)}
-                                                className="w-full rounded-full bg-black/5 border border-black/5 px-4 py-2.5 text-sm text-black/85 placeholder:text-black/35 outline-none focus:border-black/20 focus:bg-black/10 transition-all font-medium"
-                                                placeholder="Search catalog..."
-                                            />
-                                            {isMounted && (
-                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-black/35 text-xs border border-black/5 rounded-md px-2 py-1 bg-white/70">
-                                                    ⌘K
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <button className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm text-black/60 hover:text-black/90 transition font-medium">
-                                        Sign in
-                                    </button>
-                                    <button className="rounded-full bg-black text-white px-5 py-2 text-sm hover:scale-105 active:scale-95 transition-all font-medium shadow-lg shadow-black/20">
-                                        Sign up
-                                    </button>
-                                </div>
-                            </div>
-                        </header>
+            {/* HEADER (Full Width, Connected) */}
+            <div className={`sticky top-0 z-50 w-full border-b border-black/5 bg-white/80 backdrop-blur-md transition-all duration-500 ${!isHeroOpen ? 'shadow-sm' : ''}`}>
+                <div className="flex items-center h-[var(--top-h)]">
+                    {/* Logo Area (Matches Rail Width) */}
+                    <div
+                        className="flex items-center justify-center shrink-0 border-r border-black/5 bg-[#fafafa]/50"
+                        style={{ width: "var(--rail-w)", height: "100%" }}
+                    >
+                        <div className="text-black font-bold tracking-[0.2em] text-sm">COVE</div>
                     </div>
 
-                    <div style={{ height: "var(--nav-gap)" }} />
+                    {/* Search / Nav Area */}
+                    <div className="flex-1 flex items-center px-6 relative">
+                        {/* Search Input (Left Aligned) */}
+                        <div className="w-full max-w-[400px] hidden md:block">
+                            <div className="relative group">
+                                <input
+                                    value={searchValue}
+                                    onChange={(e) => onSearchChange?.(e.target.value)}
+                                    className="w-full rounded-full bg-black/5 border border-black/5 px-4 py-2 text-sm text-black/85 placeholder:text-black/35 outline-none focus:border-black/20 focus:bg-black/10 transition-all font-medium"
+                                    placeholder="Search catalog..."
+                                />
+                            </div>
+                        </div>
+
+                        {/* CENTER TOGGLE BUTTON */}
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                            <button
+                                onClick={() => setIsHeroOpen(!isHeroOpen)}
+                                className="w-10 h-10 rounded-full bg-black/5 hover:bg-black/10 active:scale-90 flex items-center justify-center transition-all text-black/60 hover:text-black"
+                                title={isHeroOpen ? "Minimize Hero" : "Expand Hero"}
+                            >
+                                {/* Braces Icon [ ] */}
+                                <div className="text-sm font-bold tracking-widest scale-110">
+                                    {isHeroOpen ? '[ ]' : '][ '}
+                                </div>
+                            </button>
+                        </div>
+
+                        {/* Right Buttons */}
+                        <div className="flex items-center gap-3 ml-auto z-10">
+                            <button className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm text-black/60 hover:text-black/90 transition font-medium">
+                                Sign in
+                            </button>
+                            <button className="rounded-full bg-black text-white px-5 py-2 text-sm hover:scale-105 active:scale-95 transition-all font-medium shadow-lg shadow-black/20">
+                                Sign up
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* BODY GRID */}
-            <div
-                className="w-full"
-                style={{
-                    paddingLeft: "var(--nav-gap)",
-                    paddingRight: "var(--nav-gap)",
-                    paddingBottom: "var(--nav-gap)",
-                    paddingTop: "var(--nav-gap)",
-                }}
-            >
-                <div className="grid w-full gap-[var(--nav-gap)] grid-cols-1 md:grid-cols-[var(--rail-w)_minmax(0,1fr)]">
-                    {/* Left rail (stacks on mobile) */}
-                    <aside
-                        className={cn("self-start", surfaceClass, "border border-black/10", "rounded-[28px]")}
-                        style={{
-                            position: "relative",
-                            overflow: "hidden",
-                        }}
-                    >
-                        <div className="md:sticky" style={{ top: railStickyTop }}>
-                            <div className="h-full flex flex-col">
-                                <div className="flex-1 overflow-y-auto no-scrollbar py-6 px-3 flex flex-col items-center gap-2">
-                                    <div className="text-[10px] text-black/40 font-bold tracking-widest mb-4 w-full text-center">
-                                        FILTERS
-                                    </div>
-
-                                    {filterGroups.map((group) => {
-                                        const selectedCount = activeFilters[group.label]?.length || 0
-                                        const isAnyOptionActive = selectedCount > 0
-
-                                        return (
-                                            <FilterItem
-                                                key={group.label}
-                                                group={group}
-                                                isActive={isAnyOptionActive}
-                                                selectedCount={selectedCount}
-                                                onHoverStart={(rect) => handleHoverStart(group.label, rect)}
-                                                onHoverEnd={handleHoverEnd}
-                                            />
-                                        )
-                                    })}
-
-                                    <div className="my-2 w-1/2 h-px bg-black/5 mx-auto" />
-
-                                    <button
-                                        onClick={onResetAll}
-                                        className="w-full rounded-xl border px-2 py-3 text-[12px] font-medium transition-all hover:bg-black/5 hover:text-black text-black/60 border-transparent bg-transparent"
-                                    >
-                                        Reset All
-                                    </button>
-                                </div>
-
-                                <div className="p-3 w-full flex flex-col gap-2 border-t border-black/5">
-                                    <button className="w-full rounded-xl bg-black/5 hover:bg-black/10 text-black/70 font-medium py-3 text-xs transition-colors border border-black/5">
-                                        Cart
-                                    </button>
-                                    <div className="w-full text-center text-[10px] text-black/20 pb-1">© 2025</div>
-                                </div>
-                            </div>
+            <div className="w-full flex flex-col md:flex-row min-h-screen bg-[#fafafa]">
+                {/* Left rail (Sticky) */}
+                <aside
+                    className="hidden md:flex flex-col w-[var(--rail-w)] shrink-0 border-r border-black/5 bg-[#fafafa] z-40"
+                    style={{
+                        position: "sticky",
+                        top: "var(--top-h)",
+                        height: "calc(100vh - var(--top-h))"
+                    }}
+                >
+                    <div className="flex-1 overflow-y-auto no-scrollbar py-6 px-3 flex flex-col items-center gap-2">
+                        <div className="text-[10px] text-black/40 font-bold tracking-widest mb-4 w-full text-center">
+                            FILTERS
                         </div>
-                    </aside>
 
-                    <div className="min-w-0">{children}</div>
+                        {filterGroups.map((group) => {
+                            const selectedCount = activeFilters[group.label]?.length || 0
+                            const isAnyOptionActive = selectedCount > 0
+
+                            return (
+                                <FilterItem
+                                    key={group.label}
+                                    group={group}
+                                    isActive={isAnyOptionActive}
+                                    selectedCount={selectedCount}
+                                    onHoverStart={(rect) => handleHoverStart(group.label, rect)}
+                                    onHoverEnd={handleHoverEnd}
+                                />
+                            )
+                        })}
+
+                        <div className="my-2 w-1/2 h-px bg-black/5 mx-auto" />
+
+                        <button
+                            onClick={onResetAll}
+                            className="w-full rounded-xl border px-2 py-3 text-[12px] font-medium transition-all hover:bg-black/5 hover:text-black text-black/60 border-transparent bg-transparent"
+                        >
+                            Reset All
+                        </button>
+                    </div>
+
+                    <div className="p-3 w-full flex flex-col gap-2 border-t border-black/5">
+                        <button className="w-full rounded-xl bg-black/5 hover:bg-black/10 text-black/70 font-medium py-3 text-xs transition-colors border border-black/5">
+                            Cart
+                        </button>
+                        <div className="w-full text-center text-[10px] text-black/20 pb-1">© 2025</div>
+                    </div>
+                </aside>
+
+                <div className="flex-1 min-w-0 bg-white flex flex-col">
+                    {children}
                 </div>
             </div>
 

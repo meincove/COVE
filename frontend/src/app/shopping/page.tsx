@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from "react"
 import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
 import HeroScanner from "@/src/components/shopping/HeroScanner"
-import CatalogSection from "@/src/components/shopping/CatalogSection"
-import CatalogBrowseModal from "@/src/components/shopping/CatalogBrowseModal"
 import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
 import { useBrowseModal } from "@/src/hooks/useBrowseModal"
+import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
+import CarouselStage from "@/src/components/Catalog/CarouselStage"
+import CategoryBanner from "@/src/components/shopping/CategoryBanner"
 
 type ApiImage = { image_name?: string; url?: string }
 type ApiVariant = { variant_id?: string; images?: ApiImage[] }
@@ -181,6 +182,15 @@ export default function ShoppingPage() {
         return base.filter((p) => (p.type ?? "").toLowerCase().includes(heroType.toLowerCase()))
     }, [allProducts, activeFilters, searchValue, heroType])
 
+    // Base filter logic (already implemented previously)
+    const bestSellers = useMemo(() => {
+        // Take items with "NEW" badge or just the first 15 items as "Curated"
+        const top = allProducts.filter(p => p.badge === "NEW").slice(0, 15)
+        return top.length > 5 ? top : allProducts.slice(0, 15)
+    }, [allProducts])
+
+    const carouselCards = useMemo(() => bestSellers.map(uiProductToCatalogCard), [bestSellers])
+
     return (
         <>
             <LshapedNavbar
@@ -195,38 +205,92 @@ export default function ShoppingPage() {
                         products={heroProducts}
                         heightVh={70}
                         minHeight={600}
-                    // splineSrc="https://my.spline.design/particlesmoment-kW3xvVny6weThXJ3vbs2M2bB/"
                     />
                 }
             >
-                <div className="relative">
-                    <div className="px-4 md:px-6 py-6 space-y-8">
-                        <div>
-                            <div className="text-lg font-semibold text-black/85">Browse</div>
-                            <div className="text-xs text-black/45">Curated shelves (fast) → open “Show more” for full inventory</div>
-                        </div>
+                <div className="relative pb-32">
+                    {/* Iterate over each Type Section to create the "Editorial" layout */}
+                    {TYPE_SECTIONS.map((section, index) => {
+                        // Filter products for this section (limit to e.g. 15 for the carousel)
+                        const sectionProducts = allProducts
+                            .filter(p => (p.type ?? "").toLowerCase().includes(section.type))
+                            .slice(0, 15)
 
-                        {sections.map((s) => (
-                            <div key={s.type} className="space-y-3">
-                                <CatalogSection title={s.title.toLowerCase()} items={s.items} />
-                                <div className="flex justify-end">
-                                    <button
-                                        onClick={() => openBrowse(s.type)}
-                                        className="rounded-full bg-black text-white px-4 py-2 text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition"
-                                    >
-                                        Show more
-                                    </button>
+                        if (sectionProducts.length === 0) return null
+
+                        // Convert to Carousel Cards
+                        const cards = sectionProducts.map(uiProductToCatalogCard)
+
+                        // Placeholder Image logic (use first product image or fallback)
+                        const bannerImg = sectionProducts[0]?.imageSrc || FALLBACK_IMG
+
+                        return (
+                            <div key={section.type} className="mb-12 border-b border-black/5 pb-12 last:border-0">
+                                {/* Row 1: Intro Text (35%) + Banner (65%) -> Compact Height */}
+                                <div className="flex flex-col md:flex-row h-[320px] md:h-[35vh] min-h-[300px] w-full mb-6">
+                                    {/* Text Area (35%) */}
+                                    <div className="w-full md:w-[35%] bg-gray-50 flex flex-col justify-center px-6 md:px-10 py-8 border-r border-black/5 relative group">
+                                        <div className="text-xs font-bold tracking-widest text-black/40 mb-3 uppercase">
+                                            Collection 0{index + 1}
+                                        </div>
+                                        <h2 className="text-3xl md:text-4xl font-black text-black mb-3 uppercase tracking-tighter">
+                                            {section.title}
+                                        </h2>
+                                        <p className="text-sm text-black/60 leading-relaxed max-w-sm mb-6 line-clamp-3">
+                                            Explore our premium range of {section.title.toLowerCase()}s.
+                                            Crafted for style and comfort.
+                                        </p>
+
+                                        {/* CTA Button Moved Here */}
+                                        <div>
+                                            <a
+                                                href={`/shopping/${section.type}`}
+                                                className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-semibold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/20"
+                                            >
+                                                Explore {section.title}
+                                                <span>→</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    {/* Banner Image (65%) with Animated Brands */}
+                                    <div className="w-full md:w-[65%] relative overflow-hidden rounded-r-3xl">
+                                        <CategoryBanner
+                                            title={section.title}
+                                            imageSrc={bannerImg}
+                                            products={sectionProducts}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Row 2: 3D Carousel (Compact) */}
+                                <div className="w-full overflow-hidden px-2 md:px-6">
+                                    <div className="relative w-full scale-90 origin-top">
+                                        <CarouselStage
+                                            cards={cards}
+                                            sectionKey={`stage-${section.type}`}
+                                            tierLabel={section.title}
+                                            isFilterOpen={false}
+                                            filtersForTier={{}}
+                                            availableTypes={[]}
+                                            availableFits={[]}
+                                            availableMaterials={[]}
+                                            onTypeChange={() => { }}
+                                            onFitChange={() => { }}
+                                            onMaterialChange={() => { }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )
+                    })}
                 </div>
             </LshapedNavbar>
-
-            <CatalogBrowseModal open={open} type={type} items={modalItems} onClose={closeBrowse} />
         </>
     )
 }
+// Removed CatalogBrowseModal import usage
+// Removed CatalogSection usage
 
 
 
