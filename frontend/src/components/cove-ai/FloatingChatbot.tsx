@@ -156,29 +156,6 @@ export default function FloatingChatbot() {
                 budgetMax={500}
             />
 
-            {/* Floating Chat Button - Clean Minimal Design */}
-            {/* Round 4: Hide Launcher when Open (unless Minimized, but Minimized shows Pill, so Launcher usually hidden if interaction active) */}
-            {/* User said: "minimize... gone but Floating pill will become placeholder... Close icon should close... reappear" */}
-            {(!isOpen) && (
-                <button
-                    onClick={toggleChat}
-                    className="fixed bottom-6 right-6 z-[999] group"
-                    aria-label="Open Bubbles"
-                >
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="h-14 w-14 rounded-full bg-black shadow-lg flex items-center justify-center"
-                    >
-                        {isOpen ? (
-                            <X className="h-6 w-6 text-white" />
-                        ) : (
-                            <MessageCircle className="h-6 w-6 text-white" />
-                        )}
-                    </motion.div>
-                </button>
-            )}
-
             {/* Chat Window - Clean White Design */}
             <AnimatePresence>
                 {isOpen && (
@@ -193,27 +170,31 @@ export default function FloatingChatbot() {
                         />
 
                         {/* Main Chat Container */}
-                        {/* Main Chat Container */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{
-                                opacity: 1,
-                                scale: 1,
-                                y: 0,
-                                height: isMinimized ? 'auto' : undefined,
-                                width: isMinimized ? 'auto' : undefined
-                            }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className={`fixed z-[999] bottom-6 right-6 ${isMinimized ? 'bg-transparent shadow-none' : 'w-[90vw] md:w-[380px] h-[75vh] md:h-[750px] max-h-[900px] max-w-[380px] rounded-2xl bg-neutral-100 shadow-2xl border border-gray-200'} overflow-hidden flex flex-col`}
-                        >
-                            {/* Round 4: Minimized View (Click to Restore) */}
+                        <AnimatePresence mode="wait">
                             {isMinimized ? (
-                                <div onClickCapture={() => setIsMinimized(false)} className="cursor-pointer">
-                                    <BubblesStatusPill isThinking={isThinking} thinkingSteps={thinkingSteps} />
-                                </div>
+                                <motion.div
+                                    key="minimized-pill"
+                                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="fixed z-[999] bottom-6 right-6 cursor-pointer"
+                                    onClick={() => setIsMinimized(false)}
+                                >
+                                    <BubblesStatusPill
+                                        isThinking={isThinking}
+                                        thinkingSteps={thinkingSteps}
+                                    />
+                                </motion.div>
                             ) : (
-                                <>
+                                <motion.div
+                                    key="full-chat"
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className="fixed z-[999] bottom-6 right-6 w-[90vw] md:w-[380px] h-[75vh] md:h-[750px] max-h-[900px] max-w-[380px] rounded-2xl bg-neutral-100 shadow-2xl border border-gray-200 overflow-hidden flex flex-col"
+                                >
                                     {/* Header - Minimal Top Bar - above blur */}
                                     <div className="h-11 flex items-center justify-between px-4 relative z-50 shrink-0 bg-transparent">
                                         <div className="flex items-center">
@@ -224,17 +205,9 @@ export default function FloatingChatbot() {
                                         </div>
 
                                         <div className="flex items-center gap-0.5">
-                                            {/* Minimize - Darker */}
+                                            {/* Close/Minimize - Both now reduce to pill */}
                                             <button
                                                 onClick={() => setIsMinimized(true)}
-                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
-                                                title="Minimize"
-                                            >
-                                                <Minus className="h-4 w-4" strokeWidth={2} />
-                                            </button>
-                                            {/* Close - Darker */}
-                                            <button
-                                                onClick={toggleChat}
                                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
                                                 title="Close"
                                             >
@@ -247,6 +220,7 @@ export default function FloatingChatbot() {
                                     <div className="absolute top-12 left-0 right-0 z-50 flex justify-center pointer-events-none">
                                         <div className="pointer-events-auto">
                                             <BubblesStatusPill
+                                                className="-mt-4"
                                                 isThinking={isThinking}
                                                 thinkingSteps={thinkingSteps}
                                             />
@@ -429,12 +403,13 @@ export default function FloatingChatbot() {
                                             Powered by <span className="text-gray-600 font-medium">🫧 CoveAI</span>
                                         </span>
                                     </div>
-                                </>
-                            )}
-                        </motion.div>
+                                </motion.div >
+                            )
+                            }
+                        </AnimatePresence >
                     </>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
         </>
     );
 }

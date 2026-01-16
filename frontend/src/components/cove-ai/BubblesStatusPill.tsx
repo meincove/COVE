@@ -40,7 +40,7 @@ export default function BubblesStatusPill({
         <div className={`flex justify-center ${className}`}>
             <motion.div
                 layout="position"
-                className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden relative z-50 -mt-4 w-[150px]"
+                className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden relative z-50 w-[150px]"
                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
