@@ -8,6 +8,13 @@ export type ThinkingStep = {
     done?: boolean;
 };
 
+export type QuestionOptions = {
+    input_type: 'budget_range' | 'style' | 'occasion' | 'text';
+    options: Array<{ label: string; value: string; icon?: string; min?: number; max?: number }>;
+    allow_custom: boolean;
+    slider_config?: { min: number; max: number; step: number; currency: string };
+};
+
 export type StreamState = {
     thinkingSteps: ThinkingStep[];
     introText: string;
@@ -25,6 +32,8 @@ export type StreamState = {
     tools_used: any[] | null;
     // ✨ PHASE 6: Live product exploration events
     agenticEvents: any[];
+    // Interactive question options for conversation flow
+    questionOptions: QuestionOptions | null;
 };
 
 export function useAgentStream() {
@@ -42,6 +51,7 @@ export function useAgentStream() {
         thinking_events: null,
         tools_used: null,
         agenticEvents: [],  // ✨ PHASE 6: Live exploration
+        questionOptions: null,  // Interactive question options
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -75,6 +85,7 @@ export function useAgentStream() {
             thinking_events: null,
             tools_used: null,
             agenticEvents: [],  // ✨ PHASE 6
+            questionOptions: null,
         });
 
         try {
@@ -200,6 +211,8 @@ export function useAgentStream() {
                     ...prev,
                     answer: data.text || '',
                     introText: data.text || '',
+                    // Include question options for interactive UI
+                    questionOptions: data.question_options || null,
                 }));
                 break;
 

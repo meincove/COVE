@@ -2,7 +2,6 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ThumbsUp, ThumbsDown, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ThinkingStep {
@@ -23,17 +22,16 @@ export default function BubblesStatusPill({
     thinkingSteps = [],
     className = "",
 }: BubblesStatusPillProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [showSteps, setShowSteps] = useState(false);
 
-    // Auto-expand/collapse based on thinking state
+    // Auto-expand to show steps when thinking
     useEffect(() => {
-        if (isThinking) {
-            setIsExpanded(true);
+        if (isThinking && thinkingSteps.length > 0) {
+            setShowSteps(true);
         } else {
-            // Collapse when done, user can click to expand for feedback
-            setIsExpanded(false);
+            setShowSteps(false);
         }
-    }, [isThinking]);
+    }, [isThinking, thinkingSteps.length]);
 
     // Limit to last 2 steps for cleaner UI
     const visibleSteps = thinkingSteps.slice(-2);
@@ -42,103 +40,78 @@ export default function BubblesStatusPill({
         <div className={`flex justify-center ${className}`}>
             <motion.div
                 layout
-                onClick={() => !isThinking && setIsExpanded(!isExpanded)}
-                className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden cursor-pointer transition-shadow hover:shadow-xl relative z-50`}
+                className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden relative z-50 -mt-2"
                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
-                {/* Main Pill Content - Compact Design */}
+                {/* Main Pill Content */}
                 <motion.div layout className="px-3 py-2 flex items-center gap-2.5">
-                    {/* Logo - Smaller */}
-                    <div className="h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <span className="text-white font-bold text-xs">B</span>
+                    {/* Logo - Black circular icon with B letter + green dot */}
+                    <div className="relative">
+                        <div className="h-7 w-7 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-sm font-bold">B</span>
+                        </div>
+                        {/* Green active dot - overlay on icon when thinking */}
+                        <AnimatePresence>
+                            {isThinking && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0 }}
+                                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-[1.5px] border-white animate-pulse"
+                                />
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     {/* Name & Status */}
-                    <div className="flex flex-col min-w-[80px]">
-                        <span className="font-semibold text-gray-900 text-xs">Bubbles</span>
-                        {isThinking ? (
-                            <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-[10px] text-gray-500 font-medium"
-                            >
-                                Thinking...
-                            </motion.span>
-                        ) : (
-                            <span className="text-[10px] text-gray-400">
-                                {isExpanded ? "Rate response" : "Click to rate"}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Chevron or Feedback Actions */}
-                    <div className="ml-1 flex items-center">
-                        <AnimatePresence mode="popLayout">
-                            {!isThinking && isExpanded && (
-                                <motion.div
-                                    initial={{ opacity: 0, width: 0 }}
-                                    animate={{ opacity: 1, width: 'auto' }}
-                                    exit={{ opacity: 0, width: 0 }}
-                                    className="flex items-center gap-1 overflow-hidden"
+                    <div className="flex flex-col min-w-[70px]">
+                        <span className="font-bold text-gray-900 text-sm tracking-tight">Bubbles</span>
+                        <AnimatePresence mode="wait">
+                            {isThinking && (
+                                <motion.span
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -5 }}
+                                    className="text-[10px] text-gray-500 font-medium"
                                 >
-                                    <motion.button
-                                        initial={{ x: 20, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        transition={{ delay: 0.1, type: "spring" }}
-                                        className="p-1.5 rounded-full hover:bg-green-50 text-gray-400 hover:text-green-600 transition-colors"
-                                        onClick={(e) => { e.stopPropagation(); /* Handle like */ }}
-                                    >
-                                        <ThumbsUp className="h-3.5 w-3.5" />
-                                    </motion.button>
-                                    <motion.button
-                                        initial={{ x: 20, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        transition={{ delay: 0.2, type: "spring" }}
-                                        className="p-1.5 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
-                                        onClick={(e) => { e.stopPropagation(); /* Handle dislike */ }}
-                                    >
-                                        <ThumbsDown className="h-3.5 w-3.5" />
-                                    </motion.button>
-                                </motion.div>
+                                    Thinking...
+                                </motion.span>
                             )}
                         </AnimatePresence>
                     </div>
                 </motion.div>
 
-                {/* Thinking Steps - Scrolling Animation */}
+                {/* Thinking Steps - Expandable section */}
                 <AnimatePresence>
-                    {isThinking && thinkingSteps.length > 0 && (
+                    {showSteps && visibleSteps.length > 0 && (
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="bg-gray-50/50 backdrop-blur-[2px]"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="bg-gray-50/50 backdrop-blur-[2px] overflow-hidden"
                         >
                             <div className="px-3 pb-2 pt-1 border-t border-gray-100 max-h-[60px] overflow-hidden relative">
                                 {/* Gradient Masks for blur effect */}
-                                <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-b from-white/80 to-transparent z-10 pointer-events-none" />
-                                <div className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-t from-white/80 to-transparent z-10 pointer-events-none" />
+                                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-b from-white/60 to-transparent z-10 pointer-events-none" />
+                                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-t from-white/60 to-transparent z-10 pointer-events-none" />
 
-                                <motion.div
-                                    className="flex flex-col justify-end"
-                                    layout
-                                >
+                                <motion.div className="flex flex-col justify-end" layout>
                                     <AnimatePresence mode="popLayout" initial={false}>
-                                        {visibleSteps.map((step) => (
+                                        {visibleSteps.map((step, idx) => (
                                             <motion.div
-                                                key={step.icon + step.status} // Unique key for animation
+                                                key={step.icon + step.status + idx}
                                                 layout
                                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: -10, scale: 0.95, position: "absolute" }} // Absolute exit to prevent jumping
+                                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                                 className="flex items-center gap-2 py-0.5"
                                             >
                                                 <span className="text-xs">{step.icon}</span>
-                                                <span className="text-[10px] text-gray-600 font-medium truncate max-w-[140px]">
+                                                <span className="text-[10px] text-gray-600 font-medium truncate max-w-[160px]">
                                                     {step.status}
                                                 </span>
                                                 <div className="ml-auto">
@@ -146,7 +119,7 @@ export default function BubblesStatusPill({
                                                         <motion.div
                                                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
                                                             transition={{ duration: 1.5, repeat: Infinity }}
-                                                            className="h-1.5 w-1.5 rounded-full bg-green-500"
+                                                            className="h-1.5 w-1.5 rounded-full bg-emerald-500"
                                                         />
                                                     ) : (
                                                         <motion.div

@@ -205,7 +205,7 @@ export default function FloatingChatbot() {
                             }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
-                            className={`fixed z-[999] bottom-6 right-6 ${isMinimized ? 'bg-transparent shadow-none' : 'w-[90vw] md:w-[380px] h-[60vh] md:h-[600px] max-h-[850px] max-w-[380px] rounded-2xl bg-white shadow-2xl border border-gray-200'} overflow-hidden flex flex-col`}
+                            className={`fixed z-[999] bottom-6 right-6 ${isMinimized ? 'bg-transparent shadow-none' : 'w-[90vw] md:w-[380px] h-[75vh] md:h-[750px] max-h-[900px] max-w-[380px] rounded-2xl bg-neutral-100 shadow-2xl border border-gray-200'} overflow-hidden flex flex-col`}
                         >
                             {/* Round 4: Minimized View (Click to Restore) */}
                             {isMinimized ? (
@@ -214,36 +214,31 @@ export default function FloatingChatbot() {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Header - Custom Top Bar with blur */}
-                                    <div className="bg-gray-50/80 backdrop-blur-sm h-10 border-b border-gray-100/50 flex items-center justify-between px-3 relative z-10 shrink-0">
-                                        <div className="flex items-center gap-2">
-                                            {/* Back Arrow (Visual only or maybe back to home?) */}
-                                            <button className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600">
-                                                <ArrowLeft className="h-4 w-4" />
+                                    {/* Header - Minimal Top Bar - above blur */}
+                                    <div className="h-11 flex items-center justify-between px-4 relative z-50 shrink-0 bg-transparent">
+                                        <div className="flex items-center">
+                                            {/* Back Arrow - Darker, bolder */}
+                                            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-800 hover:text-black">
+                                                <ArrowLeft className="h-5 w-5" strokeWidth={2} />
                                             </button>
                                         </div>
 
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => chatWidgetRef.current?.clearChat()}
-                                                className="p-1.5 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors text-gray-400"
-                                                title="Clear Chat"
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </button>
+                                        <div className="flex items-center gap-0.5">
+                                            {/* Minimize - Darker */}
                                             <button
                                                 onClick={() => setIsMinimized(true)}
-                                                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
                                                 title="Minimize"
                                             >
-                                                <Minus className="h-3.5 w-3.5" />
+                                                <Minus className="h-4 w-4" strokeWidth={2} />
                                             </button>
+                                            {/* Close - Darker */}
                                             <button
                                                 onClick={toggleChat}
-                                                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
                                                 title="Close"
                                             >
-                                                <X className="h-4 w-4" />
+                                                <X className="h-4 w-4" strokeWidth={2} />
                                             </button>
                                         </div>
                                     </div>
@@ -258,8 +253,17 @@ export default function FloatingChatbot() {
                                         </div>
                                     </div>
 
+                                    {/* Neutral gradient fade zone from top - darker toned */}
+                                    <div
+                                        className="absolute top-0 left-0 right-0 h-20 z-30 pointer-events-none"
+                                        style={{
+                                            background: 'linear-gradient(to bottom, rgba(235,235,235,1) 0%, rgba(240,240,240,0.95) 40%, rgba(245,245,245,0.7) 70%, rgba(245,245,245,0) 100%)',
+                                            backdropFilter: 'blur(4px)'
+                                        }}
+                                    />
+
                                     {/* Chat Content */}
-                                    <div className="flex-1 min-h-0 overflow-hidden pt-2">
+                                    <div className="flex-1 min-h-0 overflow-hidden">
                                         <div className={activeView === 'cart' ? 'hidden' : 'h-full'}>
                                             <CoveChatWidget
                                                 ref={chatWidgetRef}
@@ -313,8 +317,8 @@ export default function FloatingChatbot() {
                                         )}
                                     </AnimatePresence>
 
-                                    {/* Input Area */}
-                                    <form onSubmit={handleSubmit} className="border-t border-gray-100 px-4 py-3">
+                                    {/* Input Area - Gray background, no border */}
+                                    <form onSubmit={handleSubmit} className="px-4 py-3 bg-neutral-100">
                                         <motion.div
                                             className={`flex items-center gap-2 rounded-full px-4 py-2 border-2 transition-colors ${isFocused
                                                 ? 'bg-white border-green-400 shadow-sm'
@@ -389,8 +393,8 @@ export default function FloatingChatbot() {
                                         </motion.div>
                                     </form>
 
-                                    {/* View Mode Tabs - Bottom Pills */}
-                                    <div className="border-t border-gray-100 px-4 py-2">
+                                    {/* View Mode Tabs - Bottom Pills - Gray bg */}
+                                    <div className="px-4 py-2 bg-neutral-100">
                                         <div className="flex justify-center gap-2">
                                             {[
                                                 { id: 'chat', label: 'Chat', icon: MessageCircle },
@@ -419,8 +423,8 @@ export default function FloatingChatbot() {
                                         </div>
                                     </div>
 
-                                    {/* Footer Branding */}
-                                    <div className="border-t border-gray-100 py-2 px-4 text-center">
+                                    {/* Footer Branding - White bg with top border */}
+                                    <div className="border-t border-gray-200 py-2 px-4 text-center bg-white">
                                         <span className="text-xs text-gray-400">
                                             Powered by <span className="text-gray-600 font-medium">🫧 CoveAI</span>
                                         </span>

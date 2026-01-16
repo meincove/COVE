@@ -289,11 +289,26 @@ Return valid JSON. Use null for values not found."""},
 
 
     
-    def _format_question(self, step: Dict[str, Any]) -> str:
-        """Format question with examples."""
+    def _format_question(self, step: Dict[str, Any]) -> Union[str, Dict[str, Any]]:
+        """Format question with structured options for interactive UI."""
         question = step.get("question", "")
-        examples = step.get("examples", [])
+        input_type = step.get("input_type", "text")
+        options = step.get("options", [])
+        allow_custom = step.get("allow_custom", True)
+        slider_config = step.get("slider_config")
         
+        # If step has interactive options, return structured data
+        if options or input_type != "text":
+            return {
+                "text": question,
+                "input_type": input_type,
+                "options": options,
+                "allow_custom": allow_custom,
+                "slider_config": slider_config
+            }
+        
+        # Fallback to simple text with examples (legacy behavior)
+        examples = step.get("examples", [])
         if examples:
             examples_text = ", ".join(f'"{ex}"' for ex in examples[:3])
             question += f"\n\n(e.g., {examples_text})"

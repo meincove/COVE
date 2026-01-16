@@ -135,6 +135,8 @@ class AgentOut(BaseModel):
     thinking_events: Optional[List[Dict[str, Any]]] = None  # Detailed AI reasoning steps
     tools_used: Optional[List[Dict[str, Any]]] = None  # Tools called with duration/results
     suggestions: Optional[List[str]] = None  # NEW: Drive Forward suggestions (follow-ups)
+    # Interactive question options for conversation flow
+    question_options: Optional[Dict[str, Any]] = None  # {input_type, options, allow_custom, slider_config}
 
 
 class AgentCartAddIn(BaseModel):

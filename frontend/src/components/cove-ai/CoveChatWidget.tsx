@@ -43,6 +43,7 @@ import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/Typin
 import ThinkingSteps from "@/src/components/cove-ai/ThinkingSteps";
 import EnhancedThinking from "@/src/components/cove-ai/EnhancedThinking";  // Phase 1
 import PersonalizedGreeting from "@/src/components/cove-ai/PersonalizedGreeting";
+import InteractiveQuestionOptions from "@/src/components/cove-ai/InteractiveQuestionOptions";
 import { useLayoutStore } from "@/src/store/layoutStore";
 
 // ---------- TYPES ----------
@@ -199,6 +200,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     thinking_events: streamThinkingEvents,
     tools_used: streamToolsUsed,
     agenticEvents,  // ✨ PHASE 6: Live product exploration
+    questionOptions,  // Interactive question options for conversation flow
   } = useAgentStream();
 
   // Phase 3: Layout Store integration for Virtual Trial Room
@@ -1052,8 +1054,9 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
 
   return (
     <div className="flex flex-col h-full bg-white overflow-hidden">
-      {/* Messages list */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50">
+      {/* Messages list - Muted neutral background, hidden scrollbar */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-16 pb-4 space-y-4 bg-neutral-100/80 scrollbar-hide">
+
         {/* Personalized Greeting - Mode-specific */}
         {messages.length === 0 && !isStreamingProgress && (
           mode === 'outfit_builder' ? (
@@ -1114,11 +1117,18 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
           return (
             <div
               key={m.id}
-              className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-300`}
+              className={`flex ${isUser ? "flex-col items-end" : "items-start gap-2"} animate-in fade-in slide-in-from-bottom-4 duration-300`}
             >
+              {/* Bot Avatar - Left side, top aligned, smaller */}
+              {!isUser && (
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center mt-1">
+                  <span className="text-white text-[10px] font-bold">B</span>
+                </div>
+              )}
+
               <div
-                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed overflow-hidden ${isUser
-                  ? "bg-gray-800 text-white font-medium"
+                className={`max-w-[75%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed overflow-hidden ${isUser
+                  ? "bg-gray-900 text-white font-medium shadow-md"
                   : "bg-white border border-gray-200 shadow-sm text-gray-700"
                   }`}
               >
@@ -1243,31 +1253,91 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
                   />
                 )}
               </div>
+
+              {/* Message Status - only for user messages */}
+              {isUser && (() => {
+                const msgIndex = messages.findIndex(msg => msg.id === m.id);
+                const hasNextBotMessage = messages.slice(msgIndex + 1).some(msg => msg.role === 'assistant');
+                const isLastMessage = msgIndex === messages.length - 1;
+                const showRead = hasNextBotMessage || (isLastMessage && isStreamingProgress);
+                // Generate timestamp for status
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+                return (
+                  <span className="text-[10px] text-gray-400 mt-0.5 mr-1">
+                    {showRead ? 'Read' : 'Delivered'} · {timeStr}
+                  </span>
+                );
+              })()}
             </div>
           );
         })}
 
         {/* Welcome suggestions removed - PersonalizedGreeting handles the empty state */}
 
+        {/* Generic Query Thinking Indicator - shows spinning icon when not an outfit query */}
+        {isStreamingProgress && agenticEvents.length === 0 && mode !== 'outfit_builder' && (
+          <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-3 flex items-center gap-2.5">
+              {/* Spinning Icon */}
+              <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              <span className="text-sm text-gray-500 font-medium">Thinking...</span>
+            </div>
+          </div>
+        )}
+
         {/* Round 3: Skeleton hidden as thinking is in pill */}
         {/* {loading && thinkingSteps.length === 0 && <LoadingSkeleton />} */}
 
+        {/* Interactive Question Options for Conversation Flow */}
+        {!isStreamingProgress && questionOptions && questionOptions.options && questionOptions.options.length > 0 && (
+          <div className="px-3 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <InteractiveQuestionOptions
+              inputType={questionOptions.input_type}
+              options={questionOptions.options}
+              allowCustom={questionOptions.allow_custom}
+              sliderConfig={questionOptions.slider_config}
+              onSelect={(value) => {
+                // Auto-send the selected value
+                setInput(value);
+                setTimeout(() => {
+                  const form = document.querySelector('form') as HTMLFormElement;
+                  form?.requestSubmit();
+                }, 50);
+              }}
+              onFocusInput={() => {
+                // Focus the main input field for custom typing
+                // Use setTimeout to ensure the DOM is ready
+                setTimeout(() => {
+                  const inputEl = document.querySelector('input[type="text"][placeholder="Write a message..."]') as HTMLInputElement;
+                  if (inputEl) {
+                    inputEl.focus();
+                    inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }, 100);
+              }}
+              disabled={loading}
+            />
+          </div>
+        )}
+
         {/* ✨ PHASE 6: Live Product Exploration during outfit building */}
-        {/* Render if we have active events OR if we have persistent outfit data in store */}
-        {(agenticEvents.length > 0 || Object.keys(useOutfitStore.getState().categories).length > 0) && (
+        {/* Only show this block when we have active outfit events (not leftover from previous query) */}
+        {/* For generic queries, the pill shows "Thinking..." - this block is outfit-specific */}
+        {(mode === 'outfit_builder' || agenticEvents.length > 0) && (
           <div className="px-3 mb-4">
             {mode === 'outfit_builder' ? (
               <AgenticOutfitBuilder
                 streamEvents={agenticEvents}
                 isActive={true}
               />
-            ) : isStreamingProgress ? (
-              /* While streaming - show progress indicator */
+            ) : isStreamingProgress && agenticEvents.length > 0 ? (
+              /* Only show "Building outfit" when we have CURRENT agentic events during streaming */
               <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-sm text-gray-600">Building your outfit...</span>
               </div>
-            ) : agenticEvents.length > 0 ? (
+            ) : !isStreamingProgress && agenticEvents.length > 0 ? (
               /* Done streaming - show "Outfit Ready" notification */
               <button
                 onClick={() => {
