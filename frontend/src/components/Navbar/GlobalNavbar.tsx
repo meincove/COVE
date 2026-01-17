@@ -116,11 +116,11 @@ export default function GlobalNavbar() {
                     {/* --- TOP BAR ROW --- */}
                     <motion.div
                         layout
-                        className="absolute top-0 left-0 right-0 h-[64px] grid grid-cols-[1fr_auto_1fr] items-center px-4 md:px-6 z-20"
+                        className="absolute top-0 left-0 right-0 h-[64px] grid grid-cols-[auto_1fr_auto] items-center px-4 md:px-6 z-20"
                     >
 
                         {/* LEFT: Branding + Buttons */}
-                        <div className="flex items-center gap-2 justify-start">
+                        <div className="flex items-center gap-2 justify-start shrink-0">
                             <motion.button
                                 layout
                                 onClick={() => router.push("/")}
@@ -129,32 +129,48 @@ export default function GlobalNavbar() {
                                 Cove
                             </motion.button>
 
-                            {/* Catalog Button */}
-                            <TextButton
-                                active={menuState === "catalog"}
-                                onClick={() => toggleState("catalog")}
-                                label="Catalog"
-                                icon={<Layers size={14} />}
-                            />
+                            {/* Catalog Button - Hide when Search Expanding */}
+                            <AnimatePresence>
+                                {menuState !== "search" && (
+                                    <motion.div
+                                        initial={{ opacity: 0, width: 0 }}
+                                        animate={{ opacity: 1, width: "auto" }}
+                                        exit={{ opacity: 0, width: 0 }}
+                                        className="overflow-hidden flex"
+                                    >
+                                        <TextButton
+                                            active={menuState === "catalog"}
+                                            onClick={() => toggleState("catalog")}
+                                            label="Catalog"
+                                            icon={<Layers size={14} />}
+                                        />
 
-                            {/* Brands Button */}
-                            <TextButton
-                                active={menuState === "brands"}
-                                onClick={() => toggleState("brands")}
-                                label="Brands"
-                                icon={<Box size={14} />}
-                            />
+                                        <TextButton
+                                            active={menuState === "brands"}
+                                            onClick={() => toggleState("brands")}
+                                            label="Brands"
+                                            icon={<Box size={14} />}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
-                        {/* CENTER: Search (Strictly Centered) */}
-                        <div className="w-[280px] md:w-[360px]">
+                        {/* CENTER: Search (Expands to fill space) */}
+                        <motion.div
+                            layout
+                            className={clsx(
+                                "transition-all duration-300 ease-spring",
+                                menuState === "search" ? "w-full pl-4" : "w-[280px] md:w-[360px]"
+                            )}
+                        >
                             <EnhancedSearchbar
                                 variant="pill"
                                 expanded={menuState === "search"}
                                 onExpand={() => setMenuState("search")}
                                 onCollapse={closeMenu}
                             />
-                        </div>
+                        </motion.div>
 
                         {/* RIGHT: Actions (No Brands Icon) */}
                         <div className="flex items-center gap-2 justify-end">
