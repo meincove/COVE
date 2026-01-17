@@ -7,6 +7,8 @@ import CarouselStage from "@/src/components/Catalog/CarouselStage"
 import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
 import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
 import HeroScanner from "@/src/components/shopping/HeroScanner"
+import CategoryBanner from "@/src/components/shopping/CategoryBanner"
+import ProductGridCard from "@/src/components/shopping/ProductGridCard"
 
 // --- Shared Types & Utils (duplicated from shopping/page.tsx for isolation) ---
 type ApiImage = { image_name?: string; url?: string }
@@ -153,6 +155,12 @@ export default function CategoryPage() {
         })
     }, [categoryProducts, activeFilters, searchValue])
 
+    // Memoize products to avoid re-layout
+    const products = useMemo(() => filteredProducts, [filteredProducts])
+
+    // Derive "Best Sellers" (for now, just the first 10 items)
+    const bestSellers = useMemo(() => products.slice(0, 10).map(uiProductToCatalogCard), [products])
+
     // --- Group by Brand for Carousels ---
     const brandsMap = useMemo(() => {
         const groups: Record<string, UiProduct[]> = {}
@@ -197,27 +205,11 @@ export default function CategoryPage() {
             onResetAll={onResetAll}
             // Optional: We can show a smaller hero or specific hero for the category
             hero={
-                <div className="w-full h-[40vh] min-h-[300px] relative bg-gray-100 overflow-hidden">
-                    {/* Reuse HeroScanner with filtered products? Or just a simple banner? 
-                        User wanted "seperate page... showing jackets using carousel".
-                        Maybe a focused scanner for that category? Let's use HeroScanner but smaller.
-                    */}
-                    <HeroScanner
-                        products={categoryProducts} // Only show products of this category in scanner
-                        heightVh={70}
-                        minHeight={600}
-                    />
-
-                    {/* Category Title Overlay */}
-                    <div className="absolute bottom-6 left-6 md:left-12 z-20 pointer-events-none">
-                        <h1 className="text-4xl md:text-6xl font-black text-black tracking-tight uppercase">
-                            {currentCategory}
-                        </h1>
-                        <p className="text-sm md:text-base text-black/60 font-medium mt-2">
-                            {filteredProducts.length} items found
-                        </p>
-                    </div>
-                </div>
+                <HeroScanner
+                    products={categoryProducts}
+                    heightVh={70}
+                    minHeight={600}
+                />
             }
         >
             <div className="relative pb-32">
@@ -230,44 +222,98 @@ export default function CategoryPage() {
                     </button>
                 </div>
 
-                {sortedBrands.length === 0 && (
-                    <div className="px-10 py-20 text-center text-black/40">
-                        No products found for this category.
-                    </div>
-                )}
+                <div className="relative pb-32">
+                    {/* 1. Editorial Section (Single View) */}
+                    <div className="mb-16 border-b border-black/5 pb-16">
+                        <div className="flex flex-col md:flex-row h-[320px] md:h-[35vh] min-h-[300px] w-full mb-6">
+                            {/* Text Area (CTA inside) */}
+                            <div className="w-full md:w-[35%] bg-gray-50 flex flex-col justify-center px-6 md:px-10 py-8 border-r border-black/5 relative">
+                                <div className="text-xs font-bold tracking-widest text-black/40 mb-3 uppercase">
+                                    {currentCategory} Collection
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-black text-black mb-3 uppercase tracking-tighter">
+                                    {currentCategory}
+                                </h2>
+                                <p className="text-sm text-black/60 leading-relaxed max-w-sm mb-6 line-clamp-3">
+                                    Curated selection of premium {currentCategory}s from top global brands.
+                                </p>
 
-                {sortedBrands.map(brandName => {
-                    const products = brandsMap[brandName]
-                    const cards = products.map(uiProductToCatalogCard)
-
-                    return (
-                        <div key={brandName} className="mb-20">
-                            {/* Brand Header */}
-                            <div className="px-6 md:px-10 mb-2 flex items-baseline gap-3">
-                                <h2 className="text-3xl font-bold text-black">{brandName}</h2>
-                                <span className="text-sm text-black/40 font-medium">{products.length} items</span>
+                                {/* "Scroll to Grid" Button */}
+                                <div>
+                                    <button
+                                        onClick={() => {
+                                            document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth' })
+                                        }}
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-semibold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/20"
+                                    >
+                                        View All {products.length} Items
+                                        <span>↓</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* 3D Carousel Stage */}
-                            <div className="w-full overflow-visible">
-                                <CarouselStage
-                                    cards={cards}
-                                    sectionKey={`brand-${brandName}`}
-                                    tierLabel={brandName}
-                                    isFilterOpen={false}
-                                    filtersForTier={{}}
-                                    availableTypes={[]}
-                                    availableFits={[]}
-                                    availableMaterials={[]}
-                                    onTypeChange={() => { }}
-                                    onFitChange={() => { }}
-                                    onMaterialChange={() => { }}
+                            {/* Banner Image with Brand Loop */}
+                            <div className="w-full md:w-[65%] relative overflow-hidden rounded-r-3xl">
+                                <CategoryBanner
+                                    title={currentCategory}
+                                    imageSrc={products[0]?.imageSrc || FALLBACK_IMG}
+                                    products={products}
                                 />
                             </div>
                         </div>
-                    )
-                })}
+
+                        {/* 2. Best Sellers Carousel (Compact) */}
+                        {bestSellers.length > 0 && (
+                            <div className="w-full overflow-hidden px-2 md:px-6">
+                                <div className="mb-6 px-4">
+                                    <h3 className="text-lg font-bold text-black/80">Trending Now</h3>
+                                </div>
+                                <div className="relative w-full scale-90 origin-top-left">
+                                    <CarouselStage
+                                        cards={bestSellers}
+                                        sectionKey={`stage-${currentCategory}-best`}
+                                        tierLabel="Best Sellers"
+                                        isFilterOpen={false}
+                                        filtersForTier={{}}
+                                        availableTypes={[]}
+                                        availableFits={[]}
+                                        availableMaterials={[]}
+                                        onTypeChange={() => { }}
+                                        onFitChange={() => { }}
+                                        onMaterialChange={() => { }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 3. Product Grid (The Rest) */}
+                    <div id="product-grid" className="px-6 md:px-12 scroll-mt-24">
+                        <div className="mb-8 flex items-end justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-black mb-1">All {currentCategory}s</h2>
+                                <p className="text-sm text-black/40">{products.length} items available</p>
+                            </div>
+
+                            {/* Simple Quick Filters (Placeholder for Phase 3) */}
+                            <div className="flex gap-2">
+                                {['Price', 'Brand', 'Size'].map(f => (
+                                    <button key={f} className="px-4 py-2 rounded-full border border-black/10 text-xs font-medium hover:bg-black hover:text-white transition-colors">
+                                        {f} +
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+                            {products.map(p => (
+                                <ProductGridCard key={p.id} product={p} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
         </LshapedNavbar>
     )
 }
+

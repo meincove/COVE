@@ -3,12 +3,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Minus, Plus, Heart } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Minus, Plus, Heart, ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
 import { useCartStore } from '@/src/store/cartStore'
-import ProductDescription from '@/src/components/product/ProductDescription'
-import { trackAddToCart } from '@/src/utils/analytics' // Analytics tracking (Dec 8)
+import { trackAddToCart } from '@/src/utils/analytics'
 
 type Color = {
   colorName: string
@@ -36,10 +35,40 @@ type ProductConfiguratorProps = {
   initialQuantity?: number
 }
 
+// Simple Accordion for extra details
+function Accordion({ title, children }: { title: string, children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border-b border-black/10 last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between py-4 text-sm font-medium text-black hover:text-black/70 transition-colors"
+      >
+        {title}
+        <ChevronDown size={16} className={clsx("transition-transform", open && "rotate-180")} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pb-4 text-xs text-black/60 leading-relaxed">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export default function ProductConfigurator({
   sizes,
   colors,
-  defaultColor, // currently unused, but kept for future
+  defaultColor,
   variantId,
   selectedColorIndex,
   setSelectedColorIndex,
@@ -57,7 +86,6 @@ export default function ProductConfigurator({
     defaultSelectedSize ?? null
   )
   const [quantity, setQuantity] = useState<number>(initialQuantity)
-  const [showDetails, setShowDetails] = useState(false)
   const [liked, setLiked] = useState(false)
   const [stockAlert, setStockAlert] = useState('')
   const router = useRouter()
@@ -70,7 +98,6 @@ export default function ProductConfigurator({
     .getState()
     .isInCart(selectedColor.variantId, selectedSize ?? '')
 
-  // sync when external defaults change (e.g. navigated from catalog modal)
   useEffect(() => {
     if (defaultSelectedSize) {
       setSelectedSize(defaultSelectedSize)
@@ -113,7 +140,6 @@ export default function ProductConfigurator({
       material,
     })
 
-    // Track add to cart event
     trackAddToCart(selectedColor.variantId, {
       product_name: name,
       color: selectedColor.colorName,
@@ -158,196 +184,134 @@ export default function ProductConfigurator({
     selectedSize && stockLeft > 0 && stockLeft < 10
 
   return (
-    <>
-      <div className="h-[50vh] w-full bg-transparent text-black px-8 rounded-2xl lg:space-y-10 lg:space-x-30">
-        {/* Size Selection */}
-        <div className="space-y-4 pt-4">
-          <p className="text-sm uppercase text-gray-800 font-semibold tracking-widest">
-            Select Size
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {Object.entries(sizes).map(([size, stock]) => {
-              const isSelected = selectedSize === size
-              const isOut = stock <= 0
-
-              return (
-                <button
-                  key={size}
-                  disabled={isOut}
-                  onClick={() => {
-                    if (isOut) return
-                    setSelectedSize(size)
-                    // when changing size, start from 0 again
-                    setQuantity(0)
-                    setStockAlert('')
-                  }}
-                  className={clsx(
-                    'px-4 py-2 rounded-full border-2 text-sm font-medium transition-all',
-                    isSelected
-                      ? 'bg-black text-white border-black'
-                      : 'border-gray-400 text-black hover:border-gray-800',
-                    isOut && 'opacity-40 cursor-not-allowed'
-                  )}
-                >
-                  {size}
-                </button>
-              )
-            })}
-          </div>
-          {fewPiecesLeft && (
-            <p className="text-sm text-red-600 font-medium">
-              ⚠️ Few pieces left
-            </p>
-          )}
-        </div>
-
-        {/* Color + Quantity + Cart */}
-        <div className="space-y-5">
-          <div className="space-y-5">
-            <p className="text-sm uppercase font-semibold text-gray-800 tracking-widest">
-              Select Color
-            </p>
-            <div className="flex gap-3">
-              {colors.map((color, i) => (
-                <button
-                  key={color.variantId || `color-${i}`}
-                  onClick={() => {
-                    setSelectedColorIndex(i)
-                    setStockAlert('')
-                  }}
-                  className={clsx(
-                    'p-[2px] rounded-full transition-all duration-150',
-                    selectedColorIndex === i
-                      ? 'border-2 border-black'
-                      : 'border-2 border-transparent hover:border-black'
-                  )}
-                  aria-label={color.colorName}
-                >
-                  <div
-                    className="w-7 h-7 rounded-full"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Quantity & Add to Cart */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pt-4">
-            <div className="flex items-center border border-gray-500 rounded-full overflow-hidden">
-              <button
-                className="px-2 py-4 text-black hover:bg-black/10"
-                onClick={decQuantity}
-              >
-                <Minus size={16} />
-              </button>
-              <span className="w-10 text-center font-medium">
-                {quantity}
-              </span>
-              <button
-                className="px-2 py-4 text-black hover:bg-black/10"
-                onClick={incQuantity}
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-
-            {/* Cart Button */}
-            <div className="flex items-center gap-4 flex-1">
-              {!isCurrentItemInCart ? (
-                <motion.button
-                  initial={{ opacity: 0.3, scale: 0.98 }}
-                  animate={{
-                    opacity:
-                      selectedSize && quantity > 0 ? 1 : 0.3,
-                    scale:
-                      selectedSize && quantity > 0 ? 1 : 0.98,
-                  }}
-                  whileTap={{ scale: 0.96 }}
-                  disabled={!selectedSize || quantity <= 0}
-                  onClick={handleAddToCart}
-                  className="flex-1 py-4 px-5 ml-2 bg-black text-white font-medium rounded-full disabled:cursor-not-allowed transition-all"
-                >
-                  Add to Cart
-                </motion.button>
-              ) : (
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => router.push('/checkoutpage')}
-                  className="flex-1 py-4 px-5 ml-2 bg-white text-black font-medium border border-black rounded-full transition-all"
-                >
-                  Go to Checkout
-                </motion.button>
+    <div className="w-full flex flex-col gap-8">
+      {/* Colors */}
+      <div className="space-y-4">
+        <p className="text-xs uppercase font-bold text-black/50 tracking-widest">
+          Available Colors
+        </p>
+        <div className="flex flex-wrap gap-3">
+          {colors.map((color, i) => (
+            <button
+              key={color.variantId || `color-${i}`}
+              onClick={() => {
+                setSelectedColorIndex(i)
+                setStockAlert('')
+              }}
+              className={clsx(
+                'p-1.5 rounded-full transition-all duration-200 hover:bg-black/5',
+                selectedColorIndex === i ? 'ring-1 ring-black ring-offset-2' : ''
               )}
+              title={color.colorName}
+            >
+              <div
+                className="w-8 h-8 rounded-full border border-black/10 shadow-sm"
+                style={{ backgroundColor: color.hex }}
+              />
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-black/60 font-medium ml-1">
+          Selected: <span className="text-black">{selectedColor.colorName}</span>
+        </p>
+      </div>
 
-              <motion.button
-                onClick={() => setLiked(!liked)}
-                whileTap={{ scale: 0.8 }}
-                className="p-2 rounded-full border transition-colors"
-                aria-label="Toggle Wishlist"
-              >
-                <motion.div
-                  key={liked ? 'filled' : 'outline'}
-                  initial={{ scale: 0.7, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.7, opacity: 0 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 20,
-                  }}
-                >
-                  {liked ? (
-                    <Heart
-                      className="text-red-500 fill-red-500"
-                      size={28}
-                    />
-                  ) : (
-                    <Heart
-                      className="text-gray-700"
-                      size={28}
-                    />
-                  )}
-                </motion.div>
-              </motion.button>
-            </div>
-          </div>
-
-          {stockAlert && (
-            <p className="text-sm text-red-600 mt-2">
-              {stockAlert}
-            </p>
-          )}
+      {/* Sizes */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-baseline">
+          <p className="text-xs uppercase font-bold text-black/50 tracking-widest">Select Size</p>
+          <button className="text-[10px] underline text-black/40 hover:text-black">Size Guide</button>
         </div>
 
-        {/* Product Details */}
-        <div className="flex items-center gap-3 mt-4">
-          <span
-            className="text-3xl font-light leading-none animate-bounce transition-transform duration-200 cursor-pointer"
-            onClick={() => setShowDetails(true)}
-          >
-            ↓
-          </span>
+        <div className="grid grid-cols-4 gap-2">
+          {Object.entries(sizes).map(([size, stock]) => {
+            const isSelected = selectedSize === size
+            const isOut = stock <= 0
+
+            return (
+              <button
+                key={size}
+                disabled={isOut}
+                onClick={() => {
+                  if (isOut) return
+                  setSelectedSize(size)
+                  setQuantity(0)
+                  setStockAlert('')
+                }}
+                className={clsx(
+                  'py-3 rounded-lg border text-sm font-semibold transition-all',
+                  isSelected
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-black border-gray-200 hover:border-black',
+                  isOut && 'opacity-30 bg-gray-50 cursor-not-allowed decoration-slice line-through'
+                )}
+              >
+                {size}
+              </button>
+            )
+          })}
+        </div>
+        {fewPiecesLeft && (
+          <p className="text-xs text-red-600 font-medium animate-pulse">
+            🔥 Only {stockLeft} left in stock for this size
+          </p>
+        )}
+      </div>
+
+      {/* Action Area */}
+      <div className="space-y-4 pt-4 border-t border-black/5">
+        {stockAlert && (
+          <div className="p-3 bg-red-50 text-red-600 text-xs font-medium rounded-lg">
+            {stockAlert}
+          </div>
+        )}
+
+        <div className="flex gap-4">
+          {/* Quantity Stepper */}
+          <div className="flex items-center bg-gray-100 rounded-full h-14 px-2">
+            <button onClick={decQuantity} className="w-10 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Minus size={14} /></button>
+            <span className="w-8 text-center text-sm font-semibold">{quantity}</span>
+            <button onClick={incQuantity} className="w-10 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Plus size={14} /></button>
+          </div>
+
+          {/* Add To Cart */}
+          {!isCurrentItemInCart ? (
+            <button
+              onClick={handleAddToCart}
+              disabled={!selectedSize || quantity <= 0}
+              className="flex-1 bg-black text-white h-14 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-black/10 transition-all active:scale-[0.98]"
+            >
+              Add to Cart
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push('/checkoutpage')}
+              className="flex-1 bg-white text-black border-2 border-black h-14 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-2 transition-all"
+            >
+              Checkout →
+            </button>
+          )}
+
+          {/* Like */}
           <button
-            onClick={() => setShowDetails(true)}
-            className="text-xs tracking-widest uppercase text-black font-semibold cursor-pointer"
+            onClick={() => setLiked(!liked)}
+            className="h-14 w-14 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
           >
-            Product Details
+            <Heart size={20} className={clsx("transition-transform", liked && "fill-red-500 text-red-500 scale-110")} />
           </button>
         </div>
       </div>
 
-      <ProductDescription
-        show={showDetails}
-        onClose={() => setShowDetails(false)}
-        name={name}
-        description={description}
-        material={material}
-        tier={tier}
-        type={type}
-        fit={fit}
-      />
-    </>
+      {/* Extra Info Accordions */}
+      <div className="pt-6">
+        <Accordion title="Shipping & Returns">
+          We offer free standard shipping on all orders over €150. Returns are accepted within 30 days of delivery.
+        </Accordion>
+        <Accordion title="Care Instructions">
+          Machine wash cold with like colors. Tumble dry low. Do not bleach. Iron on low heat if needed.
+        </Accordion>
+      </div>
+    </div>
   )
 }
 

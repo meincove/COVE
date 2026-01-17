@@ -209,10 +209,25 @@ function ShopPanel({
         <div className="absolute inset-0 overflow-hidden">
             {/* background */}
             <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.98),rgba(245,240,237,0.96),rgba(240,234,230,0.95))]" />
-                <div className="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(rgba(0,0,0,0.12)_1px,transparent_1px)] [background-size:28px_28px]" />
-                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_30%_30%,rgba(236,72,153,0.14),transparent_55%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_50%,transparent_35%,rgba(0,0,0,0.10)_100%)]" />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "linear-gradient(135deg,rgba(248,250,252,0.98),rgba(245,240,237,0.96),rgba(240,234,230,0.95))" }}
+                />
+                <div
+                    className="absolute inset-0 opacity-[0.08]"
+                    style={{
+                        backgroundImage: "radial-gradient(rgba(0,0,0,0.12) 1px, transparent 1px)",
+                        backgroundSize: "28px 28px"
+                    }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "radial-gradient(900px 520px at 30% 30%, rgba(236,72,153,0.14), transparent 55%)" }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "radial-gradient(1200px 800px at 50% 50%, transparent 35%, rgba(0,0,0,0.10) 100%)" }}
+                />
             </div>
 
             <HUDFrame tone="gold" active={active} />
@@ -390,10 +405,25 @@ function PlatformPanel({ active, onEnter }: { active: boolean; onEnter: () => vo
     return (
         <div className="absolute inset-0 overflow-hidden">
             <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(12,12,12,1),rgba(20,20,20,1),rgba(10,10,10,1))]" />
-                <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.10)_1px,transparent_1px)] [background-size:56px_56px]" />
-                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_60%_35%,rgba(34,197,94,0.16),transparent_60%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_50%,transparent_35%,rgba(0,0,0,0.70)_100%)]" />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "linear-gradient(135deg,rgba(12,12,12,1),rgba(20,20,20,1),rgba(10,10,10,1))" }}
+                />
+                <div
+                    className="absolute inset-0 opacity-[0.10]"
+                    style={{
+                        backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.10) 1px, transparent 1px)",
+                        backgroundSize: "56px 56px"
+                    }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "radial-gradient(900px 520px at 60% 35%, rgba(34,197,94,0.16), transparent 60%)" }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "radial-gradient(1200px 800px at 50% 50%, transparent 35%, rgba(0,0,0,0.70) 100%)" }}
+                />
             </div>
 
             {/* ✅ ParticleWave faint background */}
@@ -401,7 +431,10 @@ function PlatformPanel({ active, onEnter }: { active: boolean; onEnter: () => vo
                 <div className="absolute inset-0 opacity-[0.22]">
                     <ParticleWave />
                 </div>
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.75)_100%)]" />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.75) 100%)" }}
+                />
             </div>
 
             <HUDFrame tone="silver" active={active} />

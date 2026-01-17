@@ -1,155 +1,278 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { useEffect, useMemo, useState, use } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import CatalogCard from "@/src/components/Catalog/CatalogCard"
-import type { CatalogCard as CatalogCardType } from "@/types/product"
+import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
+import CarouselStage from "@/src/components/Catalog/CarouselStage"
+import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
+import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
+import HeroScanner from "@/src/components/shopping/HeroScanner"
+import CategoryBanner from "@/src/components/shopping/CategoryBanner"
+import ProductGridCard from "@/src/components/shopping/ProductGridCard"
 
-type Brand = {
-    brand_id: string
-    brand_name: string
-    slug: string
-    logo_url: string | null
-    theme_colors: { primary: string; secondary: string; accent: string }
-    description: string
+// --- Shared Types & Utils (duplicated) ---
+type ApiImage = { image_name?: string; url?: string }
+type ApiVariant = { variant_id?: string; images?: ApiImage[] }
+type ApiProduct = {
+    product_id: string
+    slug?: string
+    name: string
+    brand_id?: string
+    base_price?: number | string
+    old_price?: number | string
+    is_new?: boolean
+    type?: string
+    fit?: string
+    tier?: string
+    color_variants?: ApiVariant[]
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001"
+
+function num(v: unknown, fallback = 0) {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : fallback
+}
+
+function pickBestApiImage(p: ApiProduct): string {
+    const img = p.color_variants?.[0]?.images?.[0]
+    const preferred = img?.image_name || img?.url || FALLBACK_IMG
+    return resolveImgPath(String(preferred))
+}
+
+function mapApi(p: ApiProduct): UiProduct {
+    const img = pickBestApiImage(p)
+    return {
+        id: String(p.product_id),
+        slug: p.slug,
+        variantId: p.color_variants?.[0]?.variant_id,
+        name: p.name,
+        brandId: p.brand_id,
+        price: num(p.base_price, 0),
+        oldPrice: p.old_price != null ? num(p.old_price, 0) : undefined,
+        badge: p.is_new ? "NEW" : "",
+        type: p.type,
+        fit: p.fit,
+        tier: p.tier,
+        images: [img],
+        imageSrc: img,
+        colorNames: [],
+        sizes: [],
+    } as UiProduct
+}
+
+function uniq(arr: string[]) {
+    return Array.from(new Set(arr)).filter(Boolean)
 }
 
 export default function BrandStorefrontPage({ params }: { params: Promise<{ brandSlug: string }> }) {
     const { brandSlug } = use(params)
     const router = useRouter()
-    const [brand, setBrand] = useState<Brand | null>(null)
-    const [products, setProducts] = useState<CatalogCardType[]>([])
-    const [isLoading, setIsLoading] = useState(true)
 
+    const [allProducts, setAllProducts] = useState<UiProduct[]>([])
+    const [searchValue, setSearchValue] = useState("")
+    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
+
+    // Fetch All Data (could be optimized)
     useEffect(() => {
-        async function fetchBrandAndProducts() {
-            try {
-                // Fetch brand details
-                const brandRes = await fetch(`http://localhost:8001/api/brands/${brandSlug}/`)
-                if (!brandRes.ok) {
-                    router.push('/brands')
-                    return
+        let cancelled = false
+            ; (async () => {
+                try {
+                    // Fetch products filtered by brand ID if possible, or just fetch all and filter client side
+                    // Assuming API supports ?brand_id, but here we fetch all for simplicity like CategoryPage
+                    const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=300`, { cache: "no-store" })
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                    const json = await res.json()
+                    const items: ApiProduct[] = json.results || []
+                    const mapped = items.map(mapApi)
+                    if (!cancelled) setAllProducts(mapped)
+                } catch {
+                    if (!cancelled) setAllProducts([])
                 }
-                const brandData = await brandRes.json()
-                setBrand(brandData)
-
-                // Fetch products for this brand
-                const productsRes = await fetch(`http://localhost:8001/api/products/?brand_id=${brandData.brand_id}`)
-                if (productsRes.ok) {
-                    const productsData = await productsRes.json()
-
-                    // Transform to CatalogCard format
-                    const formatted: CatalogCardType[] = productsData.results.map((product: any) => ({
-                        id: product.product_id,
-                        groupId: product.product_id,
-                        slug: product.slug,
-                        brand: product.brand_id,
-                        layoutKey: 'default', // Layout configuration for card
-                        name: product.name,
-                        tier: product.tier || 'casual',
-                        type: product.type || 'clothing',
-                        material: product.material || 'Cotton',
-                        price: parseFloat(product.base_price),
-                        basePrice: parseFloat(product.base_price),
-                        gender: product.gender || 'unisex',
-                        fit: product.fit || 'regular',
-                        description: product.description || '',
-                        colors: product.color_variants?.map((v: any) => ({
-                            colorName: v.color_name,
-                            hex: v.hex,
-                            variantId: v.variant_id,
-                            images: v.images?.map((img: any) => {
-                                const name = img.image_name
-                                if (name.startsWith('http') || name.startsWith('/')) return name
-                                return `/clothing-images/${name}`
-                            }) || [],
-                            sizes: {},
-                            slug: v.slug
-                        })) || [],
-                        sizes: {}
-                    }))
-
-                    setProducts(formatted)
-                }
-            } catch (err) {
-                console.error('Error fetching brand storefront:', err)
-            } finally {
-                setIsLoading(false)
-            }
+            })()
+        return () => {
+            cancelled = true
         }
-        fetchBrandAndProducts()
-    }, [brandSlug, router])
+    }, [])
 
-    if (isLoading) {
-        return <div className="min-h-screen bg-black flex items-center justify-center"><p className="text-white">Loading...</p></div>
-    }
+    // --- Filter logic ---
 
-    if (!brand) {
-        return null
+    // 1. Filter by Current Brand (URL)
+    // slug matching brand name usually needs normalization
+    const normalizedBrandSlug = brandSlug.toLowerCase()
+
+    const brandProducts = useMemo(() => {
+        return allProducts.filter(p => (p.brandId ?? "").toLowerCase().replace(/\s+/g, '-') === normalizedBrandSlug)
+    }, [allProducts, normalizedBrandSlug])
+
+    // 2. Compute available Sidebar Filters based on the Brand Products
+    const filterGroups: FilterGroup[] = useMemo(() => {
+        if (!brandProducts.length) return []
+
+        const types = uniq(brandProducts.map((p) => (p.type ?? "").trim()).filter(Boolean))
+        const tiers = uniq(brandProducts.map((p) => (p.tier ?? "").trim()).filter(Boolean))
+        const fits = uniq(brandProducts.map((p) => (p.fit ?? "").trim()).filter(Boolean))
+
+        return [
+            { label: "Type", options: types },
+            ...(tiers.length ? [{ label: "Tier", options: tiers }] : []),
+            ...(fits.length ? [{ label: "Fit", options: fits }] : []),
+        ]
+    }, [brandProducts])
+
+    // 3. Apply Sidebar Filters + Search
+    const filteredProducts = useMemo(() => {
+        return brandProducts.filter((p) => {
+            // Search
+            if (searchValue) {
+                const hay = `${p.name} ${p.type} ${p.tier}`.toLowerCase()
+                if (!hay.includes(searchValue.toLowerCase())) return false
+            }
+
+            // Sidebar filters
+            const typeSel = new Set(activeFilters["Type"] ?? [])
+            const tierSel = new Set(activeFilters["Tier"] ?? [])
+            const fitSel = new Set(activeFilters["Fit"] ?? [])
+
+            if (typeSel.size && !typeSel.has((p.type ?? "").trim())) return false
+            if (tierSel.size && !tierSel.has((p.tier ?? "").trim())) return false
+            if (fitSel.size && !fitSel.has((p.fit ?? "").trim())) return false
+
+            return true
+        })
+    }, [brandProducts, activeFilters, searchValue])
+
+    // Memoize products
+    const products = useMemo(() => filteredProducts, [filteredProducts])
+
+    // Derive "Best Sellers" 
+    const bestSellers = useMemo(() => products.slice(0, 10).map(uiProductToCatalogCard), [products])
+
+    // Handlers
+    const onFilterToggle = (group: string, option: string) => {
+        setActiveFilters((prev) => {
+            const set = new Set(prev[group] ?? [])
+            if (set.has(option)) set.delete(option)
+            else set.add(option)
+            return { ...prev, [group]: Array.from(set) }
+        })
     }
+    const onResetAll = () => setActiveFilters({})
+
+    const brandNameDisplay = brandSlug.toUpperCase().replace(/-/g, ' ')
 
     return (
-        <div className="min-h-screen bg-black text-white">
-            {/* Brand Hero */}
-            <div
-                className="relative overflow-hidden py-24 px-8"
-                style={{
-                    background: `linear-gradient(135deg, ${brand.theme_colors.primary}30, ${brand.theme_colors.accent}20)`
-                }}
-            >
-                <div className="max-w-7xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <h1 className="text-7xl font-bold mb-6">{brand.brand_name}</h1>
-                        <p className="text-2xl text-gray-300 max-w-3xl mb-8">{brand.description}</p>
-
-                        {/* Brand Colors */}
-                        <div className="flex gap-4 items-center">
-                            <span className="text-sm text-gray-400">Brand Colors:</span>
-                            <div className="flex gap-3">
-                                <div className="w-10 h-10 rounded-full border-2 border-white/30" style={{ backgroundColor: brand.theme_colors.primary }} />
-                                <div className="w-10 h-10 rounded-full border-2 border-white/30" style={{ backgroundColor: brand.theme_colors.secondary }} />
-                                <div className="w-10 h-10 rounded-full border-2 border-white/30" style={{ backgroundColor: brand.theme_colors.accent }} />
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
-
-            {/* Products Grid */}
-            <div className="max-w-7xl mx-auto px-8 py-16">
-                <h2 className="text-4xl font-bold mb-8">{brand.brand_name} Collection ({products.length} items)</h2>
-
-                {products.length === 0 ? (
-                    <p className="text-gray-400 text-center py-16">No products available for this brand yet.</p>
-                ) : (
-                    <div
-                        className="grid gap-6"
-                        style={{
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(var(--card-width, 300px), 1fr))',
-                            '--card-width': '300px',
-                            '--card-height': '400px'
-                        } as any}
-                    >
-                        {products.map((product, index) => (
-                            <CatalogCard key={product.id} {...product} layoutKey={index} />
-                        ))}
+        <LshapedNavbar
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            filterGroups={filterGroups}
+            activeFilters={activeFilters}
+            onFilterToggle={onFilterToggle}
+            onResetAll={onResetAll}
+            // Hero only shows brand products
+            hero={
+                <div className="relative">
+                    <HeroScanner
+                        products={brandProducts} // Only this brand's items
+                        heightVh={70}
+                        minHeight={600}
+                    />
+                    {/* Muted Text Overlay for Brand Context */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">
+                        Viewing {brandNameDisplay} Collection
                     </div>
-                )}
-
-                {/* Back Button */}
-                <div className="mt-16 text-center">
+                </div>
+            }
+        >
+            <div className="relative pb-32">
+                <div className="px-4 py-4 mb-4">
                     <button
-                        onClick={() => router.push('/brands')}
-                        className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full transition-colors"
+                        onClick={() => router.push('/shopping')} // Or back to Brands list
+                        className="text-sm font-medium text-black/50 hover:text-black transition flex items-center gap-1"
                     >
-                        ← All Brands
+                        ← Back to Shopping
                     </button>
                 </div>
+
+                <div className="relative pb-32">
+                    {/* 1. Editorial Section */}
+                    <div className="mb-16 border-b border-black/5 pb-16">
+                        <div className="flex flex-col md:flex-row h-[320px] md:h-[35vh] min-h-[300px] w-full mb-6">
+                            {/* Text Area */}
+                            <div className="w-full md:w-[35%] bg-gray-50 flex flex-col justify-center px-6 md:px-10 py-8 border-r border-black/5 relative">
+                                <div className="text-xs font-bold tracking-widest text-black/40 mb-3 uppercase">
+                                    Brand Spotlight
+                                </div>
+                                <h2 className="text-3xl md:text-4xl font-black text-black mb-3 uppercase tracking-tighter">
+                                    {brandNameDisplay}
+                                </h2>
+                                <p className="text-sm text-black/60 leading-relaxed max-w-sm mb-6 line-clamp-3">
+                                    Explore the latest collection from {brandNameDisplay}. Premium quality and exclusive designs.
+                                </p>
+
+                                <button
+                                    onClick={() => {
+                                        document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth' })
+                                    }}
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-semibold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/20"
+                                >
+                                    Shop Collection ({products.length})
+                                    <span>↓</span>
+                                </button>
+                            </div>
+
+                            {/* Banner Image */}
+                            <div className="w-full md:w-[65%] relative overflow-hidden rounded-r-3xl">
+                                <CategoryBanner
+                                    title={brandSlug}
+                                    imageSrc={products[0]?.imageSrc || FALLBACK_IMG}
+                                    products={products}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 2. Best Sellers Carousel */}
+                        {bestSellers.length > 0 && (
+                            <div className="w-full overflow-hidden px-2 md:px-6">
+                                <div className="mb-6 px-4">
+                                    <h3 className="text-lg font-bold text-black/80">Best of {brandNameDisplay}</h3>
+                                </div>
+                                <div className="relative w-full scale-90 origin-top-left">
+                                    <CarouselStage
+                                        cards={bestSellers}
+                                        sectionKey={`stage-${brandSlug}-best`}
+                                        tierLabel="Best Sellers"
+                                        isFilterOpen={false}
+                                        filtersForTier={{}}
+                                        availableTypes={[]}
+                                        availableFits={[]}
+                                        availableMaterials={[]}
+                                        onTypeChange={() => { }}
+                                        onFitChange={() => { }}
+                                        onMaterialChange={() => { }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 3. Product Grid */}
+                    <div id="product-grid" className="px-6 md:px-12 scroll-mt-24">
+                        <div className="mb-8 flex items-end justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-black mb-1">Full Collection</h2>
+                                <p className="text-sm text-black/40">{products.length} items</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+                            {products.map(p => (
+                                <ProductGridCard key={p.id} product={p} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </LshapedNavbar>
     )
 }

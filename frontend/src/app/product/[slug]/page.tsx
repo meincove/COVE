@@ -4,10 +4,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 
-import ProductGallery from '@/src/components/product/ProductGallery'
+import VerticalGallery from '@/src/components/product/VerticalGallery'
 import ProductInfo from '@/src/components/product/ProductInfo'
 import ProductConfigurator from '@/src/components/product/ProductConfigurator'
-import ImageOrbit from '@/src/components/product/ImageOrbit'
+import ReviewsSection from '@/src/components/product/ReviewsSection'
+import RelatedProducts from '@/src/components/product/RelatedProducts'
 import { useProductStore } from '@/src/store/productStore'
 import { trackProductView } from '@/src/utils/analytics' // Analytics tracking (Dec 8)
 
@@ -249,58 +250,81 @@ export default function ProductPage() {
     product.colors[selectedColorIndex] ?? product.colors[0]
 
   return (
-    <div className="relative min-h-screen text-white bg-[#2e4053] flex flex-col overflow-hidden">
-      {/* Page Content */}
-      <div className="relative z-10 flex-1 w-full max-w-[1800px] xl:max-w-[2000px] 2xl:max-w-[2400px] mx-auto flex flex-col md:flex-row lg:flex-row gap-3 sm:gap-4 md:gap-5 lg:gap-6 px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-5 md:py-6">
-        {/* LEFT COLUMN - Product Info & Gallery */}
-        <div className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 rounded-xl overflow-hidden">
-          <ProductInfo
-            name={product.name}
-            price={product.price}
-            material={product.material}
-            description={product.description || ''}
-            tier={product.tier}
-            type={product.type}
-            fit={product.fit || ''}
-          />
-          <ProductGallery
-            images={selectedColor.images}
-            selectedIndex={currentImageIndex}
-            onSelect={setCurrentImageIndex}
-          />
+    <div className="relative min-h-screen text-black bg-[#fafafa] flex flex-col font-sans pt-[140px]">
+      {/* New 3-Column Layout */}
+      <div className="flex-1 w-full max-w-[2400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-8">
+
+        {/* LEFT COLUMN: Info & Context (Sticky) */}
+        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 relative">
+          <div className="sticky top-24 pr-4">
+            {/* Breadcrumbs */}
+            <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-black/40 mb-8">
+              <a href="/" className="hover:text-black transition-colors">Home</a>
+              <span>/</span>
+              <a href={`/shopping/${product.type}`} className="hover:text-black transition-colors">{product.type}</a>
+              <span>/</span>
+              <span className="text-black">{product.name}</span>
+            </div>
+
+            <ProductInfo
+              name={product.name}
+              price={product.price}
+              material={product.material}
+              description={product.description || ''}
+              tier={product.tier}
+              type={product.type}
+              fit={product.fit || ''}
+            />
+          </div>
         </div>
 
-        {/* MIDDLE VIEWER - Main Image Display */}
-        <div className="w-full md:w-2/3 lg:w-1/2 xl:w-3/5 flex items-center justify-center rounded-xl overflow-hidden">
-          <ImageOrbit
-            images={selectedColor.images}
-            currentIndex={currentImageIndex}
-            setCurrentIndex={setCurrentImageIndex}
-          />
+        {/* CENTER COLUMN: Vertical Visuals (Scrollable) */}
+        <div className="col-span-1 lg:col-span-5 xl:col-span-6 min-h-screen">
+          {/* Mobile Header (Only visible on mobile) */}
+          <div className="block lg:hidden mb-6">
+            <h1 className="text-3xl font-black uppercase tracking-tighter">{product.name}</h1>
+            <p className="text-lg text-black/70 mt-1">€{product.price.toFixed(2)}</p>
+          </div>
+
+          <div className="w-full space-y-4">
+            <VerticalGallery images={selectedColor.images} />
+          </div>
         </div>
 
-        {/* RIGHT CONFIGURATOR - Size/Color Selection */}
-        <div className="w-full md:w-full lg:w-1/3 xl:w-1/4 rounded-xl overflow-hidden flex flex-col justify-end">
-          <ProductConfigurator
-            // IMPORTANT: per-color sizes, not aggregated product.sizes
-            sizes={selectedColor.sizes}
-            colors={product.colors}
-            defaultColor={selectedColor}
-            variantId={selectedColor.variantId}
-            selectedColorIndex={selectedColorIndex}
-            setSelectedColorIndex={setSelectedColorIndex}
-            name={product.name}
-            description={product.description || ''}
-            material={product.material}
-            tier={product.tier}
-            type={product.type}
-            fit={product.fit || ''}
-            price={product.price}
-            defaultSelectedSize={defaultSelectedSize}
-            initialQuantity={defaultQuantity}
-          />
+        {/* RIGHT COLUMN: Action & Config (Sticky) */}
+        <div className="col-span-1 lg:col-span-4 xl:col-span-3 relative">
+          <div className="sticky top-24 pl-4">
+            <ProductConfigurator
+              sizes={selectedColor.sizes}
+              colors={product.colors}
+              defaultColor={selectedColor}
+              variantId={selectedColor.variantId}
+              selectedColorIndex={selectedColorIndex}
+              setSelectedColorIndex={setSelectedColorIndex}
+              name={product.name}
+              description={product.description || ''}
+              material={product.material}
+              tier={product.tier}
+              type={product.type}
+              fit={product.fit || ''}
+              price={product.price}
+              defaultSelectedSize={defaultSelectedSize}
+              initialQuantity={defaultQuantity}
+            />
+
+            {/* Mobile Details Text (Below configuration on mobile) */}
+            <div className="block lg:hidden mt-8 pt-8 border-t border-black/10">
+              <p className="text-sm leading-relaxed text-black/80">{product.description}</p>
+            </div>
+          </div>
         </div>
+
       </div>
+
+      {/* Extra Sections (Full Width) */}
+      <RelatedProducts />
+      <ReviewsSection />
+
     </div>
   )
 }

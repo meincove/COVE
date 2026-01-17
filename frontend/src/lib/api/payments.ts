@@ -40,7 +40,10 @@ export async function createCheckoutSession(
 ): Promise<CreateCheckoutSessionResponse> {
   const res = await fetch(`${API_BASE}/api/payments/create-checkout-session/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Idempotency-Key": crypto.randomUUID(),
+    },
     body: JSON.stringify(payload), // ✅ forward everything (country, shippingSpeed, weight, etc.)
     signal: opts?.signal,
     credentials: "omit",

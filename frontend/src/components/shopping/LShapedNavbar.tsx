@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { cn } from "@/src/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
+import EnhancedSearchbar from "../Navbar/EnhancedSearchbar"
 
 export type FilterGroup = {
     label: string
@@ -157,14 +158,7 @@ export default function LshapedNavbar({
                     <div className="flex-1 flex items-center px-6 relative">
                         {/* Search Input (Left Aligned) */}
                         <div className="w-full max-w-[400px] hidden md:block">
-                            <div className="relative group">
-                                <input
-                                    value={searchValue}
-                                    onChange={(e) => onSearchChange?.(e.target.value)}
-                                    className="w-full rounded-full bg-black/5 border border-black/5 px-4 py-2 text-sm text-black/85 placeholder:text-black/35 outline-none focus:border-black/20 focus:bg-black/10 transition-all font-medium"
-                                    placeholder="Search catalog..."
-                                />
-                            </div>
+                            <EnhancedSearchbar variant="sidebar" />
                         </div>
 
                         {/* CENTER TOGGLE BUTTON */}

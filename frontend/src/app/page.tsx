@@ -590,7 +590,7 @@ export default function WelcomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.65)_100%)]" />
         </div>
 
-        <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-6">
+        <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-6 pt-32">
           <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             {/* LEFT */}
             <div>
