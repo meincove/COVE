@@ -113,7 +113,15 @@ async function fetchCatalogProductForItem(
       return null;
     }
 
-    const data: CatalogProductResponse = await res.json();
+    // Defensive JSON parsing - handle cases where API returns HTML
+    let data: CatalogProductResponse;
+    try {
+      data = await res.json();
+    } catch (parseError) {
+      console.warn("[agentItemResolver] Failed to parse JSON response:", parseError);
+      return null;
+    }
+
     if (!data || !data.product) return null;
 
     return data.product;

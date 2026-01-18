@@ -1,3 +1,158 @@
+// "use client"
+
+// import { useEffect, useRef } from "react"
+
+// interface ParticleWaveProps {
+//     particleCount?: number
+//     radiusBase?: number
+//     className?: string
+// }
+
+// class Particle {
+//     index: number
+//     angle: number
+//     radius: number
+//     baseRadius: number
+//     speed: number
+//     offset: number
+//     size: number
+//     color: string
+//     x: number = 0
+//     y: number = 0
+
+//     constructor(index: number, particleCount: number, radiusBase: number) {
+//         this.index = index
+//         this.angle = (Math.PI * 2 * index) / particleCount
+//         this.radius = radiusBase + Math.random() * 50
+//         this.baseRadius = this.radius
+//         this.speed = Math.random() * 0.002 + 0.001
+//         this.offset = Math.random() * Math.PI * 2
+//         this.size = Math.random() * 2 + 0.5
+
+//         const isBlue = Math.random() > 0.3
+//         this.color = isBlue
+//             ? `rgba(37, 99, 235, ${Math.random() * 0.45 + 0.15})` // Blue-600
+//             : `rgba(59, 130, 246, ${Math.random() * 0.45 + 0.15})` // Blue-500
+//     }
+
+//     update(time: number, width: number, height: number) {
+//         this.angle += this.speed
+
+//         const wave1 = Math.sin(this.angle * 3 + time * 0.5 + this.offset) * 30
+//         const wave2 = Math.cos(this.angle * 5 - time * 0.3) * 15
+//         const breath = Math.sin(time * 0.2) * 20
+
+//         this.radius = this.baseRadius + wave1 + wave2 + breath
+
+//         const cx = width / 2
+//         const cy = height / 2.2
+
+//         this.x = cx + Math.cos(this.angle) * this.radius
+//         this.y = cy + Math.sin(this.angle) * (this.radius * 0.78)
+//     }
+
+//     draw(ctx: CanvasRenderingContext2D) {
+//         ctx.beginPath()
+//         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+//         ctx.fillStyle = this.color
+//         ctx.fill()
+//     }
+// }
+
+// export default function ParticleWave({
+//     particleCount = 180,
+//     radiusBase = 240,
+//     className = "",
+// }: ParticleWaveProps) {
+//     const canvasRef = useRef<HTMLCanvasElement>(null)
+//     const particlesRef = useRef<Particle[]>([])
+//     const timeRef = useRef(0)
+//     const rafRef = useRef<number | null>(null)
+
+//     useEffect(() => {
+//         const canvas = canvasRef.current
+//         if (!canvas) return
+//         const ctx = canvas.getContext("2d")
+//         if (!ctx) return
+
+//         const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1))
+
+//         let width = 0
+//         let height = 0
+
+//         const initParticles = () => {
+//             particlesRef.current = []
+//             for (let i = 0; i < particleCount; i++) {
+//                 particlesRef.current.push(new Particle(i, particleCount, radiusBase))
+//             }
+//         }
+
+//         const resizeToParent = () => {
+//             const parent = canvas.parentElement
+//             if (!parent) return
+//             const rect = parent.getBoundingClientRect()
+//             width = Math.max(1, rect.width)
+//             height = Math.max(1, rect.height)
+
+//             canvas.width = Math.floor(width * dpr)
+//             canvas.height = Math.floor(height * dpr)
+//             canvas.style.width = "100%"
+//             canvas.style.height = "100%"
+
+//             ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+//             initParticles()
+//         }
+
+//         const ro = new ResizeObserver(() => resizeToParent())
+//         if (canvas.parentElement) ro.observe(canvas.parentElement)
+
+//         const animate = () => {
+//             // subtle white trail
+//             ctx.fillStyle = "rgba(255, 255, 255, 0.18)"
+//             ctx.fillRect(0, 0, width, height)
+
+//             for (const p of particlesRef.current) {
+//                 p.update(timeRef.current, width, height)
+//                 p.draw(ctx)
+//             }
+
+//             // web lines
+//             ctx.strokeStyle = "rgba(37, 99, 235, 0.10)"
+//             ctx.lineWidth = 0.6
+
+//             for (let i = 0; i < particlesRef.current.length; i += 2) {
+//                 const p1 = particlesRef.current[i]
+//                 const p2 = particlesRef.current[(i + 1) % particlesRef.current.length]
+//                 ctx.beginPath()
+//                 ctx.moveTo(p1.x, p1.y)
+//                 ctx.lineTo(p2.x, p2.y)
+//                 ctx.stroke()
+//             }
+
+//             timeRef.current += 0.01
+//             rafRef.current = requestAnimationFrame(animate)
+//         }
+
+//         resizeToParent()
+//         animate()
+
+//         return () => {
+//             ro.disconnect()
+//             if (rafRef.current) cancelAnimationFrame(rafRef.current)
+//         }
+//     }, [particleCount, radiusBase])
+
+//     return (
+//         <canvas
+//             ref={canvasRef}
+//             className={["absolute inset-0 w-full h-full pointer-events-none", className].join(" ")}
+//         />
+//     )
+// }
+
+
+
+
 // 'use client'
 
 // import { useEffect, useRef } from 'react'
@@ -142,7 +297,7 @@
 //     return (
 //         <canvas
 //             ref={canvasRef}
-//             className={`fixed inset-0 w-full h-full pointer-events-none z-0 ${className}`}
+//             className={`absolute inset-0 w-full h-full pointer-events-none z-0 ${className}`}
 //         />
 //     )
 // }
@@ -220,7 +375,7 @@
 //         this.depthOffset = Math.random() * Math.PI * 2
 //         this.depth = 0
 //         this.depthBrightness = 1
-//
+
 
 //     /**
 //      * introFactor: 0 → start (no waves, no depth), 1 → full motion / depth.

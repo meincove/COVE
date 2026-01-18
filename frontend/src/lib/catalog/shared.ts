@@ -2,6 +2,7 @@
 export type UiProduct = {
     id: string
     slug?: string
+    variantId?: string  // First variant ID for product page redirects
     name: string
     brandId?: string
     price: number

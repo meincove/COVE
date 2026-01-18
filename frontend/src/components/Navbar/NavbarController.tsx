@@ -156,161 +156,23 @@
 
 "use client"
 
-import {
-  useState,
-  useRef,
-  useEffect,
-  createContext,
-  useContext,
-  PropsWithChildren,
-} from "react"
+import { PropsWithChildren } from "react"
 import { usePathname } from "next/navigation"
-import { AnimatePresence } from "framer-motion"
-import FullNavbar from "./NavbarComponents/FullModeNavbar/FullNavbar"
-import IslandNavbar from "./NavbarComponents/IslandModeNavbar/IslandNavbar"
-
-export type NavbarMode = "full" | "island" | "menu"
-
-const ENTER_ISLAND = 620
-const EXIT_ISLAND = 560
-
-const NavbarModeCtx = createContext<{
-  mode: NavbarMode
-  setMode: (m: NavbarMode) => void
-} | null>(null)
-
-export function useNavbarMode() {
-  const ctx = useContext(NavbarModeCtx)
-  if (!ctx) throw new Error("useNavbarMode must be used inside NavbarController")
-  return ctx
-}
+import GlobalNavbar from "./GlobalNavbar"
 
 export default function NavbarController({ children }: PropsWithChildren<{}>) {
   const pathname = usePathname()
-  const [mode, setModeState] = useState<NavbarMode>("full")
 
-  // ✅ Hide old navbar ONLY on "/" and "/shopping"
-  const shouldHideNavbar = pathname === "/" || pathname?.startsWith("/shopping")
+  // Logic defined by user:
+  // Show GlobalNavbar on: /, /product/*, /checkout, /partner-onboarding
+  // Hide GlobalNavbar on: /shopping/*, /brands/* (They use L-shaped navbar)
 
-  const lastNonMenuModeRef = useRef<Exclude<NavbarMode, "menu">>("full")
-  const modeRef = useRef<NavbarMode>("full")
-  useEffect(() => {
-    modeRef.current = mode
-  }, [mode])
-
-  const transitionLockRef = useRef(false)
-  const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const setMode = (m: NavbarMode) => {
-    if (m === "menu") {
-      const currentNonMenu =
-        modeRef.current === "menu" ? lastNonMenuModeRef.current : modeRef.current
-      lastNonMenuModeRef.current =
-        currentNonMenu as Exclude<NavbarMode, "menu">
-      window.dispatchEvent(new Event("cove:menu:open"))
-      setModeState("menu")
-      modeRef.current = "menu"
-      return
-    }
-
-    if (modeRef.current === "menu") {
-      window.dispatchEvent(new Event("cove:menu:close"))
-    }
-    setModeState(m)
-    modeRef.current = m
-    lastNonMenuModeRef.current = m
-  }
-
-  // ✅ Auto-toggle full <-> island based on active scroll container:
-  // - Prefer .tester-frame if present
-  // - Otherwise fall back to window scrolling
-  useEffect(() => {
-    const frame = document.querySelector(".tester-frame") as HTMLElement | null
-
-    const getScrollY = () => (frame ? frame.scrollTop : window.scrollY)
-
-    let ticking = false
-
-    const onScroll = () => {
-      if (ticking || transitionLockRef.current) return
-      ticking = true
-
-      requestAnimationFrame(() => {
-        ticking = false
-        if (modeRef.current === "menu") return
-
-        const y = getScrollY()
-
-        let next: Exclude<NavbarMode, "menu"> =
-          modeRef.current as Exclude<NavbarMode, "menu">
-
-        if (next !== "island" && y > ENTER_ISLAND) next = "island"
-        if (next !== "full" && y < EXIT_ISLAND) next = "full"
-
-        if (next !== modeRef.current) {
-          transitionLockRef.current = true
-          if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current)
-          lockTimeoutRef.current = setTimeout(() => {
-            transitionLockRef.current = false
-          }, 400)
-
-          setModeState(next)
-          modeRef.current = next
-          lastNonMenuModeRef.current = next
-        }
-      })
-    }
-
-    // Init
-    const y0 = getScrollY()
-    const initial: Exclude<NavbarMode, "menu"> = y0 > ENTER_ISLAND ? "island" : "full"
-    setModeState(initial)
-    modeRef.current = initial
-    lastNonMenuModeRef.current = initial
-
-    // Bind
-    const target: any = frame ?? window
-    target.addEventListener("scroll", onScroll, { passive: true })
-
-    return () => {
-      target.removeEventListener("scroll", onScroll)
-    }
-  }, [pathname])
-
-  // Respect external open/close menu events
-  useEffect(() => {
-    const onOpen = () => {
-      const currentNonMenu =
-        modeRef.current === "menu" ? lastNonMenuModeRef.current : modeRef.current
-      lastNonMenuModeRef.current =
-        currentNonMenu as Exclude<NavbarMode, "menu">
-      setModeState("menu")
-      modeRef.current = "menu"
-    }
-
-    const onClose = () => {
-      const restore = lastNonMenuModeRef.current
-      setModeState(restore)
-      modeRef.current = restore
-    }
-
-    window.addEventListener("cove:menu:open", onOpen)
-    window.addEventListener("cove:menu:close", onClose)
-    return () => {
-      window.removeEventListener("cove:menu:open", onOpen)
-      window.removeEventListener("cove:menu:close", onClose)
-    }
-  }, [])
+  const isLShapedPage = pathname?.startsWith("/shopping") || pathname?.startsWith("/brands")
 
   return (
-    <NavbarModeCtx.Provider value={{ mode, setMode }}>
-      {!shouldHideNavbar && (
-        <AnimatePresence mode="wait" initial={false}>
-          {mode === "full" && <FullNavbar key="full" />}
-          {mode !== "full" && <IslandNavbar key="island" isMenu={mode === "menu"} />}
-        </AnimatePresence>
-      )}
+    <>
+      {!isLShapedPage && <GlobalNavbar />}
       {children}
-    </NavbarModeCtx.Provider>
+    </>
   )
 }

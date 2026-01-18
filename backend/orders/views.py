@@ -163,6 +163,7 @@ class MyOrdersView(APIView):
         except ValueError:
             limit = 20
 
+        # Quick validation
         if not (clerk_user_id or guest_session_id or email or payment_intent_id):
             return Response(
                 {"detail": "Provide clerkUserId or guestSessionId or email or paymentIntentId."},
@@ -171,14 +172,24 @@ class MyOrdersView(APIView):
 
         qs = Order.objects.all().order_by("-created_at")
 
-        if clerk_user_id:
+        # LOGIC CHANGE: 
+        # 1. Auth Users -> See their history
+        # 2. Single Order Lookup (PaymentIntent) -> Allowed for anyone (Receipt page)
+        # 3. Guests -> NO HISTORY allowed. Must sign up.
+        
+        if payment_intent_id:
+            # Specific order lookup (safe to show to guest who just paid)
+            qs = qs.filter(payment_intent_id=payment_intent_id)
+        elif clerk_user_id:
+            # Logged in user history
             qs = qs.filter(clerk_user_id=clerk_user_id)
-        elif guest_session_id:
-            qs = qs.filter(guest_session_id=guest_session_id)
         elif email:
+             # Email lookup (if verified? For now assume exact match is okay for dev, but strictly prefer Clerk)
             qs = qs.filter(user_email__iexact=email.strip())
         else:
-            qs = qs.filter(payment_intent_id=payment_intent_id)
+            # Guest trying to view history -> Block it (Return empty)
+            # User wants: "it should ask to sign in or sign up"
+            return Response([], status=200)
 
         qs = qs.prefetch_related("items")[:limit]
 
