@@ -87,12 +87,27 @@ Pattern: User references SPECIFIC product from context (first, second, that one,
 
 Pattern: User wants to COMPARE products (difference, which, compare)
 
-## Cart Operation (add/remove from cart)
+## Cart Operation (add ALREADY SHOWN product to cart)
 - "add the first one to cart" → cart_proposal
-- "I'll take it" → cart_proposal
-- "cop this" → cart_proposal
+- "I'll take it" → cart_proposal  (ONLY if products were already shown!)
+- "cop this" → cart_proposal  (ONLY if products were already shown!)
+- "add the black one" → cart_proposal  (ONLY if a black product was shown!)
+- "buy the second option" → cart_proposal  (referencing already-shown product)
+- "get me that hoodie you showed" → cart_proposal  (referencing already-shown product)
 
-Pattern: User expresses PURCHASE INTENT for a specific product. Look for verbs like: add, buy, take, get, want, cop, grab, purchase + reference to product (first one, second, this, it, the hoodie, etc.). The user wants to ADD the item to their cart, not just browse.
+Pattern: User wants to ADD an ALREADY SHOWN product to cart. They must REFERENCE a product from context (first one, second, this, it, that hoodie, the black one, etc.). 
+
+CRITICAL DISTINCTION - "buy/want/get" with a NEW product type:
+- "I want to buy black hoodie" → recommendations  (NO products shown yet! Show products first)
+- "buy me some sneakers" → recommendations  (searching for sneakers, not adding to cart)
+- "I want to get a jacket" → recommendations  (product discovery, not cart add)
+- "looking to buy jeans" → recommendations  (product discovery for jeans)
+
+ONLY classify as cart_proposal if:
+1. Products have ALREADY been shown in context, AND
+2. User is REFERENCING those specific shown products (first, second, this, it, the one with...)
+
+If user says "buy/want/get" + a product type they haven't seen yet, classify as "recommendations" to SHOW them products first.
 
 ## Checkout (ready to pay)
 - "checkout" → checkout_ready
