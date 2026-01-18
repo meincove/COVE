@@ -7,7 +7,7 @@ import { useEffect } from 'react'
 interface AuthDialogProps {
     isOpen: boolean
     onClose: () => void
-    destination: '/shop' | '/partner-onboarding'
+    destination: '/shopping' | '/partner-onboarding'
     pathType: 'shopping' | 'platform'
 }
 

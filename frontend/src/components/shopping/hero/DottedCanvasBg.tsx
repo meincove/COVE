@@ -105,10 +105,11 @@ export default function DottedCanvasBg({
         // local animated region only
         const spacing = spacingRef.current
         const baseR = baseRRef.current
-        const baseA = baseARef.current
+        // const baseA = baseARef.current
 
         const px = point.x
         const py = point.y
+        const strength = 1 // default
 
         const R = 210 * strength
         const R2 = R * R
@@ -139,18 +140,21 @@ export default function DottedCanvasBg({
 
                 const lift = k * wave * 1.25
                 const r = baseR + k * (0.7 + 0.4 * (0.5 + 0.5 * wave))
-                const a = Math.min(0.30, baseA + k * 0.14)
+                // const a = Math.min(0.30, baseA + k * 0.14)
 
                 const jx = ((xx * 13 + yy * 7) % 7) - 3
                 const jy = ((xx * 9 + yy * 11) % 7) - 3
 
+                // We just draw the animated dots on top. 
+                // Alternatively clear rect but that's complex. 
+                // Simple overdraw is fine.
                 ctx.beginPath()
-                ctx.fillStyle = `rgba(0,0,0,${a})`
+                ctx.fillStyle = `rgba(0,0,0,0.4)`
                 ctx.arc(xx + jx * 0.07, yy + jy * 0.07 + lift, r, 0, Math.PI * 2)
                 ctx.fill()
             }
         }
-    }, [active, point, strength])
+    }, [active, point])
 
     // run RAF only while active; otherwise draw once (ultra stable FPS)
     React.useEffect(() => {

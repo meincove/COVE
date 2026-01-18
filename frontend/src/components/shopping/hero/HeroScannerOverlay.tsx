@@ -214,10 +214,12 @@ export default function HeroScannerOverlay({
     }
 
     return (
-        <div
+        <motion.div
+            layoutId="hero-scanner-focus"
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none"
-            style={{ width: "min(420px, 86vw)", height: "min(280px, 42vh)" }}
+            style={{ width: "min(190px, 45vw)", height: "min(140px, 25vh)" }}
         >
+            {/* Static Brackets */}
             {(["tl", "tr", "bl", "br"] as const).map((pos) => (
                 <div
                     key={pos}
@@ -252,12 +254,18 @@ export default function HeroScannerOverlay({
                 />
             ))}
 
+
             {!scanned && (
                 <div className="absolute inset-0 flex items-center justify-center text-center">
-                    <div className="rounded-2xl bg-white/55 border border-black/10 px-4 py-2 shadow-sm backdrop-blur-md">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+                        className="rounded-2xl bg-white/75 border border-black/10 px-4 py-2 shadow-md"
+                    >
                         <div className="text-xs text-black/60 font-medium">Drag to explore (x + y)</div>
                         <div className="text-[11px] text-black/40 mt-1">Bring a tile into the center to preview</div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
 
@@ -273,13 +281,13 @@ export default function HeroScannerOverlay({
                         style={{
                             borderRadius: 18,
                             // ✅ FIX: don’t use shorthand `background`
-                            backgroundColor: dragging ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.75)",
+                            backgroundColor: dragging ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)",
                             backgroundImage:
-                                "radial-gradient(900px 240px at 30% 0%, rgba(255,255,255,0.55), transparent 60%)",
-                            border: "1px solid rgba(0,0,0,0.10)",
-                            boxShadow: dragging ? "0 16px 48px rgba(0,0,0,0.10)" : "0 22px 68px rgba(0,0,0,0.12)",
-                            backdropFilter: dragging ? "none" : "blur(6px)",
-                            WebkitBackdropFilter: dragging ? "none" : "blur(6px)",
+                                "radial-gradient(900px 240px at 30% 0%, rgba(255,255,255,0.40), transparent 60%)",
+                            border: "1px solid rgba(0,0,0,0.08)",
+                            boxShadow: dragging ? "0 16px 48px rgba(0,0,0,0.06)" : "0 22px 68px rgba(0,0,0,0.08)",
+                            backdropFilter: dragging ? "none" : "blur(16px)",
+                            WebkitBackdropFilter: dragging ? "none" : "blur(16px)",
                         }}
                         onPointerDown={(e) => e.stopPropagation()}
                         onPointerMove={(e) => e.stopPropagation()}
@@ -373,6 +381,6 @@ export default function HeroScannerOverlay({
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     )
 }
