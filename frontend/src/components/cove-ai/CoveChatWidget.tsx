@@ -355,6 +355,10 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
 
       if (!hasStartedChat) {
         setHasStartedChat(true);
+        // Mark that user has chatted (for personalized greeting on next visit)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cove_has_chatted', 'true');
+        }
       }
 
       // Save user message to history

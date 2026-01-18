@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
-import { MessageCircle, X, Shirt, ShoppingCart, Plus, Smile, ArrowUp, Image as ImageIcon, ArrowLeft, Minus, Trash2 } from "lucide-react";
+import { MessageCircle, X, Shirt, ShoppingCart, Plus, Smile, ArrowUp, Image as ImageIcon, ArrowLeft, Minus, Trash2, LogIn, UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
 import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
@@ -10,34 +10,37 @@ import BubblesStatusPill from "@/src/components/cove-ai/BubblesStatusPill";
 import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactiveSignals";
 import { useLayoutStore } from "@/src/store/layoutStore";
 import OutfitModal from "@/src/components/cove-ai/OutfitModal";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
+    // "started" means the user clicked "Start Chatting" or has historically chatted
+    const [hasStarted, setHasStarted] = useState(false);
     const [activeView, setActiveView] = useState<'chat' | 'outfit_builder' | 'cart'>('chat');
     const [isThinking, setIsThinking] = useState(false);
     const [thinkingSteps, setThinkingSteps] = useState<Array<{ icon: string; status: string; done?: boolean }>>([]);
-
-    // Round 4: Window State
     const [isMinimized, setIsMinimized] = useState(false);
     const [hasOutfitReady, setHasOutfitReady] = useState(false);
 
-    // Track if user has interacted to keep pill visible for feedback
-    const [hasInteracted, setHasInteracted] = useState(false);
-
-    // Input state - managed here and passed to CoveChatWidget
+    // Input state
     const [inputValue, setInputValue] = useState("");
     const [isFocused, setIsFocused] = useState(false);
     const [uploadedImage, setUploadedImage] = useState<{ file: File; preview: string } | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Auth & Routing
+    const { isSignedIn, user } = useUser();
+    const { signOut } = useClerk();
+    const router = useRouter();
+
     // Layout Store
     const { isCanvasOpen, closeCanvas, generatedOutfit } = useLayoutStore();
 
-    // Proactive Offer State
+    // Proactive Offer
     const [activeOffer, setActiveOffer] = useState<ProactiveResponse | null>(null);
 
-    // Listen for proactive signals
     useProactiveSignals((offer) => {
         if (!isOpen) {
             setActiveOffer(offer);
@@ -45,41 +48,65 @@ export default function FloatingChatbot() {
         }
     });
 
-    // Ref to chat widget for triggering messages
-    // Ref to chat widget for triggering messages
+    // Widget Ref
     const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>(null);
 
+    // Toggle Open/Close
     const toggleChat = () => {
         const newState = !isOpen;
         setIsOpen(newState);
         if (newState) {
             setActiveOffer(null);
-            // Focus input when opening
-            setTimeout(() => inputRef.current?.focus(), 100);
+            if (hasStarted) {
+                setTimeout(() => inputRef.current?.focus(), 100);
+            }
         }
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('cove_chat_open', String(newState));
         }
     };
 
-    // Load persisted state on mount
+    // Load persisted state - DISABLED: Chatbot should stay closed by default
+    useEffect(() => {
+        // Do NOT auto-open from sessionStorage
+        // The chatbot will only open when the user clicks on it
+    }, []);
+
+    // Persist hasStarted per session
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const persistedState = sessionStorage.getItem('cove_chat_open');
-            if (persistedState === 'true') {
-                setIsOpen(true);
+            const sessionStarted = sessionStorage.getItem('cove_chat_started');
+            if (sessionStarted === 'true') {
+                setHasStarted(true);
             }
         }
     }, []);
 
-    // Monitor thinking state to enable pill persistence
-    useEffect(() => {
-        if (isThinking) {
-            setHasInteracted(true);
+    const handleStartChatting = () => {
+        if (isSignedIn) {
+            setHasStarted(true);
+            sessionStorage.setItem('cove_chat_started', 'true');
+            setTimeout(() => inputRef.current?.focus(), 300);
         }
-    }, [isThinking]);
+    };
 
-    // Handle form submission
+    const [showAuthOptions, setShowAuthOptions] = useState(false);
+
+    // Auth Handlers
+    const handleSignIn = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('cove_redirect_url', window.location.pathname);
+            window.location.href = '/sign-in';
+        }
+    };
+
+    const handleSignUp = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('cove_redirect_url', window.location.pathname);
+            window.location.href = '/sign-up';
+        }
+    };
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (!inputValue.trim() && !uploadedImage) return;
@@ -91,30 +118,23 @@ export default function FloatingChatbot() {
         setUploadedImage(null);
     };
 
-    // Handle quick action/prompt clicks
     const handleQuickAction = (text: string) => {
         if (chatWidgetRef.current) {
             chatWidgetRef.current.sendQuickMessage(text);
         }
     };
 
-    // Handle image upload
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
-        // Check file size (5MB limit)
         if (file.size > 5 * 1024 * 1024) {
             alert("Image must be less than 5MB");
             return;
         }
-
-        // Check file type
         if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type)) {
             alert("Only JPEG, PNG, and SVG images are allowed");
             return;
         }
-
         const preview = URL.createObjectURL(file);
         setUploadedImage({ file, preview });
     };
@@ -126,7 +146,6 @@ export default function FloatingChatbot() {
         }
     };
 
-    // Determine if send button should be active
     const canSend = inputValue.trim().length > 0 || uploadedImage !== null;
 
     return (
@@ -137,11 +156,11 @@ export default function FloatingChatbot() {
                 onOpen={() => {
                     setIsOpen(true);
                     setActiveOffer(null);
+                    setHasStarted(true);
                 }}
                 onDismiss={() => setActiveOffer(null)}
             />
 
-            {/* Outfit Modal */}
             <OutfitModal
                 isOpen={isCanvasOpen && !!generatedOutfit && generatedOutfit.length > 0}
                 onClose={closeCanvas}
@@ -156,13 +175,27 @@ export default function FloatingChatbot() {
                 budgetMax={500}
             />
 
-            {/* Chat Window - Clean White Design */}
+            {/* Launcher (When Closed) */}
+            {!isOpen && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed z-[999] bottom-6 right-6 cursor-pointer"
+                    onClick={toggleChat}
+                >
+                    <BubblesStatusPill
+                        isThinking={isThinking}
+                        thinkingSteps={thinkingSteps}
+                    />
+                </motion.div>
+            )}
+
+            {/* Chat Window */}
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        {/* Backdrop removed to prevent full-screen blur on resize */}
-
-                        {/* Main Chat Container */}
                         <AnimatePresence mode="wait">
                             {isMinimized ? (
                                 <motion.div
@@ -188,19 +221,24 @@ export default function FloatingChatbot() {
                                     transition={{ duration: 0.2, ease: "easeOut" }}
                                     className="fixed z-[999] bottom-6 right-6 w-[90vw] md:w-[380px] h-[75vh] md:h-[750px] max-h-[900px] max-w-[380px] rounded-2xl bg-neutral-100 shadow-2xl border border-gray-200 overflow-hidden flex flex-col"
                                 >
-                                    {/* Header - Minimal Top Bar - above blur */}
+                                    {/* Header - Minimal Top Bar */}
                                     <div className="h-11 flex items-center justify-between px-4 relative z-50 shrink-0 bg-transparent">
                                         <div className="flex items-center">
-                                            {/* Back Arrow - Darker, bolder */}
                                             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-800 hover:text-black">
                                                 <ArrowLeft className="h-5 w-5" strokeWidth={2} />
                                             </button>
                                         </div>
 
                                         <div className="flex items-center gap-0.5">
-                                            {/* Close/Minimize - Both now reduce to pill */}
                                             <button
                                                 onClick={() => setIsMinimized(true)}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
+                                                title="Minimize"
+                                            >
+                                                <Minus className="h-4 w-4" strokeWidth={2} />
+                                            </button>
+                                            <button
+                                                onClick={() => setIsOpen(false)}
                                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
                                                 title="Close"
                                             >
@@ -220,7 +258,7 @@ export default function FloatingChatbot() {
                                         </div>
                                     </div>
 
-                                    {/* Neutral gradient fade zone from top - darker toned */}
+                                    {/* Neutral gradient fade zone from top */}
                                     <div
                                         className="absolute top-0 left-0 right-0 h-20 z-30 pointer-events-none"
                                         style={{
@@ -229,33 +267,126 @@ export default function FloatingChatbot() {
                                         }}
                                     />
 
-                                    {/* Chat Content */}
-                                    <div className="flex-1 min-h-0 overflow-hidden">
-                                        <div className={activeView === 'cart' ? 'hidden' : 'h-full'}>
-                                            <CoveChatWidget
-                                                ref={chatWidgetRef}
-                                                mode={activeView === 'outfit_builder' ? 'outfit_builder' : 'chat'}
-                                                onThinkingChange={(thinking, steps) => {
-                                                    setIsThinking(thinking);
-                                                    setThinkingSteps(steps || []);
-                                                }}
-                                                onQuickAction={handleQuickAction}
-                                                onTabChange={(tab) => {
-                                                    setActiveView(tab);
-                                                    // Note: You can clear Green Dot here if desired
-                                                    if (tab === 'outfit_builder') setHasOutfitReady(false);
-                                                }}
-                                                onOutfitReady={() => setHasOutfitReady(true)}
-                                            />
-                                        </div>
-                                        {activeView === 'cart' && (
-                                            <div className="h-full flex items-center justify-center text-gray-400">
-                                                <div className="text-center">
-                                                    <ShoppingCart className="h-12 w-12 mx-auto mb-3" />
-                                                    <p className="font-medium">Your Cart</p>
-                                                </div>
+                                    {/* Main Content Area */}
+                                    <div className="flex-1 min-h-0 relative overflow-hidden">
+
+                                        {/* View 1: Welcome/Start Screen (If not started) */}
+                                        <AnimatePresence>
+                                            {!hasStarted && (
+                                                <motion.div
+                                                    key="welcome-screen"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+                                                    transition={{ duration: 0.4 }}
+                                                    className="absolute inset-0 z-40 bg-white flex flex-col items-center justify-center p-8 text-center"
+                                                >
+                                                    <motion.div
+                                                        initial={{ scale: 0.8, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        transition={{ delay: 0.1 }}
+                                                        className="w-24 h-24 mb-6 rounded-full bg-black flex items-center justify-center shadow-xl"
+                                                    >
+                                                        <span className="text-white text-5xl font-bold">B</span>
+                                                    </motion.div>
+
+                                                    <motion.h2
+                                                        initial={{ y: 20, opacity: 0 }}
+                                                        animate={{ y: 0, opacity: 1 }}
+                                                        transition={{ delay: 0.2 }}
+                                                        className="text-2xl font-bold text-gray-900 mb-3"
+                                                    >
+                                                        Hi, I'm Bubbles!
+                                                    </motion.h2>
+
+                                                    <motion.p
+                                                        initial={{ y: 20, opacity: 0 }}
+                                                        animate={{ y: 0, opacity: 1 }}
+                                                        transition={{ delay: 0.3 }}
+                                                        className="text-gray-500 mb-8 leading-relaxed"
+                                                    >
+                                                        Your personal shopping assistant. 🫧 <br />
+                                                        I'm here to help you browse, style, and find the perfect look.
+                                                    </motion.p>
+
+                                                    {!showAuthOptions ? (
+                                                        <motion.button
+                                                            initial={{ y: 20, opacity: 0 }}
+                                                            animate={{ y: 0, opacity: 1 }}
+                                                            transition={{ delay: 0.4 }}
+                                                            onClick={() => {
+                                                                if (isSignedIn) {
+                                                                    handleStartChatting();
+                                                                } else {
+                                                                    setShowAuthOptions(true);
+                                                                }
+                                                            }}
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            className="px-8 py-3 bg-black text-white rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                                                        >
+                                                            Start Chatting
+                                                            <MessageCircle className="w-4 h-4" />
+                                                        </motion.button>
+                                                    ) : (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: 20 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            className="flex flex-col gap-3 w-full max-w-xs"
+                                                        >
+                                                            <button
+                                                                onClick={handleSignIn}
+                                                                className="w-full py-3 bg-black text-white rounded-xl font-medium shadow-md flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                                                            >
+                                                                <LogIn className="w-4 h-4" />
+                                                                Sign In to Chat
+                                                            </button>
+                                                            <button
+                                                                onClick={handleSignUp}
+                                                                className="w-full py-3 bg-gray-100 text-gray-900 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                                            >
+                                                                <UserPlus className="w-4 h-4" />
+                                                                Create Account
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setShowAuthOptions(false)}
+                                                                className="text-gray-400 text-sm mt-2 hover:text-gray-600"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </motion.div>
+                                                    )}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+
+                                        {/* View 2: Active Chat Interface */}
+                                        <div className={`h-full ${!hasStarted ? 'invisible' : 'visible'}`}>
+                                            <div className={activeView === 'cart' ? 'hidden' : 'h-full'}>
+                                                <CoveChatWidget
+                                                    ref={chatWidgetRef}
+                                                    mode={activeView === 'outfit_builder' ? 'outfit_builder' : 'chat'}
+                                                    onThinkingChange={(thinking, steps) => {
+                                                        setIsThinking(thinking);
+                                                        setThinkingSteps(steps || []);
+                                                    }}
+                                                    onQuickAction={handleQuickAction}
+                                                    onTabChange={(tab) => {
+                                                        setActiveView(tab);
+                                                        if (tab === 'outfit_builder') setHasOutfitReady(false);
+                                                    }}
+                                                    onOutfitReady={() => setHasOutfitReady(true)}
+                                                />
                                             </div>
-                                        )}
+                                            {activeView === 'cart' && (
+                                                <div className="h-full flex items-center justify-center text-gray-400">
+                                                    <div className="text-center">
+                                                        <ShoppingCart className="h-12 w-12 mx-auto mb-3" />
+                                                        <p className="font-medium">Your Cart</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Uploaded Image Preview */}
@@ -284,83 +415,93 @@ export default function FloatingChatbot() {
                                         )}
                                     </AnimatePresence>
 
-                                    {/* Input Area - Gray background, no border */}
-                                    <form onSubmit={handleSubmit} className="px-4 py-3 bg-neutral-100">
-                                        <motion.div
-                                            className={`flex items-center gap-2 rounded-full px-4 py-2 border-2 transition-colors ${isFocused
-                                                ? 'bg-white border-green-400 shadow-sm'
-                                                : 'bg-gray-50 border-gray-200'
-                                                }`}
-                                            animate={{
-                                                borderColor: isFocused ? '#4ade80' : '#e5e7eb',
-                                            }}
-                                        >
-                                            {/* Image Upload Button */}
-                                            <button
-                                                type="button"
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                                            >
-                                                <Plus className="h-5 w-5 text-gray-400" />
-                                            </button>
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                accept="image/jpeg,image/png,image/svg+xml"
-                                                onChange={handleImageSelect}
-                                                className="hidden"
-                                            />
-
-                                            <input
-                                                ref={inputRef}
-                                                type="text"
-                                                placeholder="Write a message..."
-                                                value={inputValue}
-                                                onChange={(e) => setInputValue(e.target.value)}
-                                                onFocus={() => setIsFocused(true)}
-                                                onBlur={() => setIsFocused(false)}
-                                                className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
-                                            />
-
-                                            <button
-                                                type="button"
-                                                className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                                            >
-                                                <Smile className="h-5 w-5 text-gray-400" />
-                                            </button>
-
-                                            {/* Send Button - Animates based on canSend */}
-                                            <motion.button
-                                                type="submit"
-                                                disabled={!canSend}
-                                                className="flex items-center justify-center rounded-full transition-all"
-                                                animate={{
-                                                    backgroundColor: canSend ? '#22c55e' : 'transparent',
-                                                    width: canSend ? 36 : 32,
-                                                    height: canSend ? 36 : 32,
-                                                    borderWidth: canSend ? 0 : 2,
-                                                }}
-                                                style={{
-                                                    borderColor: '#22c55e',
-                                                }}
-                                                whileHover={canSend ? { scale: 1.05 } : {}}
-                                                whileTap={canSend ? { scale: 0.95 } : {}}
+                                    {/* Input Area - Springs up when hasStarted */}
+                                    <AnimatePresence>
+                                        {hasStarted && (
+                                            <motion.form
+                                                initial={{ y: 100, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ type: "spring", damping: 20, stiffness: 300, delay: 0.2 }}
+                                                onSubmit={handleSubmit}
+                                                className="px-4 py-3 bg-neutral-100"
                                             >
                                                 <motion.div
+                                                    className={`flex items-center gap-2 rounded-full px-4 py-2 border-2 transition-colors ${isFocused
+                                                        ? 'bg-white border-green-400 shadow-sm'
+                                                        : 'bg-gray-50 border-gray-200'
+                                                        }`}
                                                     animate={{
-                                                        scale: canSend ? 1.1 : 1,
+                                                        borderColor: isFocused ? '#4ade80' : '#e5e7eb',
                                                     }}
                                                 >
-                                                    <ArrowUp
-                                                        className={`transition-colors ${canSend ? 'text-white h-5 w-5' : 'text-green-500 h-4 w-4'
-                                                            }`}
+                                                    {/* Image Upload Button */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                                                    >
+                                                        <Plus className="h-5 w-5 text-gray-400" />
+                                                    </button>
+                                                    <input
+                                                        ref={fileInputRef}
+                                                        type="file"
+                                                        accept="image/jpeg,image/png,image/svg+xml"
+                                                        onChange={handleImageSelect}
+                                                        className="hidden"
                                                     />
-                                                </motion.div>
-                                            </motion.button>
-                                        </motion.div>
-                                    </form>
 
-                                    {/* View Mode Tabs - Bottom Pills - Gray bg */}
+                                                    <input
+                                                        ref={inputRef}
+                                                        type="text"
+                                                        placeholder="Write a message..."
+                                                        value={inputValue}
+                                                        onChange={(e) => setInputValue(e.target.value)}
+                                                        onFocus={() => setIsFocused(true)}
+                                                        onBlur={() => setIsFocused(false)}
+                                                        className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
+                                                    />
+
+                                                    <button
+                                                        type="button"
+                                                        className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                                                    >
+                                                        <Smile className="h-5 w-5 text-gray-400" />
+                                                    </button>
+
+                                                    {/* Send Button - Green styling */}
+                                                    <motion.button
+                                                        type="submit"
+                                                        disabled={!canSend}
+                                                        className="flex items-center justify-center rounded-full transition-all"
+                                                        animate={{
+                                                            backgroundColor: canSend ? '#22c55e' : 'transparent',
+                                                            width: canSend ? 36 : 32,
+                                                            height: canSend ? 36 : 32,
+                                                            borderWidth: canSend ? 0 : 2,
+                                                        }}
+                                                        style={{
+                                                            borderColor: '#22c55e',
+                                                        }}
+                                                        whileHover={canSend ? { scale: 1.05 } : {}}
+                                                        whileTap={canSend ? { scale: 0.95 } : {}}
+                                                    >
+                                                        <motion.div
+                                                            animate={{
+                                                                scale: canSend ? 1.1 : 1,
+                                                            }}
+                                                        >
+                                                            <ArrowUp
+                                                                className={`transition-colors ${canSend ? 'text-white h-5 w-5' : 'text-green-500 h-4 w-4'
+                                                                    }`}
+                                                            />
+                                                        </motion.div>
+                                                    </motion.button>
+                                                </motion.div>
+                                            </motion.form>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* View Mode Tabs - Bottom Pills */}
                                     <div className="px-4 py-2 bg-neutral-100">
                                         <div className="flex justify-center gap-2">
                                             {[
@@ -390,19 +531,18 @@ export default function FloatingChatbot() {
                                         </div>
                                     </div>
 
-                                    {/* Footer Branding - White bg with top border */}
+                                    {/* Footer Branding */}
                                     <div className="border-t border-gray-200 py-2 px-4 text-center bg-white">
                                         <span className="text-xs text-gray-400">
                                             Powered by <span className="text-gray-600 font-medium">🫧 CoveAI</span>
                                         </span>
                                     </div>
-                                </motion.div >
-                            )
-                            }
-                        </AnimatePresence >
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </>
                 )}
-            </AnimatePresence >
+            </AnimatePresence>
         </>
     );
 }

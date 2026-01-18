@@ -25,11 +25,19 @@ export default function CustomSignUpPage() {
     // ✅ Redirect if already signed in
     useEffect(() => {
         if (isLoaded && isSignedIn) {
+            // 1. Check for specific return URL (from Chatbot/Deep Link)
+            const returnUrl = localStorage.getItem('cove_redirect_url')
+            if (returnUrl) {
+                localStorage.removeItem('cove_redirect_url') // Clear after use
+                router.push(returnUrl)
+                return
+            }
+
             const selectedPath = localStorage.getItem('cove_selected_path')
             if (selectedPath === 'platform') {
                 router.push('/partner-onboarding')
             } else {
-                router.push('/shop')
+                router.push('/shopping')
             }
         }
     }, [isLoaded, isSignedIn, router])
@@ -111,10 +119,18 @@ export default function CustomSignUpPage() {
                 }
 
                 // Redirect based on selected path
+                // 1. Check for specific return URL
+                const returnUrl = localStorage.getItem('cove_redirect_url')
+                if (returnUrl) {
+                    localStorage.removeItem('cove_redirect_url')
+                    router.push(returnUrl)
+                    return
+                }
+
                 if (selectedPath === 'platform') {
                     router.push('/partner-onboarding')
                 } else {
-                    router.push('/shop')
+                    router.push('/shopping')
                 }
             }
         } catch (err: any) {
@@ -130,11 +146,19 @@ export default function CustomSignUpPage() {
 
         // ✅ Check if already signed in
         if (isSignedIn) {
+            // 1. Check for specific return URL
+            const returnUrl = localStorage.getItem('cove_redirect_url')
+            if (returnUrl) {
+                localStorage.removeItem('cove_redirect_url')
+                router.push(returnUrl)
+                return
+            }
+
             const selectedPath = localStorage.getItem('cove_selected_path')
             if (selectedPath === 'platform') {
                 router.push('/partner-onboarding')
             } else {
-                router.push('/shop')
+                router.push('/shopping')
             }
             return
         }
@@ -157,11 +181,19 @@ export default function CustomSignUpPage() {
 
         // ✅ Check if already signed in
         if (isSignedIn) {
+            // 1. Check for specific return URL
+            const returnUrl = localStorage.getItem('cove_redirect_url')
+            if (returnUrl) {
+                localStorage.removeItem('cove_redirect_url')
+                router.push(returnUrl)
+                return
+            }
+
             const selectedPath = localStorage.getItem('cove_selected_path')
             if (selectedPath === 'platform') {
                 router.push('/partner-onboarding')
             } else {
-                router.push('/shop')
+                router.push('/shopping')
             }
             return
         }

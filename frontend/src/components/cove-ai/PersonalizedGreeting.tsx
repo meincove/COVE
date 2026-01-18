@@ -28,34 +28,70 @@ export default function PersonalizedGreeting({ onQuickAction }: PersonalizedGree
         }
     };
 
-    // Signed-in personalized greeting - User info card like MusicBed
+    // Signed-in personalized greeting - Friendly message from Bubbles
     if (isSignedIn && user) {
-        const firstName = user.firstName || user.username || "there";
-        const email = user.primaryEmailAddress?.emailAddress || "";
+        const displayName = user.firstName || user.username || "there";
+
+        // Check if this is the first time the user is chatting (per session or ever)
+        const isFirstTimeUser = typeof window !== 'undefined' && !localStorage.getItem('cove_has_chatted');
+
+        // Determine the greeting based on first-time vs returning user
+        const greeting = isFirstTimeUser ? (
+            <>
+                <span className="font-semibold text-gray-900">Hey {displayName}! 🫧</span>
+                <br />
+                I'm Bubbles, your personal shopping assistant! I'm here to help you discover styles,
+                build outfits, and find exactly what you're looking for. What can I help you with today?
+            </>
+        ) : (
+            <>
+                <span className="font-semibold text-gray-900">Hey {displayName}! 👋</span>
+                <br />
+                Good to see you again! What are we shopping for today?
+            </>
+        );
+
+        // Quick actions differ for first-time vs returning
+        const quickActions = isFirstTimeUser ? [
+            { emoji: "✨", text: "Show me trending styles" },
+            { emoji: "🧥", text: "I need a hoodie" },
+            { emoji: "🎨", text: "Build me an outfit" },
+            { emoji: "🎁", text: "Surprise me!" }
+        ] : [
+            { emoji: "🔥", text: "Show me what's new" },
+            { emoji: "👀", text: "Continue where I left off" },
+            { emoji: "🎨", text: "Build me an outfit" },
+            { emoji: "📦", text: "Check my orders" }
+        ];
 
         return (
             <div className="p-4">
-                {/* User Info Card - MusicBed Style */}
+                {/* Bubbles Avatar + Personalized Message */}
                 <div className="flex items-start gap-3 mb-4">
-                    <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                        <User className="h-4 w-4 text-gray-500" />
+                    <div className="h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-xs">B</span>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">Name:</span>
-                            </div>
-                            <p className="text-sm font-medium text-gray-800">{user.fullName || firstName}</p>
+                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm max-w-[280px]">
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                            {greeting}
+                        </p>
+                    </div>
+                </div>
 
-                            {email && (
-                                <>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <span className="text-xs text-gray-500">E-mail:</span>
-                                    </div>
-                                    <p className="text-sm text-gray-700">{email}</p>
-                                </>
-                            )}
-                        </div>
+                {/* Quick Suggestions */}
+                <div className="mt-2 pt-3 border-t border-gray-100">
+                    <p className="text-xs text-gray-400 mb-2">{isFirstTimeUser ? "Try one of these to get started:" : "Quick actions:"}</p>
+                    <div className="flex flex-wrap gap-2">
+                        {quickActions.map((item, idx) => (
+                            <button
+                                key={idx}
+                                type="button"
+                                onClick={() => handleQuickClick(item.text)}
+                                className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-xs text-gray-600 hover:text-gray-800 transition-all cursor-pointer"
+                            >
+                                {item.emoji} {item.text}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
