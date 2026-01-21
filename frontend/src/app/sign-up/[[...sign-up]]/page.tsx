@@ -164,10 +164,11 @@ export default function CustomSignUpPage() {
         }
 
         try {
+            const returnUrl = localStorage.getItem('cove_redirect_url') || '/'
             await signUp.authenticateWithRedirect({
                 strategy: 'oauth_google',
                 redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/'
+                redirectUrlComplete: returnUrl
             })
         } catch (err) {
             console.error('OAuth error:', err)
@@ -199,10 +200,11 @@ export default function CustomSignUpPage() {
         }
 
         try {
+            const returnUrl = localStorage.getItem('cove_redirect_url') || '/'
             await signUp.authenticateWithRedirect({
                 strategy: 'oauth_apple',
                 redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/'
+                redirectUrlComplete: returnUrl
             })
         } catch (err) {
             console.error('OAuth error:', err)

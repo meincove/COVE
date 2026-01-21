@@ -198,21 +198,26 @@ export default function ProductConfigurator({
                 setSelectedColorIndex(i)
                 setStockAlert('')
               }}
-              className={clsx(
-                'p-1.5 rounded-full transition-all duration-200 hover:bg-black/5',
-                selectedColorIndex === i ? 'ring-1 ring-black ring-offset-2' : ''
-              )}
+              className="transition-all duration-200 hover:scale-105 rounded-3xl"
               title={color.colorName}
             >
               <div
-                className="w-8 h-8 rounded-full border border-black/10 shadow-sm"
-                style={{ backgroundColor: color.hex }}
-              />
+                className={clsx(
+                  "w-12 h-10 rounded-2xl relative overflow-hidden flex items-center justify-center shadow-sm",
+                  selectedColorIndex === i
+                    ? "border-2 border-black/50"
+                    : "border border-black/5"
+                )}
+              >
+                <div className="absolute inset-0" style={{ backgroundColor: color.hex }} />
+                {/* Subtle gloss */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/0 via-white/10 to-white/20" />
+              </div>
             </button>
           ))}
         </div>
         <p className="text-xs text-black/60 font-medium ml-1">
-          Selected: <span className="text-black">{selectedColor.colorName}</span>
+          Selected: <span className="text-black font-bold">{selectedColor.colorName}</span>
         </p>
       </div>
 
@@ -223,7 +228,7 @@ export default function ProductConfigurator({
           <button className="text-[10px] underline text-black/40 hover:text-black">Size Guide</button>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-3">
           {Object.entries(sizes).map(([size, stock]) => {
             const isSelected = selectedSize === size
             const isOut = stock <= 0
@@ -239,11 +244,11 @@ export default function ProductConfigurator({
                   setStockAlert('')
                 }}
                 className={clsx(
-                  'py-3 rounded-lg border text-sm font-semibold transition-all',
+                  'h-12 rounded-3xl text-sm font-bold transition-all duration-200 shadow-sm flex items-center justify-center',
                   isSelected
-                    ? 'bg-black text-white border-black'
-                    : 'bg-white text-black border-gray-200 hover:border-black',
-                  isOut && 'opacity-30 bg-gray-50 cursor-not-allowed decoration-slice line-through'
+                    ? 'bg-black text-white shadow-md'
+                    : 'bg-gray-100 text-black hover:bg-gray-200',
+                  isOut && 'opacity-30 bg-gray-50 cursor-not-allowed line-through shadow-none'
                 )}
               >
                 {size}
@@ -266,12 +271,12 @@ export default function ProductConfigurator({
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           {/* Quantity Stepper */}
-          <div className="flex items-center bg-gray-100 rounded-full h-14 px-2">
-            <button onClick={decQuantity} className="w-10 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Minus size={14} /></button>
+          <div className="flex items-center bg-gray-100 rounded-full h-12 px-2">
+            <button onClick={decQuantity} className="w-9 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Minus size={14} /></button>
             <span className="w-8 text-center text-sm font-semibold">{quantity}</span>
-            <button onClick={incQuantity} className="w-10 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Plus size={14} /></button>
+            <button onClick={incQuantity} className="w-9 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Plus size={14} /></button>
           </div>
 
           {/* Add To Cart */}
@@ -279,14 +284,14 @@ export default function ProductConfigurator({
             <button
               onClick={handleAddToCart}
               disabled={!selectedSize || quantity <= 0}
-              className="flex-1 bg-black text-white h-14 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-black/10 transition-all active:scale-[0.98]"
+              className="flex-1 bg-black text-white h-12 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-black/10 transition-all active:scale-[0.98]"
             >
               Add to Cart
             </button>
           ) : (
             <button
               onClick={() => router.push('/checkoutpage')}
-              className="flex-1 bg-white text-black border-2 border-black h-14 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-2 transition-all"
+              className="flex-1 bg-white text-black border-2 border-black h-12 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-gray-50 flex items-center justify-center gap-2 transition-all"
             >
               Checkout →
             </button>
@@ -295,7 +300,7 @@ export default function ProductConfigurator({
           {/* Like */}
           <button
             onClick={() => setLiked(!liked)}
-            className="h-14 w-14 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
+            className="h-12 w-12 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
           >
             <Heart size={20} className={clsx("transition-transform", liked && "fill-red-500 text-red-500 scale-110")} />
           </button>

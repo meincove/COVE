@@ -255,7 +255,7 @@ export default function ProductPage() {
       <div className="flex-1 w-full max-w-[2400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-8">
 
         {/* LEFT COLUMN: Info & Context (Sticky) */}
-        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 relative">
+        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 relative pl-4 lg:pl-12">
           <div className="sticky top-24 pr-4">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-black/40 mb-8">
@@ -292,7 +292,8 @@ export default function ProductPage() {
         </div>
 
         {/* RIGHT COLUMN: Action & Config (Sticky) */}
-        <div className="col-span-1 lg:col-span-4 xl:col-span-3 relative">
+        {/* Added extra right padding (lg:pr-12) to increase gap from screen edge */}
+        <div className="col-span-1 lg:col-span-4 xl:col-span-3 relative lg:pr-12">
           <div className="sticky top-24 pl-4">
             <ProductConfigurator
               sizes={selectedColor.sizes}

@@ -98,20 +98,19 @@ export default function GlobalNavbar() {
 
             {/*
               Positioning Wrapper
-              Fixed to top, centered, smaller width
+              Full-width fixed at top
             */}
-            <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] md:w-[85%] lg:w-[70%] max-w-[1100px] z-[300]">
+            <div className="fixed top-0 left-0 right-0 w-full z-[300]">
 
                 <motion.div
                     layout
                     initial={false}
                     animate={{
                         height: isExpanded ? expandedHeight : collapsedHeight,
-                        borderRadius: "32px",
                         backgroundColor: "rgba(255, 255, 255, 0.85)"
                     }}
                     transition={SPRING_TRANSITION}
-                    className="relative w-full border-[3px] border-white/80 shadow-[0_30px_60px_-10px_rgba(0,0,0,0.3),0_10px_20px_-5px_rgba(0,0,0,0.1)] backdrop-blur-3xl overflow-hidden"
+                    className="relative w-full border-b border-white/80 shadow-[0_4px_30px_-5px_rgba(0,0,0,0.1)] backdrop-blur-3xl overflow-hidden"
                 >
                     {/* --- TOP BAR ROW --- */}
                     <motion.div
@@ -311,7 +310,7 @@ export default function GlobalNavbar() {
                     </AnimatePresence>
 
                 </motion.div>
-            </div>
+            </div >
 
             <CartModal open={cartOpen} onClose={() => setCartOpen(false)} />
         </>

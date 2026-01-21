@@ -479,14 +479,19 @@ export default function HeroScannerWall({
             onPointerLeave={handlePointerUp}
             style={{ backgroundColor: "transparent" }} // Catch events
         >
-            <div className="absolute inset-0" style={{ perspective: "1200px", transformStyle: "preserve-3d" }}>
-                {/* GRADIAL FADE IN ENTRY */}
+            <div className="absolute inset-0" style={{ perspective: "1200px", perspectiveOrigin: "50% 50%", transformStyle: "preserve-3d" }}>
+                {/* ENTIRE CANVAS CURVED INWARD - CONCAVE SURFACE */}
                 <motion.div
                     initial={{ opacity: 0, filter: "blur(10px)" }}
                     animate={{ opacity: 1, filter: "blur(0px)" }}
                     transition={{ duration: 1.2, ease: "easeOut" }}
                     className="w-full h-full"
-                    style={{ transformStyle: "preserve-3d" }}
+                    style={{
+                        transformStyle: "preserve-3d",
+                        // Curve the entire panel inward like inside of a bowl
+                        transform: "rotateX(15deg) translateZ(-200px)",
+                        transformOrigin: "center center"
+                    }}
                 >
                     {visibleTiles.map(t => {
                         // Calculate relative position to camera for rendering
@@ -505,17 +510,34 @@ export default function HeroScannerWall({
                         const ax = Math.min(1, Math.abs(nx))
                         const ay = Math.min(1, Math.abs(ny))
 
-                        // ✅ CONVEX CURVE (Center Forward, Edges Back)
-                        // Center (ax=0) -> Z = 0
-                        // Edges (ax=1) -> Z = -220 (receding)
-                        const z = -((Math.pow(ax, 2) + Math.pow(ay, 2)) * 180)
+                        // ✅ CYLINDRICAL CURVED MONITOR: Horizontal Curve ONLY
+                        // We only care about Horizontal (X) distance for the "wrap".
+                        // Vertical (Y) should stay relatively flat or have very subtle depth.
 
-                        // Rotations: Standard
-                        const rotY = -nx * 25
-                        const rotX = ny * 16
+                        // DISTANCE: Based primarily on X (Horizontal)
+                        const distX = Math.abs(nx)
 
-                        // Scale: Center (closest) = 1.0. Edges (farther) = smaller.
-                        const scale = 1.0 - (ax * 0.1 + ay * 0.1)
+                        // Z: Curve deeply on X axis.
+                        // Center X = 0 (closest/neutral) or pushed back?
+                        // "Centre part is more inwards" -> Center is furthest away.
+                        // "Outer ones are flat but no in proper POV"
+                        // Let's model a Cylinder centered at the viewer.
+                        // Radius of cylinder = 1200px.
+                        // Z = R * (cos(theta) - 1) ?
+
+                        // Simplified Parabola for X-axis curve (Concave)
+                        // At center (nx=0), Z is deepest (-250). At edges (nx=1), Z is 0.
+                        // "More inward" -> Deeper Center (-400)
+                        const z = -400 + (400 * distX * distX)
+
+                        // Rotations: FLIPPED & REDUCED (30deg at edges)
+                        // "Opposite to now" -> -nx
+                        // "Too much" -> 30deg
+                        const rotY = -nx * 30
+                        const rotX = 0       // No vertical tilt (like a real monitor)
+
+                        // Scale: Uniform
+                        const scale = 1.0
 
                         const transform = `translate3d(${screenX}px, ${screenY}px, ${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${scale.toFixed(3)})`
 

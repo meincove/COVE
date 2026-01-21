@@ -219,11 +219,11 @@ export default function HeroScannerOverlay({
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none"
             initial={false}
             animate={{
-                width: scanned ? "min(420px, 86vw)" : "170px",
-                height: scanned ? "min(280px, 42vh)" : "170px",
+                width: scanned ? "min(380px, 80vw)" : "128px",  // Increased ~20% (315 -> 380)
+                height: scanned ? "min(252px, 42vh)" : "128px", // Increased ~20% (210 -> 252)
             }}
-            // ✅ QUICKER SPRING (User request: "smooth and quicker with nice spring")
-            transition={{ type: "spring", stiffness: 380, damping: 30, mass: 0.8 }}
+            // ✅ SNAPPY SPRING: Higher stiffness, lower damping ratio for snap
+            transition={{ type: "spring", stiffness: 450, damping: 28, mass: 0.8 }}
         >
             {/* Static Brackets - Hidden until scanned (User request) */}
             {(["tl", "tr", "bl", "br"] as const).map((pos) => (
@@ -231,33 +231,31 @@ export default function HeroScannerOverlay({
                     key={pos}
                     className="absolute"
                     style={{
-                        width: 30,
-                        height: 30,
+                        width: 36, // Scaled slightly
+                        height: 36,
                         borderStyle: "solid",
-                        // ✅ VISIBILITY FIX: Only visible when scanned (or dragging?)
-                        // User said: "Until something is scanned, the outer layer will not be visible"
                         borderColor: scanned ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.0)",
                         transition: "border-color 0.2s ease",
                         borderWidth:
                             pos === "tl"
-                                ? "2px 0 0 2px"
+                                ? "2.5px 0 0 2.5px"
                                 : pos === "tr"
-                                    ? "2px 2px 0 0"
+                                    ? "2.5px 2.5px 0 0"
                                     : pos === "bl"
-                                        ? "0 0 2px 2px"
-                                        : "0 2px 2px 0",
+                                        ? "0 0 2.5px 2.5px"
+                                        : "0 2.5px 2.5px 0",
                         borderRadius:
                             pos === "tl"
-                                ? "12px 0 0 0"
+                                ? "14px 0 0 0" // Scaled radius
                                 : pos === "tr"
-                                    ? "0 12px 0 0"
+                                    ? "0 14px 0 0"
                                     : pos === "bl"
-                                        ? "0 0 0 12px"
-                                        : "0 0 12px 0",
-                        top: pos.includes("t") ? 0 : undefined,
-                        bottom: pos.includes("b") ? 0 : undefined,
-                        left: pos.includes("l") ? 0 : undefined,
-                        right: pos.includes("r") ? 0 : undefined,
+                                        ? "0 0 0 14px"
+                                        : "0 0 14px 0",
+                        top: pos.includes("t") ? -4 : undefined,     // Offset for larger feel
+                        bottom: pos.includes("b") ? -4 : undefined,
+                        left: pos.includes("l") ? -4 : undefined,
+                        right: pos.includes("r") ? -4 : undefined,
                     }}
                 />
             ))}
@@ -265,21 +263,13 @@ export default function HeroScannerOverlay({
 
             {!scanned && (
                 <div className="absolute inset-0 flex items-center justify-center text-center">
-                    <motion.div
-                        // ✅ SQUARE ICON (User request: "small square , inside it we have a scan symbol")
-                        initial={{ opacity: 0, scale: 0.5, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 400,
-                            damping: 25,
-                            mass: 0.8,
-                            delay: 0.1
-                        }}
-                        className="h-12 w-12 rounded-xl bg-white/75 border border-black/10 flex items-center justify-center shadow-sm backdrop-blur-md"
+                    <div
+                        // ✅ STATIC IDLE (User request: "remove any animation on this")
+                        // No motion props here, just a static div.
+                        className="h-12 w-12 rounded-2xl bg-white/80 border border-black/10 flex items-center justify-center shadow-sm backdrop-blur-md"
                     >
                         <Scan className="w-5 h-5 text-black/60" strokeWidth={1.5} />
-                    </motion.div>
+                    </div>
                 </div>
             )}
 
@@ -287,14 +277,13 @@ export default function HeroScannerOverlay({
                 {scanned && (
                     <motion.div
                         key={scanned.id}
-                        initial={{ opacity: 0, scale: 0.97, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.98, y: 8 }}
-                        transition={{ duration: 0.22, ease: [0.2, 0.9, 0.2, 1] }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                         className="absolute inset-0 overflow-hidden pointer-events-auto"
                         style={{
-                            borderRadius: 18,
-                            // ✅ FIX: don’t use shorthand `background`
+                            borderRadius: 32, // ✅ MORE ROUNDED (18 -> 32)
                             backgroundColor: dragging ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)",
                             backgroundImage:
                                 "radial-gradient(900px 240px at 30% 0%, rgba(255,255,255,0.40), transparent 60%)",

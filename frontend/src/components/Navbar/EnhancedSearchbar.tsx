@@ -7,24 +7,46 @@ import { useProductSearch } from "@/src/hooks/useProductSearch"
 export type SearchMode = "collapsed" | "expanded"
 
 type Props = {
-    // If 'pill' mode, it replaces the GlobalNavbar search
+    // Original props
     variant?: "pill" | "sidebar"
     onExpand?: () => void
     onCollapse?: () => void
     expanded?: boolean
+
+    // Controlled props
+    query?: string
+    onQueryChange?: (q: string) => void
+    externalResults?: boolean
+    results?: any[]
+    loading?: boolean
 }
 
-export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollapse, expanded }: Props) {
+export default function EnhancedSearchbar({
+    variant = "pill",
+    onExpand,
+    onCollapse,
+    expanded,
+    query: controlledQuery,
+    onQueryChange,
+    externalResults = false,
+    results: controlledResults,
+    loading: controlledLoading
+}: Props) {
     const router = useRouter()
 
-    // Professional: Logic abstracted to hook
-    const { query, setQuery, results, loading } = useProductSearch()
+    // Use internal hook ONLY if not controlled or partial
+    const internalSearch = useProductSearch()
+
+    // Derived state - Prefer controlled if present
+    const query = controlledQuery ?? internalSearch.query
+    const setQuery = onQueryChange ?? internalSearch.setQuery
+    // CRITICAL FIX: If using controlled query, must use controlled results!
+    const results = controlledResults ?? internalSearch.results
+    const loading = controlledLoading ?? internalSearch.loading
 
     const [active, setActive] = useState(false)
-
-    // internal expand logic if not controlled
-    const isExpanded = expanded ?? active
     const containerRef = useRef<HTMLDivElement>(null)
+    const isExpanded = expanded ?? active
 
     // Handle outside click
     useEffect(() => {
@@ -51,22 +73,9 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
         onCollapse?.()
     }
 
-    // Styles based on variant
-    const containerClasses = variant === "pill"
-        ? "relative w-full h-full flex items-center"
-        : "relative w-full"
-
-    const inputWrapperClasses = variant === "pill"
-        ? "relative flex items-center bg-gray-100/50 hover:bg-gray-100 transition-colors rounded-full h-10 md:h-12 px-4 cursor-text w-full"
-        : "relative group w-full"
-
-    const inputClasses = variant === "pill"
-        ? "flex-1 bg-transparent border-none outline-none text-sm font-medium placeholder:text-black/30 w-full"
-        : "w-full rounded-full bg-black/5 border border-black/5 px-4 py-2 text-sm text-black/85 placeholder:text-black/35 outline-none focus:border-black/20 focus:bg-black/10 transition-all font-medium"
-
-    // Unified Shell Pattern
-    // The shell is an absolute container that sites on top of a relative placeholder.
-    // This allows it to expand freely without pushing navbar layout, while maintaining its origin position.
+    // If externalResults is true, we ONLY render the input shell, not the dropdown results
+    // The shell animation might need adjustment too - if external results, maybe we don't expand height?
+    const shouldExpandShell = isExpanded && (query || variant === 'sidebar') && !externalResults
 
     return (
         <div ref={containerRef} className={`relative w-full z-50 ${variant === 'pill' ? 'h-10 md:h-12' : 'h-10'}`}>
@@ -76,10 +85,10 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                 layout
                 initial={false}
                 animate={{
-                    height: (isExpanded && (query || variant === 'sidebar')) ? "auto" : "100%",
+                    height: shouldExpandShell ? "auto" : "100%",
                     backgroundColor: (isExpanded && query) ? "#ffffff" : (variant === 'pill' ? "rgba(243, 244, 246, 0.5)" : "rgba(0, 0, 0, 0.05)"),
-                    borderRadius: (isExpanded && query) ? 24 : 9999, // 3xl vs full
-                    boxShadow: (isExpanded && query) ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)" : "none",
+                    borderRadius: (isExpanded && query) ? 24 : 9999,
+                    boxShadow: (shouldExpandShell) ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)" : "none",
                     border: (isExpanded && query) ? "1px solid rgba(0,0,0,0.05)" : "1px solid transparent"
                 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.3 }}
@@ -99,7 +108,7 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Search catalog..."
-                        className="flex-1 bg-transparent border-none outline-none text-sm font-medium placeholder:text-black/30 w-full min-w-0"
+                        className="flex-1 bg-transparent border-none outline-none text-sm font-semibold text-black placeholder:text-black/30 w-full min-w-0" // Bold text update
                         onFocus={handleFocus}
                     />
 
@@ -133,9 +142,9 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                     </AnimatePresence>
                 </div>
 
-                {/* RESULTS AREA (Inside the Shell) */}
+                {/* RESULTS AREA (Only if NOT externalResults) */}
                 <AnimatePresence>
-                    {isExpanded && query && (
+                    {shouldExpandShell && (
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -143,7 +152,7 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                             transition={{ duration: 0.2 }}
                             className="w-full border-t border-black/5"
                         >
-                            {/* 1. Loading Skeleton */}
+                            {/* ... (Existing Results Logic, kept same but wrapped) ... */}
                             {loading && (
                                 <div className="p-4 space-y-3">
                                     {[1, 2, 3].map(i => (
@@ -157,10 +166,9 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                                 </div>
                             )}
 
-                            {/* 2. Results List */}
                             {!loading && results.length > 0 && (
-                                <div className="py-2">
-                                    <p className="px-4 py-2 text-[10px] font-bold text-black/40 uppercase tracking-widest">Products</p>
+                                <div className="py-2 max-h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                                    <p className="px-4 py-2 text-[10px] font-black text-black uppercase tracking-widest sticky top-0 bg-white z-10">Products</p>
                                     {results.map((item) => {
                                         const img = item.color_variants?.[0]?.images?.[0]?.image_name
                                         return (
@@ -171,22 +179,22 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                                                     setActive(false)
                                                     onCollapse?.()
                                                 }}
-                                                className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left group"
+                                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left group border-b border-black/5 last:border-0"
                                             >
-                                                <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden shrink-0 border border-black/5">
+                                                <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-black/10">
                                                     {img ? (
                                                         <img src={img} alt={item.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-black/20 text-[8px]">IMG</div>
+                                                        <div className="w-full h-full flex items-center justify-center text-black/40 text-[9px] font-bold">IMG</div>
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="text-sm font-semibold truncate text-black/80 group-hover:text-black">{item.name}</h4>
-                                                    <div className="flex items-center gap-2 text-xs text-black/50">
+                                                    <h4 className="text-sm font-bold text-black truncate">{item.name}</h4>
+                                                    <div className="flex items-center gap-2 text-xs font-semibold text-black/70">
                                                         <span>€{item.base_price}</span>
                                                     </div>
                                                 </div>
-                                                <ArrowRight className="w-4 h-4 text-black/20 opacity-0 group-hover:opacity-100 transition-all" />
+                                                <ArrowRight className="w-4 h-4 text-black opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
                                             </button>
                                         )
                                     })}
@@ -196,10 +204,10 @@ export default function EnhancedSearchbar({ variant = "pill", onExpand, onCollap
                             {/* 3. Empty/Trends */}
                             {!loading && results.length === 0 && (
                                 <div className="p-4">
-                                    <p className="text-[10px] font-bold text-black/40 uppercase tracking-widest mb-3">Trending</p>
+                                    <p className="text-[10px] font-black text-black uppercase tracking-widest mb-3">Trending</p>
                                     <div className="flex flex-wrap gap-2">
                                         {["Oversized Hoodie", "Summer", "Accessories", "Black"].map(tag => (
-                                            <button key={tag} onClick={(e) => { e.stopPropagation(); setQuery(tag); }} className="px-3 py-1.5 bg-gray-50 hover:bg-black hover:text-white rounded-lg text-xs font-medium transition-colors">
+                                            <button key={tag} onClick={(e) => { e.stopPropagation(); setQuery(tag); }} className="px-4 py-2 bg-gray-100 hover:bg-black hover:text-white rounded-lg text-xs font-bold text-black transition-colors">
                                                 {tag}
                                             </button>
                                         ))}
