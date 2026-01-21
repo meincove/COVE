@@ -184,7 +184,7 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { ShoppingBag, Zap } from "lucide-react"
+import { ShoppingBag, Zap, Scan } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { UiProduct } from "@/src/lib/catalog/shared"
 
@@ -217,9 +217,15 @@ export default function HeroScannerOverlay({
         <motion.div
             layoutId="hero-scanner-focus"
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none"
-            style={{ width: "min(190px, 45vw)", height: "min(140px, 25vh)" }}
+            initial={false}
+            animate={{
+                width: scanned ? "min(420px, 86vw)" : "170px",
+                height: scanned ? "min(280px, 42vh)" : "170px",
+            }}
+            // ✅ QUICKER SPRING (User request: "smooth and quicker with nice spring")
+            transition={{ type: "spring", stiffness: 380, damping: 30, mass: 0.8 }}
         >
-            {/* Static Brackets */}
+            {/* Static Brackets - Hidden until scanned (User request) */}
             {(["tl", "tr", "bl", "br"] as const).map((pos) => (
                 <div
                     key={pos}
@@ -228,7 +234,9 @@ export default function HeroScannerOverlay({
                         width: 30,
                         height: 30,
                         borderStyle: "solid",
-                        borderColor: scanned ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.26)",
+                        // ✅ VISIBILITY FIX: Only visible when scanned (or dragging?)
+                        // User said: "Until something is scanned, the outer layer will not be visible"
+                        borderColor: scanned ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.0)",
                         transition: "border-color 0.2s ease",
                         borderWidth:
                             pos === "tl"
@@ -258,13 +266,19 @@ export default function HeroScannerOverlay({
             {!scanned && (
                 <div className="absolute inset-0 flex items-center justify-center text-center">
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                        className="rounded-2xl bg-white/75 border border-black/10 px-4 py-2 shadow-md"
+                        // ✅ SQUARE ICON (User request: "small square , inside it we have a scan symbol")
+                        initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 25,
+                            mass: 0.8,
+                            delay: 0.1
+                        }}
+                        className="h-12 w-12 rounded-xl bg-white/75 border border-black/10 flex items-center justify-center shadow-sm backdrop-blur-md"
                     >
-                        <div className="text-xs text-black/60 font-medium">Drag to explore (x + y)</div>
-                        <div className="text-[11px] text-black/40 mt-1">Bring a tile into the center to preview</div>
+                        <Scan className="w-5 h-5 text-black/60" strokeWidth={1.5} />
                     </motion.div>
                 </div>
             )}

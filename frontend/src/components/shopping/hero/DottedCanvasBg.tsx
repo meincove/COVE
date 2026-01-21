@@ -23,9 +23,10 @@ export default function DottedCanvasBg({
     const dprRef = React.useRef(1)
 
     // grid config (softer + less dense)
-    const spacingRef = React.useRef(26)
-    const baseRRef = React.useRef(1.05)
-    const baseARef = React.useRef(0.14)
+    // grid config (softer + less dense)
+    const spacingRef = React.useRef(32)
+    const baseRRef = React.useRef(1.35) // ✅ Smaller (User request: "particle size is too big")
+    const baseARef = React.useRef(0.09) // ✅ Fainter (User request: "colour is so off/better")
 
     const resize = React.useCallback(() => {
         const c = canvasRef.current
@@ -62,7 +63,6 @@ export default function DottedCanvasBg({
 
         for (let yy = 0; yy <= h + spacing; yy += spacing) {
             for (let xx = 0; xx <= w + spacing; xx += spacing) {
-                // tiny deterministic jitter to avoid “too perfect”
                 const jx = ((xx * 13 + yy * 7) % 7) - 3
                 const jy = ((xx * 9 + yy * 11) % 7) - 3
 
@@ -83,11 +83,10 @@ export default function DottedCanvasBg({
         return () => ro.disconnect()
     }, [resize])
 
-    // draw one frame (static + optional local animation)
+    // draw one frame (single pass, no buffer for pure dynamic control)
     const drawFrame = React.useCallback(() => {
         const c = canvasRef.current
-        const buf = bufferRef.current
-        if (!c || !buf) return
+        if (!c) return
 
         const ctx = c.getContext("2d")
         if (!ctx) return
@@ -96,61 +95,48 @@ export default function DottedCanvasBg({
         const w = rect.width
         const h = rect.height
 
-        // clear + draw static buffer (fast)
+        // Clear all
         ctx.clearRect(0, 0, w, h)
-        ctx.drawImage(buf, 0, 0, w, h)
 
-        if (!active || !point) return
-
-        // local animated region only
         const spacing = spacingRef.current
         const baseR = baseRRef.current
-        // const baseA = baseARef.current
+        const baseA = baseARef.current
 
-        const px = point.x
-        const py = point.y
-        const strength = 1 // default
-
-        const R = 210 * strength
-        const R2 = R * R
-
-        // compute grid bounds near point (only iterate local cells)
-        const minX = Math.max(0, Math.floor((px - R) / spacing) * spacing)
-        const maxX = Math.min(w + spacing, Math.ceil((px + R) / spacing) * spacing)
-        const minY = Math.max(0, Math.floor((py - R) / spacing) * spacing)
-        const maxY = Math.min(h + spacing, Math.ceil((py + R) / spacing) * spacing)
-
-        // small time (only while dragging)
+        // Animation state
+        const px = active && point ? point.x : -9999
+        const py = active && point ? point.y : -9999
         const t = performance.now() * 0.001
 
-        for (let yy = minY; yy <= maxY; yy += spacing) {
-            for (let xx = minX; xx <= maxX; xx += spacing) {
-                const dx = xx - px
-                const dy = yy - py
-                const d2 = dx * dx + dy * dy
-                if (d2 > R2) continue
+        for (let yy = 0; yy <= h + spacing; yy += spacing) {
+            for (let xx = 0; xx <= w + spacing; xx += spacing) {
+                // Determine lift
+                let lift = 0
 
-                // gaussian falloff
-                const k = Math.exp(-d2 / (2 * R2))
+                if (active) {
+                    const dx = xx - px
+                    const dy = yy - py
+                    const d = Math.hypot(dx, dy)
 
-                // gentle circular wave (no drift)
-                const d = Math.sqrt(d2)
-                const phase = d * 0.03 - t * 3.2
-                const wave = Math.sin(phase)
+                    // Global Wave
+                    const phase = d * 0.008 - t * 2.5
+                    const wave = Math.sin(phase)
 
-                const lift = k * wave * 1.25
-                const r = baseR + k * (0.7 + 0.4 * (0.5 + 0.5 * wave))
-                // const a = Math.min(0.30, baseA + k * 0.14)
+                    // Attenuation
+                    const distFact = Math.max(0, 1 - d / 1800)
+
+                    if (distFact > 0.01) {
+                        lift = wave * 2.5 * distFact
+                    }
+                }
 
                 const jx = ((xx * 13 + yy * 7) % 7) - 3
                 const jy = ((xx * 9 + yy * 11) % 7) - 3
 
-                // We just draw the animated dots on top. 
-                // Alternatively clear rect but that's complex. 
-                // Simple overdraw is fine.
+                // Draw Dot
                 ctx.beginPath()
-                ctx.fillStyle = `rgba(0,0,0,0.4)`
-                ctx.arc(xx + jx * 0.07, yy + jy * 0.07 + lift, r, 0, Math.PI * 2)
+                // Constant opacity, no pulsing
+                ctx.fillStyle = `rgba(0,0,0,${baseA})`
+                ctx.arc(xx + jx * 0.07, yy + jy * 0.07 + lift, baseR, 0, Math.PI * 2)
                 ctx.fill()
             }
         }

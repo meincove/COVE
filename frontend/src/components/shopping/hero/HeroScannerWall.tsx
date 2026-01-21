@@ -505,17 +505,25 @@ export default function HeroScannerWall({
                         const ax = Math.min(1, Math.abs(nx))
                         const ay = Math.min(1, Math.abs(ny))
 
-                        const z = Math.pow(ax, 1.7) * 90 + Math.pow(ay, 1.7) * 55 - 65
-                        const rotY = -nx * 14
-                        const rotX = ny * 8
-                        const scale = 1 - (ax * 0.03 + ay * 0.02)
+                        // ✅ CONVEX CURVE (Center Forward, Edges Back)
+                        // Center (ax=0) -> Z = 0
+                        // Edges (ax=1) -> Z = -220 (receding)
+                        const z = -((Math.pow(ax, 2) + Math.pow(ay, 2)) * 180)
 
-                        const transform = `translate3d(${screenX}px, ${screenY}px, ${z}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${scale.toFixed(3)})`
+                        // Rotations: Standard
+                        const rotY = -nx * 25
+                        const rotX = ny * 16
+
+                        // Scale: Center (closest) = 1.0. Edges (farther) = smaller.
+                        const scale = 1.0 - (ax * 0.1 + ay * 0.1)
+
+                        const transform = `translate3d(${screenX}px, ${screenY}px, ${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${scale.toFixed(3)})`
 
                         return (
                             <div
                                 key={t.key}
-                                className="absolute will-change-transform"
+                                // ✅ SHADOWS (User request: "diff and its looks 3D")
+                                className="absolute will-change-transform shadow-[0_24px_50px_-12px_rgba(0,0,0,0.35)] rounded-[24px]"
                                 style={{
                                     width: t.w,
                                     height: t.h,
