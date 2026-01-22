@@ -376,23 +376,85 @@ export default function HeroScanner({ products, heightVh = 70, minHeight = 600 }
             style={{
                 height: `${heightVh}vh`,
                 minHeight,
-                // ✅ FIX: avoid `background:` shorthand (conflicts with backgroundImage)
-                backgroundColor: "#f3f4f8",
+                // ✅ FIX: Cleaner white background (User request: "lighter... no pinkish")
+                backgroundColor: "#ffffff",
             }}
         >
-            {/* ✅ Background layers — ALWAYS behind the wall */}
-            <div className="absolute inset-0 z-[0]">
-                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_20%_30%,rgba(236,72,153,0.045),transparent_60%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_80%_40%,rgba(34,197,94,0.045),transparent_62%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_55%_45%,rgba(0,0,0,0.03),transparent_62%)]" />
+            {/* ✅ Background layers — Curved to match wall (CONCAVE) */}
+            <div
+                className="absolute inset-0 z-[0]"
+                style={{
+                    perspective: "1200px",
+                    perspectiveOrigin: "50% 50%",
+                    transformStyle: "preserve-3d"
+                }}
+            >
+                {/* Dotted background curves inward - same as card wall */}
+                {/* FIX: Scaled up to 150% to cover edges when pushed back/rotated */}
+                <div
+                    className="absolute"
+                    style={{
+                        top: "-50%", left: "-50%", right: "-50%", bottom: "-50%", // Huge overscan
+                        width: "200%", height: "200%",
+                        transform: "rotateX(15deg) translateZ(-200px)",
+                        transformOrigin: "center center",
+                        transformStyle: "preserve-3d"
+                    }}
+                >
+                    {/* Neutral premium gradients */}
+                    <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_40%,rgba(0,0,0,0.02),transparent_60%)]" />
 
-                {/* dotted canvas (now optimized) */}
-                <DottedCanvasBg active={bgActive} point={dragPoint} strength={1} />
+                    {/* dotted canvas - curves with the panel */}
+                    <DottedCanvasBg active={bgActive} point={dragPoint} strength={1} />
+                </div>
             </div>
 
-            {/* edge vignette */}
-            <div className="pointer-events-none absolute inset-0 z-[2]">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.0)_45%,rgba(0,0,0,0.05)_100%)]" />
+            {/* edge vignette - Reduced blue blur on all 4 sides */}
+            <div className="pointer-events-none absolute inset-0 z-[20]">
+                {/* Left - Blue ambient glow */}
+                <div
+                    className="absolute top-0 bottom-0 left-0 w-20"
+                    style={{
+                        background: "linear-gradient(to right, rgba(59, 130, 246, 0.10) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 100%)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                        maskImage: "linear-gradient(to right, black 30%, transparent 100%)",
+                        WebkitMaskImage: "linear-gradient(to right, black 30%, transparent 100%)"
+                    }}
+                />
+                {/* Right - Blue ambient glow */}
+                <div
+                    className="absolute top-0 bottom-0 right-0 w-20"
+                    style={{
+                        background: "linear-gradient(to left, rgba(59, 130, 246, 0.10) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 100%)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                        maskImage: "linear-gradient(to left, black 30%, transparent 100%)",
+                        WebkitMaskImage: "linear-gradient(to left, black 30%, transparent 100%)"
+                    }}
+                />
+                {/* Top - Blue ambient glow */}
+                <div
+                    className="absolute top-0 left-0 right-0 h-16"
+                    style={{
+                        background: "linear-gradient(to bottom, rgba(59, 130, 246, 0.10) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 100%)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                        maskImage: "linear-gradient(to bottom, black 30%, transparent 100%)",
+                        WebkitMaskImage: "linear-gradient(to bottom, black 30%, transparent 100%)"
+                    }}
+                />
+                {/* Bottom - Blue ambient glow */}
+                <div
+                    className="absolute bottom-0 left-0 right-0 h-20"
+                    style={{
+                        background: "linear-gradient(to top, rgba(59, 130, 246, 0.10) 0%, rgba(59, 130, 246, 0.02) 50%, transparent 100%)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                        maskImage: "linear-gradient(to top, black 30%, transparent 100%)",
+                        WebkitMaskImage: "linear-gradient(to top, black 30%, transparent 100%)"
+                    }}
+                />
             </div>
 
             {/* ✅ Wall on top */}
@@ -412,9 +474,6 @@ export default function HeroScanner({ products, heightVh = 70, minHeight = 600 }
 
             {/* overlay */}
             <HeroScannerOverlay scanned={scanned} pulseKey={pulseKey} dragging={dragging} />
-
-            {/* ✅ fade is BELOW bottom bar now */}
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white/70 via-white/25 to-transparent z-[50]" />
 
             {/* ✅ Bottom bar ABOVE fade */}
             <HeroScannerBottomBar scanned={scanned} visible={!!scanned} onAskCove={() => { }} />

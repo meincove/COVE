@@ -1,0 +1,71 @@
+INFO:cove.agents.base:Initialized stylist agent
+INFO:cove.agents.stylist:Building outfit for: date (professional style), budget: €500
+INFO:cove.agent.intent:Loaded intent_config.json from /Users/ssg/Desktop/COVE/data/intent_config.json with intents=['cart_add', 'checkout_start', 'order_query', 'order_email', 'size_fit', 'policy', 'history_meta', 'product_question', 'lookup_product', 'discover', 'generic', 'greeting', 'small_talk']
+INFO:app.services.user_memory:UserMemoryService initialized
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:app.services.user_memory:Recalled 0/0 memories for user test_user_repro
+[92m23:22:34 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+WARNING:cove.agents.stylist:⚠️ Gender ambiguous and no context found. Defaulting to UNISEX to avoid halting flow.
+INFO:cove.agents.stylist:📋 LLM defined structure: ['top', 'bottom', 'shoes']
+INFO:cove.agents.stylist:🤖 Stylist Plan: For a date night, I selected formal attire that is romantic yet sophisticated. The outfit includes a top that is elegant, a bottom that is tailored, and shoes that are stylish and appropriate for an evening out. This combination ensures a polished look suitable for a romantic setting.
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category top
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for top: {'price_max': 500, 'type': 'blazer'}
+INFO:cove.agents.stylist:   🔍 Gender Check - Original Query: 'Build me a formal outfit for date night under 500 euros'
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   Stored 3 candidates for top
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category bottom
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for bottom: {'price_max': 500, 'type': 'trousers'}
+INFO:cove.agents.stylist:   🔍 Gender Check - Original Query: 'Build me a formal outfit for date night under 500 euros'
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ Still no items for bottom. Retrying without strict type filter...
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   🔄 Extreme fallback found 20 items for bottom
+INFO:cove.agents.stylist:   Stored 20 candidates for bottom
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category shoes
+INFO:cove.agents.stylist:   🔍 Query expanded with types: sneakers boots sandals heels loafers oxfords dress shoes
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for shoes: {'price_max': 500, 'type': 'heels'}
+INFO:cove.agents.stylist:   🔍 Gender Check - Original Query: 'Build me a formal outfit for date night under 500 euros'
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   Stored 7 candidates for shoes
+Traceback (most recent call last):
+  File "/Users/ssg/Desktop/COVE/cove-ai-core/scripts/reproduce_gender_issue.py", line 51, in run_test
+    print(f"Status: {result.status}")
+AttributeError: 'AgentResult' object has no attribute 'status'
+
+--- Running Reproduction Test ---
+Query: Build me a formal outfit for date night under 500 euros
+📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...
+📚 [VOCAB] Loaded 17 colors from ai_core.docs: ['beige', 'black', 'brown', 'burgundy', 'champagne', 'charcoal', 'chocolate', 'emerald', 'grey', 'light blue', 'navy', 'nude', 'pink', 'red', 'sand', 'tan', 'white']
+📚 [VOCAB] Loaded 17 types from ai_core.docs: ['accessories', 'blazer', 'boots', 'dress', 'heels', 'hoodie', 'jacket', 'loafers', 'pants', 'shirt', 'shoes', 'shorts', 'skirt', 'sneakers', 'sweater', 'sweatshirt', 'tee']
+
+--- Result Summary ---
+Success: True
+CRITICAL ERROR: 'AgentResult' object has no attribute 'status'
+ERROR:asyncio:Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x1422857b0>
+transport: <_SelectorSocketTransport closing fd=12>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 918, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/sslproto.py", line 684, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 924, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 719, in _fatal_error
+    self._force_close(exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 731, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 745, in call_soon
+    self._check_closed()
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 510, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed

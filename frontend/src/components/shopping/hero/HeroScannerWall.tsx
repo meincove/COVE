@@ -479,14 +479,19 @@ export default function HeroScannerWall({
             onPointerLeave={handlePointerUp}
             style={{ backgroundColor: "transparent" }} // Catch events
         >
-            <div className="absolute inset-0" style={{ perspective: "1200px", transformStyle: "preserve-3d" }}>
-                {/* GRADIAL FADE IN ENTRY */}
+            <div className="absolute inset-0" style={{ perspective: "1200px", perspectiveOrigin: "50% 50%", transformStyle: "preserve-3d" }}>
+                {/* ENTIRE CANVAS CURVED INWARD - CONCAVE SURFACE */}
                 <motion.div
                     initial={{ opacity: 0, filter: "blur(10px)" }}
                     animate={{ opacity: 1, filter: "blur(0px)" }}
                     transition={{ duration: 1.2, ease: "easeOut" }}
                     className="w-full h-full"
-                    style={{ transformStyle: "preserve-3d" }}
+                    style={{
+                        transformStyle: "preserve-3d",
+                        // Curve the entire panel inward like inside of a bowl
+                        transform: "rotateX(15deg) translateZ(-200px)",
+                        transformOrigin: "center center"
+                    }}
                 >
                     {visibleTiles.map(t => {
                         // Calculate relative position to camera for rendering
@@ -505,17 +510,42 @@ export default function HeroScannerWall({
                         const ax = Math.min(1, Math.abs(nx))
                         const ay = Math.min(1, Math.abs(ny))
 
-                        const z = Math.pow(ax, 1.7) * 90 + Math.pow(ay, 1.7) * 55 - 65
-                        const rotY = -nx * 14
-                        const rotX = ny * 8
-                        const scale = 1 - (ax * 0.03 + ay * 0.02)
+                        // ✅ CYLINDRICAL CURVED MONITOR: Horizontal Curve ONLY
+                        // We only care about Horizontal (X) distance for the "wrap".
+                        // Vertical (Y) should stay relatively flat or have very subtle depth.
 
-                        const transform = `translate3d(${screenX}px, ${screenY}px, ${z}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${scale.toFixed(3)})`
+                        // DISTANCE: Based primarily on X (Horizontal)
+                        const distX = Math.abs(nx)
+
+                        // Z: Curve deeply on X axis.
+                        // Center X = 0 (closest/neutral) or pushed back?
+                        // "Centre part is more inwards" -> Center is furthest away.
+                        // "Outer ones are flat but no in proper POV"
+                        // Let's model a Cylinder centered at the viewer.
+                        // Radius of cylinder = 1200px.
+                        // Z = R * (cos(theta) - 1) ?
+
+                        // Simplified Parabola for X-axis curve (Concave)
+                        // At center (nx=0), Z is deepest (-250). At edges (nx=1), Z is 0.
+                        // "More inward" -> Deeper Center (-400)
+                        const z = -400 + (400 * distX * distX)
+
+                        // Rotations: FLIPPED & REDUCED (30deg at edges)
+                        // "Opposite to now" -> -nx
+                        // "Too much" -> 30deg
+                        const rotY = -nx * 30
+                        const rotX = 0       // No vertical tilt (like a real monitor)
+
+                        // Scale: Uniform
+                        const scale = 1.0
+
+                        const transform = `translate3d(${screenX}px, ${screenY}px, ${z.toFixed(1)}px) rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) scale(${scale.toFixed(3)})`
 
                         return (
                             <div
                                 key={t.key}
-                                className="absolute will-change-transform"
+                                // ✅ SHADOWS (User request: "diff and its looks 3D")
+                                className="absolute will-change-transform shadow-[0_24px_50px_-12px_rgba(0,0,0,0.35)] rounded-[24px]"
                                 style={{
                                     width: t.w,
                                     height: t.h,

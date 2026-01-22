@@ -1,22 +1,16 @@
 "use client"
 
-import React, { useMemo, useRef, useState } from "react"
+import React, { useMemo, useState, useRef, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import AuthDialog from "@/src/components/auth/AuthDialog"
-import SplitGateSection from "@/src/sections/welcome/SplitGateSection"
-import SplineFaintBg from "@/src/components/background/SplineFaintBg"
+import { useAuthModal } from "@/src/context/AuthModalContext"
+import ParticleWave from "@/src/components/ParticleWave"
+import CountUp from "@/src/components/CountUp"
 import { ArrowRight, Sparkles, ShoppingBag, Truck, RotateCcw, Building2, Star, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function WelcomePage() {
   const router = useRouter()
-  const splitRef = useRef<HTMLElement | null>(null)
-
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogConfig, setDialogConfig] = useState<{
-    destination: "/shopping" | "/partner-onboarding"
-    pathType: "shopping" | "platform"
-  }>({ destination: "/shopping", pathType: "shopping" })
+  const { openAuthModal } = useAuthModal()
 
   const partnerBrands = useMemo(
     () => [
@@ -36,74 +30,91 @@ export default function WelcomePage() {
     []
   )
 
-  const goToSplit = () => {
-    splitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  const handleEnter = (target: "shop" | "platform") => {
+    // Open the new AuthModal directly
+    const destination = target === "shop" ? "/shopping" : "/partner-onboarding"
+
+    // Set storage for redirect flow if needed, though context handles some of this
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cove_selected_path', target === "shop" ? "shopping" : "platform")
+      localStorage.setItem('cove_destination', destination)
+    }
+
+    openAuthModal("sign-up", destination)
   }
 
-  const handleEnter = (target: "shop" | "platform") => {
-    if (target === "shop") {
-      setDialogConfig({ destination: "/shopping", pathType: "shopping" })
-    } else {
-      setDialogConfig({ destination: "/partner-onboarding", pathType: "platform" })
-    }
-    setDialogOpen(true)
-  }
+  // Scroll progress tracking for ParticleWave animation
+  const mainRef = useRef<HTMLElement>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  const handleScroll = useCallback(() => {
+    const container = mainRef.current
+    if (!container) return
+
+    const scrollTop = container.scrollTop
+    const scrollHeight = container.scrollHeight - container.clientHeight
+
+    // Calculate progress: 0 at top, 1 at bottom
+    const progress = scrollHeight > 0 ? Math.min(1, Math.max(0, scrollTop / scrollHeight)) : 0
+    setScrollProgress(progress)
+  }, [])
+
+  useEffect(() => {
+    const container = mainRef.current
+    if (!container) return
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
 
   return (
-    <main className="h-screen w-screen overflow-y-auto snap-y snap-mandatory bg-[#FAFAF8] text-gray-900">
+    <main ref={mainRef} className="h-screen w-screen overflow-y-auto snap-y snap-mandatory bg-gradient-to-br from-[#F8F9FA] via-[#FAFBFC] to-[#F5F6F8] text-gray-900">
+      {/* Particle Wave Background */}
+      <ParticleWave scrollProgress={scrollProgress} />
+
+      {/* Gradient Overlay for Depth - Fixed */}
+      <div className="fixed inset-0 pointer-events-none z-[1] bg-gradient-to-b from-transparent via-[#F8F9FA]/20 to-[#F5F6F8]/50"></div>
+
       {/* =========================
                 PAGE 1 — INTRO (Light Theme)
                ========================= */}
-      <section className="snap-start min-h-screen w-full relative overflow-hidden bg-[#FAFAF8]">
-        {/* Subtle animated background */}
-        <SplineFaintBg
-          src="https://my.spline.design/particlesmoment-kW3xvYny6weIhXJ3vbs2M2bB/"
-          opacity={0.35}
-          className="z-0"
-        />
-
-        {/* Light background layers */}
-        <div className="absolute inset-0 z-[1]">
-          <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_30%_20%,rgba(0,0,0,0.03),transparent_60%),radial-gradient(900px_500px_at_70%_70%,rgba(34,197,94,0.06),transparent_60%)]" />
-          <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] [background-size:48px_48px]" />
-        </div>
-
-        <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-6 pt-32">
-          <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            {/* LEFT */}
-            <div>
+      <section className="snap-start min-h-screen w-full relative overflow-hidden z-10">
+        <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-6 sm:px-10 md:px-12 lg:px-16 pt-12 sm:pt-20 md:pt-24 lg:pt-28 pb-16 sm:pb-20">
+          <div className="max-w-7xl w-full flex flex-col lg:grid lg:grid-cols-2 gap-10 lg:gap-16 xl:gap-20 items-center">
+            {/* LEFT - Text Content */}
+            <div className="w-full text-center lg:text-left order-first">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
+                className="flex flex-col items-center lg:items-start"
               >
-                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-4 py-2 text-sm text-gray-600 shadow-sm">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.45)]" />
-                  AI fashion marketplace + brand platform
+                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 shadow-sm mb-4">
+                  <span className="h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.45)]" />
+                  AI fashion marketplace
                 </div>
 
-                <h1 className="mt-6 text-5xl md:text-6xl xl:text-7xl font-bold leading-[1.08] tracking-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] lg:text-6xl xl:text-7xl font-bold leading-[1.1] tracking-tight text-gray-900">
                   Your Style,
-                  <br />
-                  <span className="text-gray-400">Reimagined</span>
+                  <div className="text-gray-400 mt-1 sm:mt-2">Reimagined</div>
                 </h1>
 
-                <p className="mt-6 max-w-md text-lg text-gray-500 leading-relaxed">
+                <p className="mt-6 sm:mt-8 md:mt-10 max-w-md text-sm sm:text-base md:text-lg text-gray-500 font-medium leading-relaxed tracking-tight">
                   Discover curated collections powered by AI. Get personalized styling from Bubbles,
                   your intelligent fashion assistant.
                 </p>
 
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-8 sm:mt-10 md:mt-12 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
                   <motion.button
-                    onClick={goToSplit}
+                    onClick={() => handleEnter("shop")}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className="group flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:bg-gray-800"
+                    className="group flex items-center gap-2 rounded-full bg-black px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:bg-gray-800"
                   >
                     <span>Get Started</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </motion.button>
-                  <span className="text-sm text-gray-400">Scroll to explore</span>
+                  <span className="text-xs sm:text-sm text-gray-400 hidden sm:inline">Scroll to explore</span>
                 </div>
               </motion.div>
             </div>
@@ -113,22 +124,28 @@ export default function WelcomePage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-col items-center lg:items-end gap-8"
+              className="flex flex-col items-center lg:items-end gap-6 sm:gap-8 md:gap-10 order-last mt-8 lg:mt-0"
             >
-              <div className="text-8xl font-black tracking-[0.1em] text-gray-900">COVE</div>
+              <div className="font-['Atop'] text-[3.5rem] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] text-gray-900 leading-none">COVE</div>
 
-              {/* Stats */}
-              <div className="flex gap-8 text-center">
-                {[
-                  { value: "50+", label: "Brands" },
-                  { value: "10K+", label: "Products" },
-                  { value: "AI", label: "Powered" },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                    <div className="text-sm text-gray-500">{stat.label}</div>
+              {/* Stats with Count Animation */}
+              <div className="flex gap-6 sm:gap-8 md:gap-10 text-center">
+                <div>
+                  <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+                    <CountUp end={50} suffix="+" duration={2000} />
                   </div>
-                ))}
+                  <div className="text-xs sm:text-sm md:text-base text-gray-500">Brands</div>
+                </div>
+                <div>
+                  <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+                    <CountUp end={10} suffix="K+" duration={2000} />
+                  </div>
+                  <div className="text-xs sm:text-sm md:text-base text-gray-500">Products</div>
+                </div>
+                <div>
+                  <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">AI</div>
+                  <div className="text-xs sm:text-sm md:text-base text-gray-500">Powered</div>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -149,22 +166,22 @@ export default function WelcomePage() {
       {/* =========================
                 PAGE 2 — VALUE PROPS
                ========================= */}
-      <section className="snap-start min-h-screen w-full flex items-center justify-center bg-white px-6 py-20">
-        <div className="max-w-6xl w-full">
+      <section className="snap-start min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-white/95 to-[#F8F9FA]/90 px-6 sm:px-10 md:px-12 lg:px-16 py-16 sm:py-20 relative z-20">
+        <div className="max-w-7xl w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-12 md:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Why COVE?</h2>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">Why COVE?</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-500 max-w-2xl mx-auto px-4">
               We're building the future of fashion retail with AI at its core.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {[
               {
                 icon: Sparkles,
@@ -203,13 +220,13 @@ export default function WelcomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="bg-gray-50 rounded-2xl p-6 hover:bg-gray-100 transition-colors"
+                className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:bg-gray-100 transition-colors"
               >
-                <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
-                  <prop.icon className="h-6 w-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                  <prop.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{prop.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{prop.description}</p>
+                <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">{prop.title}</h3>
+                <p className="text-sm sm:text-base text-gray-500 leading-relaxed">{prop.description}</p>
               </motion.div>
             ))}
           </div>
@@ -219,31 +236,31 @@ export default function WelcomePage() {
       {/* =========================
                 PAGE 3 — BRAND MARQUEE
                ========================= */}
-      <section className="snap-start min-h-screen w-full flex flex-col items-center justify-center bg-[#FAFAF8] px-6 py-20">
+      <section className="snap-start min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#F8F9FA]/95 to-[#F5F6F8] px-6 sm:px-10 md:px-12 lg:px-16 py-16 sm:py-20 relative z-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-10 sm:mb-14"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Trusted by the Best</h2>
-          <p className="text-xl text-gray-500">World-class brands, one platform.</p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5">Trusted by the Best</h2>
+          <p className="text-lg sm:text-xl md:text-xl text-gray-500">World-class brands, one platform.</p>
         </motion.div>
 
         {/* Brand Marquee */}
         <div className="w-full overflow-hidden relative">
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#FAFAF8] to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#FAFAF8] to-transparent z-10" />
+          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-r from-[#F8F9FA] to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-l from-[#F8F9FA] to-transparent z-10" />
 
           <motion.div
             animate={{ x: ["0%", "-50%"] }}
             transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            className="flex gap-16 whitespace-nowrap"
+            className="flex gap-8 sm:gap-12 md:gap-16 whitespace-nowrap"
           >
             {[...partnerBrands, ...partnerBrands].map((brand, idx) => (
               <div
                 key={`${brand}-${idx}`}
-                className="text-3xl font-bold text-gray-300 hover:text-gray-900 transition-colors cursor-default tracking-wider"
+                className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-300 hover:text-gray-900 transition-colors cursor-default tracking-wider"
               >
                 {brand}
               </div>
@@ -257,36 +274,22 @@ export default function WelcomePage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="mt-16 text-center"
+          className="mt-10 sm:mt-16 text-center"
         >
-          <p className="text-gray-500 mb-4">Are you a brand looking to grow?</p>
+          <p className="text-sm sm:text-base text-gray-500 mb-3 sm:mb-4">Are you a brand looking to grow?</p>
           <button
             onClick={() => handleEnter("platform")}
-            className="inline-flex items-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-full font-medium hover:border-black hover:bg-black hover:text-white transition-all"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 rounded-full text-sm sm:text-base font-medium hover:border-black hover:bg-black hover:text-white transition-all"
           >
-            <Building2 className="h-5 w-5" />
+            <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
             Become a Partner
           </button>
         </motion.div>
       </section>
 
-      {/* =========================
-                PAGE 4 — SPLIT GATE (Shop vs Platform)
-               ========================= */}
-      <SplitGateSection
-        ref={splitRef}
-        className="snap-start"
-        onEnterShop={() => handleEnter("shop")}
-        onEnterPlatform={() => handleEnter("platform")}
-      />
 
-      {/* Auth Dialog */}
-      <AuthDialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        destination={dialogConfig.destination}
-        pathType={dialogConfig.pathType}
-      />
+
+      {/* Auth Dialog - REMOVED, using Context globally now */}
     </main>
   )
 }

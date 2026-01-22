@@ -21,7 +21,7 @@ export default function ProductInfo({
     <div className="flex flex-col gap-6 text-black">
       {/* Header Group */}
       <div>
-        <div className="flex items-center gap-1 text-yellow-500 mb-4">
+        <div className="flex items-center gap-1 text-yellow-500 mb-8">
           {[1, 2, 3, 4, 5].map(i => (
             <svg key={i} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="w-4 h-4">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -30,13 +30,31 @@ export default function ProductInfo({
           <span className="text-xs font-bold text-black/40 ml-2 tracking-widest uppercase">(128 Reviews)</span>
         </div>
 
-        <div className="text-xs font-bold tracking-widest text-red-600 mb-2 uppercase">
+        <div className="text-xs font-bold tracking-widest text-red-600 mb-4 uppercase">
           {tier} Collection
         </div>
-        <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-[0.9]">
-          {name}
-        </h1>
-        <p className="text-xl font-medium mt-2 text-black/70">
+
+        {/* Artistic Typography */}
+        <div className="relative pt-2 pb-4 overflow-hidden">
+          {/* Brand Name - Huge, Faded, Block - Auto-scales to fit 80% width */}
+          <h1
+            className="font-black text-black/[0.05] uppercase tracking-tighter leading-[0.8] select-none whitespace-nowrap box-content"
+            style={{
+              width: '78%',
+              paddingRight: '4px',
+              fontSize: `clamp(2rem, ${Math.max(4, 28 / (name.split(' ')[0]?.length || 1))}vw, 7rem)`,
+            }}
+          >
+            {name.split(' ')[0]}
+          </h1>
+
+          {/* Product Name (Type) - Below, Sharp (Next Row) */}
+          <h2 className="text-4xl md:text-5xl font-black text-black uppercase tracking-tighter leading-[0.9] mt-2 ml-1 relative z-10">
+            {name.split(' ').slice(1).join(' ') || name}
+          </h2>
+        </div>
+
+        <p className="text-xl font-medium mt-4 text-black/70">
           €{price.toFixed(2)}
         </p>
       </div>

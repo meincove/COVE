@@ -56,6 +56,8 @@ import { dark } from "@clerk/themes"
 
 import ModalHost from "@/src/components/ModalHost"
 import { ModalProvider } from "@/src/context/ModalContext"
+import { AuthModalProvider } from "@/src/context/AuthModalContext"
+import AuthModal from "@/src/components/auth/AuthModal"
 import { ThemeProvider } from "@/src/components/ThemeProvider"
 import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot"
 import AnalyticsInit from "@/src/components/AnalyticsInit"
@@ -73,17 +75,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body className="h-[100dvh] overflow-hidden antialiased" suppressHydrationWarning>
           <ThemeProvider>
             <AnalyticsInit />
-            <ModalProvider>
-              {/* ✅ Single scroll root for the whole app */}
-              <div className="tester-frame relative h-[100dvh] w-full overflow-y-auto overflow-x-hidden">
-                <NavbarController>
-                  <main className="overflow-visible">{children}</main>
-                </NavbarController>
-              </div>
+            <AuthModalProvider>
+              <ModalProvider>
+                {/* ✅ Single scroll root for the whole app */}
+                <div className="tester-frame relative h-[100dvh] w-full overflow-y-auto overflow-x-hidden">
+                  <NavbarController>
+                    <main className="overflow-visible">{children}</main>
+                  </NavbarController>
+                </div>
 
-              <FloatingChatbot />
-              <ModalHost />
-            </ModalProvider>
+                <FloatingChatbot />
+                <ModalHost />
+                <AuthModal />
+              </ModalProvider>
+            </AuthModalProvider>
           </ThemeProvider>
         </body>
       </html>

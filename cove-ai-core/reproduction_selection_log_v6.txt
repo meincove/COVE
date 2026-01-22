@@ -1,0 +1,129 @@
+INFO:httpx:HTTP Request: GET https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:✓ Loaded stylist config from /Users/ssg/Desktop/COVE/cove-ai-core/data/stylist_config.json
+INFO:cove.agents.registry:✓ Registered agent: stylist | 7 capabilities | priority=10
+INFO:cove.agents.stylist:✓ Stylist agent registered
+INFO:cove.agents.fit:✓ Loaded fit config from /Users/ssg/Desktop/COVE/cove-ai-core/data/fit_agent_config.json
+INFO:cove.agents.registry:✓ Registered agent: fit | 5 capabilities | priority=8
+INFO:cove.agents.fit:✓ Fit agent registered
+INFO:cove.agents.budget:✓ Loaded budget config from /Users/ssg/Desktop/COVE/cove-ai-core/data/budget_agent_config.json
+INFO:cove.agents.registry:✓ Registered agent: budget | 6 capabilities | priority=7
+INFO:cove.agents.budget:✓ Budget agent registered
+INFO:cove.agents.registry:✓ Registered agent: outfit_builder | 3 capabilities | priority=10
+INFO:cove.agents.orchestrator:✓ Loaded 3 workflows from /Users/ssg/Desktop/COVE/cove-ai-core/data/orchestrator_workflows.json
+INFO:cove.agents.orchestrator:✓ Orchestrator initialized with 3 workflows
+INFO:cove.agents.orchestrator:✓ Multi-agent orchestrator ready
+INFO:cove.agents.base:Initialized stylist agent
+INFO:cove.agents.stylist:Building outfit for: date (professional style), budget: €500
+INFO:cove.agent.intent:Loaded intent_config.json from /Users/ssg/Desktop/COVE/data/intent_config.json with intents=['cart_add', 'checkout_start', 'order_query', 'order_email', 'size_fit', 'policy', 'history_meta', 'product_question', 'lookup_product', 'discover', 'generic', 'greeting', 'small_talk']
+INFO:app.services.user_memory:UserMemoryService initialized
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:app.services.user_memory:Recalled 0/0 memories for user test_user_repro
+[92m23:47:43 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+WARNING:cove.agents.stylist:⚠️ Gender ambiguous. Defaulting to UNISEX/ALL to avoid halting flow.
+INFO:cove.agents.stylist:📋 LLM defined structure: ['tops', 'bottoms', 'shoes']
+INFO:cove.agents.stylist:🤖 Stylist Plan: For a date night formal outfit, I need to select items that are elegant and suitable for a romantic evening. The outfit must include a top that is either a shirt, blouse, or blazer, paired with formal bottoms like pants or a skirt, and finished with appropriate shoes such as heels or loafers. This ensures a polished and sophisticated look that aligns with the formal nature of the occasion.
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category tops
+INFO:cove.agents.stylist:   🔍 Query expanded with types: tee t-shirt shirt blouse sweater hoodie sweatshirt jacket coat blazer vest
+INFO:cove.agents.stylist:   🔄 SPLIT types to list: ['shirt', 'blouse', 'blazer']
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for tops: {'price_max': 500, 'type': ['shirt', 'blouse', 'blazer']}
+INFO:cove.agents.stylist:   🔍 Gender Check - Original Query: 'I want a date night formal outfit under 500 euros'
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   Stored 5 candidates for tops
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category bottoms
+INFO:cove.agents.stylist:   🔍 Query expanded with types: pants jeans trousers shorts skirt joggers leggings
+INFO:cove.agents.stylist:   🔄 SPLIT types to list: ['pants', 'skirt']
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for bottoms: {'price_max': 500, 'type': ['pants', 'skirt']}
+INFO:cove.agents.stylist:   🔍 Gender Check - Original Query: 'I want a date night formal outfit under 500 euros'
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   Stored 20 candidates for bottoms
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category shoes
+INFO:cove.agents.stylist:   🔍 Query expanded with types: sneakers boots sandals heels loafers oxfords dress shoes
+INFO:cove.agents.stylist:   🔄 SPLIT types to list: ['heels', 'loafers']
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for shoes: {'price_max': 500, 'type': ['heels', 'loafers']}
+INFO:cove.agents.stylist:   🔍 Gender Check - Original Query: 'I want a date night formal outfit under 500 euros'
+INFO:httpx:HTTP Request: POST http://127.0.0.1:8000/ai/recs/suggest "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   Stored 13 candidates for shoes
+
+--- Running Reproduction Test for Bad Item Selection ---
+Query: I want a date night formal outfit under 500 euros
+📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...
+📚 [VOCAB] Loaded 17 colors from ai_core.docs: ['beige', 'black', 'brown', 'burgundy', 'champagne', 'charcoal', 'chocolate', 'emerald', 'grey', 'light blue', 'navy', 'nude', 'pink', 'red', 'sand', 'tan', 'white']
+📚 [VOCAB] Loaded 17 types from ai_core.docs: ['accessories', 'blazer', 'boots', 'dress', 'heels', 'hoodie', 'jacket', 'loafers', 'pants', 'shirt', 'shoes', 'shorts', 'skirt', 'sneakers', 'sweater', 'sweatshirt', 'tee']
+
+--- Agent Result ---
+Answer: I've found some great options for your date outfit across 3 categories. Take a look!
+Total Categories: 3
+
+--- Category: tops ---
+Candidate: Tailored Black Wool Blazer (Type: blazer, Price: €420.47)
+Candidate: Tailored Navy Wool Blazer (Type: blazer, Price: €201.66)
+Candidate: Tailored Charcoal Wool Blazer (Type: blazer, Price: €220.24)
+Candidate: Signature Pink Dress Shirt (Type: shirt, Price: €294.39)
+Candidate: Signature Light Blue Dress Shirt (Type: shirt, Price: €331.49)
+
+--- Category: bottoms ---
+Candidate: Pleated Black Trousers (Type: pants, Price: €362.91)
+Candidate: Pleated Grey Trousers (Type: pants, Price: €403.49)
+Candidate: TechUrban Pants (Type: pants, Price: €154.27)
+Candidate: TechUrban Pants (Type: pants, Price: €160.14)
+Candidate: CoreBasics Pants (Type: pants, Price: €80.72)
+Candidate: BoldHues Pants (Type: pants, Price: €77.35)
+Candidate: TimelessCo Pants (Type: pants, Price: €185.3)
+Candidate: LuxeLine Pants (Type: pants, Price: €258.91)
+Candidate: CoreBasics Pants (Type: pants, Price: €53.24)
+Candidate: BoldHues Pants (Type: pants, Price: €96.06)
+Candidate: LuxeLine Pants (Type: pants, Price: €276.52)
+Candidate: SimpleStack Pants (Type: pants, Price: €51.49)
+Candidate: LuxeLine Pants (Type: pants, Price: €261.31)
+Candidate: LuxeLine Pants (Type: pants, Price: €283.56)
+Candidate: CoreBasics Pants (Type: pants, Price: €52.26)
+Candidate: ModernHeritage Pants (Type: pants, Price: €152.41)
+Candidate: NordicThread Pants (Type: pants, Price: €153.64)
+Candidate: UrbanPulse Pants (Type: pants, Price: €124.16)
+Candidate: SimpleStack Pants (Type: pants, Price: €46.77)
+Candidate: NordicThread Pants (Type: pants, Price: €180.97)
+
+--- Category: shoes ---
+Candidate: Elegant Black Pumps (Type: heels, Price: €142.73)
+Candidate: Elegant Nude Pumps (Type: heels, Price: €88.24)
+Candidate: Elegant Red Pumps (Type: heels, Price: €120.71)
+Candidate: Elegant Nude Pumps (Type: heels, Price: €150.0)
+Candidate: Classic Black Leather Loafers (Type: loafers, Price: €231.21)
+Candidate: Minimalist Leather Loafers (Type: loafers, Price: €140.0)
+Candidate: Classic Tan Leather Loafers (Type: loafers, Price: €177.56)
+Candidate: Classic Brown Leather Loafers (Type: loafers, Price: €82.81)
+Candidate: Classic Burgundy Leather Loafers (Type: loafers, Price: €156.6)
+Candidate: Metallic Silver Heels (Type: heels, Price: €135.0)
+Candidate: Elegant Red Pumps (Type: heels, Price: €145.0)
+Candidate: Strappy Gold Sandals (Type: heels, Price: €130.0)
+Candidate: Classic Penny Loafers (Type: loafers, Price: €155.0)
+
+✅ PASSED: Found FORMAL items: ['Tailored Black Wool Blazer', 'Tailored Navy Wool Blazer', 'Tailored Charcoal Wool Blazer', 'Signature Pink Dress Shirt', 'Signature Light Blue Dress Shirt', 'Pleated Black Trousers', 'Pleated Grey Trousers']
+ERROR:asyncio:Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x12c67e1d0>
+transport: <_SelectorSocketTransport closing fd=12>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 918, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/sslproto.py", line 684, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 924, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 719, in _fatal_error
+    self._force_close(exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 731, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 745, in call_soon
+    self._check_closed()
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 510, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed

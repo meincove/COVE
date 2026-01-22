@@ -1,0 +1,18 @@
+INFO:httpx:HTTP Request: GET https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:✓ Loaded stylist config from /Users/ssg/Desktop/COVE/cove-ai-core/data/stylist_config.json
+INFO:cove.agents.registry:✓ Registered agent: stylist | 7 capabilities | priority=10
+INFO:cove.agents.stylist:✓ Stylist agent registered
+INFO:cove.agents.fit:✓ Loaded fit config from /Users/ssg/Desktop/COVE/cove-ai-core/data/fit_agent_config.json
+INFO:cove.agents.registry:✓ Registered agent: fit | 5 capabilities | priority=8
+INFO:cove.agents.fit:✓ Fit agent registered
+INFO:cove.agents.budget:✓ Loaded budget config from /Users/ssg/Desktop/COVE/cove-ai-core/data/budget_agent_config.json
+INFO:cove.agents.registry:✓ Registered agent: budget | 6 capabilities | priority=7
+INFO:cove.agents.budget:✓ Budget agent registered
+INFO:cove.agents.registry:✓ Registered agent: outfit_builder | 3 capabilities | priority=10
+INFO:cove.agents.orchestrator:✓ Loaded 3 workflows from /Users/ssg/Desktop/COVE/cove-ai-core/data/orchestrator_workflows.json
+INFO:cove.agents.orchestrator:✓ Orchestrator initialized with 3 workflows
+INFO:cove.agents.orchestrator:✓ Multi-agent orchestrator ready
+Traceback (most recent call last):
+  File "/Users/ssg/Desktop/COVE/cove-ai-core/scripts/reproduce_bad_selection.py", line 15, in <module>
+    from app.agents.base import AgentResult
+ModuleNotFoundError: No module named 'app.agents.base'

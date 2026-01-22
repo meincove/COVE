@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { ShoppingBag, Globe2, Heart, Menu, Box, Layers, Play } from "lucide-react"
 import clsx from "clsx"
@@ -10,6 +10,7 @@ import clsx from "clsx"
 import EnhancedSearchbar from "./EnhancedSearchbar"
 import { useCartStore } from "@/src/store/cartStore"
 import CartModal from "@/src/components/Catalog/CartModal"
+import { useAuthModal } from "@/src/context/AuthModalContext"
 
 // Animation Config for "Dampened Spring"
 const SPRING_TRANSITION = {
@@ -33,6 +34,7 @@ type Brand = {
 
 export default function GlobalNavbar() {
     const router = useRouter()
+    const pathname = usePathname()
     const { isSignedIn, user } = useUser()
     const { signOut } = useClerk()
     const { items } = useCartStore()
@@ -42,6 +44,9 @@ export default function GlobalNavbar() {
     const [cartOpen, setCartOpen] = useState(false)
     const [brands, setBrands] = useState<Brand[]>([])
     const [loadingBrands, setLoadingBrands] = useState(false)
+
+    // Auth Modal
+    const { openAuthModal } = useAuthModal()
 
     // Fetch brands when menu opens or on mount
     useEffect(() => {
@@ -98,20 +103,19 @@ export default function GlobalNavbar() {
 
             {/*
               Positioning Wrapper
-              Fixed to top, centered, smaller width
+              Full-width fixed at top
             */}
-            <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] md:w-[85%] lg:w-[70%] max-w-[1100px] z-[300]">
+            <div className="fixed top-0 left-0 right-0 w-full z-[300]">
 
                 <motion.div
                     layout
                     initial={false}
                     animate={{
                         height: isExpanded ? expandedHeight : collapsedHeight,
-                        borderRadius: "32px",
                         backgroundColor: "rgba(255, 255, 255, 0.85)"
                     }}
                     transition={SPRING_TRANSITION}
-                    className="relative w-full border-[3px] border-white/80 shadow-[0_30px_60px_-10px_rgba(0,0,0,0.3),0_10px_20px_-5px_rgba(0,0,0,0.1)] backdrop-blur-3xl overflow-hidden"
+                    className="relative w-full border-b border-white/80 shadow-[0_4px_30px_-5px_rgba(0,0,0,0.1)] backdrop-blur-3xl overflow-hidden"
                 >
                     {/* --- TOP BAR ROW --- */}
                     <motion.div
@@ -195,13 +199,13 @@ export default function GlobalNavbar() {
                             {!isSignedIn ? (
                                 <div className="flex items-center gap-2 ml-2">
                                     <button
-                                        onClick={() => router.push("/sign-in")}
+                                        onClick={() => openAuthModal('sign-in', pathname || '/')}
                                         className="hidden lg:block text-xs font-bold px-3 py-2 hover:bg-black/5 rounded-full transition-colors whitespace-nowrap"
                                     >
                                         Log In
                                     </button>
                                     <button
-                                        onClick={() => router.push("/sign-up")}
+                                        onClick={() => openAuthModal('sign-up', pathname || '/')}
                                         className="hidden sm:block text-xs font-bold bg-black text-white px-4 py-2 rounded-full hover:bg-black/80 transition-transform active:scale-95 whitespace-nowrap"
                                     >
                                         Join Us
@@ -311,7 +315,7 @@ export default function GlobalNavbar() {
                     </AnimatePresence>
 
                 </motion.div>
-            </div>
+            </div >
 
             <CartModal open={cartOpen} onClose={() => setCartOpen(false)} />
         </>

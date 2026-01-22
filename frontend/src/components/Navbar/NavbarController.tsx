@@ -164,14 +164,17 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
   const pathname = usePathname()
 
   // Logic defined by user:
-  // Show GlobalNavbar on: /, /product/*, /checkout, /partner-onboarding
-  // Hide GlobalNavbar on: /shopping/*, /brands/* (They use L-shaped navbar)
+  // Hide GlobalNavbar on: /, /shopping/*, /brands/* (They use custom or L-shaped navbar)
+  // Show GlobalNavbar on: /product/*, /checkout, /partner-onboarding, etc.
 
-  const isLShapedPage = pathname?.startsWith("/shopping") || pathname?.startsWith("/brands")
+  const hideGlobalNavbar =
+    pathname === "/" ||
+    pathname?.startsWith("/shopping") ||
+    pathname?.startsWith("/brands")
 
   return (
     <>
-      {!isLShapedPage && <GlobalNavbar />}
+      {!hideGlobalNavbar && <GlobalNavbar />}
       {children}
     </>
   )

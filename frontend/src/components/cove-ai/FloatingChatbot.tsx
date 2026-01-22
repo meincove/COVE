@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
-import { MessageCircle, X, Shirt, ShoppingCart, Plus, Smile, ArrowUp, Image as ImageIcon, ArrowLeft, Minus, Trash2, LogIn, UserPlus } from "lucide-react";
+import { MessageCircle, X, Shirt, ShoppingCart, Plus, Smile, ArrowUp, Image as ImageIcon, ArrowLeft, Minus, Trash2, LogIn, UserPlus, MoreHorizontal, RefreshCw, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
 import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
@@ -11,7 +11,8 @@ import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactive
 import { useLayoutStore } from "@/src/store/layoutStore";
 // OutfitModal removed - outfits now shown only in Outfit Builder tab
 import { useUser, useClerk } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useAuthModal } from "@/src/context/AuthModalContext";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function FloatingChatbot() {
     const [thinkingSteps, setThinkingSteps] = useState<Array<{ icon: string; status: string; done?: boolean }>>([]);
     const [isMinimized, setIsMinimized] = useState(false);
     const [hasOutfitReady, setHasOutfitReady] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
 
     // Input state
     const [inputValue, setInputValue] = useState("");
@@ -34,11 +36,15 @@ export default function FloatingChatbot() {
     const { isSignedIn, user } = useUser();
     const { signOut } = useClerk();
     const router = useRouter();
+    const pathname = usePathname();
 
     // Layout Store
     const { isCanvasOpen, closeCanvas, generatedOutfit } = useLayoutStore();
 
-    // Proactive Offer
+    // Auth Modal
+    const { openAuthModal } = useAuthModal();
+
+    // Proactive Offer - MUST be before any conditional returns (Rules of Hooks)
     const [activeOffer, setActiveOffer] = useState<ProactiveResponse | null>(null);
 
     useProactiveSignals((offer) => {
@@ -48,8 +54,14 @@ export default function FloatingChatbot() {
         }
     });
 
-    // Widget Ref
+    // Widget Ref - MUST be before any conditional returns (Rules of Hooks)
     const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>(null);
+
+    // Don't render on auth pages - keeps UI clean
+    // State is preserved via localStorage ('cove_chat_should_restore') for return
+    if (pathname?.includes('/sign-in') || pathname?.includes('/sign-up')) {
+        return null;
+    }
 
     // Toggle Open/Close
     const toggleChat = () => {
@@ -66,10 +78,21 @@ export default function FloatingChatbot() {
         }
     };
 
-    // Load persisted state - DISABLED: Chatbot should stay closed by default
+    // Load persisted state - Restore chat if returning from Auth
     useEffect(() => {
-        // Do NOT auto-open from sessionStorage
-        // The chatbot will only open when the user clicks on it
+        if (typeof window !== 'undefined') {
+            const shouldRestore = localStorage.getItem('cove_chat_should_restore');
+            if (shouldRestore === 'true') {
+                setIsOpen(true);
+                setHasStarted(true);
+
+                // Only clear the flag if we are NOT on an auth page, so it persists for the return trip
+                const isAuthPage = window.location.pathname.includes('/sign-in') || window.location.pathname.includes('/sign-up');
+                if (!isAuthPage) {
+                    localStorage.removeItem('cove_chat_should_restore');
+                }
+            }
+        }
     }, []);
 
     // Persist hasStarted per session
@@ -83,7 +106,7 @@ export default function FloatingChatbot() {
     }, []);
 
     const handleStartChatting = () => {
-        // Allow both signed-in users and guests to start chatting
+        // Unconditionally start (handles both authenticated and "Skip for now")
         setHasStarted(true);
         sessionStorage.setItem('cove_chat_started', 'true');
         setTimeout(() => inputRef.current?.focus(), 300);
@@ -91,19 +114,13 @@ export default function FloatingChatbot() {
 
     // Removed: showAuthOptions state - guests can now chat directly
 
-    // Auth Handlers
+    // Auth Handlers - Now using Auth Modal
     const handleSignIn = () => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('cove_redirect_url', window.location.pathname);
-            window.location.href = '/sign-in';
-        }
+        openAuthModal('sign-in', pathname || '/');
     };
 
     const handleSignUp = () => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('cove_redirect_url', window.location.pathname);
-            window.location.href = '/sign-up';
-        }
+        openAuthModal('sign-up', pathname || '/');
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -205,31 +222,82 @@ export default function FloatingChatbot() {
                                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    transition={{ type: "spring", stiffness: 320, damping: 32 }}
                                     className="fixed z-[999] bottom-6 right-6 w-[90vw] md:w-[380px] h-[75vh] md:h-[750px] max-h-[900px] max-w-[380px] rounded-2xl bg-neutral-100 shadow-2xl border border-gray-200 overflow-hidden flex flex-col"
                                 >
                                     {/* Header - Minimal Top Bar */}
                                     <div className="h-11 flex items-center justify-between px-4 relative z-50 shrink-0 bg-transparent">
                                         <div className="flex items-center">
-                                            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-800 hover:text-black">
+                                            <button
+                                                onClick={() => {
+                                                    if (activeView !== 'chat') {
+                                                        setActiveView('chat');
+                                                    } else {
+                                                        setHasStarted(false);
+                                                    }
+                                                }}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-800 hover:text-black"
+                                                title="Back"
+                                            >
                                                 <ArrowLeft className="h-5 w-5" strokeWidth={2} />
                                             </button>
                                         </div>
 
                                         <div className="flex items-center gap-0.5">
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setShowMenu(!showMenu)}
+                                                    className={`p-2 rounded-full transition-colors ${showMenu ? 'bg-gray-100 text-black' : 'hover:bg-gray-100 text-gray-700 hover:text-black'}`}
+                                                    title="Options"
+                                                >
+                                                    <MoreHorizontal className="h-5 w-5" strokeWidth={2} />
+                                                </button>
+
+                                                <AnimatePresence>
+                                                    {showMenu && (
+                                                        <>
+                                                            <div
+                                                                className="fixed inset-0 z-[90]"
+                                                                onClick={() => setShowMenu(false)}
+                                                            />
+                                                            <motion.div
+                                                                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                                                                transition={{ duration: 0.1 }}
+                                                                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-[100] origin-top-right overflow-hidden"
+                                                            >
+                                                                <button
+                                                                    onClick={() => {
+                                                                        chatWidgetRef.current?.clearChat();
+                                                                        setShowMenu(false);
+                                                                    }}
+                                                                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left text-sm font-medium text-gray-700"
+                                                                >
+                                                                    <RefreshCw className="w-4 h-4" />
+                                                                    Clear Chat
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setHasStarted(false);
+                                                                        setShowMenu(false);
+                                                                    }}
+                                                                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                                                                >
+                                                                    <LogOut className="w-4 h-4" />
+                                                                    End Session
+                                                                </button>
+                                                            </motion.div>
+                                                        </>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
                                             <button
                                                 onClick={() => setIsMinimized(true)}
                                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
                                                 title="Minimize"
                                             >
-                                                <Minus className="h-4 w-4" strokeWidth={2} />
-                                            </button>
-                                            <button
-                                                onClick={() => setIsOpen(false)}
-                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 hover:text-black"
-                                                title="Close"
-                                            >
-                                                <X className="h-4 w-4" strokeWidth={2} />
+                                                <Minus className="h-5 w-5" strokeWidth={2} />
                                             </button>
                                         </div>
                                     </div>
@@ -324,7 +392,6 @@ export default function FloatingChatbot() {
                                                             >
                                                                 Sign in
                                                             </button>
-                                                            {' '}for personalized recs
                                                         </motion.p>
                                                     )}
                                                 </motion.div>
