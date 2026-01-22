@@ -1,54 +1,72 @@
-# Cove Deployment Guide
-**Date:** January 22, 2026
-**Author:** Antigravity AI Assistant
+# Cove Production Deployment Guide
+
+**Date:** January 22, 2026  
+**Version:** 1.0  
+**Status:** ✅ Complete
 
 ---
 
-## Overview
+## Architecture Overview
 
-This document details the complete deployment process for Cove - an AI-powered fashion marketplace.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        meincove.com                              │
+│                     (Frontend - Vercel)                          │
+│                                                                  │
+│    ┌─────────────────┐      ┌─────────────────────────────┐     │
+│    │  Django Backend │      │  Cove AI Core (FastAPI)     │     │
+│    │api.meincove.com │◄────►│   ai.meincove.com           │     │
+│    │    (Railway)    │      │      (Railway)              │     │
+│    └────────┬────────┘      └──────────────┬──────────────┘     │
+│             │                              │                     │
+│             └──────────────┬───────────────┘                     │
+│                            │                                     │
+│                 ┌──────────▼──────────┐                          │
+│                 │   Neon PostgreSQL   │                          │
+│                 │  (Cloud Database)   │                          │
+│                 └─────────────────────┘                          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-| Component | Platform | URL |
-|-----------|----------|-----|
-| **Frontend** | Vercel | `https://meincove.com` |
-| **Backend (Django)** | Railway | `https://cove-production-af3a.up.railway.app` |
-| **Database** | Neon PostgreSQL | `ep-mute-dream-ag0ojpws-pooler.c-2.eu-central-1.aws.neon.tech` |
-| **Auth** | Clerk | Clerk-hosted |
+| Service | URL | Platform |
+|---------|-----|----------|
+| **Frontend** | `https://meincove.com` | Vercel |
+| **Backend API** | `https://api.meincove.com` | Railway |
+| **AI Chatbot** | `https://ai.meincove.com` | Railway |
+| **Database** | Neon PostgreSQL | Neon.tech |
 
 ---
 
 ## Part 1: Frontend Deployment (Vercel)
 
-### 1.1 Initial Setup
-- **Platform:** Vercel (Free tier)
+### Platform
+- **Hosting:** Vercel (Hobby tier)
+- **Framework:** Next.js 16.1.4
 - **Repository:** `meincove/COVE`
 - **Root Directory:** `frontend`
-- **Framework:** Next.js 16.1.4
 
-### 1.2 Security Fix (CVE-2025-66478)
-**Problem:** Vercel blocked deployment due to critical vulnerability in Next.js 15.3.2.
+### Security Fix Applied
+**Issue:** Vercel blocked deployment due to CVE-2025-66478 (critical vulnerability in Next.js 15.x).
 
-**Solution:**
-1. Upgraded `next` package to `16.1.4` in `package.json`
-2. Added `.npmrc` with `legacy-peer-deps=true` to resolve Clerk conflict
-3. Forced Webpack in build: `"build": "next build --webpack"`
+**Resolution:**
+1. Upgraded `next` from `15.3.2` to `16.1.4`
+2. Added `.npmrc` with `legacy-peer-deps=true`
+3. Set build command to `next build --webpack`
 
-### 1.3 Domain Configuration (Namecheap → Vercel)
-**Domains:** `meincove.com`, `meincove.de`
+### Domain Configuration (Namecheap → Vercel)
 
-**DNS Records Added in Namecheap:**
 | Type | Host | Value |
 |------|------|-------|
 | A Record | `@` | `76.76.21.21` |
-| CNAME | `www` | `30addc145c3c65ca.vercel-dns-017.com` |
+| CNAME | `www` | `30addc145c3c65ce.vercel-dns-017.com` |
 
-**Issue Fixed:** Initial generic CNAME (`cname.vercel-dns.com`) failed SSL generation. Had to use Vercel's specific CNAME value from the dashboard.
+### Environment Variables (Vercel Dashboard)
 
-### 1.4 Environment Variables (Vercel Dashboard)
-```
-NEXT_PUBLIC_API_BASE=https://cove-production-af3a.up.railway.app
-NEXT_PUBLIC_BACKEND_BASE_URL=https://cove-production-af3a.up.railway.app
-DJANGO_BACKEND_URL=https://cove-production-af3a.up.railway.app
+```env
+NEXT_PUBLIC_API_BASE=https://api.meincove.com
+NEXT_PUBLIC_BACKEND_BASE_URL=https://api.meincove.com
+DJANGO_BACKEND_URL=https://api.meincove.com
+AI_CORE_URL=https://ai.meincove.com
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -58,94 +76,162 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 ## Part 2: Backend Deployment (Railway)
 
-### 2.1 Platform Choice
-- **Selected:** Railway (Free tier with $5/month credits)
-- **Alternatives Considered:** Render.com (no free Redis), AWS (too complex)
+### Platform
+- **Hosting:** Railway (Hobby tier - $5/month credits)
+- **Service Name:** `COVE`
+- **Framework:** Django + Gunicorn
+- **Root Directory:** `backend`
 
-### 2.2 Service Configuration
-**Root Directory:** `backend`
-**Builder:** Railpack (auto-detected Python)
+### Build & Deploy Commands
 
-**Build Command:**
 ```bash
+# Build Command
 pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
-```
 
-**Start Command:**
-```bash
+# Start Command
 gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
 ```
 
-### 2.3 Environment Variables (Railway)
+### Custom Domain Setup
+
+| Type | Host | Value |
+|------|------|-------|
+| CNAME | `api` | `bqtur08r.up.railway.app` |
+
+### Environment Variables (Railway)
+
 ```json
 {
-  "DJANGO_SECRET_KEY": "...",
+  "DJANGO_SECRET_KEY": "[secret]",
   "DATABASE_URL": "postgresql://neondb_owner:...@ep-mute-dream-ag0ojpws-pooler.../neondb?sslmode=require",
   "PGHOST": "ep-mute-dream-ag0ojpws-pooler.c-2.eu-central-1.aws.neon.tech",
   "PGPORT": "5432",
   "PGDATABASE": "neondb",
   "PGUSER": "neondb_owner",
-  "PGPASSWORD": "...",
+  "PGPASSWORD": "[secret]",
   "PGSSLMODE": "require",
   "USE_RDS": "1",
   "DEBUG": "False",
-  "ALLOWED_HOSTS": ".railway.app,.meincove.com",
+  "ALLOWED_HOSTS": ".railway.app,.meincove.com,api.meincove.com",
   "CORS_ALLOWED_ORIGINS": "https://meincove.com,https://www.meincove.com",
   "CSRF_TRUSTED_ORIGINS": "https://meincove.com,https://www.meincove.com",
-  "CLERK_SECRET_KEY": "...",
-  "STRIPE_SECRET_KEY": "...",
-  "STRIPE_WEBHOOK_SECRET": "...",
+  "CLERK_SECRET_KEY": "[secret]",
+  "STRIPE_SECRET_KEY": "[secret]",
+  "STRIPE_WEBHOOK_SECRET": "[secret]",
   "STRIPE_SUCCESS_URL": "https://meincove.com/payment/result?session_id={CHECKOUT_SESSION_ID}",
   "STRIPE_CANCEL_URL": "https://meincove.com/checkout",
   "STRIPE_CURRENCY": "eur"
 }
 ```
 
-### 2.4 Errors Fixed
+### Errors Fixed
 
-#### Error 1: Bad Request (400)
-**Cause:** Django's `ALLOWED_HOSTS` used `*.railway.app` which doesn't work.
-**Fix:** Changed to `.railway.app` (leading dot for subdomain matching).
-
-#### Error 2: Products Not Loading
-**Cause:** Vercel environment variables pointed to `api.meincove.com` which wasn't configured.
-**Fix:** Updated to Railway URL `cove-production-af3a.up.railway.app`.
+| Error | Cause | Solution |
+|-------|-------|----------|
+| Bad Request (400) | `ALLOWED_HOSTS` used `*.railway.app` | Changed to `.railway.app` (leading dot) |
+| Products not loading | Vercel pointed to wrong URL | Updated to `api.meincove.com` |
 
 ---
 
-## Part 3: Database (Neon PostgreSQL)
+## Part 3: AI Core Deployment (Railway)
 
-**Already configured** - both frontend and backend use the existing Neon database.
-- **Connection:** Via `DATABASE_URL` environment variable
-- **SSL Mode:** `require`
-- **No Migration Needed:** Railway runs `python manage.py migrate` on each deploy.
+### Platform
+- **Hosting:** Railway (Hobby tier)
+- **Service Name:** `COVE-ai-chatbot` (proud-sparkle)
+- **Framework:** FastAPI + Uvicorn
+- **Root Directory:** `cove-ai-core`
+
+### Dockerfile
+
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Custom Domain Setup
+
+| Type | Host | Value |
+|------|------|-------|
+| CNAME | `ai` | `jfb87u5n.up.railway.app` |
+
+### Environment Variables (Railway)
+
+```json
+{
+  "APP_URL": "https://meincove.com",
+  "LLM_BACKEND": "openrouter",
+  "GEN_MODEL": "openrouter:openai/gpt-4o-mini",
+  "ESCALATE_MODEL": "openrouter:anthropic/claude-3.5-sonnet",
+  "RERANK_MODEL": "cohere:rerank-3",
+  "EMBED_MODEL": "openrouter:openai/text-embedding-3-small",
+  "OPENROUTER_API_KEY": "[secret]",
+  "OPENAI_API_KEY": "[secret]",
+  "COHERE_API_KEY": "[secret]",
+  "PG_DSN": "postgresql://neondb_owner:...@.../neondb?sslmode=require",
+  "DJANGO_BASE_URL": "https://api.meincove.com",
+  "USE_TOOLS_LAYER": "true",
+  "USE_LLM_ROUTER": "true",
+  "AGENT_MAX_HISTORY_MESSAGES": "6"
+}
+```
+
+### Error Fixed
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| Empty Dockerfile error | Dockerfile was empty | Created proper Python 3.11 Dockerfile with uvicorn |
 
 ---
 
-## Part 4: Authentication (Clerk)
+## Part 4: DNS Configuration Summary (Namecheap)
 
-Clerk works **independently** of the backend. Authentication data is stored on Clerk's servers.
+All DNS records for `meincove.com`:
 
-**Frontend:** Uses `@clerk/nextjs` SDK
-**Backend:** Uses `clerk-sdk-python` for JWT verification only
-
----
-
-## Current Status
-
-| Service | Status |
-|---------|--------|
-| Frontend (Vercel) | ✅ Live |
-| Backend (Railway) | ✅ Live |
-| Domain (meincove.com) | ✅ Connected |
-| Products/Images | ✅ Loading |
-| Bubbles AI Chatbot | ⏸️ Requires `cove-ai-core` (needs Railway Hobby plan) |
+| Type | Host | Value | Purpose |
+|------|------|-------|---------|
+| A | `@` | `216.198.79.1` | Main domain → Vercel |
+| CNAME | `www` | `30addc...vercel-dns-017.com` | www subdomain → Vercel |
+| CNAME | `api` | `bqtur08r.up.railway.app` | API subdomain → Railway Backend |
+| CNAME | `ai` | `jfb87u5n.up.railway.app` | AI subdomain → Railway Chatbot |
 
 ---
 
-## Next Steps
+## Testing Checklist
 
-1. **Upgrade to Railway Hobby ($5/mo)** to deploy `cove-ai-core` for AI chatbot
-2. **Configure custom domain** `api.meincove.com` on Railway (requires Hobby)
-3. **Test full checkout flow** with Stripe
-4. **Set up monitoring** (Sentry, Railway Observability)
+- [x] Frontend loads at `meincove.com`
+- [x] Products display from `api.meincove.com`
+- [x] Clerk authentication works
+- [x] Bubbles AI chatbot connects to `ai.meincove.com`
+- [ ] Stripe checkout flow (requires live testing)
+- [ ] Email notifications
+
+---
+
+## Troubleshooting
+
+### Services "Sleeping"
+Railway Hobby plan may sleep services after inactivity. First request takes 15-30 seconds.
+
+### DNS Not Working
+DNS propagation can take up to 72 hours, but usually 5-10 minutes. Check with:
+```bash
+nslookup api.meincove.com
+nslookup ai.meincove.com
+```
+
+### 500 Errors
+Check Railway → Service → Deploy Logs for Python errors.
+
+---
+
+## Future Improvements
+
+1. **Monitoring:** Add Sentry for error tracking
+2. **Caching:** Add Redis for session/cache
+3. **CDN:** Configure Vercel Edge for static assets
+4. **Backups:** Set up Neon database backups
