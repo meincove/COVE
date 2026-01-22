@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from app.agent.orchestrator import classify
 from app.agent.verify import apply_guardrails, cross_check
 from app.core.config import COHERE_API_KEY, EMBED_MODEL, OPENAI_API_KEY, RERANK_MODEL
+from app.config import COVE_CORE_BASE_URL
 from app.core.rerank import mmr_rerank_from_vectors
 from app.providers.llm import LLMClient
 from app.telemetry.trace import emit, new_trace_id
@@ -322,7 +323,7 @@ async def _call_fit_recommend(
 
     try:
         async with httpx.AsyncClient(timeout=8) as cx:
-            r = await cx.post("http://127.0.0.1:8000/ai/fit/recommend", json=payload)
+            r = await cx.post(f"{COVE_CORE_BASE_URL}/ai/fit/recommend", json=payload)
             if r.status_code == 200:
                 return r.json()
     except Exception as e:
@@ -790,7 +791,7 @@ async def _generate_greeting(message: str, user_name: Optional[str]) -> str:
 async def _fetch_product(http: httpx.AsyncClient, slug: str) -> Optional[dict]:
     try:
         r = await http.get(
-            "http://127.0.0.1:8000/ai/tools/product.get", params={"slug": slug}
+            f"{COVE_CORE_BASE_URL}/ai/tools/product.get", params={"slug": slug}
         )
         if r.status_code == 200:
             return r.json()
