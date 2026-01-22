@@ -19,40 +19,82 @@
         "flow": [
             {
                 "step": "occasion",
-                "question": "Great! Let's build you the perfect outfit! 🎨\n\nWhat's the occasion?",
-                "examples": [
-                    "business meeting",
-                    "date night",
-                    "casual weekend",
-                    "wedding",
-                    "gym"
+                "question": "Great! Let's build you the perfect outfit!\n\nWhat's the occasion?",
+                "input_type": "occasion",
+                "options": [
+                    {
+                        "label": "Date Night",
+                        "value": "date night"
+                    },
+                    {
+                        "label": "Business Meeting",
+                        "value": "business meeting"
+                    },
+                    {
+                        "label": "Casual Weekend",
+                        "value": "casual weekend"
+                    }
                 ],
+                "allow_custom": true,
                 "required": true
             },
             {
                 "step": "budget",
                 "question": "Perfect! What's your budget?",
-                "examples": [
-                    "$100",
-                    "$200-300",
-                    "under €500"
+                "input_type": "budget_range",
+                "options": [
+                    {
+                        "label": "Under EUR 100",
+                        "value": "100",
+                        "min": 0,
+                        "max": 100
+                    },
+                    {
+                        "label": "EUR 100 - 250",
+                        "value": "250",
+                        "min": 100,
+                        "max": 250
+                    },
+                    {
+                        "label": "EUR 250+",
+                        "value": "500",
+                        "min": 250,
+                        "max": 1000
+                    }
                 ],
+                "allow_custom": true,
+                "slider_config": {
+                    "min": 0,
+                    "max": 1000,
+                    "step": 10,
+                    "currency": "EUR"
+                },
                 "required": true,
                 "default": 500
             },
             {
                 "step": "style",
                 "question": "Any style preferences? (optional)",
-                "examples": [
-                    "smart casual",
-                    "streetwear",
-                    "minimalist",
-                    "bold colors"
+                "input_type": "style",
+                "options": [
+                    {
+                        "label": "Casual",
+                        "value": "casual"
+                    },
+                    {
+                        "label": "Smart Casual",
+                        "value": "smart casual"
+                    },
+                    {
+                        "label": "Formal",
+                        "value": "formal"
+                    }
                 ],
+                "allow_custom": true,
                 "required": false
             }
         ],
-        "completion_message": "🎨 Got it! Building your {occasion} outfit with a €{budget} budget...",
+        "completion_message": "Got it! Building your {occasion} outfit with a €{budget} budget...",
         "orchestrator_workflow": "outfit_builder"
     }
 }

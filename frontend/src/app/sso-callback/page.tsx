@@ -21,17 +21,24 @@ export default function SSOCallback() {
             // Give Clerk a moment to complete sign-in
             await new Promise(resolve => setTimeout(resolve, 500))
 
-            const selectedPath = localStorage.getItem('cove_selected_path')
+            // 1. Check for specific return URL (set by Chatbot or deep link)
+            const returnUrl = localStorage.getItem('cove_redirect_url')
+            if (returnUrl) {
+                localStorage.removeItem('cove_redirect_url')
+                router.push(returnUrl)
+                router.refresh()
+                return
+            }
 
-            // Clean up
+            // 2. Check for path preference
+            const selectedPath = localStorage.getItem('cove_selected_path')
             localStorage.removeItem('cove_selected_path')
 
-            // Redirect based on path or sign-in status
             if (selectedPath === 'platform') {
                 router.push('/partner-onboarding')
             } else {
-                // Redirect to shop with refresh to ensure auth state is updated
-                router.push('/shop')
+                // Default to shopping page
+                router.push('/shopping')
                 router.refresh()
             }
         }

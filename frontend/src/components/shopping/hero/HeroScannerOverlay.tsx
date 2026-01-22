@@ -1,7 +1,191 @@
+// "use client"
+
+// import { AnimatePresence, motion } from "framer-motion"
+// import { ShoppingBag, Zap } from "lucide-react"
+// import { useRouter } from "next/navigation"
+// import type { UiProduct } from "@/src/lib/catalog/shared"
+
+// function safeImg(src?: string) {
+//     if (!src) return "/clothing-images/fallback.jpg"
+//     return src
+// }
+
+// export default function HeroScannerOverlay({
+//     scanned,
+//     pulseKey,
+//     dragging,
+// }: {
+//     scanned: UiProduct | null
+//     pulseKey: number
+//     dragging: boolean
+// }) {
+//     const router = useRouter()
+
+//     const goProduct = (p: UiProduct) => {
+//         // if your app uses /product/[slug], keep this:
+//         if (p.slug) router.push(`/product/${p.slug}`)
+//         else router.push(`/shopping`)
+//     }
+
+//     return (
+//         <div
+//             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none"
+//             style={{ width: "min(420px, 86vw)", height: "min(280px, 42vh)" }}
+//         >
+//             {/* center scan brackets */}
+//             {(["tl", "tr", "bl", "br"] as const).map((pos) => (
+//                 <div
+//                     key={pos}
+//                     className="absolute"
+//                     style={{
+//                         width: 30,
+//                         height: 30,
+//                         borderStyle: "solid",
+//                         borderColor: scanned ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.35)",
+//                         transition: "border-color 0.2s ease",
+//                         borderWidth:
+//                             pos === "tl"
+//                                 ? "2px 0 0 2px"
+//                                 : pos === "tr"
+//                                     ? "2px 2px 0 0"
+//                                     : pos === "bl"
+//                                         ? "0 0 2px 2px"
+//                                         : "0 2px 2px 0",
+//                         borderRadius:
+//                             pos === "tl"
+//                                 ? "12px 0 0 0"
+//                                 : pos === "tr"
+//                                     ? "0 12px 0 0"
+//                                     : pos === "bl"
+//                                         ? "0 0 0 12px"
+//                                         : "0 0 12px 0",
+//                         top: pos.includes("t") ? 0 : undefined,
+//                         bottom: pos.includes("b") ? 0 : undefined,
+//                         left: pos.includes("l") ? 0 : undefined,
+//                         right: pos.includes("r") ? 0 : undefined,
+//                     }}
+//                 />
+//             ))}
+
+//             {!scanned && (
+//                 <div className="absolute inset-0 flex items-center justify-center text-center">
+//                     <div className="rounded-2xl bg-white/75 border border-black/10 px-4 py-2 shadow-md">
+//                         <div className="text-xs text-black/60 font-medium">Drag to explore (x + y)</div>
+//                         <div className="text-[11px] text-black/40 mt-1">Bring a tile into the center to preview</div>
+//                     </div>
+//                 </div>
+//             )}
+
+//             <AnimatePresence>
+//                 {scanned && (
+//                     <motion.div
+//                         key={scanned.id}
+//                         initial={{ opacity: 0, scale: 0.97, y: 10 }}
+//                         animate={{ opacity: 1, scale: 1, y: 0 }}
+//                         exit={{ opacity: 0, scale: 0.98, y: 8 }}
+//                         transition={{ duration: 0.22, ease: [0.2, 0.9, 0.2, 1] }}
+//                         className="absolute inset-0 overflow-hidden pointer-events-auto"
+//                         style={{
+//                             borderRadius: 18,
+//                             background: dragging ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.97)",
+//                             border: "1px solid rgba(0,0,0,0.10)",
+//                             boxShadow: dragging ? "0 18px 55px rgba(0,0,0,0.10)" : "0 30px 90px rgba(0,0,0,0.14)",
+//                             backdropFilter: dragging ? "none" : "blur(12px)",
+//                             WebkitBackdropFilter: dragging ? "none" : "blur(12px)",
+//                         }}
+//                         onPointerDown={(e) => e.stopPropagation()}
+//                         onPointerMove={(e) => e.stopPropagation()}
+//                     >
+//                         {/* scan line */}
+//                         <div
+//                             key={pulseKey}
+//                             className="absolute left-0 right-0 h-[2px]"
+//                             style={{
+//                                 top: 0,
+//                                 background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.28), transparent)",
+//                                 animation: "coveScanLine 0.55s ease-out forwards",
+//                             }}
+//                         />
+
+//                         <div className="flex h-full">
+//                             <div className="w-[44%] h-full bg-neutral-50 relative overflow-hidden">
+//                                 <img
+//                                     src={safeImg(scanned.imageSrc ?? scanned.images?.[0])}
+//                                     alt=""
+//                                     className="w-full h-full object-cover"
+//                                     draggable={false}
+//                                     onError={(e) => {
+//                                         const t = e.currentTarget as HTMLImageElement
+//                                         if (t.src.includes("fallback.jpg")) return
+//                                         t.src = "/clothing-images/fallback.jpg"
+//                                     }}
+//                                 />
+//                             </div>
+
+//                             <div className="w-[56%] h-full p-5 flex flex-col justify-between">
+//                                 <div>
+//                                     <div className="text-[11px] uppercase tracking-wider text-black/45 font-medium">
+//                                         {(scanned.type ?? "Item").toString()}
+//                                     </div>
+//                                     <div className="mt-1 text-lg font-semibold text-black/85 leading-tight">{scanned.name}</div>
+//                                     <div className="mt-2 text-base font-medium text-black/70">€{Number(scanned.price ?? 0).toFixed(2)}</div>
+//                                 </div>
+
+//                                 <div className="flex flex-col gap-2">
+//                                     <button
+//                                         className="w-full py-2.5 rounded-xl bg-black text-white text-sm font-medium flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition"
+//                                         onPointerDown={(e) => e.stopPropagation()}
+//                                         onClick={() => goProduct(scanned)}
+//                                     >
+//                                         <ShoppingBag className="w-4 h-4" strokeWidth={1.6} />
+//                                         View Product
+//                                     </button>
+
+//                                     <div className="grid grid-cols-2 gap-2">
+//                                         <button
+//                                             className="py-2 rounded-lg bg-black/5 text-black/65 text-xs font-medium hover:bg-black/10 transition"
+//                                             onPointerDown={(e) => e.stopPropagation()}
+//                                             onClick={() => goProduct(scanned)}
+//                                         >
+//                                             Details
+//                                         </button>
+//                                         <button
+//                                             className="py-2 rounded-lg bg-black/5 text-black/65 text-xs font-medium hover:bg-black/10 transition flex items-center justify-center gap-1"
+//                                             onPointerDown={(e) => e.stopPropagation()}
+//                                             onClick={() => goProduct(scanned)}
+//                                         >
+//                                             <Zap className="w-3 h-3" strokeWidth={1.6} />
+//                                             Buy Now
+//                                         </button>
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         </div>
+
+//                         <style jsx global>{`
+//               @keyframes coveScanLine {
+//                 0% {
+//                   top: 0%;
+//                   opacity: 1;
+//                 }
+//                 100% {
+//                   top: 100%;
+//                   opacity: 0.22;
+//                 }
+//               }
+//             `}</style>
+//                     </motion.div>
+//                 )}
+//             </AnimatePresence>
+//         </div>
+//     )
+// }
+
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { Scan, ShoppingBag, Zap } from "lucide-react"
+import { ShoppingBag, Zap, Scan } from "lucide-react"
+import { useRouter } from "next/navigation"
 import type { UiProduct } from "@/src/lib/catalog/shared"
 
 function safeImg(src?: string) {
@@ -12,59 +196,80 @@ function safeImg(src?: string) {
 export default function HeroScannerOverlay({
     scanned,
     pulseKey,
+    dragging,
 }: {
     scanned: UiProduct | null
     pulseKey: number
+    dragging: boolean
 }) {
+    const router = useRouter()
+
+    const goProduct = (p: UiProduct) => {
+        if (p.slug) {
+            const variantParam = p.variantId ? `?variantId=${p.variantId}` : ''
+            router.push(`/product/${p.slug}${variantParam}`)
+        } else {
+            router.push(`/shopping`)
+        }
+    }
+
     return (
-        <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none"
-            style={{ width: "min(380px, 75vw)", height: "min(260px, 38vh)" }}
+        <motion.div
+            layoutId="hero-scanner-focus"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none"
+            initial={false}
+            animate={{
+                width: scanned ? "min(380px, 80vw)" : "128px",  // Increased ~20% (315 -> 380)
+                height: scanned ? "min(252px, 42vh)" : "128px", // Increased ~20% (210 -> 252)
+            }}
+            // ✅ SNAPPY SPRING: Higher stiffness, lower damping ratio for snap
+            transition={{ type: "spring", stiffness: 450, damping: 28, mass: 0.8 }}
         >
-            {/* Corner brackets */}
+            {/* Static Brackets - Hidden until scanned (User request) */}
             {(["tl", "tr", "bl", "br"] as const).map((pos) => (
                 <div
                     key={pos}
                     className="absolute"
                     style={{
-                        width: 28,
-                        height: 28,
+                        width: 36, // Scaled slightly
+                        height: 36,
                         borderStyle: "solid",
-                        borderColor: scanned ? "rgba(0,0,0,0.78)" : "rgba(0,0,0,0.40)",
-                        transition: "border-color 0.25s ease",
+                        borderColor: scanned ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.0)",
+                        transition: "border-color 0.2s ease",
                         borderWidth:
                             pos === "tl"
-                                ? "2px 0 0 2px"
+                                ? "2.5px 0 0 2.5px"
                                 : pos === "tr"
-                                    ? "2px 2px 0 0"
+                                    ? "2.5px 2.5px 0 0"
                                     : pos === "bl"
-                                        ? "0 0 2px 2px"
-                                        : "0 2px 2px 0",
+                                        ? "0 0 2.5px 2.5px"
+                                        : "0 2.5px 2.5px 0",
                         borderRadius:
                             pos === "tl"
-                                ? "10px 0 0 0"
+                                ? "14px 0 0 0" // Scaled radius
                                 : pos === "tr"
-                                    ? "0 10px 0 0"
+                                    ? "0 14px 0 0"
                                     : pos === "bl"
-                                        ? "0 0 0 10px"
-                                        : "0 0 10px 0",
-                        top: pos.includes("t") ? 0 : undefined,
-                        bottom: pos.includes("b") ? 0 : undefined,
-                        left: pos.includes("l") ? 0 : undefined,
-                        right: pos.includes("r") ? 0 : undefined,
+                                        ? "0 0 0 14px"
+                                        : "0 0 14px 0",
+                        top: pos.includes("t") ? -4 : undefined,     // Offset for larger feel
+                        bottom: pos.includes("b") ? -4 : undefined,
+                        left: pos.includes("l") ? -4 : undefined,
+                        right: pos.includes("r") ? -4 : undefined,
                     }}
                 />
             ))}
 
+
             {!scanned && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <div className="w-11 h-11 rounded-xl bg-white/80 backdrop-blur-sm border border-neutral-200/50 flex items-center justify-center mb-3 shadow-md">
-                        <Scan className="w-5 h-5 text-neutral-400" strokeWidth={1.5} />
+                <div className="absolute inset-0 flex items-center justify-center text-center">
+                    <div
+                        // ✅ STATIC IDLE (User request: "remove any animation on this")
+                        // No motion props here, just a static div.
+                        className="h-12 w-12 rounded-2xl bg-white/80 border border-black/10 flex items-center justify-center shadow-sm backdrop-blur-md"
+                    >
+                        <Scan className="w-5 h-5 text-black/60" strokeWidth={1.5} />
                     </div>
-                    <p className="text-xs text-neutral-500 font-medium">Drag to explore</p>
-                    <p className="text-xs text-neutral-400 mt-1">
-                        Bring items into frame to preview
-                    </p>
                 </div>
             )}
 
@@ -72,29 +277,48 @@ export default function HeroScannerOverlay({
                 {scanned && (
                     <motion.div
                         key={scanned.id}
-                        initial={{ opacity: 0, scale: 0.96, y: 10, filter: "blur(3px)" }}
-                        animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, scale: 0.98, y: 8, filter: "blur(2px)" }}
-                        transition={{ duration: 0.24, ease: [0.2, 0.9, 0.2, 1] }}
-                        className="absolute inset-0 rounded-2xl bg-white/98 backdrop-blur-xl border border-neutral-200/70 shadow-2xl shadow-black/10 overflow-hidden pointer-events-auto"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute inset-0 overflow-hidden pointer-events-auto"
+                        style={{
+                            borderRadius: 32, // ✅ MORE ROUNDED (18 -> 32)
+                            backgroundColor: dragging ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)",
+                            backgroundImage:
+                                "radial-gradient(900px 240px at 30% 0%, rgba(255,255,255,0.40), transparent 60%)",
+                            border: "1px solid rgba(0,0,0,0.08)",
+                            boxShadow: dragging ? "0 16px 48px rgba(0,0,0,0.06)" : "0 22px 68px rgba(0,0,0,0.08)",
+                            backdropFilter: dragging ? "none" : "blur(16px)",
+                            WebkitBackdropFilter: dragging ? "none" : "blur(16px)",
+                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onPointerMove={(e) => e.stopPropagation()}
                     >
-                        {/* scan line */}
+                        {/* subtle inner stroke */}
+                        <div
+                            className="pointer-events-none absolute inset-0"
+                            style={{
+                                borderRadius: 18,
+                                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.55)",
+                            }}
+                        />
+
                         <div
                             key={pulseKey}
                             className="absolute left-0 right-0 h-[2px]"
                             style={{
                                 top: 0,
-                                background:
-                                    "linear-gradient(90deg, transparent, rgba(0,0,0,0.35), transparent)",
+                                background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.22), transparent)",
                                 animation: "coveScanLine 0.55s ease-out forwards",
                             }}
                         />
 
                         <div className="flex h-full">
-                            <div className="w-2/5 h-full bg-neutral-50 relative overflow-hidden">
+                            <div className="w-[44%] h-full bg-neutral-50/50 relative overflow-hidden">
                                 <img
                                     src={safeImg(scanned.imageSrc ?? scanned.images?.[0])}
-                                    alt={scanned.name}
+                                    alt=""
                                     className="w-full h-full object-cover"
                                     draggable={false}
                                     onError={(e) => {
@@ -103,61 +327,63 @@ export default function HeroScannerOverlay({
                                         t.src = "/clothing-images/fallback.jpg"
                                     }}
                                 />
-                                {!!scanned.badge && (
-                                    <div className="absolute top-3 left-3">
-                                        <span className="px-2 py-1 text-xs font-medium bg-neutral-900 text-white rounded">
-                                            {scanned.badge}
-                                        </span>
-                                    </div>
-                                )}
                             </div>
 
-                            <div className="w-3/5 h-full p-5 flex flex-col justify-between">
+                            <div className="w-[56%] h-full p-5 flex flex-col justify-between">
                                 <div>
-                                    <p className="text-xs text-neutral-400 font-medium uppercase tracking-wider mb-1">
-                                        {scanned.type ?? "Item"}
-                                    </p>
-                                    <h3 className="text-lg font-semibold text-neutral-900 tracking-tight leading-tight mb-2">
-                                        {scanned.name}
-                                    </h3>
-                                    <p className="text-base font-medium text-neutral-700">
-                                        €{Number(scanned.price ?? 0).toFixed(2)}
-                                    </p>
+                                    <div className="text-[11px] uppercase tracking-wider text-black/45 font-medium">
+                                        {(scanned.type ?? "Item").toString()}
+                                    </div>
+                                    <div className="mt-1 text-lg font-semibold text-black/85 leading-tight">{scanned.name}</div>
+                                    <div className="mt-2 text-base font-medium text-black/70">€{Number(scanned.price ?? 0).toFixed(2)}</div>
                                 </div>
 
                                 <div className="flex flex-col gap-2">
-                                    <button className="w-full py-2.5 px-4 bg-neutral-900 text-white text-sm font-medium rounded-xl hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2">
-                                        <ShoppingBag className="w-4 h-4" strokeWidth={1.5} />
-                                        Add to Cart
+                                    <button
+                                        className="w-full py-2.5 rounded-xl bg-black text-white text-sm font-medium flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition"
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onClick={() => goProduct(scanned)}
+                                    >
+                                        <ShoppingBag className="w-4 h-4" strokeWidth={1.6} />
+                                        View Product
                                     </button>
-                                    <div className="flex gap-2">
-                                        <button className="flex-1 py-2 px-3 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors">
-                                            View Details
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            className="py-2 rounded-lg bg-black/5 text-black/65 text-xs font-medium hover:bg-black/10 transition"
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onClick={() => goProduct(scanned)}
+                                        >
+                                            Details
                                         </button>
-                                        <button className="flex-1 py-2 px-3 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1">
-                                            <Zap className="w-3 h-3" strokeWidth={1.5} />
+                                        <button
+                                            className="py-2 rounded-lg bg-black/5 text-black/65 text-xs font-medium hover:bg-black/10 transition flex items-center justify-center gap-1"
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onClick={() => goProduct(scanned)}
+                                        >
+                                            <Zap className="w-3 h-3" strokeWidth={1.6} />
                                             Buy Now
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <style jsx global>{`
+              @keyframes coveScanLine {
+                0% {
+                  top: 0%;
+                  opacity: 1;
+                }
+                100% {
+                  top: 100%;
+                  opacity: 0.18;
+                }
+              }
+            `}</style>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <style jsx global>{`
-        @keyframes coveScanLine {
-          0% {
-            top: 0%;
-            opacity: 1;
-          }
-          100% {
-            top: 100%;
-            opacity: 0.35;
-          }
-        }
-      `}</style>
-        </div>
+        </motion.div>
     )
 }

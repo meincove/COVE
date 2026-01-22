@@ -1,4 +1,5 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework import filters
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import Brand, ProductMasterGroup, ColorGroup
 from .serializers import BrandSerializer, ProductSerializer, ColorGroupSerializer
@@ -21,7 +22,8 @@ def product_queryset():
     summary="List products",
     description=(
         "Returns paginated products. "
-        "Filter by tier, type, gender, color (color slug), size, and price range."
+        "Filter by tier, type, gender, color (color slug), size, and price range. "
+        "Use ?search=term to fuzzy search name, description, brand."
     ),
     parameters=[
         OpenApiParameter(name="brand_id", description="Brand ID to filter (e.g., COVE, UrbanPulse)", required=False, type=str),
@@ -32,14 +34,17 @@ def product_queryset():
         OpenApiParameter(name="size", description="S | M | L | XL", required=False, type=str),
         OpenApiParameter(name="price_min", description="Minimum price", required=False, type=str),
         OpenApiParameter(name="price_max", description="Maximum price", required=False, type=str),
+        OpenApiParameter(name="search", description="Search term", required=False, type=str),
         OpenApiParameter(name="page", description="Pagination page number", required=False, type=int),
         OpenApiParameter(name="page_size", description="Items per page (max 100)", required=False, type=int),
     ],
 )
 class ProductListView(ListAPIView):
-    """GET /api/products/?tier=&type=&gender=&color=&size=&price_min=&price_max="""
+    """GET /api/products/?search=...&tier=..."""
     serializer_class = ProductSerializer
     pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'description', 'brand_id', 'type', 'tier']
 
     def get_queryset(self):
         qs = product_queryset()

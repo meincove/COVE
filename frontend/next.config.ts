@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   transpilePackages: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@clerk/nextjs', '@clerk/themes'],

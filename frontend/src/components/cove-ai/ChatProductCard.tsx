@@ -89,7 +89,7 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
         name: title,
         price: 0, // TODO: Get real price if available
         quantity: 1,
-        imageUrl: imageUrl,  // Use external URL from catalog, no fallback needed
+        imageUrl: imageUrl || '',  // Use external URL from catalog
         size: item.size || 'M', // Default or from item
         color: item.color || 'Black',
         colorName: colorName || item.color || 'Black',
@@ -118,11 +118,11 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
     <div
       className={`
         group relative
-        w-64 h-[340px] shrink-0
-        rounded-2xl overflow-hidden
-        bg-neutral-900
-        transform transition-all duration-500 ease-out
-        hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/30
+        w-56 h-[300px] shrink-0
+        rounded-xl overflow-hidden
+        bg-white border border-gray-200
+        transform transition-all duration-300 ease-out
+        hover:scale-[1.02] hover:shadow-lg hover:border-gray-300
         cursor-pointer
         animate-fade-in-up
       `}
@@ -152,20 +152,20 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
         </div>
       )}
 
-      {/* Gradient Overlay - Always visible for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+      {/* Gradient Overlay - Light version */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
       {/* Top Badges */}
-      <div className="absolute top-3 left-3 flex flex-col gap-1">
+      <div className="absolute top-2 left-2 flex flex-col gap-1">
         {(fromCatalog || imageUrl || priceLabel) && (
-          <div className="px-2 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center gap-1">
-            <Check className="h-3 w-3 text-green-400" />
-            <span className="text-[10px] font-medium text-white">Available</span>
+          <div className="px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center gap-1">
+            <Check className="h-2.5 w-2.5 text-green-500" />
+            <span className="text-[9px] font-medium text-gray-700">Available</span>
           </div>
         )}
         {item.tier && (
-          <div className="px-2 py-1 rounded-full bg-purple-500/20 backdrop-blur-md border border-purple-500/30">
-            <span className="text-[10px] font-medium text-purple-200">{item.tier}</span>
+          <div className="px-2 py-0.5 rounded-full bg-gray-800/80 backdrop-blur-sm">
+            <span className="text-[9px] font-medium text-white">{item.tier}</span>
           </div>
         )}
       </div>
@@ -177,13 +177,13 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
           setIsLiked(!isLiked);
         }}
         className={`
-          absolute top-3 right-3
-          h-8 w-8 rounded-full flex items-center justify-center
-          backdrop-blur-md transition-all duration-200
-          ${isLiked ? 'bg-red-500 text-white' : 'bg-black/30 text-white hover:bg-black/50'}
+          absolute top-2 right-2
+          h-7 w-7 rounded-full flex items-center justify-center
+          backdrop-blur-sm transition-all duration-200
+          ${isLiked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-500 hover:bg-white border border-gray-200'}
         `}
       >
-        <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+        <Heart className={`h-3.5 w-3.5 ${isLiked ? 'fill-current' : ''}`} />
       </button>
 
       {/* Bottom Content Area */}

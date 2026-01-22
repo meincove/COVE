@@ -3,17 +3,19 @@
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { useEffect } from 'react'
+import { useAuthModal } from '@/src/context/AuthModalContext'
 
 interface AuthDialogProps {
     isOpen: boolean
     onClose: () => void
-    destination: '/shop' | '/partner-onboarding'
+    destination: '/shopping' | '/partner-onboarding'
     pathType: 'shopping' | 'platform'
 }
 
 export default function AuthDialog({ isOpen, onClose, destination, pathType }: AuthDialogProps) {
     const router = useRouter()
     const { isSignedIn } = useAuth()
+    const { openAuthModal } = useAuthModal()
 
     // If already signed in, just redirect
     useEffect(() => {
@@ -27,13 +29,15 @@ export default function AuthDialog({ isOpen, onClose, destination, pathType }: A
 
     const handleSignUp = () => {
         localStorage.setItem('cove_selected_path', pathType)
-        router.push('/sign-up')
+        localStorage.setItem('cove_redirect_url', destination)
+        openAuthModal('sign-up', destination)
         onClose()
     }
 
     const handleSignIn = () => {
         localStorage.setItem('cove_selected_path', pathType)
-        router.push('/sign-in')
+        localStorage.setItem('cove_redirect_url', destination)
+        openAuthModal('sign-in', destination)
         onClose()
     }
 

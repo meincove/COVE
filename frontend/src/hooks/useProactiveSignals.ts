@@ -52,9 +52,12 @@ export function useProactiveSignals(onOffer: (offer: ProactiveResponse) => void)
                 return; // No signal for other pages yet
             }
 
-            // 2. Send Signal
+            // 2. Send Signal (skip if AI endpoint not configured)
+            const aiCoreUrl = process.env.NEXT_PUBLIC_AI_CORE_URL;
+            if (!aiCoreUrl) return; // AI features not configured
+
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_AI_CORE_URL}/ai/events`, {
+                const res = await fetch(`${aiCoreUrl}/ai/events`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

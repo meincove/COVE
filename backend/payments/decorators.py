@@ -41,14 +41,14 @@ def validate_stripe_event_age(event, max_age_seconds=300):
         tuple: (is_valid: bool, error_message: str or None)
     """
     from django.utils import timezone
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone as dt_timezone
     
     event_timestamp = event.get("created")
     if not event_timestamp:
         return False, "event_missing_timestamp"
         
     try:
-        event_time = datetime.fromtimestamp(event_timestamp, tz=timezone.utc)
+        event_time = datetime.fromtimestamp(event_timestamp, tz=dt_timezone.utc)
         event_age = timezone.now() - event_time
         
         if event_age > timedelta(seconds=max_age_seconds):

@@ -313,6 +313,12 @@ CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,https://*.ngrok-free.app").split(",") if o.strip()
 ]
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "idempotency-key",
+]
+
 
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

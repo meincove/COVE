@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from "react"
 import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
 import HeroScanner from "@/src/components/shopping/HeroScanner"
-import CatalogSection from "@/src/components/shopping/CatalogSection"
-import CatalogBrowseModal from "@/src/components/shopping/CatalogBrowseModal"
 import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
 import { useBrowseModal } from "@/src/hooks/useBrowseModal"
+import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
+import CarouselStage from "@/src/components/Catalog/CarouselStage"
+import CategoryBanner from "@/src/components/shopping/CategoryBanner"
 
 type ApiImage = { image_name?: string; url?: string }
-type ApiVariant = { images?: ApiImage[] }
+type ApiVariant = { variant_id?: string; images?: ApiImage[] }
 type ApiProduct = {
     product_id: string
     slug?: string
@@ -39,17 +40,23 @@ function num(v: unknown, fallback = 0) {
     return Number.isFinite(n) ? n : fallback
 }
 
-function mapApi(p: ApiProduct): UiProduct {
-    const img0 =
-        p.color_variants?.[0]?.images?.[0]?.url ||
-        p.color_variants?.[0]?.images?.[0]?.image_name ||
-        FALLBACK_IMG
+function pickBestApiImage(p: ApiProduct): string {
+    const img = p.color_variants?.[0]?.images?.[0]
+    // IMPORTANT:
+    // Prefer image_name (your public/clothing-images pipeline),
+    // because url may be S3 signed/blocked and show AccessDenied text.
+    const preferred = img?.image_name || img?.url || FALLBACK_IMG
+    return resolveImgPath(String(preferred))
+}
 
-    const img = resolveImgPath(String(img0))
+function mapApi(p: ApiProduct): UiProduct {
+    const img = pickBestApiImage(p)
+    const firstVariantId = p.color_variants?.[0]?.variant_id
 
     return {
         id: String(p.product_id),
         slug: p.slug,
+        variantId: firstVariantId,  // Include variant ID for product page redirects
         name: p.name,
         brandId: p.brand_id,
         price: num(p.base_price, 0),
@@ -69,53 +76,15 @@ function uniq(arr: string[]) {
     return Array.from(new Set(arr)).filter(Boolean)
 }
 
-function FpsMeter() {
-    const [mounted, setMounted] = useState(false)
-    const [fps, setFps] = useState<number | null>(null)
-
-    useEffect(() => setMounted(true), [])
-
-    useEffect(() => {
-        if (!mounted) return
-        let raf = 0
-        let last = performance.now()
-        let frames = 0
-
-        const loop = () => {
-            frames += 1
-            const now = performance.now()
-            const dt = now - last
-
-            if (dt >= 500) {
-                setFps(Math.round((frames * 1000) / dt))
-                frames = 0
-                last = now
-            }
-
-            raf = requestAnimationFrame(loop)
-        }
-
-        raf = requestAnimationFrame(loop)
-        return () => cancelAnimationFrame(raf)
-    }, [mounted])
-
-    if (!mounted) return null
-
-    return (
-        <div className="fixed top-3 right-3 z-[9999]">
-            <div className="px-2.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-semibold backdrop-blur">
-                {fps ?? "--"} FPS
-            </div>
-        </div>
-    )
-}
-
 export default function ShoppingPage() {
     const { open, type, openBrowse, closeBrowse } = useBrowseModal()
 
     const [searchValue, setSearchValue] = useState("")
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
     const [allProducts, setAllProducts] = useState<UiProduct[]>([])
+
+    // Hero pill selector state
+    const [heroType, setHeroType] = useState<string>("curated") // "curated" | one of types
 
     useEffect(() => {
         let cancelled = false
@@ -199,10 +168,31 @@ export default function ShoppingPage() {
             .filter((p) => (p.type ?? "").toLowerCase().includes(type))
     }, [type, allProducts, activeFilters, searchValue])
 
+    // Hero options for pill (from data, fall back to TYPE_SECTIONS)
+    const heroTypes = useMemo(() => {
+        const found = uniq(allProducts.map((p) => (p.type ?? "").trim()).filter(Boolean))
+        const fallback = TYPE_SECTIONS.map((s) => s.type)
+        const types = found.length ? found : fallback
+        return ["curated", ...types]
+    }, [allProducts])
+
+    const heroProducts = useMemo(() => {
+        const base = allProducts.filter(passesFilters)
+        if (heroType === "curated") return base
+        return base.filter((p) => (p.type ?? "").toLowerCase().includes(heroType.toLowerCase()))
+    }, [allProducts, activeFilters, searchValue, heroType])
+
+    // Base filter logic (already implemented previously)
+    const bestSellers = useMemo(() => {
+        // Take items with "NEW" badge or just the first 15 items as "Curated"
+        const top = allProducts.filter(p => p.badge === "NEW").slice(0, 15)
+        return top.length > 5 ? top : allProducts.slice(0, 15)
+    }, [allProducts])
+
+    const carouselCards = useMemo(() => bestSellers.map(uiProductToCatalogCard), [bestSellers])
+
     return (
         <>
-            <FpsMeter />
-
             <LshapedNavbar
                 searchValue={searchValue}
                 onSearchChange={setSearchValue}
@@ -210,39 +200,360 @@ export default function ShoppingPage() {
                 activeFilters={activeFilters}
                 onFilterToggle={onFilterToggle}
                 onResetAll={onResetAll}
-                hero={<HeroScanner products={allProducts.filter(passesFilters)} heightVh={70} minHeight={600} />}
+                hero={
+                    <HeroScanner
+                        products={heroProducts}
+                        heightVh={70}
+                        minHeight={600}
+                    />
+                }
             >
-                <div className="relative">
-                    <div className="px-4 md:px-6 py-6 space-y-8">
-                        <div>
-                            <div className="text-lg font-semibold text-black/85">Browse</div>
-                            <div className="text-xs text-black/45">
-                                Curated shelves (fast) → open “Show more” for full inventory
-                            </div>
-                        </div>
+                <div className="relative pb-32">
+                    {/* Iterate over each Type Section to create the "Editorial" layout */}
+                    {TYPE_SECTIONS.map((section, index) => {
+                        // Filter products for this section (limit to e.g. 15 for the carousel)
+                        const sectionProducts = allProducts
+                            .filter(p => (p.type ?? "").toLowerCase().includes(section.type))
+                            .slice(0, 15)
 
-                        {sections.map((s) => (
-                            <div key={s.type} className="space-y-3">
-                                <CatalogSection title={s.title.toLowerCase()} items={s.items} />
+                        if (sectionProducts.length === 0) return null
 
-                                <div className="flex justify-end">
-                                    <button
-                                        onClick={() => openBrowse(s.type)}
-                                        className="rounded-full bg-black text-white px-4 py-2 text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition"
-                                    >
-                                        Show more
-                                    </button>
+                        // Convert to Carousel Cards
+                        const cards = sectionProducts.map(uiProductToCatalogCard)
+
+                        // Placeholder Image logic (use first product image or fallback)
+                        const bannerImg = sectionProducts[0]?.imageSrc || FALLBACK_IMG
+
+                        return (
+                            <div key={section.type} className="mb-12 border-b border-black/5 pb-12 last:border-0">
+                                {/* Row 1: Intro Text (35%) + Banner (65%) -> Compact Height */}
+                                <div className="flex flex-col md:flex-row h-[320px] md:h-[35vh] min-h-[300px] w-full mb-6">
+                                    {/* Text Area (35%) */}
+                                    <div className="w-full md:w-[35%] bg-gray-50 flex flex-col justify-center px-6 md:px-10 py-8 border-r border-black/5 relative group">
+                                        <div className="text-xs font-bold tracking-widest text-black/40 mb-3 uppercase">
+                                            Collection 0{index + 1}
+                                        </div>
+                                        <h2 className="text-3xl md:text-4xl font-black text-black mb-3 uppercase tracking-tighter">
+                                            {section.title}
+                                        </h2>
+                                        <p className="text-sm text-black/60 leading-relaxed max-w-sm mb-6 line-clamp-3">
+                                            Explore our premium range of {section.title.toLowerCase()}s.
+                                            Crafted for style and comfort.
+                                        </p>
+
+                                        {/* CTA Button Moved Here */}
+                                        <div>
+                                            <a
+                                                href={`/shopping/${section.type}`}
+                                                className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-semibold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/20"
+                                            >
+                                                Explore {section.title}
+                                                <span>→</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    {/* Banner Image (65%) with Animated Brands */}
+                                    <div className="w-full md:w-[65%] relative overflow-hidden rounded-r-3xl">
+                                        <CategoryBanner
+                                            title={section.title}
+                                            imageSrc={bannerImg}
+                                            products={sectionProducts}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Row 2: 3D Carousel (Compact) */}
+                                <div className="w-full overflow-hidden px-2 md:px-6">
+                                    <div className="relative w-full scale-90 origin-top">
+                                        <CarouselStage
+                                            cards={cards}
+                                            sectionKey={`stage-${section.type}`}
+                                            tierLabel={section.title}
+                                            isFilterOpen={false}
+                                            filtersForTier={{}}
+                                            availableTypes={[]}
+                                            availableFits={[]}
+                                            availableMaterials={[]}
+                                            onTypeChange={() => { }}
+                                            onFitChange={() => { }}
+                                            onMaterialChange={() => { }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )
+                    })}
                 </div>
             </LshapedNavbar>
-
-            <CatalogBrowseModal open={open} type={type} items={modalItems} onClose={closeBrowse} />
         </>
     )
 }
+// Removed CatalogBrowseModal import usage
+// Removed CatalogSection usage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client"
+
+// import { useEffect, useMemo, useState } from "react"
+// import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
+// import HeroScanner from "@/src/components/shopping/HeroScanner"
+// import CatalogSection from "@/src/components/shopping/CatalogSection"
+// import CatalogBrowseModal from "@/src/components/shopping/CatalogBrowseModal"
+// import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
+// import { useBrowseModal } from "@/src/hooks/useBrowseModal"
+
+// type ApiImage = { image_name?: string; url?: string }
+// type ApiVariant = { images?: ApiImage[] }
+// type ApiProduct = {
+//     product_id: string
+//     slug?: string
+//     name: string
+//     brand_id?: string
+//     base_price?: number | string
+//     old_price?: number | string
+//     is_new?: boolean
+//     type?: string
+//     fit?: string
+//     tier?: string
+//     color_variants?: ApiVariant[]
+// }
+
+// const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001"
+
+// const TYPE_SECTIONS = [
+//     { type: "jacket", title: "Jacket" },
+//     { type: "hoodie", title: "Hoodie" },
+//     { type: "shirt", title: "Shirt" },
+//     { type: "tee", title: "Tee" },
+//     { type: "pants", title: "Pants" },
+// ] as const
+
+// function num(v: unknown, fallback = 0) {
+//     const n = Number(v)
+//     return Number.isFinite(n) ? n : fallback
+// }
+
+// function mapApi(p: ApiProduct): UiProduct {
+//     const img0 =
+//         p.color_variants?.[0]?.images?.[0]?.url ||
+//         p.color_variants?.[0]?.images?.[0]?.image_name ||
+//         FALLBACK_IMG
+
+//     const img = resolveImgPath(String(img0))
+
+//     return {
+//         id: String(p.product_id),
+//         slug: p.slug,
+//         name: p.name,
+//         brandId: p.brand_id,
+//         price: num(p.base_price, 0),
+//         oldPrice: p.old_price != null ? num(p.old_price, 0) : undefined,
+//         badge: p.is_new ? "NEW" : "",
+//         type: p.type,
+//         fit: p.fit,
+//         tier: p.tier,
+//         images: [img],
+//         imageSrc: img,
+//         colorNames: [],
+//         sizes: [],
+//     } as UiProduct
+// }
+
+// function uniq(arr: string[]) {
+//     return Array.from(new Set(arr)).filter(Boolean)
+// }
+
+// function FpsMeter() {
+//     const [mounted, setMounted] = useState(false)
+//     const [fps, setFps] = useState<number | null>(null)
+
+//     useEffect(() => setMounted(true), [])
+
+//     useEffect(() => {
+//         if (!mounted) return
+//         let raf = 0
+//         let last = performance.now()
+//         let frames = 0
+
+//         const loop = () => {
+//             frames += 1
+//             const now = performance.now()
+//             const dt = now - last
+
+//             if (dt >= 500) {
+//                 setFps(Math.round((frames * 1000) / dt))
+//                 frames = 0
+//                 last = now
+//             }
+
+//             raf = requestAnimationFrame(loop)
+//         }
+
+//         raf = requestAnimationFrame(loop)
+//         return () => cancelAnimationFrame(raf)
+//     }, [mounted])
+
+//     if (!mounted) return null
+
+//     return (
+//         <div className="fixed top-3 right-3 z-[9999]">
+//             <div className="px-2.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-semibold backdrop-blur">
+//                 {fps ?? "--"} FPS
+//             </div>
+//         </div>
+//     )
+// }
+
+// export default function ShoppingPage() {
+//     const { open, type, openBrowse, closeBrowse } = useBrowseModal()
+
+//     const [searchValue, setSearchValue] = useState("")
+//     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
+//     const [allProducts, setAllProducts] = useState<UiProduct[]>([])
+
+//     useEffect(() => {
+//         let cancelled = false
+//             ; (async () => {
+//                 try {
+//                     const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=240`, { cache: "no-store" })
+//                     if (!res.ok) throw new Error(`HTTP ${res.status}`)
+//                     const json = await res.json()
+//                     const items: ApiProduct[] = json.results || []
+//                     const mapped = items.map(mapApi)
+//                     if (!cancelled) setAllProducts(mapped)
+//                 } catch {
+//                     if (!cancelled) setAllProducts([])
+//                 }
+//             })()
+//         return () => {
+//             cancelled = true
+//         }
+//     }, [])
+
+//     const filterGroups: FilterGroup[] = useMemo(() => {
+//         const types = uniq(allProducts.map((p) => (p.type ?? "").trim()).filter(Boolean))
+//         const tiers = uniq(allProducts.map((p) => (p.tier ?? "").trim()).filter(Boolean))
+//         const fits = uniq(allProducts.map((p) => (p.fit ?? "").trim()).filter(Boolean))
+//         const badges = uniq(allProducts.map((p) => (p.badge ?? "").trim()).filter(Boolean))
+
+//         return [
+//             { label: "Type", options: types.length ? types : TYPE_SECTIONS.map((s) => s.title) },
+//             ...(tiers.length ? [{ label: "Tier", options: tiers }] : []),
+//             ...(fits.length ? [{ label: "Fit", options: fits }] : []),
+//             ...(badges.length ? [{ label: "Badge", options: badges }] : []),
+//         ]
+//     }, [allProducts])
+
+//     const onFilterToggle = (group: string, option: string) => {
+//         setActiveFilters((prev) => {
+//             const set = new Set(prev[group] ?? [])
+//             if (set.has(option)) set.delete(option)
+//             else set.add(option)
+//             return { ...prev, [group]: Array.from(set) }
+//         })
+//     }
+
+//     const onResetAll = () => setActiveFilters({})
+
+//     const passesFilters = (p: UiProduct) => {
+//         const typeSel = new Set(activeFilters["Type"] ?? [])
+//         const tierSel = new Set(activeFilters["Tier"] ?? [])
+//         const fitSel = new Set(activeFilters["Fit"] ?? [])
+//         const badgeSel = new Set(activeFilters["Badge"] ?? [])
+
+//         if (typeSel.size && !typeSel.has((p.type ?? "").trim())) return false
+//         if (tierSel.size && !tierSel.has((p.tier ?? "").trim())) return false
+//         if (fitSel.size && !fitSel.has((p.fit ?? "").trim())) return false
+//         if (badgeSel.size && !badgeSel.has((p.badge ?? "").trim())) return false
+
+//         const q = searchValue.trim().toLowerCase()
+//         if (q) {
+//             const hay = `${p.name ?? ""} ${p.type ?? ""} ${p.tier ?? ""} ${p.fit ?? ""}`.toLowerCase()
+//             if (!hay.includes(q)) return false
+//         }
+
+//         return true
+//     }
+
+//     const sections = useMemo(() => {
+//         return TYPE_SECTIONS.map((s) => {
+//             const items = allProducts
+//                 .filter((p) => (p.type ?? "").toLowerCase().includes(s.type))
+//                 .filter(passesFilters)
+//                 .slice(0, 12)
+
+//             return { type: s.type, title: s.title, items }
+//         })
+//     }, [allProducts, activeFilters, searchValue])
+
+//     const modalItems = useMemo(() => {
+//         if (!type) return []
+//         return allProducts
+//             .filter(passesFilters)
+//             .filter((p) => (p.type ?? "").toLowerCase().includes(type))
+//     }, [type, allProducts, activeFilters, searchValue])
+
+//     return (
+//         <>
+//             <FpsMeter />
+
+//             <LshapedNavbar
+//                 searchValue={searchValue}
+//                 onSearchChange={setSearchValue}
+//                 filterGroups={filterGroups}
+//                 activeFilters={activeFilters}
+//                 onFilterToggle={onFilterToggle}
+//                 onResetAll={onResetAll}
+//                 hero={<HeroScanner products={allProducts.filter(passesFilters)} heightVh={70} minHeight={600} />}
+//             >
+//                 <div className="relative">
+//                     <div className="px-4 md:px-6 py-6 space-y-8">
+//                         <div>
+//                             <div className="text-lg font-semibold text-black/85">Browse</div>
+//                             <div className="text-xs text-black/45">
+//                                 Curated shelves (fast) → open “Show more” for full inventory
+//                             </div>
+//                         </div>
+
+//                         {sections.map((s) => (
+//                             <div key={s.type} className="space-y-3">
+//                                 <CatalogSection title={s.title.toLowerCase()} items={s.items} />
+
+//                                 <div className="flex justify-end">
+//                                     <button
+//                                         onClick={() => openBrowse(s.type)}
+//                                         className="rounded-full bg-black text-white px-4 py-2 text-xs font-medium hover:scale-[1.02] active:scale-[0.98] transition"
+//                                     >
+//                                         Show more
+//                                     </button>
+//                                 </div>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 </div>
+//             </LshapedNavbar>
+
+//             <CatalogBrowseModal open={open} type={type} items={modalItems} onClose={closeBrowse} />
+//         </>
+//     )
+// }
 
 
 

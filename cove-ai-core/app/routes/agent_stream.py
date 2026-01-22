@@ -111,6 +111,9 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
                 'text': result.answer,
                 'citations': result.citations if result.citations else []
             }
+            # Include question_options for interactive conversation flow UI
+            if hasattr(result, 'question_options') and result.question_options:
+                answer_data['question_options'] = result.question_options
             yield f"event: answer\ndata: {json.dumps(answer_data)}\n\n"
 
         

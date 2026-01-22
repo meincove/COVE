@@ -971,10 +971,25 @@ async def _agent_query_impl(
         
         else:
             # Continue conversation with next question
+            # Handle structured response (dict) vs simple string
+            message = result.get("message", "")
+            question_options = None
+            
+            if isinstance(message, dict):
+                # Structured question with interactive options
+                question_options = {
+                    "input_type": message.get("input_type", "text"),
+                    "options": message.get("options", []),
+                    "allow_custom": message.get("allow_custom", True),
+                    "slider_config": message.get("slider_config")
+                }
+                message = message.get("text", "")
+            
             return AgentOut(
                 kind="answer",
-                answer=result.get("message", ""),
-                items=[]
+                answer=message,
+                items=[],
+                question_options=question_options
             )
     
     # ===== INTENT-BASED ROUTING (UNIFIED) =====
@@ -1097,10 +1112,25 @@ async def _agent_query_impl(
                 # Note: We effectively skipped the multi-turn flow
             else:
                 # Still need more info, return question to user
+                # Handle structured response (dict) vs simple string
+                question_options = None
+                message = conv_result
+                
+                if isinstance(conv_result, dict):
+                    # Structured question with interactive options
+                    question_options = {
+                        "input_type": conv_result.get("input_type", "text"),
+                        "options": conv_result.get("options", []),
+                        "allow_custom": conv_result.get("allow_custom", True),
+                        "slider_config": conv_result.get("slider_config")
+                    }
+                    message = conv_result.get("text", "")
+                
                 return AgentOut(
                     kind="answer",
-                    answer=conv_result,
-                    items=[]
+                    answer=message,
+                    items=[],
+                    question_options=question_options
                 )
     # ===== END CONVERSATION FLOW HANDLER =====
 

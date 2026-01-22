@@ -123,9 +123,9 @@ export async function GET(req: NextRequest) {
     });
 
     return {
-      variantId: v.variantId,
+      variantId: v.variant_id,  // Backend uses snake_case
       colorName: v.color_name,
-      hex: v.color_hex,
+      hex: v.hex,  // Backend returns 'hex' not 'color_hex'
       // Professional Image Handling (Product Page)
       // Backend returns images as objects: {image_name: "url"}
       images: (v.images || []).map((img: any) => {

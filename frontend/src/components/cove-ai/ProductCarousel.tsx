@@ -37,8 +37,8 @@ export default function ProductCarousel({ items }: ProductCarouselProps) {
             {/* Left Gradient & Button */}
             <div
                 className={`
-          absolute left-0 top-0 bottom-0 z-10 w-12
-          bg-gradient-to-r from-black/80 to-transparent
+          absolute left-0 top-0 bottom-0 z-10 w-10
+          bg-gradient-to-r from-gray-50 to-transparent
           flex items-center justify-start pl-1
           transition-opacity duration-300
           ${showLeft ? "opacity-100" : "opacity-0 pointer-events-none"}
@@ -46,17 +46,17 @@ export default function ProductCarousel({ items }: ProductCarouselProps) {
             >
                 <button
                     onClick={() => scroll("left")}
-                    className="h-8 w-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
+                    className="h-7 w-7 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
                 >
-                    <ChevronLeft className="h-5 w-5 text-white" />
+                    <ChevronLeft className="h-4 w-4 text-gray-600" />
                 </button>
             </div>
 
             {/* Right Gradient & Button */}
             <div
                 className={`
-          absolute right-0 top-0 bottom-0 z-10 w-12
-          bg-gradient-to-l from-black/80 to-transparent
+          absolute right-0 top-0 bottom-0 z-10 w-10
+          bg-gradient-to-l from-gray-50 to-transparent
           flex items-center justify-end pr-1
           transition-opacity duration-300
           ${showRight ? "opacity-100" : "opacity-0 pointer-events-none"}
@@ -64,9 +64,9 @@ export default function ProductCarousel({ items }: ProductCarouselProps) {
             >
                 <button
                     onClick={() => scroll("right")}
-                    className="h-8 w-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
+                    className="h-7 w-7 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
                 >
-                    <ChevronRight className="h-5 w-5 text-white" />
+                    <ChevronRight className="h-4 w-4 text-gray-600" />
                 </button>
             </div>
 
