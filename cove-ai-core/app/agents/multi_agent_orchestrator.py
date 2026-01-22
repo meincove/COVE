@@ -365,6 +365,7 @@ Rules:
                         
                         async def agentic_callback(event):
                             """Callback for stylist/outfit_builder to emit exploration events"""
+                            log.info(f"📤 AGENTIC CALLBACK received event: {event.get('event_type')}")
                             await agentic_queue.put(event)
                         
                         # Run agent execution in background
@@ -381,7 +382,9 @@ Rules:
                         while True:
                             event = await agentic_queue.get()
                             if event is None:
+                                log.info("📤 AGENTIC QUEUE: Received completion signal (None)")
                                 break  # Agent done
+                            log.info(f"📤 AGENTIC QUEUE yielding event: {event.get('event_type')}")
                             yield {
                                 "type": "agentic_event",
                                 **event
@@ -603,9 +606,15 @@ Rules:
         elif agent_name == "outfit_builder":
             # Pass candidates from stylist
             stylist_result = state.agent_results.get("stylist", {})
+            intent = stylist_result.get("data", {}).get("intent", {})
+            
             return {
                 "candidates": stylist_result.get("data", {}).get("candidates", {}),
-                "intent": stylist_result.get("data", {}).get("intent", {}),
+                "intent": intent,
+                # FIX: Explicitly pass style/occasion/gender for OutfitBuilder to use
+                "style": intent.get("style", "casual"),
+                "occasion": intent.get("occasion", "casual"),
+                "gender": intent.get("gender"), 
                 "user_preferences": stylist_result.get("data", {}).get("user_preferences", {}),
                 "budget_max": state.budget_max
             }

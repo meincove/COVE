@@ -161,16 +161,30 @@ class StylistAgent(BaseAgent):
         else:
             detected_gender = analysis.get("gender")
         
-        # If the LLM is unsure about gender AND context didn't provide it, ask the user!
+        # Use original_query for gender detection (preserves "boyfriend", "girlfriend" etc.)
+        original_query = context.get("original_query", "") or query
+
+        # FALLBACK: If LLM didn't detect gender, use keyword matching on ORIGINAL query
+        # We do this BEFORE halting to avoid unnecessary "ask_gender" stops
+        if not detected_gender or detected_gender == "ask_gender":
+            query_lower = original_query.lower()
+            if any(kw in query_lower for kw in ["boyfriend", "husband", "for him", "for men", "men's", "mens", "male"]):
+                detected_gender = "male"
+                log.info(f"   👤 Gender detected via keyword fallback: male")
+            elif any(kw in query_lower for kw in ["girlfriend", "wife", "for her", "for women", "women's", "womens", "female"]):
+                detected_gender = "female"
+                log.info(f"   👤 Gender detected via keyword fallback: female")
+            
+            # Update analysis with inferred gender
+            if detected_gender and detected_gender != "ask_gender":
+                 analysis["gender"] = detected_gender
+
+        # If STILL ambiguous, DEFAULT TO UNISEX instead of halting.
+        # This is the "Be Proactive" fix.
         if detected_gender == "ask_gender":
-            log.info("✋ Stylist requesting gender clarification")
-            return AgentResult(
-                success=True,
-                data={},
-                reasoning="To give you the best recommendations, are you shopping for men, women, or looking for unisex styles?",
-                confidence=1.0,
-                tools_used=["stylist_clarification"]
-            )
+            log.warning("⚠️ Gender ambiguous. Defaulting to UNISEX/ALL to avoid halting flow.")
+            detected_gender = "unisex"
+            analysis["gender"] = "unisex" # Ensure downstream logic sees the update
         
         # KEY CHANGE: Allow LLM to expand categories (e.g. add shoes)
         # If LLM returns a specific list of categories, use it.
@@ -188,6 +202,7 @@ class StylistAgent(BaseAgent):
                 try:
                     # ✨ PHASE 6: Emit category_start event for live exploration
                     if stream_callback:
+                        log.info(f"📤 STYLIST emitting category_start for: {category}")
                         await stream_callback({
                             "event_type": "category_start",
                             "category": category,
@@ -195,6 +210,8 @@ class StylistAgent(BaseAgent):
                             "total_categories": len(categories),
                             "status": f"Searching for {category}..."
                         })
+                    else:
+                        log.warning(f"⚠️ STYLIST: No stream_callback for category {category}")
                     
                     # ✨ HYBRID SEARCH IMPLEMENTATION
                     
@@ -258,36 +275,37 @@ class StylistAgent(BaseAgent):
                     if hard_filters:
                         # Only apply valid filters
                         if hard_filters.get("type"):
-                            # ✨ TYPE EXPANSION: Map generic categories to actual product types
-                            # e.g., "shoes" -> ["sneakers", "boots", "loafers", "heels"]
                             type_value = hard_filters["type"]
-                            expanded_types = self._expand_type_filter(type_value)
-                            if expanded_types and len(expanded_types) > 1:
-                                # Use list of types for OR matching
-                                search_payload["filters"]["type"] = expanded_types
-                                log.info(f"   🔄 Expanded type '{type_value}' -> {expanded_types}")
-                            else:
-                                search_payload["filters"]["type"] = type_value
+                            
+                            # ✨ FIX: Handle comma-separated LLM output (e.g. "pants, skirt")
+                            if isinstance(type_value, str) and "," in type_value:
+                                type_list = [t.strip() for t in type_value.split(",")]
+                                search_payload["filters"]["type"] = type_list
+                                log.info(f"   🔄 SPLIT types to list: {type_list}")
+                            
+                            # ✨ TYPE EXPANSION: Map generic categories to actual product types
+                            elif isinstance(type_value, str):
+                                # e.g., "shoes" -> ["sneakers", "boots", "loafers", "heels"]
+                                expanded_types = self._expand_type_filter(type_value)
+                                if expanded_types and len(expanded_types) > 1:
+                                    # Use list of types for OR matching
+                                    search_payload["filters"]["type"] = expanded_types
+                                    log.info(f"   🔄 Expanded type '{type_value}' -> {expanded_types}")
+                                else:
+                                    search_payload["filters"]["type"] = type_value
                         if hard_filters.get("color"):
                             search_payload["filters"]["color"] = hard_filters["color"]
                         log.info(f"   🛡️ Applied Hard Filters for {category}: {search_payload['filters']}")
                     
                     # ✨ CRITICAL: Apply gender from LLM analysis
+                    # Gender is already determined at the start of execute() (Context > LLM > Keyword Fallback > Unisex)
                     detected_gender = analysis.get("gender")
                     
                     # Use original_query for gender detection (preserves "boyfriend", "girlfriend" etc.)
                     original_query = context.get("original_query", "") or query
-                    log.info(f"   🔍 Gender Check - Original Query: '{original_query[:100]}'")
+                    # log.info(f"   🔍 Gender Check - Original Query: '{original_query[:100]}'")
                     
-                    # FALLBACK: If LLM didn't detect gender, use keyword matching on ORIGINAL query
-                    if not detected_gender or detected_gender == "unisex":
-                        query_lower = original_query.lower()
-                        if any(kw in query_lower for kw in ["boyfriend", "husband", "for him", "for men", "men's", "mens", "male"]):
-                            detected_gender = "male"
-                            log.info(f"   👤 Gender detected via keyword fallback: male")
-                        elif any(kw in query_lower for kw in ["girlfriend", "wife", "for her", "for women", "women's", "womens", "female"]):
-                            detected_gender = "female"
-                            log.info(f"   👤 Gender detected via keyword fallback: female")
+                    # (Redundant fallback removed - already handled at start of execute)
                     
                     if detected_gender and detected_gender not in ["unisex", None]:
                         # Normalize LLM gender output to database values
@@ -569,6 +587,31 @@ class StylistAgent(BaseAgent):
             else:
                  category_constraint = "CONSTRAINT: You are the stylist. Decide what items make a COMPLETE outfit for this occasion. usually Top + Bottom + Shoes."
 
+            # ✨ DYNAMIC RULES LOADING (Refactor: No Hardcoding)
+            occasion_rules_text = "FASHION EXPERTISE - OCCASION RULES (STRICTLY FOLLOW THESE CONSTRAINTS):\n"
+            occasions_config = _STYLIST_CONFIG.get("occasions", {})
+            
+            for occ_name, occ_data in occasions_config.items():
+                # specific rules for this occasion
+                rules = occ_data.get("rules", {})
+                desc = occ_data.get("description", "")
+                
+                if rules:
+                    occasion_rules_text += f"\n{occ_name.upper()} ({desc}) REQUIRES:\n"
+                    for cat, rule in rules.items():
+                        allowed = ", ".join(rule.get("allowed", []))
+                        excluded = ", ".join(rule.get("excluded", []))
+                        
+                        rule_str = ""
+                        if allowed:
+                            rule_str += f"MUST BE [{allowed}]"
+                        if excluded:
+                            if rule_str: rule_str += " AND "
+                            rule_str += f"NEVER [{excluded}]"
+                            
+                        if rule_str:
+                            occasion_rules_text += f"   - {cat.title()}: {rule_str}\n"
+
             prompt = f"""You are an Expert Fashion Stylist AI using HYBRID SEARCH.
 User Request: "{query}"
 Budget: €{budget}
@@ -581,32 +624,38 @@ DATABASE VOCABULARY (Use these EXACT values for filters):
 - Allowed Colors: {valid_colors}
 - Allowed Genders: women, men, unisex
 
+{occasion_rules_text}
+
+CRITICAL: If the user asks for a specific occasion, you MUST apply its corresponding ALLOWED/EXCLUDED rules from the list above.
+- Example: If occasion is FORMAL, you MUST NOT include shorts or tees.
+- Example: If occasion is GYM, you MUST NOT include blazers or heels.
+
 Task:
-1. Analyze Occasion/Style.
+1. Analyze Occasion/Style - REASON about formality level first.
 2. CRITICAL: Detect Gender.
    - If user says "men", "boyfriend", "him" -> "male"
    - If user says "women", "girlfriend", "her" -> "female"
-   - If user says multiple specific genders, likely specific.
    - If completely ambiguous (e.g. "I need a hoodie"), set gender to "ask_gender".
    - If phrasing implies self (e.g. "for me") and no profile, set "ask_gender".
-3. Decide categories.
+3. Decide categories based on occasion appropriateness.
 4. For EACH category, generate a search PLAN:
-   - "query": KEYWORD description for search (e.g. "beige hoodie"). Keep it simple and objective.
+   - "query": KEYWORD description for search. Include the formality context.
    - "filters": Strict metadata constraints.
-     - "type": MUST be one of Allowed Types (e.g. "hoodie"). Crucial for relevance.
-     - "color": MUST be one of Allowed Colors if user specified a color preference. Otherwise null.
+     - "type": MUST be occasion-appropriate from Allowed Types. CRITICAL for relevance.
+     - "color": MUST be one of Allowed Colors if user specified. Otherwise null.
 
 Response JSON Format:
 {{
     "gender": "detected gender (women/men/unisex/ask_gender)",
     "occasion": "detected occasion",
+    "formality": "formal/smart_casual/casual/evening (important!)",
     "style": "detected style",
-    "reasoning": "thought process",
+    "reasoning": "EXPLAIN why you chose these product types for this occasion",
     "categories": ["list", "of", "categories"],
     "category_plans": {{
         "CategoryName": {{
-            "query": "semantic text",
-            "filters": {{ "type": "valid_type_or_null", "color": "valid_color_or_null" }}
+            "query": "semantic text with formality context",
+            "filters": {{ "type": "occasion_appropriate_type", "color": "valid_color_or_null" }}
         }}
     }}
 }}
@@ -736,6 +785,7 @@ DO NOT output markdown. Just the JSON object.
             with open(config_path) as f:
                 outfit_config = json.load(f)
             
+            # Use 'category_mappings' (plural) as per the fixed JSON
             category_mappings = outfit_config.get("category_mappings", {})
             
             # Build reverse mapping: generic -> [specific types]
@@ -743,13 +793,18 @@ DO NOT output markdown. Just the JSON object.
             for specific_type, generic_category in category_mappings.items():
                 if generic_category not in reverse_map:
                     reverse_map[generic_category] = []
+                # Ensure we capture all specific types for a category
                 if specific_type not in reverse_map[generic_category]:
                     reverse_map[generic_category].append(specific_type)
             
             # Return expanded types if mapping exists
             type_lower = type_value.lower()
             if type_lower in reverse_map:
-                return reverse_map[type_lower]
+                expanded = reverse_map[type_lower]
+                # Also include the type itself if not present
+                if type_lower not in expanded:
+                     expanded.append(type_lower)
+                return expanded
             
             # No expansion needed
             return [type_value]

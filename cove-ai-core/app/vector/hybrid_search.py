@@ -29,11 +29,78 @@ class SearchResult:
     source: str  # 'vector', 'bm25', or 'hybrid'
 
 
+def _build_sql_filters(filters: Dict[str, Any]) -> tuple[str, List[Any]]:
+    """
+    Build SQL WHERE clause fragments for metadata filtering.
+    
+    Supports:
+    - type: str or List[str] (exact match or IN)
+    - price_min / price_max: float range
+    - gender: str (matches gender OR 'unisex')
+    - tier / color / size: exact matches
+    """
+    if not filters:
+        return "", []
+        
+    clauses = []
+    params = []
+    
+    # 1. Type Filter (Supports String or List)
+    if "type" in filters and filters["type"]:
+        val = filters["type"]
+        if isinstance(val, list):
+            # List of types: meta->>'type' = ANY(%s)
+            clauses.append("meta->>'type' = ANY(%s)")
+            params.append(val)
+        else:
+            # Single type
+            clauses.append("meta->>'type' = %s")
+            params.append(val)
+            
+    # 2. Price Range
+    if filters.get("price_min") is not None:
+        clauses.append("(meta->>'price')::float >= %s")
+        params.append(filters["price_min"])
+        
+    if filters.get("price_max") is not None:
+        clauses.append("(meta->>'price')::float <= %s")
+        params.append(filters["price_max"])
+
+    # 3. Gender (Handle unisex logic if needed, or strict)
+    # Note: DB usually has 'men', 'women', 'unisex'. 
+    # If filter is 'men', we might want 'men' OR 'unisex'.
+    if filters.get("gender"):
+        g = filters["gender"].lower()
+        
+        # Robust mapping: Map input to ALL possible DB variations
+        target_genders = [g]
+        if g in ("male", "man", "men", "mens"):
+            target_genders = ["male", "men", "man", "mens"]
+        elif g in ("female", "woman", "women", "womens"):
+            target_genders = ["female", "women", "woman", "womens"]
+        
+        # Match ANY of the target genders OR unisex
+        clauses.append("(lower(meta->>'gender') = ANY(%s) OR lower(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)")
+        params.append(target_genders)
+
+    # 4. Other exact matches
+    for field in ["tier", "color", "size"]:
+        if filters.get(field):
+            clauses.append(f"meta->>'{field}' = %s")
+            params.append(filters[field])
+
+    if not clauses:
+        return "", []
+        
+    return " AND " + " AND ".join(clauses), params
+
+
 def search_bm25(
     conn: psycopg.Connection,
     query: str,
     kind: str = "product",
-    top_k: int = 20
+    top_k: int = 20,
+    filters: Optional[Dict[str, Any]] = None
 ) -> List[SearchResult]:
     """
     BM25-style keyword search using PostgreSQL full-text search.
@@ -53,12 +120,19 @@ def search_bm25(
     """
     if not query.strip():
         return []
+        
+    # Build filter SQL
+    filter_sql, filter_params = _build_sql_filters(filters or {})
     
     with conn.cursor(row_factory=dict_row) as cur:
         # Use plainto_tsquery for natural language queries
         # setweight gives title 4x more importance than text
+        
+        # Combine params: [query (rank), query (rank), kind, *filter_params, query (match), top_k]
+        sql_params = [query, query, kind] + filter_params + [query, top_k]
+        
         cur.execute(
-            """
+            f"""
             SELECT 
                 id,
                 title,
@@ -79,6 +153,7 @@ def search_bm25(
                 ) AS rank
             FROM ai_core.docs
             WHERE kind = %s
+              {filter_sql}
               AND (
                 to_tsvector('english', COALESCE(title, '')) ||
                 to_tsvector('english', COALESCE(text, ''))
@@ -86,7 +161,7 @@ def search_bm25(
             ORDER BY bm25_score DESC
             LIMIT %s
             """,
-            (query, query, kind, query, top_k),
+            tuple(sql_params),
         )
         rows = cur.fetchall()
     
@@ -108,7 +183,8 @@ def search_vector(
     conn: psycopg.Connection,
     query_embedding: List[float],
     kind: str = "product",
-    top_k: int = 20
+    top_k: int = 20,
+    filters: Optional[Dict[str, Any]] = None
 ) -> List[SearchResult]:
     """
     Dense vector similarity search using pgvector.
@@ -124,9 +200,15 @@ def search_vector(
     Returns:
         List of SearchResult objects sorted by cosine similarity
     """
+    # Build filter SQL
+    filter_sql, filter_params = _build_sql_filters(filters or {})
+    
     with conn.cursor(row_factory=dict_row) as cur:
+        # Combine params: [q_emb, q_emb, kind, *filter_params, q_emb, top_k]
+        sql_params = [query_embedding, query_embedding, kind] + filter_params + [query_embedding, top_k]
+        
         cur.execute(
-            """
+            f"""
             SELECT 
                 id,
                 title,
@@ -137,11 +219,12 @@ def search_vector(
                 ROW_NUMBER() OVER (ORDER BY embedding <=> %s::vector) AS rank
             FROM ai_core.docs
             WHERE kind = %s
+              {filter_sql}
               AND embedding IS NOT NULL
             ORDER BY embedding <=> %s::vector
             LIMIT %s
             """,
-            (query_embedding, query_embedding, kind, query_embedding, top_k),
+            tuple(sql_params),
         )
         rows = cur.fetchall()
     
@@ -241,7 +324,8 @@ def search_hybrid_rrf(
     vector_k: int = 20,
     rrf_constant: int = 60,
     visual_vibe: Optional[str] = None,
-    sku_boost: bool = False
+    sku_boost: bool = False,
+    filters: Optional[Dict[str, Any]] = None
 ) -> List[SearchResult]:
     """
     Complete hybrid search pipeline with Dynamic Weights (Zalando Style).
@@ -265,7 +349,9 @@ def search_hybrid_rrf(
         vector_k: Vector candidate pool size (default: 20)
         rrf_constant: RRF k parameter (default: 60 per research)
         visual_vibe: Optional string for vibe boosting
+        visual_vibe: Optional string for vibe boosting
         sku_boost: Boolean to boost BM25 for exact/SKU queries
+        filters: Optional dict of metadata filters (type, price, gender, etc.)
         
     Returns:
         List of top_k SearchResult objects sorted by RRF score
@@ -288,10 +374,10 @@ def search_hybrid_rrf(
         bm25_k = 40
 
     # 1. Get BM25 candidates
-    bm25_results = search_bm25(conn, query, kind, bm25_k)
+    bm25_results = search_bm25(conn, query, kind, bm25_k, filters=filters)
     
     # 2. Get vector candidates
-    vector_results = search_vector(conn, query_embedding, kind, vector_k)
+    vector_results = search_vector(conn, query_embedding, kind, vector_k, filters=filters)
     
     # 3. Fuse with RRF
     hybrid_results = reciprocal_rank_fusion(

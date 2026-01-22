@@ -503,6 +503,10 @@ def update_session_facts(request):
                         session.metadata = {}
                     session.metadata["conversation_facts"] = merged_facts
                     session.save()
+                    
+                    # ✨ SYNC TO PERMANENT PROFILE (if authenticated)
+                    if clerk_user_id and "user_preferences" in facts:
+                        _update_permanent_profile(clerk_user_id, facts["user_preferences"])
             
             except Exception as e:
                 return JsonResponse({"error": f"Database error: {str(e)}"}, status=500)
@@ -521,6 +525,55 @@ def update_session_facts(request):
             "facts_stored": False,
             "error": str(e)
         }, status=200)
+
+
+def _update_permanent_profile(clerk_user_id: str, new_preferences: dict):
+    """
+    Sync verified preferences from conversation to permanent AiUserProfile.
+    """
+    if not clerk_user_id or not new_preferences:
+        return
+
+    try:
+        user = _get_user_by_clerk_id(clerk_user_id)
+        if not user:
+            return
+
+        profile, _ = AiUserProfile.objects.get_or_create(user=user)
+        updated = False
+
+        # Gender
+        if "gender" in new_preferences:
+            val = str(new_preferences["gender"]).lower()
+            if val in ["male", "man", "men", "mens"]:
+                profile.gender = "male"
+                updated = True
+            elif val in ["female", "woman", "women", "womens"]:
+                profile.gender = "female"
+                updated = True
+            elif val in ["unisex", "all"]:
+                profile.gender = "unisex"
+                updated = True
+        
+        # Sizes
+        if "size_top" in new_preferences:
+            profile.preferred_size_top = str(new_preferences["size_top"]).upper()
+            updated = True
+        if "size_bottom" in new_preferences:
+            profile.preferred_size_bottom = str(new_preferences["size_bottom"]).upper()
+            updated = True
+            
+        # Fit
+        if "fit" in new_preferences:
+            profile.preferred_fit = str(new_preferences["fit"]).lower()
+            updated = True
+            
+        if updated:
+            profile.save()
+            print(f"💾 [PROFILE] Persisted preferences for {clerk_user_id}: {new_preferences}")
+
+    except Exception as e:
+        print(f"⚠️ [PROFILE] Failed to sync permanent profile: {e}")
 
 
 @csrf_exempt

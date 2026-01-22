@@ -1061,12 +1061,15 @@ async def _agent_query_impl(
     is_outfit_intent = (intent == "outfit_builder" and confidence > 0.6) or body.sessionType == "outfit_builder"
     
     # SMART VAGUE QUERY DETECTION
-    # If user says "something casual for the weekend" (no explicit "outfit"/"look" keyword),
-    # skip the conversation flow and use default budget for immediate results
-    # BUT: If user explicitly opened outfit builder (sessionType), keep normal flow
+    # ...
     vague_occasion_query = False
     is_explicit_outfit_session = (body.sessionType == "outfit_builder")
     
+    # ✨ FIX: If explicit outfit session (e.g. from UI button), SKIP conversation flow and force orchestrator
+    if is_explicit_outfit_session:
+        log.info(f"⏭️  Explicit outfit_builder session - skipping conversation flow to force build")
+        should_skip_flow = True
+
     if is_outfit_intent and not should_skip_flow and not is_explicit_outfit_session:
         # Check if query contains EXPLICIT outfit keywords (as full words, not substrings)
         q_lower = q.lower()
@@ -1167,13 +1170,16 @@ async def _agent_query_impl(
         budget_max = gathered_context.get('budget_max')  # User's explicit answer to "What's your budget?"
         log.debug(f" 💰 budget_max from context = {budget_max}")
         
+        # Load profile early for budget AND gender
+        ai_profile = None
+        if body.clerkUserId:
+            ai_profile = await _load_ai_profile(body.clerkUserId)
+
         if not budget_max:
             # Fallback to user profile
             budget_max = 500  # Default
-            if body.clerkUserId:
-                ai_profile = await _load_ai_profile(body.clerkUserId)
-                if ai_profile and ai_profile.get('budget_max'):
-                    budget_max = float(ai_profile['budget_max'])
+            if ai_profile and ai_profile.get('budget_max'):
+                budget_max = float(ai_profile['budget_max'])
         
         log.info(f"💰 Using budget: €{budget_max} (from {'conversation' if gathered_context.get('budget_max') else 'profile/default'})")
         
@@ -1200,7 +1206,7 @@ async def _agent_query_impl(
                     "budget_max": budget_max,
                     "user_size_history": {},  # Could load from profile
                     "original_query": gathered_context.get("original_query", ""),  # Preserve for gender detection
-                    "gender": gathered_context.get("gender")  # Pass explicitly extracted gender
+                    "gender": gathered_context.get("gender") or SessionStateManager.get_gender_preference(body) or (ai_profile.get("gender") if ai_profile else None) # ✨ Use resolved gender from session/profile if available
                 },
                 stream=True  # Enable streaming!
             ):

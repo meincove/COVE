@@ -143,6 +143,8 @@ export function useAgentStream() {
                     handleEvent(eventType, data);
                 }
             }
+            // Stream finished naturally
+            setState(prev => ({ ...prev, isStreaming: false }));
         } catch (error: any) {
             if (error.name === 'AbortError') {
                 return; // Ignore abort errors
@@ -236,11 +238,19 @@ export function useAgentStream() {
             case 'agentic:category_candidates':
             case 'agentic:item_selected':
             case 'agentic:category_vetting':
-            case 'agentic:budget_set':  // Budget from conversation flow
+            case 'agentic:budget_set':
+            // Also handle non-prefixed events (as sent by backend event_handler)
+            case 'category_start':
+            case 'category_candidates':
+            case 'item_selected':
+            case 'category_vetting':
+            case 'budget_set':
+            case 'complete': // ✨ Add complete event to agentic events
                 console.log('🎯 AGENTIC EVENT:', eventType, data);  // DEBUG
+                const normalizedType = eventType.startsWith('agentic:') ? eventType.replace('agentic:', '') : eventType;
                 setState(prev => ({
                     ...prev,
-                    agenticEvents: [...prev.agenticEvents, { event_type: eventType.replace('agentic:', ''), ...data }],
+                    agenticEvents: [...prev.agenticEvents, { event_type: normalizedType, ...data }],
                 }));
                 break;
         }

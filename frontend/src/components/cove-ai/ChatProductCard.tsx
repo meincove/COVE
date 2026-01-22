@@ -4,7 +4,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ShoppingCart, Heart, ExternalLink, Sparkles, Check, X } from "lucide-react";
+import { ShoppingCart, Heart, ExternalLink, Sparkles, Check, X, ShoppingBag } from "lucide-react";
 
 import type { AgentItem } from "@/types/agent";
 import type { CartItem } from "@/types/cart";
@@ -118,11 +118,11 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
     <div
       className={`
         group relative
-        w-56 h-[300px] shrink-0
-        rounded-xl overflow-hidden
-        bg-white border border-gray-200
-        transform transition-all duration-300 ease-out
-        hover:scale-[1.02] hover:shadow-lg hover:border-gray-300
+        w-60 h-[340px] shrink-0
+        rounded-2xl overflow-hidden
+        bg-white border border-neutral-100
+        transition-all duration-300 ease-out
+        hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1
         cursor-pointer
         animate-fade-in-up
       `}
@@ -134,133 +134,107 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
       onClick={handleClick}
       role="button"
     >
-      {/* Full Background Image */}
-      {imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={title}
-          fill
-          unoptimized
-          className={`
-            object-cover transition-transform duration-700
-            ${isHovered ? 'scale-110' : 'scale-100'}
-          `}
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
-          <Sparkles className="h-12 w-12 text-neutral-600 animate-pulse" />
+      {/* Full Background Image Area - Taller aspect ratio */}
+      <div className="relative h-[240px] w-full bg-neutral-50 overflow-hidden">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            unoptimized
+            className={`
+              object-cover transition-transform duration-700
+              ${isHovered ? 'scale-105' : 'scale-100'}
+            `}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-300">
+            {/* Subtle fallback icon */}
+            <div className="flex flex-col items-center gap-2">
+              <ShoppingBag size={24} strokeWidth={1.5} />
+            </div>
+          </div>
+        )}
+
+        {/* Floating Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+          {item.tier && (
+            <div className="px-2 py-1 rounded-md bg-white/90 backdrop-blur shadow-sm border border-neutral-100">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-900">{item.tier}</span>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Gradient Overlay - Light version */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-      {/* Top Badges */}
-      <div className="absolute top-2 left-2 flex flex-col gap-1">
-        {(fromCatalog || imageUrl || priceLabel) && (
-          <div className="px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 flex items-center gap-1">
-            <Check className="h-2.5 w-2.5 text-green-500" />
-            <span className="text-[9px] font-medium text-gray-700">Available</span>
-          </div>
-        )}
-        {item.tier && (
-          <div className="px-2 py-0.5 rounded-full bg-gray-800/80 backdrop-blur-sm">
-            <span className="text-[9px] font-medium text-white">{item.tier}</span>
-          </div>
-        )}
+        {/* Like Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsLiked(!isLiked);
+          }}
+          className={`
+              absolute top-3 right-3
+              h-8 w-8 rounded-full flex items-center justify-center
+              transition-all duration-200 shadow-sm
+              ${isLiked ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-white text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50'}
+            `}
+        >
+          <Heart size={16} className={isLiked ? "fill-current" : ""} />
+        </button>
       </div>
 
-      {/* Like Button - Floating Top Right */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsLiked(!isLiked);
-        }}
-        className={`
-          absolute top-2 right-2
-          h-7 w-7 rounded-full flex items-center justify-center
-          backdrop-blur-sm transition-all duration-200
-          ${isLiked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-500 hover:bg-white border border-gray-200'}
-        `}
-      >
-        <Heart className={`h-3.5 w-3.5 ${isLiked ? 'fill-current' : ''}`} />
-      </button>
-
-      {/* Bottom Content Area */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
-        {/* Title & Price */}
+      {/* Content Area - Clean, high contrast */}
+      <div className="p-4 flex flex-col justify-between h-[100px]">
         <div>
-          <div className="flex justify-between items-start gap-2">
-            <h3 className="font-bold text-sm text-white leading-tight line-clamp-2 flex-1">
+          <div className="flex justify-between items-start gap-2 mb-1">
+            <h3 className="font-bold text-sm text-neutral-900 leading-snug line-clamp-2">
               {title}
             </h3>
             {priceLabel && (
-              <span className="font-bold text-sm text-white bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-sm">
+              <span className="shrink-0 font-medium text-sm text-neutral-900">
                 {priceLabel}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-xs text-neutral-300 mt-1 line-clamp-1">{subtitle}</p>
+            <p className="text-xs text-neutral-500 line-clamp-1">{subtitle}</p>
           )}
         </div>
 
-        {/* Reason Pill */}
-        {reason && (
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-purple-400" />
-            <p className="text-[10px] text-purple-200 line-clamp-1">
-              {reason}
-            </p>
-          </div>
-        )}
-
-        {/* Action Button - Expands on Hover */}
-        <div className={`
-          overflow-hidden transition-all duration-300
-          ${isHovered ? 'max-h-12 opacity-100 mt-2' : 'max-h-0 opacity-0'}
-        `}>
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdding || isAdded}
-            className={`
-              w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 
-              transition-all duration-300
-              ${isAdded
-                ? 'bg-emerald-500 text-white'
-                : isAdding
-                  ? 'bg-neutral-500 text-white cursor-not-allowed'
-                  : 'bg-white text-black hover:bg-neutral-200'
-              }
+        {/* Hover Action: Add to Cart (Overlays bottom slightly or just appears) */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isAdding || isAdded}
+          className={`
+                mt-2 w-full py-2 rounded-lg font-bold text-xs flex items-center justify-center gap-2 
+                transition-all duration-200
+                ${isAdded
+              ? 'bg-emerald-500 text-white'
+              : isAdding
+                ? 'bg-neutral-100 text-neutral-400 cursor-wait'
+                : 'bg-black text-white hover:bg-neutral-800' // Strong CTA
+            }
             `}
-          >
-            {isAdded ? (
-              <>
-                <Check className="h-3.5 w-3.5" />
-                Added!
-              </>
-            ) : isAdding ? (
-              <>
-                <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Adding...
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="h-3.5 w-3.5" />
-                Add to Cart
-              </>
-            )}
-          </button>
-        </div>
+        >
+          {isAdded ? (
+            <>
+              <Check size={14} strokeWidth={3} />
+              Added
+            </>
+          ) : isAdding ? (
+            <div className="h-3 w-3 border-2 border-neutral-400 border-t-neutral-600 rounded-full animate-spin" />
+          ) : (
+            "Add to Cart"
+          )}
+        </button>
       </div>
 
       <style jsx>{`
         @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out forwards;
+          animation: fade-in-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
           opacity: 0;
         }
       `}</style>

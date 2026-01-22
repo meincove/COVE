@@ -316,7 +316,8 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             cf_model=None, # Load CF model here if available
             visual_vibe=body.visual_vibe,
             user_profile=body.user_profile,
-            sku_boost=body.sku_boost
+            sku_boost=body.sku_boost,
+            filters=filters.dict(exclude_none=True)
         )
         docs = personalized_results_to_dict(results)
 

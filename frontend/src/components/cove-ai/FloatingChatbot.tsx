@@ -9,7 +9,7 @@ import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
 import BubblesStatusPill from "@/src/components/cove-ai/BubblesStatusPill";
 import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactiveSignals";
 import { useLayoutStore } from "@/src/store/layoutStore";
-import OutfitModal from "@/src/components/cove-ai/OutfitModal";
+// OutfitModal removed - outfits now shown only in Outfit Builder tab
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -83,14 +83,13 @@ export default function FloatingChatbot() {
     }, []);
 
     const handleStartChatting = () => {
-        if (isSignedIn) {
-            setHasStarted(true);
-            sessionStorage.setItem('cove_chat_started', 'true');
-            setTimeout(() => inputRef.current?.focus(), 300);
-        }
+        // Allow both signed-in users and guests to start chatting
+        setHasStarted(true);
+        sessionStorage.setItem('cove_chat_started', 'true');
+        setTimeout(() => inputRef.current?.focus(), 300);
     };
 
-    const [showAuthOptions, setShowAuthOptions] = useState(false);
+    // Removed: showAuthOptions state - guests can now chat directly
 
     // Auth Handlers
     const handleSignIn = () => {
@@ -161,19 +160,7 @@ export default function FloatingChatbot() {
                 onDismiss={() => setActiveOffer(null)}
             />
 
-            <OutfitModal
-                isOpen={isCanvasOpen && !!generatedOutfit && generatedOutfit.length > 0}
-                onClose={closeCanvas}
-                items={(generatedOutfit || []).map(item => ({
-                    slug: item.slug,
-                    title: item.title,
-                    price: item.price || 0,
-                    imageUrl: item.imageUrl,
-                    type: item.type,
-                    outfit_id: item.outfit_id,
-                }))}
-                budgetMax={500}
-            />
+            {/* OutfitModal removed - outfits now shown only in the Outfit Builder tab */}
 
             {/* Launcher (When Closed) */}
             {!isOpen && (
@@ -309,52 +296,36 @@ export default function FloatingChatbot() {
                                                         I'm here to help you browse, style, and find the perfect look.
                                                     </motion.p>
 
-                                                    {!showAuthOptions ? (
-                                                        <motion.button
-                                                            initial={{ y: 20, opacity: 0 }}
-                                                            animate={{ y: 0, opacity: 1 }}
-                                                            transition={{ delay: 0.4 }}
-                                                            onClick={() => {
-                                                                if (isSignedIn) {
-                                                                    handleStartChatting();
-                                                                } else {
-                                                                    setShowAuthOptions(true);
-                                                                }
-                                                            }}
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                            className="px-8 py-3 bg-black text-white rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                                                    <motion.button
+                                                        initial={{ y: 20, opacity: 0 }}
+                                                        animate={{ y: 0, opacity: 1 }}
+                                                        transition={{ delay: 0.4 }}
+                                                        onClick={handleStartChatting}
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        className="px-8 py-3 bg-black text-white rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                                                    >
+                                                        Start Chatting
+                                                        <MessageCircle className="w-4 h-4" />
+                                                    </motion.button>
+
+                                                    {/* Non-blocking sign-in option for guests */}
+                                                    {!isSignedIn && (
+                                                        <motion.p
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 1 }}
+                                                            transition={{ delay: 0.6 }}
+                                                            className="mt-4 text-sm text-gray-400"
                                                         >
-                                                            Start Chatting
-                                                            <MessageCircle className="w-4 h-4" />
-                                                        </motion.button>
-                                                    ) : (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, y: 20 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            className="flex flex-col gap-3 w-full max-w-xs"
-                                                        >
+                                                            Have an account?{' '}
                                                             <button
                                                                 onClick={handleSignIn}
-                                                                className="w-full py-3 bg-black text-white rounded-xl font-medium shadow-md flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                                                                className="text-gray-600 underline hover:text-black transition-colors"
                                                             >
-                                                                <LogIn className="w-4 h-4" />
-                                                                Sign In to Chat
+                                                                Sign in
                                                             </button>
-                                                            <button
-                                                                onClick={handleSignUp}
-                                                                className="w-full py-3 bg-gray-100 text-gray-900 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-                                                            >
-                                                                <UserPlus className="w-4 h-4" />
-                                                                Create Account
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setShowAuthOptions(false)}
-                                                                className="text-gray-400 text-sm mt-2 hover:text-gray-600"
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                        </motion.div>
+                                                            {' '}for personalized recs
+                                                        </motion.p>
                                                     )}
                                                 </motion.div>
                                             )}

@@ -352,9 +352,15 @@ def _search_by_category_sync(
             
             # Gender filter (allow unisex to match any)
             if gender:
-                gender_normalized = {"male": "men", "men": "men", "female": "women", "women": "women"}.get(gender.lower(), gender.lower())
-                sql += " AND (LOWER(meta->>'gender') = %s OR LOWER(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)"
-                params.append(gender_normalized)
+                g = gender.lower()
+                target_genders = [g]
+                if g in ("male", "man", "men", "mens"):
+                    target_genders = ["male", "men", "man", "mens"]
+                elif g in ("female", "woman", "women", "womens"):
+                    target_genders = ["female", "women", "woman", "womens"]
+                    
+                sql += " AND (lower(meta->>'gender') = ANY(%s) OR lower(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)"
+                params.append(target_genders)
             
             # Price filter
             if price_max:

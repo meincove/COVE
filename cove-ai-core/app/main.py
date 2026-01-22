@@ -30,6 +30,24 @@ from app.routes import events  # Phase 3: Proactive Agent
 
 
 app = FastAPI(title="Cove AI Core")
+
+# CORS Configuration
+# Explicitly allowing both 3000 (default) and 3001 (user's current port)
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(tools_routes.router)
 app.include_router(rag_router)
 app.include_router(fit_router)
