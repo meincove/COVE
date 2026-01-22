@@ -108,9 +108,9 @@ export default function OwlCharacterModal({
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
         const normalizedDistance = Math.min(distance / 400, 1)
 
-        // Head rotation: ±25° based on horizontal mouse position
-        const headRotation = (deltaX / 300) * 25
-        const clampedHeadRotation = Math.max(-25, Math.min(25, headRotation))
+        // Head rotation: ±8° based on horizontal mouse position (Reduced from 15°)
+        const headRotation = (deltaX / 300) * 8
+        const clampedHeadRotation = Math.max(-8, Math.min(8, headRotation))
 
         // Eye position within socket
         const angle = Math.atan2(deltaY, deltaX)
@@ -142,104 +142,76 @@ export default function OwlCharacterModal({
                 </div>
             )}
 
-            {/* Owl Container - Modal version (smaller, perched) */}
-            <div
-                className="relative w-32 h-36 transition-transform duration-150 ease-out"
-                style={{ transform: `rotate(${headRotation}deg)` }}
-            >
-                {/* Head */}
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-28 h-28 bg-gradient-to-br from-amber-600 to-amber-800 rounded-full shadow-xl" />
-
-                {/* Ear Tufts */}
-                <div className="absolute top-0 left-6 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[20px] border-b-amber-700 transform -rotate-12" />
-                <div className="absolute top-0 right-6 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[20px] border-b-amber-700 transform rotate-12" />
-
-                {/* Face */}
-                <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-22 h-22 bg-amber-50 rounded-full" style={{ width: '5.5rem', height: '5.5rem' }} />
-
-                {/* Eyebrows */}
+            {/* Owl Container - Head Only */}
+            <div className="relative w-40 h-32" style={{ perspective: '800px' }}>
+                {/* HEAD GROUP - Rotates with mouse (Sideways 3D) */}
                 <div
-                    className="absolute top-9 left-9 w-7 h-1.5 bg-amber-900 rounded-full transition-all duration-300"
-                    style={{ transform: `rotate(${eyebrowRaise}deg)` }}
-                />
-                <div
-                    className="absolute top-9 right-9 w-7 h-1.5 bg-amber-900 rounded-full transition-all duration-300"
-                    style={{ transform: `rotate(${-eyebrowRaise}deg)` }}
-                />
+                    className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full transition-transform duration-100 ease-out z-20"
+                    style={{
+                        transform: `translateX(-50%) rotateY(${headRotation * 1.5}deg)`, // Single unified rotation
+                        transformStyle: 'preserve-3d'
+                    }}
+                >
+                    {/* Ear Tufts - Attached to head */}
+                    <div className="absolute top-2 left-4 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[28px] border-b-[#3E2723] transform -rotate-[20deg]" />
+                    <div className="absolute top-2 right-4 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[28px] border-b-[#3E2723] transform rotate-[20deg]" />
 
-                {/* Eyes */}
-                {eyesOpen ? (
-                    <div className="absolute top-11 left-1/2 transform -translate-x-1/2 flex gap-2">
-                        {/* Left Eye */}
-                        <div className="relative w-9 h-10 bg-white rounded-full shadow-inner border-2 border-amber-900">
-                            <div
-                                className="absolute top-1/2 left-1/2 w-6 h-6 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full transition-transform duration-100 ease-out"
-                                style={{ transform: `translate(calc(-50% + ${eyeX}px), calc(-50% + ${eyeY}px))` }}
-                            >
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-black rounded-full">
-                                    <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white rounded-full" />
+                    {/* Head Base */}
+                    <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-32 h-28 bg-gradient-to-b from-[#3E2723] to-[#1A0F0A] rounded-[45%] shadow-xl" />
+
+                    {/* Face Mask - Standard Position (No loose sliding) */}
+                    <div
+                        className="absolute top-9 left-1/2 transform -translate-x-1/2 w-26 h-20 bg-[#F5F5DC] rounded-[40%]"
+                        style={{ width: '7rem', height: '5rem' }}
+                    />
+
+                    {/* Eyebrows */}
+                    <div
+                        className="absolute top-11 left-10 w-9 h-2.5 bg-[#1A0F0A] rounded-full transition-all duration-300 shadow-sm"
+                        style={{ transform: `rotate(${eyebrowRaise}deg)` }}
+                    />
+                    <div
+                        className="absolute top-11 right-10 w-9 h-2.5 bg-[#1A0F0A] rounded-full transition-all duration-300 shadow-sm"
+                        style={{ transform: `rotate(${-eyebrowRaise}deg)` }}
+                    />
+
+                    {/* Eyes - Fixed position relative to head (moves with rotateY) */}
+                    {eyesOpen ? (
+                        <div className="absolute top-[3.75rem] left-1/2 transform -translate-x-1/2 flex gap-2">
+                            {/* Left Eye */}
+                            <div className="relative w-11 h-11 bg-white rounded-full shadow-lg border-[3px] border-[#1A0F0A] overflow-hidden">
+                                <div
+                                    className="absolute top-1/2 left-1/2 w-8 h-8 bg-gradient-to-br from-[#FFC107] to-[#FF6F00] rounded-full transition-transform duration-100 ease-out shadow-inner"
+                                    style={{ transform: `translate(calc(-50% + ${eyeX}px), calc(-50% + ${eyeY}px))` }}
+                                >
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-black rounded-full">
+                                        <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white rounded-full opacity-90" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Eye */}
+                            <div className="relative w-11 h-11 bg-white rounded-full shadow-lg border-[3px] border-[#1A0F0A] overflow-hidden">
+                                <div
+                                    className="absolute top-1/2 left-1/2 w-8 h-8 bg-gradient-to-br from-[#FFC107] to-[#FF6F00] rounded-full transition-transform duration-100 ease-out shadow-inner"
+                                    style={{ transform: `translate(calc(-50% + ${eyeX}px), calc(-50% + ${eyeY}px))` }}
+                                >
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-black rounded-full">
+                                        <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white rounded-full opacity-90" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Right Eye */}
-                        <div className="relative w-9 h-10 bg-white rounded-full shadow-inner border-2 border-amber-900">
-                            <div
-                                className="absolute top-1/2 left-1/2 w-6 h-6 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full transition-transform duration-100 ease-out"
-                                style={{ transform: `translate(calc(-50% + ${eyeX}px), calc(-50% + ${eyeY}px))` }}
-                            >
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-black rounded-full">
-                                    <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white rounded-full" />
-                                </div>
-                            </div>
+                    ) : (
+                        <div className="absolute top-[4.5rem] left-1/2 transform -translate-x-1/2 flex gap-4">
+                            <div className="w-10 h-1.5 bg-[#1A0F0A] rounded-full" />
+                            <div className="w-10 h-1.5 bg-[#1A0F0A] rounded-full" />
                         </div>
-                    </div>
-                ) : (
-                    <div className="absolute top-14 left-1/2 transform -translate-x-1/2 flex gap-2">
-                        <div className="w-8 h-0.5 bg-amber-900 rounded-full" />
-                        <div className="w-8 h-0.5 bg-amber-900 rounded-full" />
-                    </div>
-                )}
+                    )}
 
-                {/* Sleeping Z's */}
-                {isSleeping && (
-                    <div className="absolute -top-1 -right-2 text-lg font-bold text-gray-400 animate-pulse">
-                        z z
-                    </div>
-                )}
-
-                {/* Beak */}
-                <div className="absolute top-[5.5rem] left-1/2 transform -translate-x-1/2">
-                    <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[10px] border-t-orange-500" />
-                </div>
-
-                {/* Body */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-10 bg-gradient-to-b from-amber-700 to-amber-900 rounded-[50%] shadow-md" />
-
-                {/* Belly */}
-                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-12 h-6 bg-amber-100 rounded-[50%]" />
-
-                {/* Wings */}
-                <div
-                    className={`absolute top-[4.5rem] -left-1 w-8 h-10 bg-amber-800 rounded-[50%] shadow transition-transform duration-150 ${isFlapping ? 'animate-flap-left' : 'transform -rotate-12'
-                        }`}
-                />
-                <div
-                    className={`absolute top-[4.5rem] -right-1 w-8 h-10 bg-amber-800 rounded-[50%] shadow transition-transform duration-150 ${isFlapping ? 'animate-flap-right' : 'transform rotate-12'
-                        }`}
-                />
-
-                {/* Feet */}
-                <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 flex gap-1.5">
-                    <div className="flex gap-0.5">
-                        <div className="w-0.5 h-2 bg-orange-600 rounded-full" />
-                        <div className="w-0.5 h-2 bg-orange-600 rounded-full" />
-                        <div className="w-0.5 h-2 bg-orange-600 rounded-full" />
-                    </div>
-                    <div className="flex gap-0.5">
-                        <div className="w-0.5 h-2 bg-orange-600 rounded-full" />
-                        <div className="w-0.5 h-2 bg-orange-600 rounded-full" />
-                        <div className="w-0.5 h-2 bg-orange-600 rounded-full" />
+                    {/* Beak */}
+                    <div className="absolute top-[7rem] left-1/2 transform -translate-x-1/2 z-10">
+                        <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[14px] border-t-orange-600 drop-shadow-md" />
                     </div>
                 </div>
             </div>
