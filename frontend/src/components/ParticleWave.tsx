@@ -695,6 +695,7 @@ interface ParticleWaveProps {
     radiusBase?: number
     className?: string
     contained?: boolean // If true, uses absolute positioning instead of fixed
+    scrollProgress?: number // 0 = section 1 (right), 0.5 = section 2 (center), 1 = section 3 (left)
 }
 
 type Color = {
@@ -751,8 +752,9 @@ class Particle {
 
     /**
      * introFactor: 0 → start (no waves, no depth), 1 → full motion / depth.
+     * scrollProgress: 0 = right side, 0.5 = center, 1 = left side
      */
-    update(timeSeconds: number, width: number, height: number, introFactor: number) {
+    update(timeSeconds: number, width: number, height: number, introFactor: number, scrollProgress: number = 0) {
         // --- depth oscillation for subtle 3D effect ---
         const depthRaw = Math.sin(timeSeconds * 0.25 + this.depthOffset)
         this.depth = depthRaw * introFactor
@@ -797,8 +799,22 @@ class Particle {
         const baseRadial = radial * 0.92 // was 0.9
         this.radius = baseRadial * depthScale
 
-        // --- position (centered, slightly above vertical center) ---
-        const cx = width / 1.4
+        // --- position based on scroll progress ---
+        // scrollProgress: 0 = right (width/1.4), 0.5 = center (width/2), 1 = left (width/2.8)
+        const rightX = width / 1.4  // ~71% from left
+        const centerX = width / 2   // 50%
+        const leftX = width / 2.8   // ~36% from left
+
+        // Interpolate: 0→0.5 goes right→center, 0.5→1 goes center→left
+        let cx: number
+        if (scrollProgress <= 0.5) {
+            const t = scrollProgress * 2 // 0→1 for first half
+            cx = rightX + (centerX - rightX) * t
+        } else {
+            const t = (scrollProgress - 0.5) * 2 // 0→1 for second half
+            cx = centerX + (leftX - centerX) * t
+        }
+
         const cy = height / 2.3
 
         this.x = cx + Math.cos(this.angle) * this.radius
@@ -839,12 +855,19 @@ export default function ParticleWave({
     particleCount = 288,
     radiusBase = 355,
     className = '',
-    contained = false
+    contained = false,
+    scrollProgress = 0
 }: ParticleWaveProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const particlesRef = useRef<Particle[]>([])
     const timeRef = useRef<number>(0)
     const animationFrameRef = useRef<number | undefined>(undefined)
+    const scrollProgressRef = useRef<number>(scrollProgress)
+
+    // Sync scroll progress ref with prop
+    useEffect(() => {
+        scrollProgressRef.current = scrollProgress
+    }, [scrollProgress])
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -922,9 +945,10 @@ export default function ParticleWave({
 
             const particles = particlesRef.current
 
-            // update particle positions
+            // update particle positions with current scroll progress
+            const currentScrollProgress = scrollProgressRef.current
             particles.forEach(p => {
-                p.update(timeSeconds, width, height, introFactor)
+                p.update(timeSeconds, width, height, introFactor, currentScrollProgress)
             })
 
             // global colour interpolation (for ALL particles)
