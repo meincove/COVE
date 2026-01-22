@@ -27,12 +27,7 @@ const nextConfig: NextConfig = {
     "@clerk/themes",
   ],
 
-  // ✅ Unblock Vercel builds:
-  // Next runs ESLint + TS checks during build by default in many setups.
-  // These options prevent build from failing while you clean up warnings/errors.
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   typescript: {
     ignoreBuildErrors: true,
   },

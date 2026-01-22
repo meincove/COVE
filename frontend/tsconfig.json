@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,19 +15,36 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-    "types": ["./types/glsl"],
+    "types": [
+      "./types/glsl"
+    ],
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"],
-      "@data/*": ["./data/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@data/*": [
+        "./data/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts","types", "types/**/*.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "scripts/generateCatalogData.js"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "types",
+    "types/**/*.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "scripts/generateCatalogData.js",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
