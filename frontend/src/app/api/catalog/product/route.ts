@@ -34,7 +34,7 @@ function getBackendBaseUrl() {
   return (
     process.env.DJANGO_BACKEND_URL ||
     process.env.NEXT_PUBLIC_BACKEND_BASE_URL ||
-    "http://localhost:8001"
+    "http://127.0.0.1:8001"
   );
 }
 

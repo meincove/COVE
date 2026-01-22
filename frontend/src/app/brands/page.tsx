@@ -26,7 +26,8 @@ export default function BrandsPage() {
     useEffect(() => {
         async function fetchBrands() {
             try {
-                const res = await fetch('http://localhost:8001/api/brands/')
+                const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
+                const res = await fetch(`${apiBase}/api/brands/`)
                 if (res.ok) {
                     const data = await res.json()
                     setBrands(data.results || [])
