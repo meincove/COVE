@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import AuthDialog from "@/src/components/auth/AuthDialog"
 import ParticleWave from "@/src/components/ParticleWave"
@@ -43,18 +43,42 @@ export default function WelcomePage() {
     setDialogOpen(true)
   }
 
+  // Scroll progress tracking for ParticleWave animation
+  const mainRef = useRef<HTMLElement>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  const handleScroll = useCallback(() => {
+    const container = mainRef.current
+    if (!container) return
+
+    const scrollTop = container.scrollTop
+    const scrollHeight = container.scrollHeight - container.clientHeight
+
+    // Calculate progress: 0 at top, 1 at bottom
+    const progress = scrollHeight > 0 ? Math.min(1, Math.max(0, scrollTop / scrollHeight)) : 0
+    setScrollProgress(progress)
+  }, [])
+
+  useEffect(() => {
+    const container = mainRef.current
+    if (!container) return
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
+
   return (
-    <main className="h-screen w-screen overflow-y-auto snap-y snap-mandatory bg-[#FAFAF8] text-gray-900">
+    <main ref={mainRef} className="h-screen w-screen overflow-y-auto snap-y snap-mandatory bg-[#FAFAF8] text-gray-900">
+      {/* Particle Wave Background - Fixed position, animates based on scroll */}
+      <ParticleWave scrollProgress={scrollProgress} />
+
+      {/* Gradient Overlay for Depth - Fixed */}
+      <div className="fixed inset-0 pointer-events-none z-[1] bg-gradient-to-b from-transparent via-[#FAFAF8]/30 to-[#FAFAF8]/60"></div>
+
       {/* =========================
                 PAGE 1 — INTRO (Light Theme)
                ========================= */}
-      <section className="snap-start min-h-screen w-full relative overflow-hidden bg-[#FAFAF8]">
-        {/* Particle Wave Background (contained to this section only) */}
-        <ParticleWave contained />
-
-        {/* Gradient Overlay for Depth */}
-        <div className="absolute inset-0 pointer-events-none z-[1] bg-gradient-to-b from-transparent via-[#FAFAF8]/50 to-[#FAFAF8]"></div>
-
+      <section className="snap-start min-h-screen w-full relative overflow-hidden">
         <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-6 pt-32">
           <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             {/* LEFT */}
