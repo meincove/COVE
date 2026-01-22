@@ -694,6 +694,7 @@ interface ParticleWaveProps {
     particleCount?: number
     radiusBase?: number
     className?: string
+    contained?: boolean // If true, uses absolute positioning instead of fixed
 }
 
 type Color = {
@@ -837,7 +838,8 @@ export default function ParticleWave({
     // +25% particles: 214 → 268
     particleCount = 288,
     radiusBase = 355,
-    className = ''
+    className = '',
+    contained = false
 }: ParticleWaveProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const particlesRef = useRef<Particle[]>([])
@@ -1041,10 +1043,12 @@ export default function ParticleWave({
         }
     }, [particleCount, radiusBase])
 
+    const positionClass = contained ? 'absolute' : 'fixed'
+
     return (
         <canvas
             ref={canvasRef}
-            className={`fixed inset-0 w-full h-full pointer-events-none z-0 ${className}`}
+            className={`${positionClass} inset-0 w-full h-full pointer-events-none z-0 ${className}`}
         />
     )
 }

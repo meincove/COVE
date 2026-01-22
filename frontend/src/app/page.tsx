@@ -1,16 +1,14 @@
 "use client"
 
-import React, { useMemo, useRef, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import AuthDialog from "@/src/components/auth/AuthDialog"
-import SplitGateSection from "@/src/sections/welcome/SplitGateSection"
-import SplineFaintBg from "@/src/components/background/SplineFaintBg"
+import ParticleWave from "@/src/components/ParticleWave"
 import { ArrowRight, Sparkles, ShoppingBag, Truck, RotateCcw, Building2, Star, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function WelcomePage() {
   const router = useRouter()
-  const splitRef = useRef<HTMLElement | null>(null)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogConfig, setDialogConfig] = useState<{
@@ -36,10 +34,6 @@ export default function WelcomePage() {
     []
   )
 
-  const goToSplit = () => {
-    splitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
-
   const handleEnter = (target: "shop" | "platform") => {
     if (target === "shop") {
       setDialogConfig({ destination: "/shopping", pathType: "shopping" })
@@ -55,18 +49,11 @@ export default function WelcomePage() {
                 PAGE 1 — INTRO (Light Theme)
                ========================= */}
       <section className="snap-start min-h-screen w-full relative overflow-hidden bg-[#FAFAF8]">
-        {/* Subtle animated background */}
-        <SplineFaintBg
-          src="https://my.spline.design/particlesmoment-kW3xvYny6weIhXJ3vbs2M2bB/"
-          opacity={0.35}
-          className="z-0"
-        />
+        {/* Particle Wave Background (contained to this section only) */}
+        <ParticleWave contained />
 
-        {/* Light background layers */}
-        <div className="absolute inset-0 z-[1]">
-          <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_30%_20%,rgba(0,0,0,0.03),transparent_60%),radial-gradient(900px_500px_at_70%_70%,rgba(34,197,94,0.06),transparent_60%)]" />
-          <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] [background-size:48px_48px]" />
-        </div>
+        {/* Gradient Overlay for Depth */}
+        <div className="absolute inset-0 pointer-events-none z-[1] bg-gradient-to-b from-transparent via-[#FAFAF8]/50 to-[#FAFAF8]"></div>
 
         <div className="relative z-10 min-h-screen w-full flex items-center justify-center px-6 pt-32">
           <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -95,7 +82,7 @@ export default function WelcomePage() {
 
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <motion.button
-                    onClick={goToSplit}
+                    onClick={() => handleEnter("shop")}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     className="group flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:bg-gray-800"
@@ -270,15 +257,7 @@ export default function WelcomePage() {
         </motion.div>
       </section>
 
-      {/* =========================
-                PAGE 4 — SPLIT GATE (Shop vs Platform)
-               ========================= */}
-      <SplitGateSection
-        ref={splitRef}
-        className="snap-start"
-        onEnterShop={() => handleEnter("shop")}
-        onEnterPlatform={() => handleEnter("platform")}
-      />
+
 
       {/* Auth Dialog */}
       <AuthDialog

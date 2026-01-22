@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useUser, useClerk } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { User, LogOut, Layers, Box, Globe2, ShoppingBag, Menu, ArrowLeft, ArrowRight, ChevronRight, Loader2 } from "lucide-react"
 import clsx from "clsx"
 
@@ -13,6 +13,7 @@ import EnhancedSearchbar from "@/src/components/Navbar/EnhancedSearchbar"
 import { useCartStore } from "@/src/store/cartStore"
 import CartModal from "@/src/components/Catalog/CartModal"
 import { useProductSearch } from "@/src/hooks/useProductSearch"
+import { useAuthModal } from "@/src/context/AuthModalContext"
 
 /* Types */
 type MenuState = "none" | "search" | "brands" | "catalog" | "menu"
@@ -105,6 +106,7 @@ export default function LShapedNavbar({
     const { isLoaded, isSignedIn, user } = useUser()
     const { signOut } = useClerk()
     const router = useRouter()
+    const pathname = usePathname()
 
     const { items: cartItems } = useCartStore()
     const itemCount = cartItems.reduce((sum, it) => sum + it.quantity, 0)
@@ -112,6 +114,9 @@ export default function LShapedNavbar({
 
     // Search Hook
     const { query, setQuery, results, loading: searchLoading } = useProductSearch()
+
+    // Auth Modal
+    const { openAuthModal } = useAuthModal()
 
     // Layout Constants
     const navGap = "16px"
@@ -345,7 +350,7 @@ export default function LShapedNavbar({
                                     <ShoppingBag size={18} strokeWidth={2} />
                                 </IconButton>
                                 {!isSignedIn ? (
-                                    <button onClick={() => router.push("/sign-in")} className="hidden sm:block text-xs font-bold bg-black text-white px-5 py-2 rounded-full hover:scale-105 transition-all shadow-lg shadow-black/20 ml-2">Login</button>
+                                    <button onClick={() => openAuthModal('sign-in', pathname || '/shopping')} className="hidden sm:block text-xs font-bold bg-black text-white px-5 py-2 rounded-full hover:scale-105 transition-all shadow-lg shadow-black/20 ml-2">Login</button>
                                 ) : (
                                     <button onClick={() => router.push("/dashboard")} className="ml-2 w-8 h-8 rounded-full bg-gray-100 overflow-hidden ring-1 ring-black/5">
                                         <img src={user?.imageUrl} alt="User" className="w-full h-full object-cover" />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { ShoppingBag, Globe2, Heart, Menu, Box, Layers, Play } from "lucide-react"
 import clsx from "clsx"
@@ -10,6 +10,7 @@ import clsx from "clsx"
 import EnhancedSearchbar from "./EnhancedSearchbar"
 import { useCartStore } from "@/src/store/cartStore"
 import CartModal from "@/src/components/Catalog/CartModal"
+import { useAuthModal } from "@/src/context/AuthModalContext"
 
 // Animation Config for "Dampened Spring"
 const SPRING_TRANSITION = {
@@ -33,6 +34,7 @@ type Brand = {
 
 export default function GlobalNavbar() {
     const router = useRouter()
+    const pathname = usePathname()
     const { isSignedIn, user } = useUser()
     const { signOut } = useClerk()
     const { items } = useCartStore()
@@ -42,6 +44,9 @@ export default function GlobalNavbar() {
     const [cartOpen, setCartOpen] = useState(false)
     const [brands, setBrands] = useState<Brand[]>([])
     const [loadingBrands, setLoadingBrands] = useState(false)
+
+    // Auth Modal
+    const { openAuthModal } = useAuthModal()
 
     // Fetch brands when menu opens or on mount
     useEffect(() => {
@@ -194,13 +199,13 @@ export default function GlobalNavbar() {
                             {!isSignedIn ? (
                                 <div className="flex items-center gap-2 ml-2">
                                     <button
-                                        onClick={() => router.push("/sign-in")}
+                                        onClick={() => openAuthModal('sign-in', pathname || '/')}
                                         className="hidden lg:block text-xs font-bold px-3 py-2 hover:bg-black/5 rounded-full transition-colors whitespace-nowrap"
                                     >
                                         Log In
                                     </button>
                                     <button
-                                        onClick={() => router.push("/sign-up")}
+                                        onClick={() => openAuthModal('sign-up', pathname || '/')}
                                         className="hidden sm:block text-xs font-bold bg-black text-white px-4 py-2 rounded-full hover:bg-black/80 transition-transform active:scale-95 whitespace-nowrap"
                                     >
                                         Join Us

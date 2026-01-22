@@ -228,7 +228,7 @@ export default function ProductConfigurator({
           <button className="text-[10px] underline text-black/40 hover:text-black">Size Guide</button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-5 gap-2">
           {Object.entries(sizes).map(([size, stock]) => {
             const isSelected = selectedSize === size
             const isOut = stock <= 0
@@ -244,7 +244,7 @@ export default function ProductConfigurator({
                   setStockAlert('')
                 }}
                 className={clsx(
-                  'h-12 rounded-3xl text-sm font-bold transition-all duration-200 shadow-sm flex items-center justify-center',
+                  'h-12 rounded-2xl text-sm font-bold transition-all duration-200 shadow-sm flex items-center justify-center',
                   isSelected
                     ? 'bg-black text-white shadow-md'
                     : 'bg-gray-100 text-black hover:bg-gray-200',

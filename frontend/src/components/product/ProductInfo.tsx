@@ -36,9 +36,15 @@ export default function ProductInfo({
 
         {/* Artistic Typography */}
         <div className="relative pt-2 pb-4 overflow-hidden">
-          {/* Brand Name - Huge, Faded, Block */}
-          {/* Adjusted size to prevent cutoff: text-5xl to 7xl depending on width */}
-          <h1 className="text-6xl lg:text-[5rem] xl:text-[6rem] font-black text-black/[0.05] uppercase tracking-tighter leading-[0.8] select-none w-full whitespace-nowrap">
+          {/* Brand Name - Huge, Faded, Block - Auto-scales to fit 80% width */}
+          <h1
+            className="font-black text-black/[0.05] uppercase tracking-tighter leading-[0.8] select-none whitespace-nowrap box-content"
+            style={{
+              width: '78%',
+              paddingRight: '4px',
+              fontSize: `clamp(2rem, ${Math.max(4, 28 / (name.split(' ')[0]?.length || 1))}vw, 7rem)`,
+            }}
+          >
             {name.split(' ')[0]}
           </h1>
 

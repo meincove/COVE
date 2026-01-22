@@ -12,6 +12,7 @@ import { useLayoutStore } from "@/src/store/layoutStore";
 import OutfitModal from "@/src/components/cove-ai/OutfitModal";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuthModal } from "@/src/context/AuthModalContext";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -40,13 +41,10 @@ export default function FloatingChatbot() {
     // Layout Store
     const { isCanvasOpen, closeCanvas, generatedOutfit } = useLayoutStore();
 
-    // Don't render on auth pages - keeps UI clean
-    // State is preserved via localStorage ('cove_chat_should_restore') for return
-    if (pathname?.includes('/sign-in') || pathname?.includes('/sign-up')) {
-        return null;
-    }
+    // Auth Modal
+    const { openAuthModal } = useAuthModal();
 
-    // Proactive Offer
+    // Proactive Offer - MUST be before any conditional returns (Rules of Hooks)
     const [activeOffer, setActiveOffer] = useState<ProactiveResponse | null>(null);
 
     useProactiveSignals((offer) => {
@@ -56,8 +54,14 @@ export default function FloatingChatbot() {
         }
     });
 
-    // Widget Ref
+    // Widget Ref - MUST be before any conditional returns (Rules of Hooks)
     const chatWidgetRef = useRef<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>(null);
+
+    // Don't render on auth pages - keeps UI clean
+    // State is preserved via localStorage ('cove_chat_should_restore') for return
+    if (pathname?.includes('/sign-in') || pathname?.includes('/sign-up')) {
+        return null;
+    }
 
     // Toggle Open/Close
     const toggleChat = () => {
@@ -110,24 +114,13 @@ export default function FloatingChatbot() {
 
     const [showAuthOptions, setShowAuthOptions] = useState(false);
 
-    // Auth Handlers
+    // Auth Handlers - Now using Auth Modal
     const handleSignIn = () => {
-        if (typeof window !== 'undefined') {
-            const currentPath = window.location.pathname;
-            localStorage.setItem('cove_redirect_url', currentPath);
-            localStorage.setItem('cove_chat_should_restore', 'true');
-            // Append redirect_url so the sign-in page knows where to go back
-            window.location.href = `/sign-in?redirect_url=${encodeURIComponent(currentPath)}`;
-        }
+        openAuthModal('sign-in', pathname || '/');
     };
 
     const handleSignUp = () => {
-        if (typeof window !== 'undefined') {
-            const currentPath = window.location.pathname;
-            localStorage.setItem('cove_redirect_url', currentPath);
-            localStorage.setItem('cove_chat_should_restore', 'true');
-            window.location.href = `/sign-up?redirect_url=${encodeURIComponent(currentPath)}`;
-        }
+        openAuthModal('sign-up', pathname || '/');
     };
 
     const handleSubmit = (e: FormEvent) => {
