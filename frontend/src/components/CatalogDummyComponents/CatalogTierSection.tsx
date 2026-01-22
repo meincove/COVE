@@ -36,9 +36,11 @@ type TierTheme = {
 
 // ✅ Bubbly font (put Atop-R99O3.ttf in /public/fonts/)
 const bubblyFont = localFont({
-  src: '/fonts/Atop-R99O3.ttf',
+  src: '../../fonts/Atop-R99O3.ttf',
   variable: '--font-bubbly',
+  display: 'swap',
 })
+
 
 // 🎨 Theme map – center + edge colors per tier
 export const DUMMY_TIER_THEME: Record<string, TierTheme> = {
@@ -173,17 +175,17 @@ function ExplodingMorphText({
         const animate =
           phase === 'scatter'
             ? {
-                x: m.x,
-                y: m.y,
-                scale: m.scale,
-                rotate: m.rotate,
-              }
+              x: m.x,
+              y: m.y,
+              scale: m.scale,
+              rotate: m.rotate,
+            }
             : {
-                x: 0,
-                y: 0,
-                scale: 1,
-                rotate: 0,
-              }
+              x: 0,
+              y: 0,
+              scale: 1,
+              rotate: 0,
+            }
 
         return (
           <motion.span
@@ -247,14 +249,14 @@ export default function CatalogTierSection({
   }
 
   const theme = DUMMY_TIER_THEME[tierKey as string] ?? DEFAULT_TIER_THEME
- const tierLabel = formatTierLabel(tierKey)
+  const tierLabel = formatTierLabel(tierKey)
 
-// these are what actually show in the card
-const displayTitle =
-  TIER_TITLES[tierKey as string] ?? tierLabel
+  // these are what actually show in the card
+  const displayTitle =
+    TIER_TITLES[tierKey as string] ?? tierLabel
 
-const displayTagline =
-  TIER_TAGLINES[tierKey as string] ?? 'Explore the collection'
+  const displayTagline =
+    TIER_TAGLINES[tierKey as string] ?? 'Explore the collection'
 
 
   /* ---------------- FILTER DATA ---------------- */
@@ -349,9 +351,8 @@ const displayTagline =
         <div className="w-full max-w-6xl mx-auto h-full">
           <CarouselStage
             cards={filteredCards}
-            sectionKey={`carousel-${index}-${tierKey}-${activeType ?? 'ALL'}-${
-              activeFit ?? 'ALL'
-            }-${activeMaterial ?? 'ALL'}`}
+            sectionKey={`carousel-${index}-${tierKey}-${activeType ?? 'ALL'}-${activeFit ?? 'ALL'
+              }-${activeMaterial ?? 'ALL'}`}
             tierLabel={tierLabel}
             filtersForTier={filtersForTier}
             availableTypes={availableTypes}
@@ -420,11 +421,10 @@ const displayTagline =
             </p>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`px-3 py-1 text-xs rounded-full border ${
-                  activeType == null
+                className={`px-3 py-1 text-xs rounded-full border ${activeType == null
                     ? 'bg-white text-slate-900 border-white'
                     : 'border-slate-500 text-slate-100 hover:border-white'
-                }`}
+                  }`}
                 onClick={() => handleAdvancedTypeClick(null)}
               >
                 All types
@@ -432,11 +432,10 @@ const displayTagline =
               {availableTypes.map((type) => (
                 <button
                   key={type}
-                  className={`px-3 py-1 text-xs rounded-full border ${
-                    activeType === type
+                  className={`px-3 py-1 text-xs rounded-full border ${activeType === type
                       ? 'bg-white text-slate-900 border-white'
                       : 'border-slate-500 text-slate-100 hover:border-white'
-                  }`}
+                    }`}
                   onClick={() => handleAdvancedTypeClick(type)}
                 >
                   {type}
@@ -452,11 +451,10 @@ const displayTagline =
             </p>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`px-3 py-1 text-xs rounded-full border ${
-                  activeFit == null
+                className={`px-3 py-1 text-xs rounded-full border ${activeFit == null
                     ? 'bg-white text-slate-900 border-white'
                     : 'border-slate-500 text-slate-100 hover:border-white'
-                }`}
+                  }`}
                 onClick={() => handleAdvancedFitClick(null)}
               >
                 All fits
@@ -464,11 +462,10 @@ const displayTagline =
               {availableFits.map((fit) => (
                 <button
                   key={fit}
-                  className={`px-3 py-1 text-xs rounded-full border ${
-                    activeFit === fit
+                  className={`px-3 py-1 text-xs rounded-full border ${activeFit === fit
                       ? 'bg-white text-slate-900 border-white'
                       : 'border-slate-500 text-slate-100 hover:border-white'
-                  }`}
+                    }`}
                   onClick={() => handleAdvancedFitClick(fit)}
                 >
                   {fit}
@@ -484,11 +481,10 @@ const displayTagline =
             </p>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`px-3 py-1 text-xs rounded-full border ${
-                  activeMaterial == null
+                className={`px-3 py-1 text-xs rounded-full border ${activeMaterial == null
                     ? 'bg-white text-slate-900 border-white'
                     : 'border-slate-500 text-slate-100 hover:border-white'
-                }`}
+                  }`}
                 onClick={() => handleAdvancedMaterialClick(null)}
               >
                 All materials
@@ -496,11 +492,10 @@ const displayTagline =
               {availableMaterials.map((mat) => (
                 <button
                   key={mat}
-                  className={`px-3 py-1 text-xs rounded-full border ${
-                    activeMaterial === mat
+                  className={`px-3 py-1 text-xs rounded-full border ${activeMaterial === mat
                       ? 'bg-white text-slate-900 border-white'
                       : 'border-slate-500 text-slate-100 hover:border-white'
-                  }`}
+                    }`}
                   onClick={() => handleAdvancedMaterialClick(mat)}
                 >
                   {mat}
