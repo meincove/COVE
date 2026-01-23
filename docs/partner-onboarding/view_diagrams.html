@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVE Brand Onboarding Architecture - Diagram Viewer</title>
+    
+    <!-- Mermaid JS for rendering diagrams -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .diagram-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .diagram-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .diagram-section p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        
+        .mermaid {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+        
+        .info-box h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .info-box li {
+            margin-bottom: 8px;
+        }
+        
+        .nav {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .nav h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .nav a {
+            display: block;
+            padding: 8px 12px;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+        
+        .nav a:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .diagram-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 COVE Brand Onboarding Architecture</h1>
+            <p>Interactive Diagram Viewer - All Onboarding Flows Visualized</p>
+        </div>
+        
+        <div class="content">
+            <div class="nav">
+                <h3>📋 Quick Navigation</h3>
+                <a href="#flow1">Flow 1: Solo Founder Onboarding</a>
+                <a href="#flow2">Flow 2: Established Brand Integration</a>
+                <a href="#flow3">Flow 3: Affiliate Brand Feed</a>
+                <a href="#pipeline">Data Normalization Pipeline</a>
+            </div>
+            
+            <div class="info-box">
+                <h3>ℹ️ About This Document</h3>
+                <ul>
+                    <li><strong>Purpose:</strong> Visualize COVE's automated brand onboarding system</li>
+                    <li><strong>Coverage:</strong> Direct brands, affiliate brands, API integrations</li>
+                    <li><strong>Status:</strong> ✅ Architecture Approved - Ready for Implementation</li>
+                    <li><strong>Full Documentation:</strong> See <code>brand_onboarding_architecture.md</code></li>
+                </ul>
+            </div>
+            
+            <!-- Flow 1 -->
+            <div class="diagram-section" id="flow1">
+                <h2>🎨 Flow 1: Small Solo Founder (Manual Onboarding)</h2>
+                <p>
+                    This flow is designed for independent designers and small brands who manually enter their products. 
+                    It includes both UI form entry and CSV bulk upload options.
+                </p>
+                <div class="mermaid">
+graph TD
+    A[Brand Discovers COVE] --> B[Clicks 'Become a Partner']
+    B --> C[Registration Form]
+    
+    C --> D{Account Creation}
+    D --> E[Email: Brand Name, Contact Info]
+    E --> F[Business: VAT, Country, Address]
+    F --> G[Shipping: Policies, Processing Time]
+    G --> H[Payment: Stripe Connect Onboarding]
+    
+    H --> I[Dashboard Access]
+    I --> J{Add Products}
+    
+    J --> K1[Option 1: Manual UI Form]
+    J --> K2[Option 2: CSV Upload]
+    
+    K1 --> L[Fill Product Details]
+    L --> M[Add Color Variants]
+    M --> N[Upload Images]
+    N --> O[Set Sizes & Stock]
+    O --> P[Preview Product]
+    
+    K2 --> Q[Download CSV Template]
+    Q --> R[Fill Template Offline]
+    R --> S[Upload CSV File]
+    S --> T[AI Validation & Mapping]
+    T --> U{Valid?}
+    U -->|No| V[Show Errors, Fix CSV]
+    V --> S
+    U -->|Yes| W[Import Products]
+    
+    P --> X[Submit for Review]
+    W --> X
+    X --> Y{COVE Admin Review}
+    Y -->|Approved| Z[Brand Goes Live]
+    Y -->|Rejected| AA[Feedback Sent, Fix Issues]
+    AA --> J
+    Z --> AB[Products Visible on COVE]
+                </div>
+            </div>
+            
+            <!-- Flow 2 -->
+            <div class="diagram-section" id="flow2">
+                <h2>⚙️ Flow 2: Established Brand (API/Platform Integration)</h2>
+                <p>
+                    For brands with existing e-commerce stores (Shopify, WooCommerce, or custom platforms). 
+                    This flow automates product syncing and reduces manual work.
+                </p>
+                <div class="mermaid">
+graph TD
+    A[Brand with Existing Store] --> B[Choose Integration Type]
+    
+    B --> C1[Shopify Integration]
+    B --> C2[WooCommerce Integration]
+    B --> C3[Custom API Integration]
+    
+    C1 --> D1[Install COVE Shopify App]
+    D1 --> E1[Authorize Access]
+    E1 --> F1[Auto-Import Products]
+    
+    C2 --> D2[Install COVE Plugin]
+    D2 --> E2[Configure Settings]
+    E2 --> F2[Auto-Import Products]
+    
+    C3 --> D3[Provide API Endpoint]
+    D3 --> E3[Generate API Key]
+    E3 --> F3[Test Connection]
+    F3 --> G3[Map Fields]
+    G3 --> H3[Initial Sync]
+    
+    F1 --> I[Products in COVE Format]
+    F2 --> I
+    H3 --> I
+    
+    I --> J[AI Data Validation]
+    J --> K{Issues Found?}
+    K -->|Yes| L[Flag for Manual Review]
+    K -->|No| M[Auto-Approve]
+    
+    L --> N[Brand Fixes Issues]
+    N --> J
+    
+    M --> O[Set Sync Schedule]
+    O --> P[Brand Goes Live]
+    P --> Q[Automated Daily Sync]
+                </div>
+            </div>
+            
+            <!-- Flow 3 -->
+            <div class="diagram-section" id="flow3">
+                <h2>🔗 Flow 3: Affiliate Brand (Feed Integration)</h2>
+                <p>
+                    Fully automated integration with affiliate networks (Awin, ShareASale, CJ Affiliate). 
+                    COVE automatically syncs product catalogs daily with AI enrichment.
+                </p>
+                <div class="mermaid">
+graph TD
+    A[Partner with Affiliate Network] --> B[COVE Joins Network]
+    B --> C[Access Brand's Product Feed]
+    
+    C --> D[COVE Backend Cron Job]
+    D --> E[Download Feed: XML/CSV]
+    E --> F[Parse Feed Format]
+    
+    F --> G{Feed Format}
+    G -->|Awin| H1[Awin Parser]
+    G -->|ShareASale| H2[ShareASale Parser]
+    G -->|CJ| H3[CJ Parser]
+    G -->|Custom| H4[Custom Parser]
+    
+    H1 --> I[Normalize to COVE Schema]
+    H2 --> I
+    H3 --> I
+    H4 --> I
+    
+    I --> J[Enrich with AI]
+    J --> K[Generate style_tags]
+    K --> L[Classify formality_score]
+    L --> M[Extract color_family]
+    M --> N[Determine use_cases]
+    
+    N --> O[Store in Database]
+    O --> P{Product Exists?}
+    P -->|New| Q[Create Product]
+    P -->|Existing| R[Update Product]
+    
+    Q --> S[Products Live]
+    R --> S
+    
+    S --> T[Schedule Next Sync]
+    T --> D
+                </div>
+            </div>
+            
+            <!-- Pipeline -->
+            <div class="diagram-section" id="pipeline">
+                <h2>🔧 Data Ingestion & Normalization Pipeline</h2>
+                <p>
+                    The core data pipeline that standardizes product data from any source into COVE's unified schema. 
+                    This ensures consistency across all brands.
+                </p>
+                <div class="mermaid">
+graph LR
+    A[External Data Source] --> B[Data Ingestion Layer]
+    B --> C{Source Type}
+    
+    C -->|CSV| D1[CSV Parser]
+    C -->|JSON| D2[JSON Parser]
+    C -->|XML| D3[XML Parser]
+    C -->|Shopify API| D4[Shopify Adapter]
+    C -->|Affiliate Feed| D5[Feed Parser]
+    
+    D1 --> E[Field Mapper]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    D5 --> E
+    
+    E --> F[Validation Engine]
+    F --> G{Valid?}
+    
+    G -->|No| H[Error Queue]
+    H --> I[Notify Brand]
+    
+    G -->|Yes| J[AI Enrichment]
+    J --> K[Generate Missing Fields]
+    K --> L[Image Processing]
+    L --> M[COVE Standard Schema]
+    
+    M --> N[Database Writer]
+    N --> O[PostgreSQL]
+    
+    O --> P[Update Search Index]
+    P --> Q[Clear Cache]
+    Q --> R[Products Live]
+                </div>
+            </div>
+            
+            <div class="info-box" style="background: #f0fdf4; border-left-color: #10b981;">
+                <h3>✅ Key Takeaways</h3>
+                <ul>
+                    <li><strong>3 Onboarding Paths:</strong> Manual, API Integration, and Affiliate Feeds</li>
+                    <li><strong>AI-Powered:</strong> Automatic validation, enrichment, and quality control</li>
+                    <li><strong>Scalable:</strong> From solo founders to enterprise brands</li>
+                    <li><strong>Automated Sync:</strong> Daily updates for API and affiliate integrations</li>
+                    <li><strong>Smart Approval:</strong> Auto-approve legitimate brands, review edge cases</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <p>📄 For complete technical details, see <strong>brand_onboarding_architecture.md</strong></p>
+                <p style="margin-top: 10px; font-size: 0.9rem;">Status: Architecture Approved - Ready for Phase 1 Implementation</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
