@@ -4,6 +4,7 @@ from django.db import models
 # Brand: Multi-brand support
 # --------------------------------------
 class Brand(models.Model):
+    # ===== EXISTING CORE FIELDS =====
     brand_id = models.CharField(max_length=50, primary_key=True)
     brand_name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
@@ -12,6 +13,176 @@ class Brand(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True, null=True)
+    
+    # ===== NEW: BRAND TYPE & INTEGRATION =====
+    brand_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('direct', 'Direct Seller'),      # Ships from own inventory
+            ('affiliate', 'Affiliate'),        # Redirects to external site
+        ],
+        default='direct',
+        db_index=True,
+        help_text="Direct brands ship products; Affiliates redirect to external sites"
+    )
+    
+    integration_method = models.CharField(
+        max_length=20,
+        choices=[
+            ('manual', 'Manual Entry'),
+            ('csv', 'CSV Upload'),
+            ('api', 'API Integration'),
+            ('shopify', 'Shopify Sync'),
+            ('woocommerce', 'WooCommerce Sync'),
+            ('affiliate_feed', 'Affiliate Feed'),
+        ],
+        default='manual',
+        db_index=True,
+        help_text="How brand uploads/syncs product data"
+    )
+    
+    # ===== NEW: AFFILIATE TRACKING =====
+    affiliate_network = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True,
+        help_text="Affiliate network name: Awin, ShareASale, CJ, etc."
+    )
+    affiliate_program_id = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="Program ID within the affiliate network"
+    )
+    affiliate_commission_rate = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        blank=True, 
+        null=True,
+        help_text="Commission percentage (e.g., 10.50 for 10.5%)"
+    )
+    
+    # ===== NEW: DATA SYNC =====
+    feed_url = models.URLField(
+        blank=True, 
+        null=True, 
+        max_length=500,
+        help_text="Product feed URL for automated sync"
+    )
+    api_endpoint = models.URLField(
+        blank=True, 
+        null=True, 
+        max_length=500,
+        help_text="Custom API endpoint for product data"
+    )
+    api_key_encrypted = models.CharField(
+        max_length=500, 
+        blank=True, 
+        null=True,
+        help_text="Encrypted API key for authentication"
+    )
+    last_sync_at = models.DateTimeField(
+        blank=True, 
+        null=True,
+        help_text="Last successful data sync timestamp"
+    )
+    sync_frequency = models.CharField(
+        max_length=20,
+        choices=[
+            ('manual', 'Manual Only'),
+            ('hourly', 'Every Hour'),
+            ('daily', 'Daily'),
+            ('weekly', 'Weekly'),
+        ],
+        default='manual',
+        help_text="How often to automatically sync product data"
+    )
+    sync_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('never', 'Never Synced'),
+            ('success', 'Success'),
+            ('pending', 'In Progress'),
+            ('failed', 'Failed'),
+        ],
+        default='never',
+        db_index=True,
+        help_text="Current sync status"
+    )
+    sync_error_log = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Log of last sync error if failed"
+    )
+    
+    # ===== NEW: BUSINESS INFORMATION =====
+    contact_name = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="Primary contact person name"
+    )
+    contact_email = models.EmailField(
+        blank=True,
+        null=True,
+        help_text="Primary contact email for notifications"
+    )
+    contact_phone = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True,
+        help_text="Contact phone number"
+    )
+    company_registration = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="VAT/Business registration number"
+    )
+    country = models.CharField(
+        max_length=2,
+        blank=True,
+        null=True,
+        help_text="ISO country code (DE, FR, IT, etc.)"
+    )
+    
+    # ===== NEW: ONBOARDING STATUS =====
+    onboarding_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Application Pending'),
+            ('info_complete', 'Info Submitted'),
+            ('products_added', 'Products Added'),
+            ('live', 'Live on Platform'),
+            ('suspended', 'Suspended'),
+        ],
+        default='pending',
+        db_index=True,
+        help_text="Current onboarding progress stage"
+    )
+    onboarding_completed_at = models.DateTimeField(
+        blank=True, 
+        null=True,
+        help_text="When brand completed onboarding and went live"
+    )
+    
+    # ===== NEW: PAYMENT & SHIPPING =====
+    stripe_account_id = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="Stripe Connect account ID for payouts"
+    )
+    payment_method_verified = models.BooleanField(
+        default=False,
+        help_text="Whether Stripe Connect setup is complete"
+    )
+    ships_from_country = models.CharField(
+        max_length=2, 
+        blank=True, 
+        null=True,
+        help_text="Primary shipping origin country (ISO code)"
+    )
 
     class Meta:
         verbose_name = "Brand"
@@ -20,6 +191,10 @@ class Brand(models.Model):
         indexes = [
             models.Index(fields=['slug']),
             models.Index(fields=['is_active']),
+            models.Index(fields=['brand_type']),
+            models.Index(fields=['integration_method']),
+            models.Index(fields=['onboarding_status']),
+            models.Index(fields=['sync_status']),
         ]
 
     def __str__(self):

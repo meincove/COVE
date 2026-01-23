@@ -8,6 +8,23 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 from api import views as api_views
 import os
 from tools.catalog_views import catalog_details, catalog_search
+
+# Brand Onboarding Views
+from catalog.views_brand_onboarding import (
+    BrandRegistrationView,
+    BrandBusinessInfoView,
+    BrandShippingView,
+    BrandStripeConnectView,
+    BrandIntegrationChoiceView,
+    BrandDetailView,
+)
+
+# Product Management Views
+from catalog.views_product import (
+    BrandProductListCreateView,
+    BrandProductDetailView
+)
+
 def healthz(_request):
     return JsonResponse({"ok": True})
 
@@ -19,6 +36,18 @@ urlpatterns = [
     # health/readiness
     path("healthz/", healthz),
     path("readiness/", api_views.readiness),
+
+    # Brand Onboarding API
+    path("api/brands/register/", BrandRegistrationView.as_view(), name='brand-register'),
+    path("api/brands/<str:brand_id>/", BrandDetailView.as_view(), name='brand-detail'),
+    path("api/brands/<str:brand_id>/business-info/", BrandBusinessInfoView.as_view(), name='brand-business-info'),
+   path("api/brands/<str:brand_id>/shipping/", BrandShippingView.as_view(), name='brand-shipping'),
+    path("api/brands/<str:brand_id>/stripe-connect/", BrandStripeConnectView.as_view(), name='brand-stripe'),
+    path("api/brands/<str:brand_id>/integration/", BrandIntegrationChoiceView.as_view(), name='brand-integration'),
+
+    # Product Management API
+    path("api/brands/<str:brand_id>/products/", BrandProductListCreateView.as_view(), name='brand-products'),
+    path("api/brands/<str:brand_id>/products/<str:product_id>/", BrandProductDetailView.as_view(), name='brand-product-detail'),
 
     # your other APIs
     path("api/", include("catalog.api_urls")),

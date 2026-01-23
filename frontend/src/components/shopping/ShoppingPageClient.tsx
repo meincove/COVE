@@ -88,13 +88,18 @@ export default function ShoppingPageClient() {
         let cancelled = false
             ; (async () => {
                 try {
+                    console.log('[ShoppingPageClient] API_BASE:', API_BASE)
+                    console.log('[ShoppingPageClient] Fetching from:', `${API_BASE}/api/products/?page=1&page_size=240`)
                     const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=240`, { cache: "no-store" })
+                    console.log('[ShoppingPageClient] Response status:', res.status)
                     if (!res.ok) throw new Error(`HTTP ${res.status}`)
                     const json = await res.json()
                     const items: ApiProduct[] = json.results || []
+                    console.log('[ShoppingPageClient] Fetched products:', items.length)
                     const mapped = items.map(mapApi)
                     if (!cancelled) setAllProducts(mapped)
-                } catch {
+                } catch (error) {
+                    console.error('[ShoppingPageClient] Fetch error:', error)
                     if (!cancelled) setAllProducts([])
                 }
             })()

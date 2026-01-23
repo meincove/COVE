@@ -48,7 +48,7 @@ export default function PartnerOnboardingPage() {
                         <a href="#how-it-works" className="hover:text-blue-600 transition-colors">How It Works</a>
                     </div>
 
-                    <a href="#apply" className="bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-slate-800 transition-all active:scale-95 z-10 shadow-lg shadow-slate-900/10">
+                    <a href="/partner-onboarding/register" className="bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-slate-800 transition-all active:scale-95 z-10 shadow-lg shadow-slate-900/10">
                         Get Started
                     </a>
                 </div>
@@ -94,10 +94,10 @@ export default function PartnerOnboardingPage() {
                         transition={{ duration: 0.8, delay: 0.3 }}
                         className="flex flex-col sm:flex-row items-center justify-center gap-4"
                     >
-                        <button className="h-12 px-8 rounded-full bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 transition-all shadow-[0_4px_20px_rgba(37,99,235,0.25)] flex items-center gap-2 hover:-translate-y-0.5">
+                        <a href="/partner-onboarding/register" className="h-12 px-8 rounded-full bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 transition-all shadow-[0_4px_20px_rgba(37,99,235,0.25)] flex items-center gap-2 hover:-translate-y-0.5">
                             <span>Join COVE AI</span>
                             <ArrowRight className="w-4 h-4" />
-                        </button>
+                        </a>
                         <button className="h-12 px-8 rounded-full bg-white text-slate-700 border border-slate-200 font-medium text-sm hover:bg-slate-50 transition-all flex items-center gap-2 backdrop-blur-sm shadow-sm hover:border-slate-300">
                             <span>See AI in Action</span>
                             <ArrowRight className="w-4 h-4" />
@@ -275,9 +275,9 @@ export default function PartnerOnboardingPage() {
                     <p className="text-slate-500 mb-8">Join leading brands using COVE AI. Get started with our intelligent platform today.</p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button className="w-full sm:w-auto h-12 px-6 rounded-full bg-blue-600 text-white font-medium text-sm hover:bg-blue-500 transition-all shadow-[0_4px_15px_rgba(37,99,235,0.3)]">
+                        <a href="/partner-onboarding/register" className="w-full sm:w-auto h-12 px-6 rounded-full bg-blue-600 text-white font-medium text-sm hover:bg-blue-500 transition-all shadow-[0_4px_15px_rgba(37,99,235,0.3)]">
                             Start with COVE AI
-                        </button>
+                        </a>
                         <button className="w-full sm:w-auto h-12 px-6 rounded-full bg-transparent text-slate-700 border border-slate-300 font-medium text-sm hover:bg-slate-50 transition-all">
                             Book AI Demo
                         </button>

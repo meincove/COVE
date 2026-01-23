@@ -121,14 +121,14 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     o.strip() for o in os.getenv(
         "CORS_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8080,http://127.0.0.1:8080",
     ).split(",") if o.strip()
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8080,http://127.0.0.1:8080",
     ).split(",") if o.strip()
 ]
 
