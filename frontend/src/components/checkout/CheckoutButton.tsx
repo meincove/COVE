@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useUser } from "@clerk/nextjs";
-import { createCheckoutSession } from "@/src/lib/api/payments";
-import { useCartStore } from "@/src/store/cartStore";
+import { createCheckoutSession } from "@/lib/api/payments";
+import { useCartStore } from "@/store/cartStore";
 import { getOrCreateGuestId } from "@/utils/guest";
-import { RegionCountryPicker, RegionCountryValue } from "@/src/components/checkout/RegionCountryPicker";
+import { RegionCountryPicker, RegionCountryValue } from "@/components/checkout/RegionCountryPicker";
 
 export function CheckoutButton({ className }: { className?: string }) {
   const items = useCartStore((s) => s.items);

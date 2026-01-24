@@ -26,6 +26,7 @@ type UiProduct = {
   description: string;
   sizes: Record<string, number>; // aggregated stock per size
   colors: UiVariant[];
+  affiliateUrl?: string;
 };
 
 // Helper to get backend URL (Django)
@@ -153,6 +154,7 @@ export async function GET(req: NextRequest) {
     description: backendProduct.description ?? "",
     sizes: productSizeTotals,
     colors: uiVariants,
+    affiliateUrl: backendProduct.affiliate_url,
   };
 
   return NextResponse.json({ product: uiProduct });

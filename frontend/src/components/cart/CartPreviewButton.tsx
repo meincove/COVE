@@ -4,7 +4,7 @@
 import { useState, useMemo } from 'react'
 import { ShoppingBag } from 'lucide-react'
 import CartMiniModal from './CartMiniModal'
-import { useCartStore } from '@/src/store/cartStore'
+import { useCartStore } from '@/store/cartStore'
 
 export default function CartPreviewButton() {
   const [open, setOpen] = useState(false)

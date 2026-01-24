@@ -11,7 +11,8 @@ import {
     ChevronRight,
     LogOut,
     Settings,
-    Home
+    Home,
+    LayoutDashboard
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
@@ -19,7 +20,7 @@ import { useRouter, usePathname } from "next/navigation";
 interface NavItem {
     id: string;
     label: string;
-    icon: React.ElementType;
+    icon: any;
     badge?: number;
 }
 
@@ -27,9 +28,11 @@ interface DashboardLayoutProps {
     children: React.ReactNode;
     activeTab?: string;
     onTabChange?: (tab: string) => void;
+    user?: any; // Accepting user prop from parent
 }
 
 const navItems: NavItem[] = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "closet", label: "My Closet", icon: Shirt },
     { id: "outfits", label: "Saved Outfits", icon: Sparkles },
     { id: "orders", label: "Order History", icon: Package },
@@ -39,15 +42,16 @@ const navItems: NavItem[] = [
 
 export default function DashboardLayout({
     children,
-    activeTab = "closet",
-    onTabChange
+    activeTab = "overview",
+    onTabChange,
+    user: propUser
 }: DashboardLayoutProps) {
-    const { user, isLoaded } = useUser();
+    const { user: clerkUser, isLoaded } = useUser();
     const { signOut } = useClerk();
     const router = useRouter();
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-    const displayName = user?.firstName || user?.username || "Fashion Lover";
+    const displayName = clerkUser?.firstName || clerkUser?.username || "Fashion Lover";
     const userInitial = displayName.charAt(0).toUpperCase();
 
     return (
@@ -91,8 +95,8 @@ export default function DashboardLayout({
                                 onMouseEnter={() => setHoveredItem(item.id)}
                                 onMouseLeave={() => setHoveredItem(null)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${isActive
-                                        ? "bg-black text-white"
-                                        : "text-gray-600 hover:bg-gray-100"
+                                    ? "bg-black text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
                                     }`}
                                 whileTap={{ scale: 0.98 }}
                             >

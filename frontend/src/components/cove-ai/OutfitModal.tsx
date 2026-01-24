@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ShoppingBag, Check, Sparkles, ChevronLeft, ChevronRight, Star, Zap } from "lucide-react";
-import { useCartStore } from "@/src/store/cartStore";
+import { useCartStore } from "@/store/cartStore";
 import type { CartItem, CartState } from "@/types/cart";
 
 interface OutfitItem {

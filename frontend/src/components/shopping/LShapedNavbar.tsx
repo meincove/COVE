@@ -5,21 +5,22 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { useRouter, usePathname } from "next/navigation"
 import { User, LogOut, Layers, Box, Globe2, ShoppingBag, Menu, ArrowLeft, ArrowRight, ChevronRight, Loader2 } from "lucide-react"
+import { Transition } from "framer-motion"
 import clsx from "clsx"
 
-import { cn } from "@/src/lib/utils"
+import { cn } from "@/lib/utils"
 /* Components */
-import EnhancedSearchbar from "@/src/components/Navbar/EnhancedSearchbar"
-import { useCartStore } from "@/src/store/cartStore"
-import CartModal from "@/src/components/Catalog/CartModal"
-import { useProductSearch } from "@/src/hooks/useProductSearch"
-import { useAuthModal } from "@/src/context/AuthModalContext"
+import EnhancedSearchbar from "@/components/Navbar/EnhancedSearchbar"
+import { useCartStore } from "@/store/cartStore"
+import CartModal from "@/components/Catalog/CartModal"
+import { useProductSearch } from "@/hooks/useProductSearch"
+import { useAuthModal } from "@/context/AuthModalContext"
 
 /* Types */
 type MenuState = "none" | "search" | "brands" | "catalog" | "menu"
 
 // Animation Config for "Dampened Spring" (Same as Global)
-const SPRING_TRANSITION = {
+const SPRING_TRANSITION: Transition = {
     type: "spring",
     stiffness: 180,
     damping: 26,
@@ -109,7 +110,7 @@ export default function LShapedNavbar({
     const pathname = usePathname()
 
     const { items: cartItems } = useCartStore()
-    const itemCount = cartItems.reduce((sum, it) => sum + it.quantity, 0)
+    const itemCount = cartItems.reduce((sum: number, it: any) => sum + it.quantity, 0)
     const [cartOpen, setCartOpen] = useState(false)
 
     // Search Hook
@@ -269,7 +270,7 @@ export default function LShapedNavbar({
 
                     {/* C. TOP NAVBAR (Sticky) */}
                     <motion.div
-                        className="sticky top-0 z-40 w-full border-b border-black/5 bg-white shadow-sm"
+                        className="sticky top-0 z-40 w-full bg-white"
                         initial={false}
                         animate={{
                             height: isExpanded ? expandedHeight : topH
@@ -344,6 +345,14 @@ export default function LShapedNavbar({
 
                             {/* RIGHT ACTIONS */}
                             <div className="flex items-center gap-3 ml-auto z-10">
+                                <a
+                                    href="/partner-onboarding"
+                                    className="hidden sm:block text-[10px] font-bold uppercase tracking-wider text-black/60 hover:text-black transition-colors mr-2"
+                                >
+                                    Visit Platform
+                                </a>
+
+
                                 <IconButton label="Language"> <Globe2 size={18} strokeWidth={2} /> </IconButton>
                                 <div className="w-[1px] h-6 bg-black/5 mx-1 hidden md:block" />
                                 <IconButton onClick={() => setCartOpen(true)} badge={itemCount > 0 ? itemCount : undefined} label="Cart">
@@ -352,9 +361,18 @@ export default function LShapedNavbar({
                                 {!isSignedIn ? (
                                     <button onClick={() => openAuthModal('sign-in', pathname || '/shopping')} className="hidden sm:block text-xs font-bold bg-black text-white px-5 py-2 rounded-full hover:scale-105 transition-all shadow-lg shadow-black/20 ml-2">Login</button>
                                 ) : (
-                                    <button onClick={() => router.push("/dashboard")} className="ml-2 w-8 h-8 rounded-full bg-gray-100 overflow-hidden ring-1 ring-black/5">
-                                        <img src={user?.imageUrl} alt="User" className="w-full h-full object-cover" />
-                                    </button>
+                                    <div className="flex items-center gap-2 ml-2">
+                                        <button
+                                            onClick={() => router.push("/dashboard")}
+                                            className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors group"
+                                            title="Go to Shopping Dashboard"
+                                        >
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-black/60 group-hover:text-black">Dashboard</span>
+                                        </button>
+                                        <button onClick={() => router.push("/dashboard")} className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden ring-1 ring-black/5 hover:ring-black/20 transition-all">
+                                            <img src={user?.imageUrl} alt="User" className="w-full h-full object-cover" />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -383,7 +401,14 @@ export default function LShapedNavbar({
                                             ) : (
                                                 <div className="grid grid-cols-4 gap-4">
                                                     {brands.slice(0, 8).map(brand => (
-                                                        <div key={brand.brand_id} className="aspect-[2/1] bg-gray-50 rounded-xl flex items-center justify-center text-lg font-bold text-black hover:bg-gray-100 hover:scale-[1.02] transition-all cursor-pointer border border-black/5">
+                                                        <div
+                                                            key={brand.brand_id}
+                                                            onClick={() => {
+                                                                router.push(`/brands/${brand.slug}`)
+                                                                setMenuState("none")
+                                                            }}
+                                                            className="aspect-[2/1] bg-gray-50 rounded-xl flex items-center justify-center text-lg font-bold text-black hover:bg-gray-100 hover:scale-[1.02] transition-all cursor-pointer border border-black/5"
+                                                        >
                                                             {brand.brand_name}
                                                         </div>
                                                     ))}

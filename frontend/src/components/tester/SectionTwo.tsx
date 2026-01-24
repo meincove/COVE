@@ -3,8 +3,8 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import { useLocalScrollProgress } from "@/src/hooks/useLocalScrollProgress";
-import SectionHUD from "@/src/components/dev/SectionHUD";
+import { useLocalScrollProgress } from "@/hooks/useLocalScrollProgress";
+import SectionHUD from "@/components/dev/SectionHUD";
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const clamp01 = (t: number) => Math.max(0, Math.min(1, t));

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import ParticleWave from '@/src/components/ParticleWave'
+import ParticleWave from '@/components/ParticleWave'
 import {
     Zap,
     ShieldCheck,
@@ -10,10 +10,14 @@ import {
     ArrowRight,
     Brain,
     Sparkles,
-    TrendingUp
+    TrendingUp,
+    LayoutDashboard
 } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
+import Link from 'next/link'
 
 export default function PartnerOnboardingPage() {
+    const { isSignedIn } = useUser()
     const [navbarScrolled, setNavbarScrolled] = useState(false)
 
     // Handle navbar scroll effect
@@ -42,15 +46,18 @@ export default function PartnerOnboardingPage() {
                         COVE AI Partners
                     </a>
 
-                    <div className="hidden md:flex items-center gap-8 text-sm text-slate-500 font-medium">
+                    <div className="hidden md:flex items-center gap-8 text-sm text-slate-500 font-medium z-10">
                         <a href="#features" className="hover:text-blue-600 transition-colors">AI Features</a>
                         <a href="#benefits" className="hover:text-blue-600 transition-colors">Benefits</a>
                         <a href="#how-it-works" className="hover:text-blue-600 transition-colors">How It Works</a>
                     </div>
 
-                    <a href="/partner-onboarding/register" className="bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-slate-800 transition-all active:scale-95 z-10 shadow-lg shadow-slate-900/10">
-                        Get Started
-                    </a>
+                    <Link
+                        href={isSignedIn ? "/partner-onboarding/dashboard" : "/partner-onboarding/register"}
+                        className="bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-slate-800 transition-all active:scale-95 z-10 shadow-lg shadow-slate-900/10"
+                    >
+                        {isSignedIn ? 'Dashboard' : 'Get Started'}
+                    </Link>
                 </div>
             </nav>
 
@@ -94,10 +101,14 @@ export default function PartnerOnboardingPage() {
                         transition={{ duration: 0.8, delay: 0.3 }}
                         className="flex flex-col sm:flex-row items-center justify-center gap-4"
                     >
-                        <a href="/partner-onboarding/register" className="h-12 px-8 rounded-full bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 transition-all shadow-[0_4px_20px_rgba(37,99,235,0.25)] flex items-center gap-2 hover:-translate-y-0.5">
-                            <span>Join COVE AI</span>
-                            <ArrowRight className="w-4 h-4" />
-                        </a>
+                        <Link
+                            href={isSignedIn ? "/partner-onboarding/dashboard" : "/partner-onboarding/register"}
+                            className="h-12 px-8 rounded-full bg-blue-600 text-white font-semibold text-sm hover:bg-blue-500 transition-all shadow-[0_4px_20px_rgba(37,99,235,0.25)] flex items-center gap-2 hover:-translate-y-0.5"
+                        >
+                            {isSignedIn ? <LayoutDashboard className="w-4 h-4" /> : null}
+                            <span>{isSignedIn ? 'Go to Dashboard' : 'Join as Partner'}</span>
+                            {!isSignedIn && <ArrowRight className="w-4 h-4" />}
+                        </Link>
                         <button className="h-12 px-8 rounded-full bg-white text-slate-700 border border-slate-200 font-medium text-sm hover:bg-slate-50 transition-all flex items-center gap-2 backdrop-blur-sm shadow-sm hover:border-slate-300">
                             <span>See AI in Action</span>
                             <ArrowRight className="w-4 h-4" />

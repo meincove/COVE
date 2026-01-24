@@ -1,6 +1,6 @@
 "use client"
 
-import { FALLBACK_IMG } from "@/src/lib/catalog/shared"
+import { FALLBACK_IMG } from "@/lib/catalog/shared"
 
 export default function ProductImg({
     src,

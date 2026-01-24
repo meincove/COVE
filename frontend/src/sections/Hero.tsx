@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 
-import HeroSection from '@/src/sections/HeroSection';
-import CatalogSection from '@/src/sections/CatalogSection';
-import AboutSection from '@/src/sections/AboutSection';
-import { WardrobeSection, type WardrobeItem } from '@/src/sections/WardrobeSection';
+import HeroSection from '@/sections/HeroSection';
+import CatalogSection from '@/sections/CatalogSection';
+import AboutSection from '@/sections/AboutSection';
+import { WardrobeSection, type WardrobeItem } from '@/sections/WardrobeSection';
 
 import catalogData from '@/data/catalogData.json';
-import LightRunwayScene from '@/src/components/LightRunway';
-import TubelightScene from '@/src/sections/TubelightScene';
+import LightRunwayScene from '@/components/LightRunway';
+import TubelightScene from '@/sections/TubelightScene';
 
 // helper: page wrapper
 function Page({ children }: { children: React.ReactNode }) {

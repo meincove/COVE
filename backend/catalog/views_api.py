@@ -83,6 +83,13 @@ class ProductListView(ListAPIView):
 
         return qs
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # Pre-fetch brands to avoid N+1 queries in serializer
+        brands = Brand.objects.values('brand_id', 'brand_name')
+        context['brand_map'] = {b['brand_id']: b['brand_name'] for b in brands}
+        return context
+
 
 @extend_schema(
     tags=["Catalog"],
@@ -153,3 +160,76 @@ class BrandDetailView(RetrieveAPIView):
     serializer_class = BrandSerializer
     lookup_field = "slug"
     queryset = Brand.objects.filter(is_active=True)
+
+    def get_object(self):
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        queryset = self.filter_queryset(self.get_queryset())
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        slug = self.kwargs[lookup_url_kwarg]
+
+        logger.info(f"BRAND DETAIL LOOKUP: slug='{slug}'")
+        
+        # Try exact first
+        obj = queryset.filter(slug=slug).first()
+        if obj:
+             logger.info(f"Found exact match: {obj.brand_name}")
+             self.check_object_permissions(self.request, obj)
+             return obj
+
+        # Try iexact
+        obj = queryset.filter(slug__iexact=slug).first()
+        if obj:
+            logger.info(f"Found iexact match: {obj.brand_name}")
+            self.check_object_permissions(self.request, obj)
+            return obj
+            
+        logger.warning(f"Brand not found for slug: '{slug}'. Active brands count: {queryset.count()}")
+        
+        from django.http import Http404
+        raise Http404
+
+
+from django.http import JsonResponse
+def debug_brands(request):
+    if request.GET.get('test_slug'):
+        test_slug = request.GET.get('test_slug')
+        found = Brand.objects.filter(slug__iexact=test_slug).first()
+        return JsonResponse({
+            'test_slug': test_slug,
+            'match': found.brand_name if found else None,
+            'active': found.is_active if found else None
+        })
+
+    data = []
+    for b in Brand.objects.all():
+        product_count = ProductMasterGroup.objects.filter(brand_id=b.brand_id).count()
+        data.append({
+            'brand_name': b.brand_name,
+            'slug': b.slug,
+            'brand_id': b.brand_id,
+            'is_active': b.is_active,
+            'product_count': product_count
+        })
+    return JsonResponse({'brands': data})
+
+
+def debug_products(request):
+    query = request.GET.get('q', '')
+    qs = ProductMasterGroup.objects.all()
+    if query:
+        qs = qs.filter(name__icontains=query)
+    
+    data = []
+    for p in qs[:20]:
+        data.append({
+            'name': p.name,
+            'type': p.type,
+            'status': p.status,
+            'brand_id': p.brand_id,
+            'slug': p.slug,
+             # Check if brand is active
+            'brand_active': Brand.objects.filter(brand_id=p.brand_id).first().is_active if Brand.objects.filter(brand_id=p.brand_id).exists() else 'N/A'
+        })
+    return JsonResponse({'products': data})

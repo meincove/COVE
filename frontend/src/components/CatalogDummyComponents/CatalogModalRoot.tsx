@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence } from 'framer-motion'
-import { useModal } from '@/src/context/ModalContext'
+import { useModal } from '@/context/ModalContext'
 import CatalogCardModal from './CatalogCardModal'
 
 export default function CatalogModalRoot() {

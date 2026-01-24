@@ -2,7 +2,7 @@
 
 // import { useState } from "react";
 // import { ShoppingBag, X } from "lucide-react";
-// import { useCartStore } from "@/src/store/cartStore";
+// import { useCartStore } from "@/store/cartStore";
 
 // export default function CartButton() {
 //   const { cartId } = useCartStore();

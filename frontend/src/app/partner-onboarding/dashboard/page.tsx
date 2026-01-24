@@ -16,8 +16,10 @@ import {
     CheckCircle,
     Clock,
     ArrowRight,
-    Sparkles
+    Sparkles,
+    Trash2
 } from 'lucide-react'
+import Link from 'next/link'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8001'
 
@@ -41,7 +43,6 @@ export default function BrandDashboard() {
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        // Get brand_id from localStorage (set during registration)
         const brandId = localStorage.getItem('cove_brand_id')
 
         if (!brandId) {
@@ -50,16 +51,13 @@ export default function BrandDashboard() {
             return
         }
 
-        // Fetch brand data and products
         const fetchData = async () => {
             try {
-                // Fetch brand info
                 const brandResponse = await fetch(`${API_BASE}/api/brands/${brandId}/`)
                 if (!brandResponse.ok) throw new Error('Failed to load brand data')
                 const brandData = await brandResponse.json()
                 setBrand(brandData)
 
-                // Fetch products count
                 const productsResponse = await fetch(`${API_BASE}/api/brands/${brandId}/products/`)
                 if (productsResponse.ok) {
                     const productsData = await productsResponse.json()
@@ -117,7 +115,6 @@ export default function BrandDashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-            {/* Header */}
             <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -132,6 +129,9 @@ export default function BrandDashboard() {
                         <a href="/partner-onboarding" className="text-sm text-slate-600 hover:text-blue-600 transition-colors">
                             Partner Info
                         </a>
+                        <a href="/partner-onboarding/dashboard/bin" className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600" title="Recycle Bin">
+                            <Trash2 className="w-5 h-5" />
+                        </a>
                         <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                             <Settings className="w-5 h-5 text-slate-600" />
                         </button>
@@ -140,7 +140,6 @@ export default function BrandDashboard() {
             </header>
 
             <div className="max-w-7xl mx-auto px-6 py-12">
-                {/* Welcome Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -160,9 +159,8 @@ export default function BrandDashboard() {
                         </div>
                     </div>
 
-                    {/* Quick Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <a href="/partner-onboarding/dashboard/partner-products" className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                        <Link href="/partner-onboarding/dashboard/partner-products" className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
                                     <Package className="w-6 h-6 text-blue-600" />
@@ -170,7 +168,7 @@ export default function BrandDashboard() {
                             </div>
                             <div className="text-3xl font-bold text-slate-900 mb-1">{productCount}</div>
                             <div className="text-sm text-slate-600 group-hover:text-blue-600 transition-colors">Total Products →</div>
-                        </a>
+                        </Link>
 
                         <a href="/partner-onboarding/dashboard/partner-orders" className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                             <div className="flex items-center justify-between mb-4">
@@ -204,7 +202,6 @@ export default function BrandDashboard() {
                     </div>
                 </motion.div>
 
-                {/* Main Action: Add Products */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -220,20 +217,20 @@ export default function BrandDashboard() {
                                     Start building your catalog and reach thousands of potential customers through COVE AI's intelligent platform.
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <a
+                                    <Link
                                         href="/partner-onboarding/products/add"
                                         className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-all shadow-lg"
                                     >
                                         <Plus className="w-5 h-5" />
                                         Add Product Manually
-                                    </a>
-                                    <button
-                                        disabled
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold cursor-not-allowed"
+                                    </Link>
+                                    <Link
+                                        href="/partner-onboarding/products/bulk"
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-lg font-semibold hover:bg-white/20 transition-all backdrop-blur-sm border border-white/20"
                                     >
                                         <Upload className="w-5 h-5" />
-                                        Bulk Upload CSV (Coming Soon)
-                                    </button>
+                                        Bulk Upload CSV
+                                    </Link>
                                 </div>
                             </div>
                             <div className="hidden lg:block">
@@ -245,14 +242,12 @@ export default function BrandDashboard() {
                     </div>
                 </motion.div>
 
-                {/* Brand Info Summary */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                     className="grid grid-cols-1 lg:grid-cols-2 gap-6"
                 >
-                    {/* Brand Details */}
                     <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -299,7 +294,6 @@ export default function BrandDashboard() {
                         </button>
                     </div>
 
-                    {/* Integration Settings */}
                     <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">

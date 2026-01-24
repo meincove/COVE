@@ -1,7 +1,7 @@
 // src/components/dev/GlobalScrollHUD.tsx
 "use client";
 
-import { useFrameScrollProgress } from "@/src/hooks/useFrameScrollProgress";
+import { useFrameScrollProgress } from "@/hooks/useFrameScrollProgress";
 
 type Props = {
   containerSel?: string;

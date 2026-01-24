@@ -4,13 +4,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 
-import VerticalGallery from '@/src/components/product/VerticalGallery'
-import ProductInfo from '@/src/components/product/ProductInfo'
-import ProductConfigurator from '@/src/components/product/ProductConfigurator'
-import ReviewsSection from '@/src/components/product/ReviewsSection'
-import RelatedProducts from '@/src/components/product/RelatedProducts'
-import { useProductStore } from '@/src/store/productStore'
-import { trackProductView } from '@/src/utils/analytics' // Analytics tracking (Dec 8)
+import VerticalGallery from '@/components/product/VerticalGallery'
+import ProductInfo from '@/components/product/ProductInfo'
+import ProductConfigurator from '@/components/product/ProductConfigurator'
+import ReviewsSection from '@/components/product/ReviewsSection'
+import RelatedProducts from '@/components/product/RelatedProducts'
+import { useProductStore } from '@/store/productStore'
+import { trackProductView } from '@/utils/analytics' // Analytics tracking (Dec 8)
 
 // --- Types matching the UI shape we already use -----------------------------
 
@@ -40,6 +40,7 @@ type UiProduct = {
   // aggregated total stock per size (across variants)
   sizes: UiSizeMap
   colors: UiColor[]
+  affiliateUrl?: string
 }
 
 export default function ProductPage() {
@@ -95,6 +96,10 @@ export default function ProductPage() {
 
         const data = await res.json()
         const uiProduct: UiProduct | undefined = data.product
+        // Ensure affiliate_url is mapped if backend returns snake_case
+        if (uiProduct && (data.product.affiliate_url)) {
+          uiProduct.affiliateUrl = data.product.affiliate_url
+        }
 
         if (!uiProduct) {
           setProduct(null)
@@ -311,6 +316,7 @@ export default function ProductPage() {
               price={product.price}
               defaultSelectedSize={defaultSelectedSize}
               initialQuantity={defaultQuantity}
+              affiliateUrl={product.affiliateUrl}
             />
 
             {/* Mobile Details Text (Below configuration on mobile) */}

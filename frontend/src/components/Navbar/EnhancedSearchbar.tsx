@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { Search, X, Loader2, ArrowRight } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { useProductSearch } from "@/src/hooks/useProductSearch"
+import { useProductSearch } from "@/hooks/useProductSearch"
 
 export type SearchMode = "collapsed" | "expanded"
 

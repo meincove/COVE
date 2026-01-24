@@ -1,4 +1,4 @@
-import GlowTubeCard from '@/src/components/GlowTubeCard'
+import GlowTubeCard from '@/components/GlowTubeCard'
 
 export default function Page() {
   return (

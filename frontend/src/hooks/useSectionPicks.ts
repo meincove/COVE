@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import type { UiProduct } from "@/src/lib/catalog/shared"
-import { FALLBACK_IMG, resolveImgPath } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
+import { FALLBACK_IMG, resolveImgPath } from "@/lib/catalog/shared"
 
 type ApiImage = { image_name?: string; url?: string }
 type ApiVariant = { images?: ApiImage[] }

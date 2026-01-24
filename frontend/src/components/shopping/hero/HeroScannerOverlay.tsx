@@ -3,7 +3,7 @@
 // import { AnimatePresence, motion } from "framer-motion"
 // import { ShoppingBag, Zap } from "lucide-react"
 // import { useRouter } from "next/navigation"
-// import type { UiProduct } from "@/src/lib/catalog/shared"
+// import type { UiProduct } from "@/lib/catalog/shared"
 
 // function safeImg(src?: string) {
 //     if (!src) return "/clothing-images/fallback.jpg"
@@ -186,7 +186,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { ShoppingBag, Zap, Scan } from "lucide-react"
 import { useRouter } from "next/navigation"
-import type { UiProduct } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
 
 function safeImg(src?: string) {
     if (!src) return "/clothing-images/fallback.jpg"

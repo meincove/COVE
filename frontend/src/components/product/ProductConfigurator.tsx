@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Minus, Plus, Heart, ChevronDown } from 'lucide-react'
+import { Minus, Plus, Heart, ChevronDown, ExternalLink } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
-import { useCartStore } from '@/src/store/cartStore'
-import { trackAddToCart } from '@/src/utils/analytics'
+import { useCartStore } from '@/store/cartStore'
+import { trackAddToCart } from '@/utils/analytics'
 
 type Color = {
   colorName: string
@@ -33,6 +33,7 @@ type ProductConfiguratorProps = {
 
   defaultSelectedSize?: string | null
   initialQuantity?: number
+  affiliateUrl?: string
 }
 
 // Simple Accordion for extra details
@@ -81,6 +82,7 @@ export default function ProductConfigurator({
   price,
   defaultSelectedSize,
   initialQuantity = 0,
+  ...props
 }: ProductConfiguratorProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(
     defaultSelectedSize ?? null
@@ -279,8 +281,17 @@ export default function ProductConfigurator({
             <button onClick={incQuantity} className="w-9 h-full flex items-center justify-center hover:bg-white rounded-full transition-colors"><Plus size={14} /></button>
           </div>
 
-          {/* Add To Cart */}
-          {!isCurrentItemInCart ? (
+          {/* Add To Cart or Affiliate Button */}
+          {props.affiliateUrl ? (
+            <a
+              href={props.affiliateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 bg-black text-white h-12 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 shadow-xl shadow-black/10 transition-all active:scale-[0.98]"
+            >
+              Buy on Brand Site <ExternalLink size={16} />
+            </a>
+          ) : !isCurrentItemInCart ? (
             <button
               onClick={handleAddToCart}
               disabled={!selectedSize || quantity <= 0}

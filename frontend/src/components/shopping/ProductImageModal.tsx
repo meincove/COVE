@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { X } from "lucide-react"
-import { FALLBACK_IMG, resolveImgPath } from "@/src/lib/catalog/shared"
+import { FALLBACK_IMG, resolveImgPath } from "@/lib/catalog/shared"
 
 export default function ProductImageModal({
     open,

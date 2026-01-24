@@ -4,8 +4,8 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import CatalogModalRoot from '@/src/components/Catalog/CatalogModalRoot'
-import CatalogTierSection from '@/src/components/Catalog/CatalogTierSection'
+import CatalogModalRoot from '@/components/Catalog/CatalogModalRoot'
+import CatalogTierSection from '@/components/Catalog/CatalogTierSection'
 import type { CatalogData, CatalogCard, ProductColor } from '@/types/product'
 import type { TierFilters, TierFilterState, TierKey } from '@/types/filters'
 

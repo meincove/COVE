@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
+import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/lib/catalog/shared"
 
 type Props = {
     title: string
@@ -13,7 +13,8 @@ type Props = {
 export default function CategoryBanner({ title, imageSrc, products }: Props) {
     // 1. Extract unique brands from the products of this category
     const brands = useMemo(() => {
-        const unique = new Set(products.map(p => p.brandId || "COVE").filter(Boolean))
+        // Use brandName if available, else brandId, else "COVE"
+        const unique = new Set(products.map(p => p.brandName || p.brandId || "COVE").filter(Boolean))
         return Array.from(unique)
     }, [products])
 

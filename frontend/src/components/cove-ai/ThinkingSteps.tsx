@@ -2,7 +2,7 @@
 "use client";
 
 import { Check, Loader2 } from "lucide-react";
-import { ThinkingStep } from "@/src/hooks/useAgentStream";
+import { ThinkingStep } from "@/hooks/useAgentStream";
 
 type ThinkingStepsProps = {
   steps: ThinkingStep[];

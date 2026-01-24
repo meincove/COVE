@@ -2,7 +2,7 @@
 
 // import { useEffect, useState } from "react";
 // import { X } from "lucide-react";
-// import { useCartStore } from "@/src/store/cartStore";
+// import { useCartStore } from "@/store/cartStore";
 
 // type Props = {
 //   open: boolean;

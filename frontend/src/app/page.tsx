@@ -2,9 +2,9 @@
 
 import React, { useMemo, useState, useRef, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { useAuthModal } from "@/src/context/AuthModalContext"
-import ParticleWave from "@/src/components/ParticleWave"
-import CountUp from "@/src/components/CountUp"
+import { useAuthModal } from "@/context/AuthModalContext"
+import ParticleWave from "@/components/ParticleWave"
+import CountUp from "@/components/CountUp"
 import { ArrowRight, Sparkles, ShoppingBag, Truck, RotateCcw, Building2, Star, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 

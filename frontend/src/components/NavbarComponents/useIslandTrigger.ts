@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ISLAND_THRESHOLD } from "@/src/components/NavbarComponents/constants";
+import { ISLAND_THRESHOLD } from "@/components/NavbarComponents/constants";
 
 /** Auto island trigger from hero/scroll */
 export function useIslandTrigger(targetId = "hero", threshold = ISLAND_THRESHOLD) {

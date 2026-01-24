@@ -9,9 +9,9 @@ import { getOrCreateGuestId } from "@/utils/guest";
 import { formatCurrency, parsePrice, formatOrderDate } from "@/utils/money";
 import type { Order } from "@/types/orders";
 import { getJson } from "@/utils/api";
-import LoadingState from "@/src/components/ui/LoadingState";
-import ErrorState from "@/src/components/ui/ErrorState";
-import EmptyState from "@/src/components/ui/EmptyState";
+import LoadingState from "@/components/ui/LoadingState";
+import ErrorState from "@/components/ui/ErrorState";
+import EmptyState from "@/components/ui/EmptyState";
 import { shortenId, statusChipClasses } from "@/utils/orders";
 
 

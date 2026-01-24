@@ -3,9 +3,9 @@
 import { useSignUp, useAuth } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import OwlCharacter from '@/src/components/auth/OwlCharacter'
-import ValidatedInput from '@/src/components/auth/ValidatedInput'
-import PasswordStrength from '@/src/components/auth/PasswordStrength'
+import OwlCharacter from '@/components/auth/OwlCharacter'
+import ValidatedInput from '@/components/auth/ValidatedInput'
+import PasswordStrength from '@/components/auth/PasswordStrength'
 
 export default function CustomSignUpPage() {
     const { signUp, setActive, isLoaded } = useSignUp()

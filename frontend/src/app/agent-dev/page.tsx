@@ -1,7 +1,7 @@
 "use client";
 
-import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
-//import CartButton from "@/src/components/NavbarComponents/Actions/CartButton";
+import CoveChatWidget from "@/components/cove-ai/CoveChatWidget";
+//import CartButton from "@/components/NavbarComponents/Actions/CartButton";
 
 export default function AgentDevPage() {
   return (

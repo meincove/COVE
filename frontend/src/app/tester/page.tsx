@@ -1,10 +1,10 @@
 // src/app/tester/page.tsx
 "use client";
 
-import SectionOne from "@/src/components/tester/SectionOne";
-import SectionTwo from "@/src/components/tester/SectionTwo";
-import SectionThree from "@/src/components/tester/SectionThree";
-import LightRunwayScene from "@/src/components/LightRunway";
+import SectionOne from "@/components/tester/SectionOne";
+import SectionTwo from "@/components/tester/SectionTwo";
+import SectionThree from "@/components/tester/SectionThree";
+import LightRunwayScene from "@/components/LightRunway";
 
 export default function TesterPage() {
   return (

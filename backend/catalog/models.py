@@ -228,6 +228,17 @@ class ProductMasterGroup(models.Model):
     color_family = models.CharField(max_length=20, default='neutral', help_text="Color family: neutral, warm, cool, bold")
     in_stock = models.BooleanField(default=True, help_text="Product availability")
     featured = models.BooleanField(default=False, help_text="Featured product for promotions")
+    affiliate_url = models.URLField(max_length=500, blank=True, null=True, help_text="External link for affiliate products (redirects user instead of cart)")
+    
+    # Soft Delete & Status
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('draft', 'Draft'),
+        ('trashed', 'Trashed'),
+        ('archived', 'Archived'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', db_index=True)
+    trashed_at = models.DateTimeField(blank=True, null=True, help_text="Time moved to bin")
 
     class Meta:
         verbose_name = "Product Master Group"

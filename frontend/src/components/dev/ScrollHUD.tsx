@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrameScrollProgress } from "@/src/hooks/useFrameScrollProgress";
+import { useFrameScrollProgress } from "@/hooks/useFrameScrollProgress";
 
 type Props = {
   label?: string;

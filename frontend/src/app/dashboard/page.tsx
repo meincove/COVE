@@ -3,21 +3,22 @@
 import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { syncClerkUserToBackendClientSide } from '@/src/lib/syncUser';
+import { syncClerkUserToBackendClientSide } from '@/lib/syncUser';
 
 // Dashboard Components
-import DashboardLayout from '@/src/components/dashboard/DashboardLayout';
-import ClosetGrid from '@/src/components/dashboard/ClosetGrid';
-import SavedOutfits from '@/src/components/dashboard/SavedOutfits';
-import OrderHistory from '@/src/components/dashboard/OrderHistory';
-import WishlistSection from '@/src/components/dashboard/WishlistSection';
-import StyleProfile from '@/src/components/dashboard/StyleProfile';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ClosetGrid from '@/components/dashboard/ClosetGrid';
+import SavedOutfits from '@/components/dashboard/SavedOutfits';
+import OrderHistory from '@/components/dashboard/OrderHistory';
+import WishlistSection from '@/components/dashboard/WishlistSection';
+import StyleProfile from '@/components/dashboard/StyleProfile';
+import BuyerDashboardOverview from '@/components/dashboard/BuyerDashboardOverview';
 
 export default function DashboardPage() {
   const { getToken, isLoaded: authLoaded } = useAuth();
-  const { isSignedIn, isLoaded: userLoaded } = useUser();
+  const { isSignedIn, isLoaded: userLoaded, user } = useUser();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('closet');
+  const [activeTab, setActiveTab] = useState('overview');
   const [synced, setSynced] = useState(false);
 
   // Redirect if not signed in
@@ -57,6 +58,8 @@ export default function DashboardPage() {
   // Render active tab content
   const renderContent = () => {
     switch (activeTab) {
+      case 'overview':
+        return <BuyerDashboardOverview user={user} />;
       case 'closet':
         return <ClosetGrid />;
       case 'outfits':
@@ -68,7 +71,7 @@ export default function DashboardPage() {
       case 'profile':
         return <StyleProfile />;
       default:
-        return <ClosetGrid />;
+        return <BuyerDashboardOverview user={user} />;
     }
   };
 
@@ -76,6 +79,7 @@ export default function DashboardPage() {
     <DashboardLayout
       activeTab={activeTab}
       onTabChange={setActiveTab}
+      user={user}
     >
       {renderContent()}
     </DashboardLayout>

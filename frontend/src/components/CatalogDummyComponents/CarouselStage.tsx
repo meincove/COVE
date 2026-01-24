@@ -2,8 +2,8 @@
 
 // import { motion, AnimatePresence } from 'framer-motion'
 
-// import CatalogCarousel from '@/src/components/Catalog/CatalogCarousel'
-// import CatalogFilterPanel from '@/src/components/Catalog/CatalogFilterPanel'
+// import CatalogCarousel from '@/components/Catalog/CatalogCarousel'
+// import CatalogFilterPanel from '@/components/Catalog/CatalogFilterPanel'
 // import type { CatalogCard } from '@/types/product'
 // import type { TierFilterState } from '@/types/filters'
 // import { CSSProperties } from 'react'
@@ -114,9 +114,9 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { CSSProperties, useState } from 'react'
 
-import CatalogCarousel from '@/src/components/Catalog/CatalogCarousel'
-import CatalogFilterPanel from '@/src/components/Catalog/CatalogFilterPanel'
-import CatalogSkeleton from '@/src/components/Catalog/CatalogSkeleton'
+import CatalogCarousel from '@/components/Catalog/CatalogCarousel'
+import CatalogFilterPanel from '@/components/Catalog/CatalogFilterPanel'
+import CatalogSkeleton from '@/components/Catalog/CatalogSkeleton'
 import type { CatalogCard } from '@/types/product'
 import type { TierFilterState } from '@/types/filters'
 

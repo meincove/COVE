@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { Scan, ShoppingBag, Zap } from "lucide-react"
-import type { UiProduct } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
 import { useRouter } from "next/navigation"
 
 function safeImg(src?: string) {
