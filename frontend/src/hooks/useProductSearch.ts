@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useDebounce } from "@/src/hooks/useDebounce" // We'll assume or create this too
+import { useDebounce } from "@/hooks/useDebounce" // We'll assume or create this too
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001"
 

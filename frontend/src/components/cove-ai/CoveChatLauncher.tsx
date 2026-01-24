@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { MessageCircle } from "lucide-react";
-import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
+import CoveChatWidget from "@/components/cove-ai/CoveChatWidget";
 
 export default function CoveChatLauncher() {
   const [open, setOpen] = useState(false);

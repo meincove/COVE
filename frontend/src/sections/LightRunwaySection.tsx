@@ -1,6 +1,6 @@
 // src/sections/LightRunwaySection.tsx
 "use client";
-import LightRunwayScene from "@/src/components/LightRunway"; // your working scene
+import LightRunwayScene from "@/components/LightRunway"; // your working scene
 import { useTheme } from "next-themes";
 
 export default function LightRunwaySection() {

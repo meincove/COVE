@@ -3,7 +3,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
-import { useCartStore } from '@/src/store/cartStore'
+import { useCartStore } from '@/store/cartStore'
 
 interface CartMiniModalProps {
   onClose: () => void

@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import type { UiProduct } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
 
 function clamp(v: number, min: number, max: number) {
     return Math.max(min, Math.min(max, v))

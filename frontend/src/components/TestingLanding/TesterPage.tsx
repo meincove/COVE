@@ -2,7 +2,7 @@
 
 "use client";
 
-import AuroraShader from "@/src/components/ui/AuroraShader";
+import AuroraShader from "@/components/ui/AuroraShader";
 
 export default function TesterPage() {
   return (

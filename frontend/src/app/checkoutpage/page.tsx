@@ -1,11 +1,11 @@
 'use client'
 
 import Image from 'next/image'
-import { useCartStore } from '@/src/store/cartStore'
+import { useCartStore } from '@/store/cartStore'
 import { Minus, Plus, Trash2, ArrowLeft, Sparkles, ShieldCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { CartItem } from '@/types/cart'
-import { CheckoutButton } from "@/src/components/checkout/CheckoutButton";
+import { CheckoutButton } from "@/components/checkout/CheckoutButton";
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function CheckoutPage() {

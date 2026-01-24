@@ -21,30 +21,30 @@ import {
 } from "lucide-react";
 // Note: react-markdown removed - not currently used
 
-import { useCartSessionStore } from "@/src/store/cartSessionStore";
-import { useCartStore } from "@/src/store/cartStore";
+import { useCartSessionStore } from "@/store/cartSessionStore";
+import { useCartStore } from "@/store/cartStore";
 import {
   AgentItem,
   AgentCartPayload,
   AgentResponse,
 } from "@/types/agent";
 import type { CartItem } from "@/types/cart";
-import ProductCarousel from "@/src/components/cove-ai/ProductCarousel";
-import SuggestedQueries from "@/src/components/cove-ai/SuggestedQueries";
-import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
+import ProductCarousel from "@/components/cove-ai/ProductCarousel";
+import SuggestedQueries from "@/components/cove-ai/SuggestedQueries";
+import { AgentThinkingSteps } from "@/components/cove-ai/AgentThinkingSteps";
 import LoadingSkeleton from './LoadingSkeleton';
 import AgenticOutfitBuilder from './AgenticOutfitBuilder';
-import { useOutfitStore } from '@/src/hooks/useOutfitStore';
-import Toast, { ToastType } from "@/src/components/cove-ai/Toast";
-import { useAgentStreaming } from "@/src/hooks/useAgentStreaming";
-import { useAgentStream } from "@/src/hooks/useAgentStream";
-import { useChatHistory } from "@/src/hooks/useChatHistory";
-import { TypingIndicator, StreamingCursor } from "@/src/components/cove-ai/TypingIndicator";
-import ThinkingSteps from "@/src/components/cove-ai/ThinkingSteps";
-import EnhancedThinking from "@/src/components/cove-ai/EnhancedThinking";  // Phase 1
-import PersonalizedGreeting from "@/src/components/cove-ai/PersonalizedGreeting";
-import InteractiveQuestionOptions from "@/src/components/cove-ai/InteractiveQuestionOptions";
-import { useLayoutStore } from "@/src/store/layoutStore";
+import { useOutfitStore } from '@/hooks/useOutfitStore';
+import Toast, { ToastType } from "@/components/cove-ai/Toast";
+import { useAgentStreaming } from "@/hooks/useAgentStreaming";
+import { useAgentStream } from "@/hooks/useAgentStream";
+import { useChatHistory } from "@/hooks/useChatHistory";
+import { TypingIndicator, StreamingCursor } from "@/components/cove-ai/TypingIndicator";
+import ThinkingSteps from "@/components/cove-ai/ThinkingSteps";
+import EnhancedThinking from "@/components/cove-ai/EnhancedThinking";  // Phase 1
+import PersonalizedGreeting from "@/components/cove-ai/PersonalizedGreeting";
+import InteractiveQuestionOptions from "@/components/cove-ai/InteractiveQuestionOptions";
+import { useLayoutStore } from "@/store/layoutStore";
 
 // ---------- TYPES ----------
 

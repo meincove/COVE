@@ -15,7 +15,7 @@ export default function BrandProductPage({ params }: { params: Promise<{ brandSl
 
     // For now, we'll use a dynamic import to reuse the existing product page
     // This ensures the layout stays exactly the same
-    const ProductPage = require("@/src/app/product/[slug]/page").default
+    const ProductPage = require("@/app/product/[slug]/page").default
 
     // Create params in the format the ProductPage expects
     const productParams = Promise.resolve({ slug })

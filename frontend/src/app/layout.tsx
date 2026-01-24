@@ -3,16 +3,16 @@
 // import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 
-// // import RootOverlay from "@/src/components/Navbar/overlay/RootOverlay";
-// import ModalHost from "@/src/components/ModalHost";
-// import { ModalProvider } from "@/src/context/ModalContext";
-// import { ThemeProvider } from "@/src/components/ThemeProvider";
-// import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot";
-// import AnalyticsInit from "@/src/components/AnalyticsInit"; // Analytics tracking
+// // import RootOverlay from "@/components/Navbar/overlay/RootOverlay";
+// import ModalHost from "@/components/ModalHost";
+// import { ModalProvider } from "@/context/ModalContext";
+// import { ThemeProvider } from "@/components/ThemeProvider";
+// import FloatingChatbot from "@/components/cove-ai/FloatingChatbot";
+// import AnalyticsInit from "@/components/AnalyticsInit"; // Analytics tracking
 
 
-// import IslandDevToggle from "@/src/components/dev/IslandDevToggle";
-// import NavbarController from "@/src/components/Navbar/NavbarController";
+// import IslandDevToggle from "@/components/dev/IslandDevToggle";
+// import NavbarController from "@/components/Navbar/NavbarController";
 
 // export const metadata: Metadata = {
 //   title: "Cove",
@@ -54,14 +54,14 @@ import "./globals.css"
 import { ClerkProvider } from "@clerk/nextjs"
 import { dark } from "@clerk/themes"
 
-import ModalHost from "@/src/components/ModalHost"
-import { ModalProvider } from "@/src/context/ModalContext"
-import { AuthModalProvider } from "@/src/context/AuthModalContext"
-import AuthModal from "@/src/components/auth/AuthModal"
-import { ThemeProvider } from "@/src/components/ThemeProvider"
-import FloatingChatbot from "@/src/components/cove-ai/FloatingChatbot"
-import AnalyticsInit from "@/src/components/AnalyticsInit"
-import NavbarController from "@/src/components/Navbar/NavbarController"
+import ModalHost from "@/components/ModalHost"
+import { ModalProvider } from "@/context/ModalContext"
+import { AuthModalProvider } from "@/context/AuthModalContext"
+import AuthModal from "@/components/auth/AuthModal"
+import { ThemeProvider } from "@/components/ThemeProvider"
+import FloatingChatbot from "@/components/cove-ai/FloatingChatbot"
+import AnalyticsInit from "@/components/AnalyticsInit"
+import NavbarController from "@/components/Navbar/NavbarController"
 
 export const metadata: Metadata = {
   title: "Cove",

@@ -8,9 +8,9 @@ import { ShoppingBag, Globe2, Heart, Menu, Box, Layers, Play } from "lucide-reac
 import clsx from "clsx"
 
 import EnhancedSearchbar from "./EnhancedSearchbar"
-import { useCartStore } from "@/src/store/cartStore"
-import CartModal from "@/src/components/Catalog/CartModal"
-import { useAuthModal } from "@/src/context/AuthModalContext"
+import { useCartStore } from "@/store/cartStore"
+import CartModal from "@/components/Catalog/CartModal"
+import { useAuthModal } from "@/context/AuthModalContext"
 
 // Animation Config for "Dampened Spring"
 const SPRING_TRANSITION = {

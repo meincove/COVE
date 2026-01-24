@@ -5,19 +5,19 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu } from "lucide-react";
 
-import NavbarShell from "@/src/components/NavbarComponents/NavbarShell";
-import Brand from "@/src/components/NavbarComponents/Brand";
-import DesktopLinks from "@/src/components/NavbarComponents/DesktopLinks";
-import SearchBar from "@/src/components/NavbarComponents/SearchBar";
-import ActionsCluster from "@/src/components/NavbarComponents/Actions";
-import MobileMenu from "@/src/components/NavbarComponents/MobileMenu";
+import NavbarShell from "@/components/NavbarComponents/NavbarShell";
+import Brand from "@/components/NavbarComponents/Brand";
+import DesktopLinks from "@/components/NavbarComponents/DesktopLinks";
+import SearchBar from "@/components/NavbarComponents/SearchBar";
+import ActionsCluster from "@/components/NavbarComponents/Actions";
+import MobileMenu from "@/components/NavbarComponents/MobileMenu";
 
-import { useIslandTrigger } from "@/src/components/NavbarComponents/useIslandTrigger";
+import { useIslandTrigger } from "@/components/NavbarComponents/useIslandTrigger";
 import {
   IslandController,
   useIslandOverride,
-} from "@/src/components/NavbarComponents/IslandController";
-import { NavbarThemeScope } from "@/src/components/NavbarComponents/ThemeScope";
+} from "@/components/NavbarComponents/IslandController";
+import { NavbarThemeScope } from "@/components/NavbarComponents/ThemeScope";
 
 // Optional hook exported from useIslandTrigger.ts to control the framed inset
 import { useIslandMenu } from "./NavbarComponents/useIslandTrigger";
@@ -113,6 +113,10 @@ function NavbarInner() {
                     className="flex items-center gap-1.5 sm:gap-2"
                   >
                     {/* show actions (Language, Theme, Auth, Cart) even in island mode */}
+                    <div className="hidden sm:flex items-center gap-2 mr-2">
+                      <a href="/shopping" className="text-xs font-bold uppercase tracking-wider hover:underline">Go to Shopping</a>
+                      <div className="w-[1px] h-4 bg-white/20 mx-1" />
+                    </div>
                     <ActionsCluster />
 
                     {/* island 3-bar toggles the framed inset */}

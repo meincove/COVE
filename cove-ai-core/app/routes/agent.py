@@ -489,7 +489,7 @@ async def _call_rag(query: str, top_k: int, filters: Optional[Dict[str, Any]] = 
     try:
         async with httpx.AsyncClient(timeout=12) as cx:
             r = await cx.post(
-                "http://127.0.0.1:8000/ai/rag/query",
+                f"{COVE_CORE_BASE_URL}/ai/rag/query",
                 json={"query": query, "top_k": top_k, "filters": filters, "intent": intent},
             )
         if r.status_code == 200:
@@ -540,7 +540,7 @@ async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=120) as cx:
             r = await cx.post(
-                "http://127.0.0.1:8000/ai/recs/suggest",
+                f"{COVE_CORE_BASE_URL}/ai/recs/suggest",
                 json=payload,
             )
         if r.status_code == 200:
@@ -624,7 +624,7 @@ async def _call_fit_recommend(
     try:
         async with httpx.AsyncClient(timeout=8) as cx:
             r = await cx.post(
-                "http://127.0.0.1:8000/ai/fit/recommend",
+                f"{COVE_CORE_BASE_URL}/ai/fit/recommend",
                 json=payload,
             )
         if r.status_code == 200:

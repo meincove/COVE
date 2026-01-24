@@ -1,7 +1,7 @@
 "use client"
 
-import type { UiProduct } from "@/src/lib/catalog/shared"
-import { resolveImgPath, FALLBACK_IMG, formatPriceEUR } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
+import { resolveImgPath, FALLBACK_IMG, formatPriceEUR } from "@/lib/catalog/shared"
 
 type Props = {
     title: string

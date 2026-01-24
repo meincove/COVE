@@ -6,10 +6,10 @@ import type React from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
-// import ThumbnailDock from '@/src/components/common/ThumbnailDock'
+// import ThumbnailDock from '@/components/common/ThumbnailDock'
 import CoveSuggestionPill, {
   SuggestionVariant,
-} from '@/src/components/ui/CoveSuggestionPill'
+} from '@/components/ui/CoveSuggestionPill'
 import type { ColorTheme } from '@/utils/colorThemes'
 
 type CardMode = 'normal' | 'hero'

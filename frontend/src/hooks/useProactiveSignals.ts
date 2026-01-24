@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { useCartStore } from '@/src/store/cartStore';
+import { useCartStore } from '@/store/cartStore';
 
 // Type for the signal response
 export interface ProactiveResponse {

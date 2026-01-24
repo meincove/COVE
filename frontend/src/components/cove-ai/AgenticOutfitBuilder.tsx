@@ -48,7 +48,7 @@ interface AgenticOutfitBuilderProps {
  * - Product cards appearing with fade-in animation
  * - "Searching..." → "Found X options" → "Selected ✓" flow
  */
-import { useOutfitStore } from "@/src/hooks/useOutfitStore";
+import { useOutfitStore } from "@/hooks/useOutfitStore";
 
 // ... interfaces ...
 

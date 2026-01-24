@@ -5,6 +5,7 @@ export type UiProduct = {
     variantId?: string  // First variant ID for product page redirects
     name: string
     brandId?: string
+    brandName?: string // NEW
     price: number
     oldPrice?: number
     badge?: string
@@ -16,6 +17,7 @@ export type UiProduct = {
     imageSrc: string
     // optional extra images if you have them
     images?: string[]
+    affiliateUrl?: string
 }
 
 // No-404 fallback (so you never spam console with missing fallback.jpg)
@@ -34,6 +36,7 @@ export function resolveImgPath(raw?: string | null) {
     if (s.startsWith("http")) return s
     if (s.startsWith("data:image")) return s
     if (s.startsWith("/")) return s
+    if (s.startsWith("uploads/")) return `/media/${s}`
     return `/clothing-images/${s}`
 }
 

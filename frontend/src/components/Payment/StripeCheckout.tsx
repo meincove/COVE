@@ -10,16 +10,16 @@ import {
 } from '@stripe/react-stripe-js'
 import axios from 'axios'
 import PaymentForm from './PaymentForm'
-import { useCartStore } from '@/src/store/cartStore'
+import { useCartStore } from '@/store/cartStore'
 import { useUser } from '@clerk/nextjs'
 import PaymentResultModal from './PaymentResultModal'
 import { CartItem } from '@/types/cart'
 import { generateInvoicePDF } from '@/utils/generateInvoice'
 import InvoicePreviewModal from './InvoicePreviewModal'
-import { saveOrder } from '@/src/services/orders'
+import { saveOrder } from '@/services/orders'
 import type { SaveOrderPayload, ShippingAddress } from '@/types/checkout'
 import { getOrCreateGuestId } from '@/utils/guest'
-import ShippingForm from '@/src/components/checkout/ShippingForm'
+import ShippingForm from '@/components/checkout/ShippingForm'
 
 type Props = {
   cardNumber: string
@@ -351,13 +351,13 @@ useEffect(() => {
 // } from '@stripe/react-stripe-js'
 // import axios from 'axios'
 // import PaymentForm from './PaymentForm'
-// import { useCartStore } from '@/src/store/cartStore'
+// import { useCartStore } from '@/store/cartStore'
 // import { useUser } from '@clerk/nextjs'
 // import PaymentResultModal from './PaymentResultModal'
 // import { CartItem } from '@/types/cart'
 // import { generateInvoicePDF } from '@/utils/generateInvoice'
 // import InvoicePreviewModal from './InvoicePreviewModal'
-// import { saveOrder } from "@/src/services/orders";
+// import { saveOrder } from "@/services/orders";
 // import type { SaveOrderPayload } from "@/types/checkout";
 // import { getOrCreateGuestId } from "@/utils/guest";
 

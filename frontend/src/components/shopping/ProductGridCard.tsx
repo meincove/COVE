@@ -1,6 +1,6 @@
 "use client"
 
-import { UiProduct, resolveImgPath } from "@/src/lib/catalog/shared"
+import { UiProduct, resolveImgPath } from "@/lib/catalog/shared"
 import { motion } from "framer-motion"
 
 type Props = {

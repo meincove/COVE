@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { X, Search } from "lucide-react"
 import { useVirtualizer } from "@tanstack/react-virtual"
 
-import type { UiProduct } from "@/src/lib/catalog/shared"
-import { formatPriceEUR, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
+import { formatPriceEUR, resolveImgPath, FALLBACK_IMG } from "@/lib/catalog/shared"
 
 type Props = {
     open: boolean

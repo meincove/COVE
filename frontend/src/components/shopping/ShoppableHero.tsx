@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { FpsMeter } from "@/src/components/FpsMeter"
+import { FpsMeter } from "@/components/FpsMeter"
 
 /** Types needed for the Hero (subset of page types) */
 export type UiProduct = {

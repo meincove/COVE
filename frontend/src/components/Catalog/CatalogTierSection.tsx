@@ -7,7 +7,7 @@ import { useInView } from 'react-intersection-observer'
 import {
   applyTierFilters,
   getAvailableValuesForDimension,
-} from '@/src/lib/catalogFilterBrain'
+} from '@/lib/catalogFilterBrain'
 import type { CatalogCard } from '@/types/product'
 import type { TierFilterState, TierKey } from '@/types/filters'
 import CarouselStage from './CarouselStage'
@@ -300,7 +300,7 @@ export default function CatalogTierSection({
 // import {
 //   applyTierFilters,
 //   getAvailableValuesForDimension,
-// } from '@/src/lib/catalogFilterBrain'
+// } from '@/lib/catalogFilterBrain'
 // import type { CatalogCard } from '@/types/product'
 // import type { TierFilterState, TierKey } from '@/types/filters'
 

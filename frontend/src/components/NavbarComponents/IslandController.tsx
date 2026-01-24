@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useIslandTrigger} from "@/src/components/NavbarComponents/useIslandTrigger";
-import { useIslandMenu } from "@/src/components/NavbarComponents/islandMenuStore";
+import { useIslandTrigger} from "@/components/NavbarComponents/useIslandTrigger";
+import { useIslandMenu } from "@/components/NavbarComponents/islandMenuStore";
 
 type Ctx = {
   override: boolean | null;

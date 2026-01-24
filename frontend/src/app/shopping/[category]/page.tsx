@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
-import CarouselStage from "@/src/components/Catalog/CarouselStage"
-import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
-import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
-import HeroScanner from "@/src/components/shopping/HeroScanner"
-import CategoryBanner from "@/src/components/shopping/CategoryBanner"
-import ProductGridCard from "@/src/components/shopping/ProductGridCard"
+import LshapedNavbar, { FilterGroup } from "@/components/shopping/LShapedNavbar"
+import CarouselStage from "@/components/Catalog/CarouselStage"
+import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/lib/catalog/shared"
+import { uiProductToCatalogCard } from "@/lib/catalog/adapter"
+import HeroScanner from "@/components/shopping/HeroScanner"
+import CategoryBanner from "@/components/shopping/CategoryBanner"
+import ProductGridCard from "@/components/shopping/ProductGridCard"
 
 // --- Shared Types & Utils (duplicated from shopping/page.tsx for isolation) ---
 type ApiImage = { image_name?: string; url?: string }
@@ -18,6 +18,7 @@ type ApiProduct = {
     slug?: string
     name: string
     brand_id?: string
+    brand_name?: string // NEW
     base_price?: number | string
     old_price?: number | string
     is_new?: boolean
@@ -56,6 +57,7 @@ function mapApi(p: ApiProduct): UiProduct {
         variantId: p.color_variants?.[0]?.variant_id,
         name: p.name,
         brandId: p.brand_id,
+        brandName: p.brand_name || p.brand_id, // NEW
         price: num(p.base_price, 0),
         oldPrice: p.old_price != null ? num(p.old_price, 0) : undefined,
         badge: p.is_new ? "NEW" : "",
@@ -95,8 +97,8 @@ export default function CategoryPage() {
         let cancelled = false
             ; (async () => {
                 try {
-                    // Fetch reasonably large page to get good coverage
-                    const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=300`, { cache: "no-store" })
+                    // Fetch all products (effectively unlimited for now)
+                    const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=10000`, { cache: "no-store" })
                     if (!res.ok) throw new Error(`HTTP ${res.status}`)
                     const json = await res.json()
                     const items: ApiProduct[] = json.results || []

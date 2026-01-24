@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { UiProduct, resolveImgPath, FALLBACK_IMG, formatPriceEUR } from "@/src/lib/catalog/shared"
+import { UiProduct, resolveImgPath, FALLBACK_IMG, formatPriceEUR } from "@/lib/catalog/shared"
 
 function clamp(v: number, a: number, b: number) {
     return Math.max(a, Math.min(b, v))

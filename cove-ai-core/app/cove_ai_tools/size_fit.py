@@ -7,10 +7,11 @@ import os
 import logging
 
 import httpx
+from app.config import COVE_CORE_BASE_URL
 
 log = logging.getLogger("cove.tools.size_fit")
 
-FIT_BASE_URL = os.getenv("FIT_BASE_URL", "http://127.0.0.1:8000")
+FIT_BASE_URL = os.getenv("FIT_BASE_URL", COVE_CORE_BASE_URL)
 
 
 async def get_size_fit_advice(payload: Dict[str, Any]) -> Dict[str, Any]:

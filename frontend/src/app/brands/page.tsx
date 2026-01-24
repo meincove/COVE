@@ -26,7 +26,8 @@ export default function BrandsPage() {
     useEffect(() => {
         async function fetchBrands() {
             try {
-                const res = await fetch('http://localhost:8001/api/brands/')
+                const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
+                const res = await fetch(`${apiBase}/api/brands/`)
                 if (res.ok) {
                     const data = await res.json()
                     setBrands(data.results || [])
@@ -71,7 +72,7 @@ export default function BrandsPage() {
                             <div
                                 className="relative overflow-hidden rounded-2xl p-8 h-64 flex flex-col justify-between transition-transform duration-300 group-hover:scale-105"
                                 style={{
-                                    background: `linear-gradient(135deg, ${brand.theme_colors.primary}20, ${brand.theme_colors.accent}30)`
+                                    background: `linear-gradient(135deg, ${brand.theme_colors?.primary || '#333'}20, ${brand.theme_colors?.accent || '#666'}30)`
                                 }}
                             >
                                 {/* Brand Name */}
@@ -86,15 +87,15 @@ export default function BrandsPage() {
                                 <div className="flex gap-3">
                                     <div
                                         className="w-8 h-8 rounded-full border-2 border-white/30"
-                                        style={{ backgroundColor: brand.theme_colors.primary }}
+                                        style={{ backgroundColor: brand.theme_colors?.primary || '#333' }}
                                     />
                                     <div
                                         className="w-8 h-8 rounded-full border-2 border-white/30"
-                                        style={{ backgroundColor: brand.theme_colors.secondary }}
+                                        style={{ backgroundColor: brand.theme_colors?.secondary || '#666' }}
                                     />
                                     <div
                                         className="w-8 h-8 rounded-full border-2 border-white/30"
-                                        style={{ backgroundColor: brand.theme_colors.accent }}
+                                        style={{ backgroundColor: brand.theme_colors?.accent || '#999' }}
                                     />
                                 </div>
 

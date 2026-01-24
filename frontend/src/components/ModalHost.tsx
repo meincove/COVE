@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useModal } from '@/src/context/ModalContext'
+import { useModal } from '@/context/ModalContext'
 import CatalogCardModal from './Catalog/CatalogCardModal'
 
 export default function ModalHost() {

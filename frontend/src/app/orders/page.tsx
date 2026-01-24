@@ -7,16 +7,16 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { getOrCreateGuestId } from "@/utils/guest";
 import { formatCurrency, parsePrice, formatOrderDate } from "@/utils/money";
-import type { Order} from "@/types/orders";
+import type { Order } from "@/types/orders";
 import { getJson } from "@/utils/api";
-import LoadingState from "@/src/components/ui/LoadingState";
-import ErrorState from "@/src/components/ui/ErrorState";
-import EmptyState from "@/src/components/ui/EmptyState";
+import LoadingState from "@/components/ui/LoadingState";
+import ErrorState from "@/components/ui/ErrorState";
+import EmptyState from "@/components/ui/EmptyState";
 import { shortenId, statusChipClasses } from "@/utils/orders";
 
 
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
 // ---------- helpers ----------
 
@@ -80,32 +80,32 @@ export default function OrdersPage() {
   }, [isLoaded, isSignedIn, user?.id]);
 
   // Fetch orders
- const fetchOrders = useCallback(
-  async (signal?: AbortSignal) => {
-    if (!identity) return;
-    try {
-      setError(null);
-      setOrders(null);
+  const fetchOrders = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!identity) return;
+      try {
+        setError(null);
+        setOrders(null);
 
-      const url =
-        identity.type === "clerk"
-          ? `${API_BASE}/api/orders/mine/?clerkUserId=${encodeURIComponent(identity.id)}`
-          : `${API_BASE}/api/orders/mine/?guestSessionId=${encodeURIComponent(identity.id)}`;
+        const url =
+          identity.type === "clerk"
+            ? `${API_BASE}/api/orders/mine/?clerkUserId=${encodeURIComponent(identity.id)}`
+            : `${API_BASE}/api/orders/mine/?guestSessionId=${encodeURIComponent(identity.id)}`;
 
-      const data = await getJson<Order[]>(url, {
-        headers: { "Content-Type": "application/json" },
-        signal,
-      });
+        const data = await getJson<Order[]>(url, {
+          headers: { "Content-Type": "application/json" },
+          signal,
+        });
 
-      setOrders(data ?? []);
-    } catch (e: any) {
-      if (e?.name === "AbortError") return;
-      setError(e?.message || "Failed to load orders");
-      setOrders([]);
-    }
-  },
-  [identity]
-);
+        setOrders(data ?? []);
+      } catch (e: any) {
+        if (e?.name === "AbortError") return;
+        setError(e?.message || "Failed to load orders");
+        setOrders([]);
+      }
+    },
+    [identity]
+  );
 
 
   useEffect(() => {
@@ -118,9 +118,8 @@ export default function OrdersPage() {
   const subtitle = useMemo(() => {
     if (!identity) return "";
     if (identity.type === "clerk") {
-      return `Signed in as ${
-        user?.primaryEmailAddress?.emailAddress || user?.username || user?.id
-      }`;
+      return `Signed in as ${user?.primaryEmailAddress?.emailAddress || user?.username || user?.id
+        }`;
     }
     return `Guest session: ${identity.id}`;
   }, [identity, user]);
@@ -156,19 +155,19 @@ export default function OrdersPage() {
         <p className="text-gray-600">Loading…</p>
       ) : error ? (
         <ErrorState
-    title="Couldn’t load your orders"
-    message={error}
-    onRetry={onRefresh}
-  />
+          title="Couldn’t load your orders"
+          message={error}
+          onRetry={onRefresh}
+        />
       ) : orders === null ? (
         <LoadingState title="Loading your orders" rows={3} />
       ) : orders.length === 0 ? (
-         <EmptyState
-    title="No orders found."
-    message="Browse the catalog to get started."
-    actionHref="/catalog"
-    actionLabel="Go shopping →"
-  />
+        <EmptyState
+          title="No orders found."
+          message="Browse the catalog to get started."
+          actionHref="/catalog"
+          actionLabel="Go shopping →"
+        />
       ) : (
         <div className="space-y-6">
           {orders.map((o) => {
@@ -229,47 +228,47 @@ export default function OrdersPage() {
                 </div>
 
                 {/* pricing breakdown */}
-{/* pricing breakdown (Stripe as source of truth) */}
-<div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm">
-  <div className="flex items-center justify-between">
-    <span className="text-gray-600">Subtotal</span>
-    <span className="font-medium">{formatCurrency(stripeSubtotalDisplay(o))}</span>
-  </div>
-  <div className="mt-1 flex items-center justify-between">
-    <span className="text-gray-600">Shipping</span>
-    <span className="font-medium">{formatCurrency(stripeShipping(o))}</span>
-  </div>
-  <div className="mt-1 flex items-center justify-between">
-    <span className="text-gray-600">VAT</span>
-    <span className="font-medium">{formatCurrency(stripeTax(o))}</span>
-  </div>
-  <div className="mt-2 border-t pt-2 flex items-center justify-between">
-    <span className="text-gray-800">Total</span>
-    <span className="font-semibold">{formatCurrency(stripeTotal(o))}</span>
-  </div>
-</div>
+                {/* pricing breakdown (Stripe as source of truth) */}
+                <div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">{formatCurrency(stripeSubtotalDisplay(o))}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-gray-600">Shipping</span>
+                    <span className="font-medium">{formatCurrency(stripeShipping(o))}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-gray-600">VAT</span>
+                    <span className="font-medium">{formatCurrency(stripeTax(o))}</span>
+                  </div>
+                  <div className="mt-2 border-t pt-2 flex items-center justify-between">
+                    <span className="text-gray-800">Total</span>
+                    <span className="font-semibold">{formatCurrency(stripeTotal(o))}</span>
+                  </div>
+                </div>
 
 
 
-{/* shipping address (optional) */}
-{(o.shipping_name || o.shipping_address_line1) && (
-  <div className="mt-4 rounded-xl border p-3 text-sm">
-    <div className="mb-1 font-medium">Ship to</div>
-    <div className="text-gray-700">
-      {o.shipping_name && <div>{o.shipping_name}</div>}
-      {o.shipping_address_line1 && <div>{o.shipping_address_line1}</div>}
-      {o.shipping_address_line2 && <div>{o.shipping_address_line2}</div>}
-      {(o.shipping_city || o.shipping_state || o.shipping_postal_code) && (
-        <div>
-          {[o.shipping_city, o.shipping_state, o.shipping_postal_code]
-            .filter(Boolean)
-            .join(" ")}
-        </div>
-      )}
-      {o.shipping_country && <div>{o.shipping_country}</div>}
-    </div>
-  </div>
-)}
+                {/* shipping address (optional) */}
+                {(o.shipping_name || o.shipping_address_line1) && (
+                  <div className="mt-4 rounded-xl border p-3 text-sm">
+                    <div className="mb-1 font-medium">Ship to</div>
+                    <div className="text-gray-700">
+                      {o.shipping_name && <div>{o.shipping_name}</div>}
+                      {o.shipping_address_line1 && <div>{o.shipping_address_line1}</div>}
+                      {o.shipping_address_line2 && <div>{o.shipping_address_line2}</div>}
+                      {(o.shipping_city || o.shipping_state || o.shipping_postal_code) && (
+                        <div>
+                          {[o.shipping_city, o.shipping_state, o.shipping_postal_code]
+                            .filter(Boolean)
+                            .join(" ")}
+                        </div>
+                      )}
+                      {o.shipping_country && <div>{o.shipping_country}</div>}
+                    </div>
+                  </div>
+                )}
 
                 {/* footer row */}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">

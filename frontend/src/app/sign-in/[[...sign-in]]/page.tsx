@@ -3,8 +3,8 @@
 import { useSignIn, useAuth } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import OwlCharacter from '@/src/components/auth/OwlCharacter'
-import ValidatedInput from '@/src/components/auth/ValidatedInput'
+import OwlCharacter from '@/components/auth/OwlCharacter'
+import ValidatedInput from '@/components/auth/ValidatedInput'
 
 export default function CustomSignInPage() {
     const { signIn, setActive, isLoaded } = useSignIn()

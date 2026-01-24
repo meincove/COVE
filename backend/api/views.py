@@ -8,11 +8,12 @@ from django.http import JsonResponse, FileResponse
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.core.files.storage import default_storage
+from django.core.files.storage import default_storage, FileSystemStorage
 from django.core.files.base import ContentFile
 
 from django.db import connections
 from django.db.utils import OperationalError
+import uuid
 
 # ✅ NEW: import your AI profile model
 from ai_profiles.models import AiUserProfile
@@ -243,3 +244,42 @@ def readiness(request):
     except OperationalError:
         db_ok = False
     return JsonResponse({"ok": db_ok})
+    return JsonResponse({"ok": db_ok})
+
+
+# --- Media Upload View ---
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+
+class MediaUploadView(APIView):
+    """
+    POST /api/media/upload/
+    Uploads a file and returns the URL.
+    """
+    parser_classes = (MultiPartParser, FormParser)
+    
+    def post(self, request, *args, **kwargs):
+        if 'file' not in request.FILES:
+            return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        file_obj = request.FILES['file']
+        
+        # Validate file type (basic)
+        if not file_obj.content_type.startswith('image/'):
+            return Response({'error': 'File must be an image'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Generate unique name
+        ext = os.path.splitext(file_obj.name)[1]
+        filename = f"uploads/{uuid.uuid4().hex}{ext}"
+        
+        fs = FileSystemStorage()
+        saved_name = fs.save(filename, file_obj)
+        file_url = fs.url(saved_name)
+        
+        # If using absolute URLs in dev without full media setup:
+        if not file_url.startswith('http'):
+            file_url = request.build_absolute_uri(file_url)
+            
+        return Response({'url': file_url, 'filename': saved_name}, status=status.HTTP_201_CREATED)

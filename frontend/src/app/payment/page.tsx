@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import StripeProvider from '@/src/providers/StripeProvider'
-import StripeCheckout from '@/src/components/Payment/StripeCheckout'
-import ThreeDCard from '@/src/components/Payment/ThreeDCard'
+import StripeProvider from '@/providers/StripeProvider'
+import StripeCheckout from '@/components/Payment/StripeCheckout'
+import ThreeDCard from '@/components/Payment/ThreeDCard'
 import { useUser } from '@clerk/nextjs'
 
 import { useRouter } from 'next/navigation'
