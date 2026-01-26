@@ -78,7 +78,8 @@ from app.schemas.agent import (
     AgentItem,
     AgentStatus,
     AgentCartAddIn,
-    AgentCartAddOut
+    AgentCartAddOut,
+    VTOIn
 )
 from app.services.product import get_available_colors
 # from app.services.intent import looks_like_cart_add, get_recently_discussed_product_index
@@ -531,32 +532,8 @@ def _get_similar_types(product_type: str) -> List[str]:
         return []
 
 
-async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Direct wrapper around hybrid search for agent recommendations.
-    Bypasses HTTP overhead for reliability and metadata consistency.
-    """
-    try:
-        from app.vector.store import _search_hybrid_rrf_sync, async_embed_query, run_in_threadpool
-        
-        query = payload.get("query", "")
-        filters = payload.get("filters", {})
-        top_k = payload.get("top_k", 20)
-        
-        q_emb = await async_embed_query(query)
-        items = await run_in_threadpool(
-            _search_hybrid_rrf_sync,
-            query=query,
-            q_emb=q_emb,
-            kind="product",
-            top_k=top_k,
-            filters=filters
-        )
-        
-        return {"items": items}
-    except Exception as e:
-        log.exception(f"Direct recs search failed: {e}")
-        return {"items": []}
+# ✨ REFACTORED: Use shared service to prevent circular imports
+from app.services.search_service import search_products_hybrid as _call_recs_suggest
 
 
 # --- FIT integration helpers -------------------------------------------------
@@ -1363,8 +1340,19 @@ async def _agent_query_impl(
             
             # Format as AgentOut response
             outfit_items = result.get("outfit_items", [])
+            vto_url = result.get("vto_image_url") # ✨ CHECK FOR VTO RESULT
             
             if not outfit_items:
+                # Special Case: Pure VTO workflow might not return outfit_items
+                if vto_url:
+                    return AgentOut(
+                        kind="answer",
+                        answer=result.get("reasoning", "Here is your virtual try-on preview!"),
+                        items=[],
+                        vto_image_url=vto_url,
+                        debug={"orchestrator": workflow_name}
+                    )
+                
                 # No items found, fallback to explanation
                 return AgentOut(
                     kind="answer",
@@ -1432,6 +1420,7 @@ async def _agent_query_impl(
                 answer=answer,
                 items=agent_items,
                 reasoning=" ".join(reasoning_parts),
+                vto_image_url=vto_url, # ✨ PASS VTO URL
                 debug={
                     "orchestrator": workflow_name,
                     "agent_timings": result.get("agent_timings", {}),
@@ -1557,6 +1546,7 @@ async def _agent_query_impl(
             if val := llm_entities.get(field):
                 # Prefer LLM extraction over regex/legacy
                 rec_filters[field] = val
+                numeric_filters[field] = val # Sync numeric_filters for down-stream tools
                 log.info(f"🧠 [INTELLIGENCE] Applied filter '{field}'='{val}' from semantic understanding")
     
     # === LLM-BASED "SHOW MORE" HANDLING ===
@@ -2873,7 +2863,9 @@ async def _agent_query_impl(
         # Build task and context
         task = {
             "query": q,
-            "budget_max": numeric_filters.get("price_max", 500),
+            "budget_max": numeric_filters.get("price_max", 1000), # Default to 1000 if not specified
+            "brand_filter": rec_filters.get("brand"),
+            "gender": rec_filters.get("gender"),
             "visual_context": body.visualMetadata
         }
         
@@ -2884,7 +2876,8 @@ async def _agent_query_impl(
             "user_id": user_id,
             "session_id": body.guestSessionId,
             "original_query": body.message,
-            "gender": rec_filters.get("gender")
+            "gender": rec_filters.get("gender"),
+            "brand": rec_filters.get("brand")
         }
         
         try:
@@ -2912,7 +2905,8 @@ async def _agent_query_impl(
                     budget_max=task["budget_max"],
                     context=orchestrator_context
                 ),
-                workflow_name="outfit_builder"
+                workflow_name="outfit_builder",
+                stream_callback=orchestrator_callback
             )
             
             if result_dict.get("success"):
@@ -2920,21 +2914,26 @@ async def _agent_query_impl(
                 
                 # Convert to AgentItem list
                 items = []
+                agent_items = []
                 for it in outfit_data:
                     if isinstance(it, dict):
                         # Pydantic validation: Ensure 'url' and other fields exist
                         # Default to # if missing to satisfy non-empty string requirement if it exists
                         it["url"] = it.get("url") or f"/product/{it.get('slug', 'unknown')}"
-                        items.append(AgentItem(**it))
+                        agent_items.append(AgentItem(**it))
                 
                 # Store in session
-                SessionStateManager.store_session_recs(body, items)
-                SessionStateManager.mark_slugs_as_shown(body, [it.slug for it in items if it.slug])
+                SessionStateManager.store_session_recs(body, agent_items)
+                SessionStateManager.mark_slugs_as_shown(body, [it.slug for it in agent_items if it.slug])
                 
+                # Format total cost string for answer (assuming result_dict has 'total')
+                # total_str = f"€{result_dict.get('total', 0):.2f}" # This line was in the example but not in the original context, adding it for completeness if needed.
+
                 return AgentOut(
                     kind="recommendations",
                     answer=result_dict.get("reasoning", "I've built a complete outfit for you!"),
-                    items=items,
+                    items=agent_items,
+                    vto_image_url=result_dict.get("vto_image_url"), # ✨ Phase 3: Virtual Try-On URL
                     debug_plan={**debug_plan, "orchestrator_used": True}
                 )
             else:
@@ -3146,3 +3145,40 @@ async def agent_cart_add(body: AgentCartAddIn) -> AgentCartAddOut:
         cartId=cart_id,
         items=items,
     )
+
+
+@router.post("/ai/vto/generate")
+async def generate_vto(body: VTOIn):
+    """
+    On-demand Virtual Try-On generation.
+    """
+    from app.agents.vto_agent import VTOAgent
+    
+    log.info("🎨 On-demand VTO request received")
+    
+    # Instantiate the agent directly
+    agent = VTOAgent("vto_agent")
+    
+    # Prepare the task/context payload
+    # VTOAgent expects items in task and image in task or context
+    task = {
+        "items": body.items,
+        "imageUrl": body.imageUrl,
+        "imageData": body.imageData
+    }
+    context = {}
+    
+    result = await agent.run(task, context)
+    
+    if result.success:
+        return {
+            "ok": True,
+            "vto_image_url": result.data.get("vto_image_url"),
+            "reasoning": result.reasoning
+        }
+    else:
+        return {
+            "ok": False,
+            "error": result.errors[0] if result.errors else "Unknown VTO error",
+            "reasoning": result.reasoning
+        }

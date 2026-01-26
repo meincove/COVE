@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Any, List
 
 from app.agents.base_agent import BaseAgent, AgentResult
-from app.vector.store import search_by_outfit_category
+from app.vector.store import search_by_outfit_category_v2 as search_by_outfit_category
 import asyncio
 import json
 import os
@@ -232,7 +232,7 @@ CRITICAL RULES FOR BANS:
                     # 🏷️ BRAND FILTER: Support targeted generation (Premium Pilot)
                     brand_filter = task.get("brand_filter")
 
-                    candidates = await search_by_outfit_category(
+                    candidates = await search_by_outfit_category( # calling v2 alias
                         outfit_category=store_cat,
                         style_query=combined_query,
                         gender=gender,
@@ -287,15 +287,29 @@ CRITICAL RULES FOR BANS:
                         
                         candidates = valid_gender_candidates
                 
+                # 🛑 DEBUG: Print Candidate List
+                if candidates:
+                    log.warning(f"\n   📋 CANDIDATES FOR {category.upper()} (found {len(candidates)}):")
+                    for i, cand in enumerate(candidates[:10]): # Show top 10
+                         p_price = cand.get('price', 0)
+                         p_title = cand.get('title', 'Unknown')
+                         p_brand = cand.get('brand', 'Unknown')
+                         log.warning(f"     {i+1}. [{p_brand}] {p_title} (€{p_price})")
+                else:
+                    log.warning(f"\n   ❌ NO CANDIDATES FOUND FOR {category.upper()}")
+                
                 # ✨ FALLBACK: Emit candidates if Stylist failed to find any
                 if stream_callback and candidates:
-                    await stream_callback({
-                        "event_type": "category_candidates",
-                        "category": category,
-                        "candidates": candidates,
-                        "total_found": len(candidates),
-                        "status": f"Found {len(candidates)} options for {category}"
-                    })
+                    try:
+                        await stream_callback({
+                            "event_type": "category_candidates",
+                            "category": category,
+                            "candidates": candidates,
+                            "total_found": len(candidates),
+                            "status": f"Found {len(candidates)} options for {category}"
+                        })
+                    except (TypeError, Exception) as e:
+                        log.warning(f"⚠️ Stream callback failed (fallback) for {category}: {e}")
                 
                 # 🛡️ STRICT BRAND ENFORCEMENT ON FALLBACK
                 # If a brand filter is active, we MUST NOT return items from other brands, even if they are cheaper.
@@ -385,17 +399,17 @@ CRITICAL RULES FOR BANS:
                 item_entry = {
                     "outfit_id": outfit_id,
                     "category": category,
-                    "slug": selected["slug"],
+                    "slug": selected.get("slug") or selected.get("slug", ""),
                     "product": selected,  # Full product data for UI
-                    "title": selected["title"],
-                    "type": selected["type"],
+                    "title": selected.get("title", "Unknown Item"),
+                    "type": selected.get("type"),
                     "price": item_price,
                     "reason": f"Matches style '{style}'",
                     "imageUrl": final_image_url,
                     "color": selected.get("color"),
-                    "url": selected.get("url"),
-                    "brand": selected.get("brand") or (selected.get("meta") or {}).get("brand") or brand_filter,
-                    "gender": selected.get("gender") or (selected.get("meta") or {}).get("gender"),
+                    "url": selected.get("url") or f"/product/{selected.get('slug', '')}",
+                    "brand": selected.get("brand") or (selected.get("meta") or {}).get("brand") or brand_filter or "Cove",
+                    "gender": selected.get("gender") or (selected.get("meta") or {}).get("gender") or gender,
                 }
                 
                 outfit_items.append(item_entry)
@@ -405,12 +419,15 @@ CRITICAL RULES FOR BANS:
                 outfit_total += item_price
                 
                 if stream_callback:
-                    await stream_callback({
-                        "event_type": "item_selected",
-                        "category": category,
-                        "selected_item": selected,
-                        "outfit_id": outfit_id
-                    })
+                    try:
+                        await stream_callback({
+                            "event_type": "item_selected",
+                            "category": category,
+                            "selected_item": selected,
+                            "outfit_id": outfit_id
+                        })
+                    except (TypeError, Exception) as e:
+                         log.warning(f"⚠️ Stream callback failed for {category}: {e}")
             
             # ✨ VISUAL HARMONY CHECK
             harmony_result = await self._check_harmony(current_outfit_products, style)
@@ -424,6 +441,12 @@ CRITICAL RULES FOR BANS:
                            item["stylist_note"] = f"⚠️ Stylist Note: {harmony_result.get('critique')}"
 
             log.info(f"   ✅ {outfit_id} complete: €{outfit_total:.2f}")
+            
+            # 🛑 DEBUG: Print Final Outfit
+            log.warning(f"\n   👗 OUTFIT {outfit_idx + 1} SUMMARY:")
+            for item in outfit_items:
+                 log.warning(f"     - [{item.get('category')}] {item.get('title')} (€{item.get('price')})")
+            log.warning(f"     Total: €{outfit_total:.2f}\n")
 
         return AgentResult(
             success=True,
@@ -562,6 +585,15 @@ JSON ONLY."""
              if "shoes" not in banned: banned["shoes"] = []
              for bad in ["boot", "loafer", "formal", "dress", "canvas", "leather"]:
                  if bad not in banned["shoes"]: banned["shoes"].append(bad)
+        
+        # 🛡️ PROTECTION: Unban sneakers for Casual/Streetwear
+        is_casual = any(t in occ_lower or t in style_lower for t in ["casual", "streetwear", "weekend", "everyday"])
+        if is_casual:
+             log.info(f"👟 Casual/Streetwear detected: Unbanning sneakers.")
+             if "shoes" in banned:
+                 # Remove sneaker variants from bans
+                 sneaker_variants = ["sneaker", "sneakers", "trainer", "trainers", "runner", "runners", "tennis"]
+                 banned["shoes"] = [b for b in banned["shoes"] if b not in sneaker_variants]
         
         # Expand Synonyms
         for category, terms in banned.items():

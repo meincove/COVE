@@ -279,7 +279,7 @@ def connect() -> psycopg.Connection:
 # OUTFIT CATEGORY SEARCH (v2 Architecture)
 # ---------------------------------------------------------------------
 
-async def search_by_outfit_category(
+async def search_by_outfit_category_v2(
     outfit_category: str,
     style_query: str = "",
     gender: Optional[str] = None,
@@ -311,7 +311,17 @@ async def search_by_outfit_category(
     
     # Generate embedding for style context
     query_text = f"{style_query} {outfit_category}" if style_query else outfit_category
-    q_emb = await async_embed_query(query_text)
+    
+    log.error(f"[STORE v2 DEBUG] async_embed_query: {async_embed_query}, type: {type(async_embed_query)}")
+    
+    call_res = async_embed_query(query_text)
+    log.error(f"[STORE v2 DEBUG] call_res type: {type(call_res)}")
+    
+    if call_res is None:
+         log.error("[STORE v2 DEBUG] CRITICAL: async_embed_query returned None!")
+         q_emb = []
+    else:
+         q_emb = await call_res
     
     # Run constrained search in threadpool
     return await run_in_threadpool(

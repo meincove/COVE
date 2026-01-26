@@ -98,6 +98,7 @@ class StylistAgent(BaseAgent):
             log.info(f"🔮 Detected Vibe Keywords: {vibe_keywords}")
 
         budget = task.get("budget_max", _STYLIST_CONFIG.get("default_budget", 500))
+        brand_context = context.get("brand") # Brand passed from orchestrator context
         categories = task.get("categories", _STYLIST_CONFIG.get("default_categories", ["top", "bottom"]))
         
         # 🐛 DEBUG STREAMING
@@ -121,7 +122,7 @@ class StylistAgent(BaseAgent):
         # Import here to avoid circular dependency
         
         # Import here to avoid circular dependency
-        from app.routes.agent import _call_recs_suggest
+        # from app.routes.agent import _call_recs_suggest # ✨ MOVED TO LAZY IMPORT
         
         # ✨ WEEK 2 DAY 4: Recall user preferences for personalization
         user_preferences = {"dislikes": [], "likes": [], "colors": [], "recalled_memories": []}
@@ -330,7 +331,7 @@ class StylistAgent(BaseAgent):
                             search_payload["filters"]["color"] = hard_filters["color"]
                         
                         # ✨ APPLY BRAND FILTER
-                        brand_val = hard_filters.get("brand") or analysis.get("brand_filter")
+                        brand_val = brand_context or hard_filters.get("brand") or analysis.get("brand_filter")
                         if brand_val:
                             search_payload["filters"]["brand"] = brand_val
                             log.info(f"   🏷️ Applied Brand Filter: {brand_val}")
@@ -363,10 +364,11 @@ class StylistAgent(BaseAgent):
                     # items = result.get("items", [])
                     
                     # ✨ DIRECT DB SEARCH (Avoids HTTP overhead and sync issues)
-                    from app.vector.store import _search_hybrid_rrf_sync
-                    from app.vector.store import async_embed_query, run_in_threadpool
-                    
+                    from app.vector.store import _search_hybrid_rrf_sync, run_in_threadpool
+                    from app.providers.embedding import embed_query as async_embed_query
+
                     q_emb = await async_embed_query(search_payload["query"])
+                    
                     items = await run_in_threadpool(
                         _search_hybrid_rrf_sync,
                         query=search_payload["query"],
@@ -386,7 +388,8 @@ class StylistAgent(BaseAgent):
                             if hard_filters.get("color"):
                                 search_payload["query"] += f" {hard_filters['color']}"
                             
-                            result = await _call_recs_suggest(search_payload)
+                            from app.services.search_service import search_products_hybrid
+                            result = await search_products_hybrid(search_payload)
                             items = result.get("items", [])
 
                         # Strategy 2: Remove Type Filter (Extreme Fallback) - ONLY if still 0 items
@@ -394,8 +397,10 @@ class StylistAgent(BaseAgent):
                             log.info(f"   ⚠️ Still no items for {category}. Retrying without strict type filter...")
                             del search_payload["filters"]["type"]
                              # The query usually contains the type (e.g. "hoodie"), so we just rely on semantic search
+                             # and trusting the vector similarity
                             
-                            result = await _call_recs_suggest(search_payload)
+                            from app.services.search_service import search_products_hybrid
+                            result = await search_products_hybrid(search_payload)
                             items = result.get("items", [])
                             log.info(f"   🔄 Extreme fallback found {len(items)} items for {category}")
 
@@ -406,33 +411,31 @@ class StylistAgent(BaseAgent):
                         if self._validate_category_relevance(category, item)
                     ]
 
-                    if stream_callback and filtered_candidates:
-                        # Send top 5 candidates with essential info for UI
-                        preview_candidates = []
-                        for item in filtered_candidates[:5]:
-                            try:
-                                candidate_data = self._extract_product_data(item)
-                                if candidate_data:
-                                    preview_candidates.append(candidate_data)
-                            except Exception as exc:
-                                log.warning(f"Error parsing item for candidates: {exc}")
+                    # ✨ SAFE STREAMING: Prevent callback crashes from killing the agent
+                    if stream_callback:
+                        try:
+                            # Send top 5 candidates with essential info for UI
+                            preview_candidates = []
+                            # ... check candidates ...
+                            if filtered_candidates:
+                                 for item in filtered_candidates[:5]:
+                                     try:
+                                         candidate_data = self._extract_product_data(item)
+                                         if candidate_data:
+                                             preview_candidates.append(candidate_data)
+                                     except Exception: pass
 
-                        await stream_callback({
-                            "event_type": "category_candidates",
-                            "category": category,
-                            "candidates": preview_candidates,
-                            "total_found": len(filtered_candidates),
-                            "status": f"Found {len(filtered_candidates)} options for {category}"
-                        })
-                    elif stream_callback:
-                        # Emit empty candidates validation
-                        await stream_callback({
-                            "event_type": "category_candidates",
-                            "category": category,
-                            "candidates": [],
-                            "total_found": 0,
-                            "status": f"No valid {category} found matching your criteria"
-                        })
+                            await stream_callback({
+                                "event_type": "category_candidates",
+                                "category": category,
+                                "candidates": preview_candidates,
+                                "total_found": len(filtered_candidates),
+                                "status": f"Found {len(filtered_candidates)} options for {category}"
+                            })
+                        except (TypeError, Exception) as e:
+                            log.warning(f"⚠️ Stream callback failed for {category}: {e}")
+                            # Continue execution - do not crash
+
                     
                     if items:
                         # ✨ WEEK 2 DAY 4: Filter based on user preferences
