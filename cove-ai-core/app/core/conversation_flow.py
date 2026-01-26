@@ -29,8 +29,36 @@ class ConversationFlowHandler:
     def __init__(self):
         self.flows = self._load_flows()
         self.stylist_config = self._load_stylist_config()
-        # In-memory state storage (session_id -> state)
-        self._active_conversations: Dict[str, Dict[str, Any]] = {}
+        # Persistence file path
+        self._persistence_path = Path(__file__).parent.parent.parent / "data" / "active_conversations.json"
+        
+        # Ensure persistence file exists
+        if not self._persistence_path.exists():
+            try:
+                with open(self._persistence_path, "w") as f:
+                    json.dump({}, f)
+                log.info(f"✓ Created conversation persistence file: {self._persistence_path}")
+            except Exception as e:
+                log.warning(f"Failed to create persistence file: {e}")
+
+    def _load_sessions(self) -> Dict[str, Any]:
+        """Load active sessions from file."""
+        if not self._persistence_path.exists():
+            return {}
+        try:
+            with open(self._persistence_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            log.error(f"Failed to load sessions: {e}")
+            return {}
+
+    def _save_sessions(self, sessions: Dict[str, Any]):
+        """Save active sessions to file."""
+        try:
+            with open(self._persistence_path, "w") as f:
+                json.dump(sessions, f, indent=2)
+        except Exception as e:
+            log.error(f"Failed to save sessions: {e}")
 
     def _load_flows(self) -> Dict[str, Any]:
         """Load conversation flows from JSON config."""
@@ -71,12 +99,14 @@ class ConversationFlowHandler:
   - "girlfriend", "wife", "for her", "for women", "women's" → "women"
   - "boyfriend", "husband", "for him", "for men", "men's" → "men"
   - If not specified or unclear → null
+- 'brand': Any specific brand name mentioned (e.g., "Vortex Streetwear", "Aura Minimalist", "COVE", "Nike")
 
 Examples:
-"outfit for my girlfriend under 500" → {"occasion": null, "budget": 500, "style": null, "gender": "women"}
-"casual look for my boyfriend" → {"occasion": "casual", "budget": null, "style": "casual", "gender": "men"}
-"wedding guest outfit under 500 euros" → {"occasion": "wedding", "budget": 500, "style": null, "gender": null}
-"I want to build an outfit for my girlfriend under 500 euros" → {"occasion": null, "budget": 500, "style": null, "gender": "women"}
+"outfit for my girlfriend under 500" → {"occasion": null, "budget": 500, "style": null, "gender": "women", "brand": null}
+"casual look for my boyfriend" → {"occasion": "casual", "budget": null, "style": "casual", "gender": "men", "brand": null}
+"wedding guest outfit under 500 euros" → {"occasion": "wedding", "budget": 500, "style": null, "gender": null, "brand": null}
+"I want to build an outfit for my girlfriend under 500 euros" → {"occasion": null, "budget": 500, "style": null, "gender": "women", "brand": null}
+"Vortex Streetwear casual outfit" → {"occasion": "casual", "budget": null, "style": "casual", "gender": null, "brand": "Vortex Streetwear"}
 
 Return valid JSON. Use null for values not found."""},
                     {"role": "user", "content": text}
@@ -92,7 +122,7 @@ Return valid JSON. Use null for values not found."""},
             log.info(f"✅ LLM extracted slots: {result}")
             return result
         except Exception as e:
-            log.warning(f"⚠️ LLM extraction failed: {e}. Falling back to heuristics.")
+            # log.warning(f"⚠️ LLM extraction failed: {e}. Falling back to heuristics.")
             return self._extract_slots_heuristic(text)
 
     def _extract_slots_heuristic(self, text: str) -> Dict[str, Any]:
@@ -106,9 +136,17 @@ Return valid JSON. Use null for values not found."""},
         if not budget_match:
             budget_match = re.search(r'(\d+)\s*(?:€|eur|euro|euros|\$|£)', text_lower)
         
+        # ✨ IMPROVEMENT: Match standalone number if context implies budget (simple heuristic)
+        if not budget_match:
+            # If text is JUST a number (e.g. "250"), treat as budget
+            if re.match(r'^\d+$', text.strip()):
+                budget_match = re.search(r'^\d+$', text.strip())
+
         if budget_match:
             try:
-                extracted["budget"] = str(float(budget_match.group(1)))
+                # Handle group(0) for standalone
+                val = budget_match.groups()[0] if budget_match.groups() else budget_match.group(0)
+                extracted["budget"] = str(float(val))
             except: 
                 pass
         
@@ -182,9 +220,12 @@ Return valid JSON. Use null for values not found."""},
             "flow_name": flow_name,
             "current_step": 0,
             "answers": {},
-            "flow": flow
+            # Do NOT store 'flow' object in JSON
         }
-        self._active_conversations[session_id] = state
+        
+        # Load existing sessions
+        sessions = self._load_sessions()
+        sessions[session_id] = state
         
         # ✨ ONE-SHOT: Extract slots from the triggering message immediately
         if initial_message:
@@ -208,6 +249,8 @@ Return valid JSON. Use null for values not found."""},
                 state["current_step"] += 1
             else:
                 # Found a step that needs answering!
+                # SAVE STATE before returning
+                self._save_sessions(sessions)
                 return self._format_question(next_step_def)
                 
         # If we skipped ALL steps, we are done immediately!
@@ -218,28 +261,41 @@ Return valid JSON. Use null for values not found."""},
         state["answers"]["_original_query"] = state.get("original_query", "")
         
         # Clean up session since we are done
-        del self._active_conversations[session_id]
+        del sessions[session_id]
+        self._save_sessions(sessions)
         
         # Build trigger payload
         return self._build_orchestrator_trigger(flow, state["answers"])
     
     def is_in_conversation(self, session_id: str) -> bool:
         """Check if session has an active conversation."""
-        return session_id in self._active_conversations
+        sessions = self._load_sessions()
+        return session_id in sessions
     
     async def handle_response(self, session_id: str, message: str) -> Dict[str, Any]:
         """
         Handle user response in active conversation.
         """
-        if session_id not in self._active_conversations:
+        sessions = self._load_sessions()
+        
+        if session_id not in sessions:
             return {
                 "complete": False,
                 "message": "No active conversation found.",
                 "trigger_orchestrator": False
             }
         
-        state = self._active_conversations[session_id]
-        flow = state["flow"]
+        state = sessions[session_id]
+        
+        # Re-hydrate flow object from config
+        flow_name = state.get("flow_name")
+        flow = self.flows.get(flow_name)
+        if not flow:
+            # Corrupted state?
+            del sessions[session_id]
+            self._save_sessions(sessions)
+            return {"complete": False, "message": "Error restoring conversation flow.", "trigger_orchestrator": False}
+            
         steps = flow.get("flow", [])
         
         # 1. SMART EXTRACTION: Try to extract ALL possible slots from this message
@@ -248,13 +304,11 @@ Return valid JSON. Use null for values not found."""},
         log.info(f"🧠 extracted slots from '{message}': {extracted}")
         
         # Merge extracted slots into known answers
-        # Be careful not to overwrite existing answers with None, but DO overwrite if new value found
         for key, val in extracted.items():
             if val:
                 state["answers"][key] = val
                 
         # Also store the raw response for the *current* step if we didn't extract a specific value for it
-        # This ensures we capture free-text answers that might not match our extraction rules
         current_idx = state["current_step"]
         if current_idx < len(steps):
             current_step_name = steps[current_idx]["step"]
@@ -273,6 +327,10 @@ Return valid JSON. Use null for values not found."""},
                 state["current_step"] += 1
             else:
                 # Found a step that needs answering!
+                # SAVE STATE
+                sessions[session_id] = state
+                self._save_sessions(sessions)
+                
                 return {
                     "complete": False,
                     "message": self._format_question(next_step_def),
@@ -280,13 +338,14 @@ Return valid JSON. Use null for values not found."""},
                 }
         
         # 3. Conversation complete! Build orchestrator query
-        # Preserve original query for context (gender, etc.)
+        # Preserve original query
         state["answers"]["_original_query"] = state.get("original_query", "")
         
-        del self._active_conversations[session_id]
+        # Remove session
+        del sessions[session_id]
+        self._save_sessions(sessions)
         
         return self._build_orchestrator_trigger(flow, state["answers"])
-
 
     
     def _format_question(self, step: Dict[str, Any]) -> Union[str, Dict[str, Any]]:
@@ -343,6 +402,17 @@ Return valid JSON. Use null for values not found."""},
         # Explicitly include budget in textual query as failsafe
         query_parts.append(f"budget {budget_num}")
         
+        # ✨ CRITICAL: Include gender in the TEXT query
+        # This ensures the Context Translator (LLM) generates gender-appropriate keywords
+        # (e.g. "suit" instead of "dress" for men)
+        gender = answers.get("gender")
+        if gender:
+            query_parts.append(f"for {gender}")
+            
+        brand = answers.get("brand")
+        if brand:
+            query_parts.append(f"brand {brand}")
+        
         query = ", ".join(query_parts)
         
         # Completion message
@@ -363,6 +433,7 @@ Return valid JSON. Use null for values not found."""},
                 "occasion": occasion,
                 "style": style,
                 "gender": answers.get("gender"),  # Extracted gender (women/men)
+                "brand_filter": answers.get("brand"), # Extracted brand
                 "original_query": answers.get("_original_query", "")  # Preserve original for context
             }
         }
@@ -388,8 +459,10 @@ Return valid JSON. Use null for values not found."""},
     
     def cancel_conversation(self, session_id: str):
         """Cancel active conversation."""
-        if session_id in self._active_conversations:
-            del self._active_conversations[session_id]
+        sessions = self._load_sessions()
+        if session_id in sessions:
+            del sessions[session_id]
+            self._save_sessions(sessions)
             log.info(f"Cancelled conversation for session {session_id}")
 
 

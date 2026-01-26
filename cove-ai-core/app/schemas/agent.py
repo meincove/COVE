@@ -7,6 +7,9 @@ from pydantic import BaseModel, Field, validator
 class AgentIn(BaseModel):
     message: str
     top_k: int = 6
+    imageUrl: Optional[str] = None  # URL of uploaded image
+    imageData: Optional[str] = None # Base64 data if needed
+    visualMetadata: Optional[Dict[str, Any]] = None  # Context from vision analysis
 
     # optional context for cart + user
     cartId: Optional[str] = None
@@ -94,6 +97,8 @@ class AgentItem(BaseModel):
     price: Optional[float] = None  # Product price for display
     imageUrl: Optional[str] = None  # ✨ PHASE 6: Product image URL
     outfit_id: Optional[str] = None  # ✨ PHASE 7: Multi-outfit grouping (e.g. "outfit_1")
+    gender: Optional[str] = None  # ✨ PHASE 8: Gender tag for UI trust
+    brand: Optional[str] = None   # ✨ PHASE 8: Brand for UI trust
     
     # Rich product details for fact extraction (match RecItem)
     material: Optional[str] = None

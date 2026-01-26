@@ -59,6 +59,7 @@
         "skirt": "bottoms",
         "joggers": "bottoms",
         "leggings": "bottoms",
+        "cargo pants": "bottoms",
         "sneakers": "shoes",
         "boots": "shoes",
         "sandals": "shoes",
@@ -66,6 +67,9 @@
         "loafers": "shoes",
         "oxfords": "shoes",
         "dress shoes": "shoes",
-        "shoes": "shoes"
+        "high-tops": "shoes",
+        "shoes": "shoes",
+        "tech jacket": "tops",
+        "outerwear": "tops"
     }
 }

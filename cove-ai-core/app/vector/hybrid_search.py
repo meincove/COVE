@@ -80,13 +80,18 @@ def _build_sql_filters(filters: Dict[str, Any]) -> tuple[str, List[Any]]:
             target_genders = ["female", "women", "woman", "womens"]
         
         # Match ANY of the target genders OR unisex
-        clauses.append("(lower(meta->>'gender') = ANY(%s) OR lower(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)")
+        clauses.append("(lower(meta->>'gender') = ANY(%s) OR lower(meta->>'gender') = 'unisex')")
         params.append(target_genders)
 
     # 4. Other exact matches
-    for field in ["tier", "color", "size"]:
+    for field in ["tier", "size", "outfit_category"]:
         if filters.get(field):
             clauses.append(f"meta->>'{field}' = %s")
+            params.append(filters[field])
+            
+    for field in ["color", "brand"]:
+        if filters.get(field):
+            clauses.append(f"lower(meta->>'{field}') = lower(%s)")
             params.append(filters[field])
 
     if not clauses:
@@ -401,6 +406,8 @@ def search_results_to_dict(results: List[SearchResult]) -> List[Dict[str, Any]]:
             'text': r.text,
             'url': r.url,
             'meta': r.meta,
+            'brand': r.meta.get('brand'),
+            'gender': r.meta.get('gender'),
             'score': r.score,
             'source': r.source
         }

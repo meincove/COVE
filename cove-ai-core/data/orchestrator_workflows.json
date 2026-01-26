@@ -11,7 +11,7 @@
                 "required": true,
                 "timeout_ms": 60000,
                 "parallel_group": 0,
-                "description": "Retrieve candidate items from catalog"
+                "description": "Analyze request & plan outfit"
             },
             {
                 "agent": "outfit_builder",
@@ -74,6 +74,37 @@
         ],
         "min_success_agents": 1,
         "enable_checkpointing": false,
+        "observability": {
+            "track_metrics": true
+        }
+    },
+    "multimodal_search": {
+        "name": "Visual Search Assistant",
+        "description": "Search products using uploaded images or style references",
+        "trigger_patterns": [
+            "search by image",
+            "upload",
+            "looks like this",
+            "find this"
+        ],
+        "steps": [
+            {
+                "agent": "fashion_analyzer",
+                "required": true,
+                "timeout_ms": 30000,
+                "parallel_group": 0,
+                "description": "Extract Fashion DNA from image"
+            },
+            {
+                "agent": "stylist",
+                "required": true,
+                "timeout_ms": 60000,
+                "parallel_group": 1,
+                "description": "Find products matching visual DNA"
+            }
+        ],
+        "min_success_agents": 2,
+        "enable_checkpointing": true,
         "observability": {
             "track_metrics": true
         }

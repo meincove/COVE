@@ -307,6 +307,17 @@ async def _classify_with_llm(
 
         # Allow bare label or quoted string
         label = raw.strip().strip('"').strip("'").lower()
+        
+        # FIX: If LLM returns a JSON object instead of a bare label (e.g. {"kind": "discover"}), parse it
+        if label.startswith("{") and label.endswith("}"):
+            try:
+                data = json.loads(label)
+                label = data.get("kind") or data.get("label") or data.get("intent") or label
+                label = label.lower()
+                log.info("Parsed JSON label from router: %s", label)
+            except:
+                pass
+
         if label not in _ALLOWED_KINDS:
             log.warning("Router LLM returned invalid label %r", label)
             return None, None  # FIX: Return tuple, not None

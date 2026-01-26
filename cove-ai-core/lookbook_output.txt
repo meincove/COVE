@@ -1,0 +1,14 @@
+
+
+✨ GENERATING LOOK: Vortex Streetwear - Cyberpunk Night Out ✨
+📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...
+📚 [VOCAB] Loaded 17 colors from ai_core.docs: ['beige', 'black', 'brown', 'burgundy', 'champagne', 'charcoal', 'chocolate', 'emerald', 'grey', 'light blue', 'navy', 'nude', 'pink', 'red', 'sand', 'tan', 'white']
+📚 [VOCAB] Loaded 24 types from ai_core.docs: ['accessories', 'blazer', 'boots', 'cargo pants', 'coat', 'dress', 'heels', 'high-tops', 'hoodie', 'jacket', 'loafers', 'pants', 'shirt', 'shoes', 'shorts', 'skirt', 'sneakers', 'sweater', 'sweatshirt', 't-shirt', 'tech jacket', 'tee', 'trousers', 'vest']
+📚 [VOCAB] Loaded 3 brands from ai_core.docs: ['aura minimalist', 'cove footwear', 'vortex streetwear']
+
+
+✨ GENERATING LOOK: Aura Minimalist - Premium Minimalist Evening ✨
+📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...
+📚 [VOCAB] Loaded 17 colors from ai_core.docs: ['beige', 'black', 'brown', 'burgundy', 'champagne', 'charcoal', 'chocolate', 'emerald', 'grey', 'light blue', 'navy', 'nude', 'pink', 'red', 'sand', 'tan', 'white']
+📚 [VOCAB] Loaded 24 types from ai_core.docs: ['accessories', 'blazer', 'boots', 'cargo pants', 'coat', 'dress', 'heels', 'high-tops', 'hoodie', 'jacket', 'loafers', 'pants', 'shirt', 'shoes', 'shorts', 'skirt', 'sneakers', 'sweater', 'sweatshirt', 't-shirt', 'tech jacket', 'tee', 'trousers', 'vest']
+📚 [VOCAB] Loaded 3 brands from ai_core.docs: ['aura minimalist', 'cove footwear', 'vortex streetwear']

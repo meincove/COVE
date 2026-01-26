@@ -55,7 +55,8 @@ Output JSON ONLY with this structure:
 CRITICAL RULES FOR BANS:
 1. **Formal/Wedding/Elegant:** MUST BAN: ["tee", "t-shirt", "hoodie", "sweatshirt", "graphic", "logo", "polo", "short", "denim", "sneaker", "runner", "sandal", "slide"].
 2. **Gym/Active:** MUST BAN: ["denim", "jeans", "boot", "loafer", "leather", "formal", "dress shoe", "heel"].
-3. **Be Strict:** If in doubt, ban it. A tee is NEVER okay for a wedding.
+3. **Streetwear/Casual:** DO NOT BAN sneakers, hoodies, or tees. These are essential.
+4. **Be Precise:** Only ban items that truly clash with the requested style.
 """
         try:
             response = await asyncio.to_thread(
@@ -104,11 +105,51 @@ CRITICAL RULES FOR BANS:
         plan = await self._plan_outfit(occasion, style, gender)
         
         categories = plan.get("categories", ["tops", "bottoms", "shoes"])
-        # Ensure we always have core elements if not explicitly removed? No, trust the Stylist.
-        if "tops" not in categories: categories.append("tops") # Safety
-        if "shoes" not in categories: categories.append("shoes")
         
-        log.info(f"   📋 Plan Categories: {categories}")
+        # 🧹 SANITIZE CATEGORIES: Prevent duplicate/overlapping items
+        # Map specific items back to core slots to avoid "Hoodie" + "Top" = 2 Tops
+        valid_slots = {
+            "top": ["top", "tops", "shirt", "t-shirt", "tee", "hoodie", "sweater", "sweatshirt", "knitwear", "blouse", "polo"],
+            "bottom": ["bottom", "bottoms", "pants", "trousers", "jeans", "shorts", "skirt", "joggers", "leggings"],
+            "shoes": ["shoe", "shoes", "sneakers", "boots", "sandals", "footwear", "trainers"],
+            "outerwear": ["outerwear", "jacket", "coat", "blazer", "vest", "gilet"],
+            "accessories": ["accessories", "bag", "hat", "scarf", "jewelry", "watch", "belt"]
+        }
+        
+        final_categories = []
+        seen_slots = set()
+        
+        for raw_cat in categories:
+            cat_lower = raw_cat.lower().strip()
+            mapped_slot = None
+            
+            # Find which slot this belongs to
+            for slot, keywords in valid_slots.items():
+                if cat_lower in keywords:
+                    mapped_slot = slot
+                    break
+            
+            # If not found, default to 'other' or skip? 
+            # If it's something valid like "dress", we might need a slot. 
+            # treating unknown as pure category for now but careful of duplicates.
+            if not mapped_slot: 
+                # Strict Mode: Ignore weird hallucinations like "vibe", "style"
+                continue
+            
+            # Only allow ONE per slot for a coherent look (unless accessories)
+            if mapped_slot not in seen_slots or mapped_slot == "accessories":
+                final_categories.append(mapped_slot)
+                seen_slots.add(mapped_slot)
+        
+        # Safety defaults
+        if "top" not in seen_slots: final_categories.append("top")
+        if "bottom" not in seen_slots: final_categories.append("bottom")
+        if "shoes" not in seen_slots: final_categories.append("shoes")
+        
+        categories = final_categories
+        log.info(f"   🧹 Sanitized Categories: {categories}")
+        
+        log.info(f"   📋 Plan Categories (Raw): {plan.get('categories')}")
         log.info(f"   🔍 Plan Queries: {plan.get('search_queries')}")
         log.info(f"   🚫 Plan Bans: {plan.get('banned_terms')}")
         
@@ -139,6 +180,7 @@ CRITICAL RULES FOR BANS:
             
             for category in categories:
                 budget_for_category = category_budgets[category]
+                brand_filter = task.get("brand_filter") # Ensure brand filter is available for all category searches
                 
                 # 1. Try to get from Pre-filtered Candidates (Stylist)
                 candidates = []
@@ -162,6 +204,13 @@ CRITICAL RULES FOR BANS:
                         source = "stylist_candidates"
                         # Sort by price descending or similarity? Stylist usually returns sorted by relevance.
                         # Let's trust the Stylist's order.
+                        
+                        # ✨ BRAND FILTER: Re-enforce brand filter on stylist candidates if present
+                        if brand_filter:
+                            filtered = [c for c in candidates if str(brand_filter).lower() in (str(c.get("brand") or "")).lower()]
+                            if filtered:
+                                candidates = filtered
+                                log.info(f"   🏷️ Re-enforced brand filter '{brand_filter}' on {len(candidates)} stylist candidates")
                 
                 if not candidates:
                     # Use LLM-optimized query for this category
@@ -175,18 +224,22 @@ CRITICAL RULES FOR BANS:
                     if category == "top": store_cat = "tops"
                     if category == "bottom": store_cat = "bottoms"
                     
-                    # 💡 RELAXED BUDGET: Use total budget_max as cap for search to avoid filtering out 
-                    # expensive key items (like the €561 Shirt) just because of arbitrary partitioning.
-                    # Even allow going over budget (2x) to ensure we find *something*.
-                    search_cap = float(budget_max) * 2 if budget_max else None
+                    # 1. 🧠 SMART BUDGET: Strict Cap
+                    # Force search max price to be the category budget * 1.1 (10% flex), NOT the total budget.
+                    # This prevents one item from eating the whole budget.
+                    search_cap = budget_for_category * 1.15
+                    
+                    # 🏷️ BRAND FILTER: Support targeted generation (Premium Pilot)
+                    brand_filter = task.get("brand_filter")
 
                     candidates = await search_by_outfit_category(
                         outfit_category=store_cat,
                         style_query=combined_query,
                         gender=gender,
-                        price_max=search_cap, # Use GLOBAL budget cap, not local partition
+                        price_max=search_cap, 
                         exclude_slugs=list(global_used_slugs),
-                        top_k=50, # Fetch more to allow for filtering
+                        top_k=50,
+                        brand=brand_filter 
                     )
 
                     # 🕵️‍♂️ STRICT FILTERING: Use LLM-generated bans
@@ -200,22 +253,39 @@ CRITICAL RULES FOR BANS:
                         
                         if bans:
                             for c in candidates:
-                                title_lower = c.get("title", "").lower()
-                                title_lower = c.get("title", "").lower()
+                                title_lower = (c.get("title") or "").lower()
                                 should_ban = any(ban in title_lower for ban in bans)
                                 if should_ban:
                                     log.info(f"🚫 BANNED: '{title_lower}' matched bans {bans}")
                                 else:
-                                    filtered.append(c)
-                                    log.info(f"✅ ALLOWED: '{title_lower}' (No match in {bans})")
+                                    filtered.append(c) # Keep if safe
+
+                            candidates = filtered
+                                
+                    # 🚦 GENDER GUARDRAIL: Strict verification of item metadata
+                    if candidates and gender:
+                        valid_gender_candidates = []
+                        target_g = gender.lower()
+                        
+                        # Define reject sets (If building for X, reject Y)
+                        rejects = set()
+                        if target_g in ["male", "man", "men", "mens"]:
+                            rejects = {"female", "woman", "women", "womens"}
+                        elif target_g in ["female", "woman", "women", "womens"]:
+                            rejects = {"male", "man", "men", "mens"}
+                        
+                        for c in candidates:
+                            # Check metadata gender
+                            item_gender = str(c.get("gender") or "").lower()
+                            title_lower = str(c.get("title") or "").lower()
                             
-                            if filtered:
-                                log.info(f"   🧹 Filtered {len(candidates) - len(filtered)} items using bans: {bans}")
-                                candidates = filtered
+                            # Double check title for gender keywords if metadata is ambiguous
+                            if any(r in item_gender for r in rejects) or any(r in title_lower for r in rejects):
+                                log.warning(f"🚫 GENDER MISMATCH: Rejecting '{c.get('title')}' for {gender}")
                             else:
-                                log.warning(f"   ⚠️ Strict filter removed all items for {category}! Bans: {bans}")
-                                # NO FALLBACK: If we banned them, they are banned.
-                                candidates = []
+                                valid_gender_candidates.append(c)
+                        
+                        candidates = valid_gender_candidates
                 
                 # ✨ FALLBACK: Emit candidates if Stylist failed to find any
                 if stream_callback and candidates:
@@ -226,6 +296,20 @@ CRITICAL RULES FOR BANS:
                         "total_found": len(candidates),
                         "status": f"Found {len(candidates)} options for {category}"
                     })
+                
+                # 🛡️ STRICT BRAND ENFORCEMENT ON FALLBACK
+                # If a brand filter is active, we MUST NOT return items from other brands, even if they are cheaper.
+                if brand_filter and candidates:
+                    brand_clean = str(brand_filter).lower().strip()
+                    strict_candidates = []
+                    for c in candidates:
+                         c_brand = str(c.get("brand") or (c.get("meta") or {}).get("brand") or "").lower()
+                         if brand_clean in c_brand:
+                             strict_candidates.append(c)
+                    
+                    if len(strict_candidates) < len(candidates):
+                        log.info(f"   🛡️ Brand Guardrail: filtered {len(candidates) - len(strict_candidates)} non-{brand_filter} items")
+                        candidates = strict_candidates
                 
                 if not candidates:
                     log.warning(f"   ⚠️ No {category} found under €{budget_for_category:.2f}")
@@ -239,8 +323,13 @@ CRITICAL RULES FOR BANS:
                             "title": f"No {category} found",
                             "price": 0,
                             "type": "notification",
-                            "description": f"Could not find {category} under €{budget_for_category:.0f}"
+                            "description": f"Could not find {category} under €{budget_for_category:.0f} matching filters"
                         },
+                        "title": f"No {category} found",
+                        "slug": f"missing-{category}-{outfit_id}",
+                        "url": "#",
+                        "type": "notification",
+                        "price": 0,
                         "reason": "Budget/inventory constraint",
                         "is_notification": True,
                         "outfit_id": outfit_id
@@ -249,9 +338,48 @@ CRITICAL RULES FOR BANS:
                     all_outfit_items.append(item_entry)
                     continue
                 
-                # Select best
-                selected = candidates[0]
+                # 💰 BUDGET SELECTION LOGIC
+                # 1. Try to find best item that fits within the PARTITION budget
+                selected = None
+                items_within_partition = [c for c in candidates if float(c.get("price", 0)) <= budget_for_category * 1.1] # 10% tolerance
+                
+                if items_within_partition:
+                    selected = items_within_partition[0]
+                    log.info(f"   ✅ Found fitting item for {category}: €{selected.get('price')} (Target: €{budget_for_category:.2f})")
+                else:
+                    # 2. Fallback: Find CHEAPEST valid item to minimize overrun
+                    # (candidates usually sorted by relevance, not price)
+                    candidates_sorted_price = sorted(candidates, key=lambda x: float(x.get("price", 0)))
+                    selected = candidates_sorted_price[0]
+                    log.warning(f"   ⚠️ Budget overrun for {category}: selected cheapest €{selected.get('price')} (Target: €{budget_for_category:.2f})")
+                
                 item_price = float(selected.get("price") or 0)
+                
+                # ✨ ROBUST IMAGE EXTRACTION (Copied from StylistAgent)
+                raw_image = selected.get("imageUrl") or selected.get("image_url") or selected.get("image")
+                
+                # Prefer Meta (Cloudinary)
+                meta = selected.get("meta") or {}
+                meta_img = meta.get("imageUrl") or meta.get("image_url") or meta.get("image")
+                if meta_img and ("cloudinary" in str(meta_img) or "http" in str(meta_img)):
+                    raw_image = meta_img
+                
+                # Check list fallback
+                if not raw_image or "/static/" in str(raw_image):
+                    images = selected.get("images", [])
+                    if not images: images = meta.get("images", [])
+                    if images and isinstance(images, list) and len(images) > 0:
+                        img_c = images[0]
+                        img_path = img_c if isinstance(img_c, str) else img_c.get("url")
+                        if img_path and "http" in str(img_path):
+                            raw_image = img_path
+
+                # Fix Relative URLs
+                final_image_url = raw_image
+                s_url = str(final_image_url) if final_image_url else ""
+                if s_url and (s_url.startswith("/static/") or s_url.startswith("static/")):
+                     base_url = os.getenv("COVE_CORE_BASE_URL", "http://localhost:8000")
+                     final_image_url = f"{base_url.rstrip('/')}/{s_url.lstrip('/')}"
                 
                 # Create item entry
                 item_entry = {
@@ -263,9 +391,11 @@ CRITICAL RULES FOR BANS:
                     "type": selected["type"],
                     "price": item_price,
                     "reason": f"Matches style '{style}'",
-                    "imageUrl": selected.get("imageUrl"),
+                    "imageUrl": final_image_url,
                     "color": selected.get("color"),
                     "url": selected.get("url"),
+                    "brand": selected.get("brand") or (selected.get("meta") or {}).get("brand") or brand_filter,
+                    "gender": selected.get("gender") or (selected.get("meta") or {}).get("gender"),
                 }
                 
                 outfit_items.append(item_entry)
@@ -302,6 +432,7 @@ CRITICAL RULES FOR BANS:
                 "num_outfits": num_outfits,
                 "is_outfit": True,
                 "is_multi_outfit": True,
+                "total_cost": outfit_total if num_outfits == 1 else (sum(it.get("price", 0) for it in all_outfit_items) / num_outfits),
                 "budget_max": budget_max
             },
             reasoning=f"Generated {num_outfits} outfits using category-aware search.",
@@ -395,8 +526,14 @@ JSON ONLY."""
         banned = normalized_banned
 
         # 🚨 SAFETY NET: Enforce Formal Rules if LLM slipped up
-        is_strict_formal = any(t in occasion.lower() or t in style.lower() for t in ["formal", "wedding", "black-tie", "gala", "tuxendo"])
-        is_business = "business" in occasion.lower() or "business" in style.lower()
+        # Fix: Use exact word matching to avoid 'informal' catching 'formal'
+        occ_lower = str(occasion).lower().split()
+        style_lower = str(style).lower().split()
+        
+        formal_trigger_words = ["formal", "wedding", "black-tie", "gala", "tuxendo"]
+        is_strict_formal = any(t in occ_lower or t in style_lower for t in formal_trigger_words)
+        
+        is_business = "business" in occ_lower or "business" in style_lower
 
         if is_strict_formal:
             log.info(f"👔 STRICT FORMAL DETECTED: {occasion}")

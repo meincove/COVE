@@ -1,0 +1,364 @@
+2026-01-25 04:46:17,323 - INFO - 🚀 Starting Premium Brand Seed...
+2026-01-25 04:46:17,323 - INFO - --- Seeding Aura Minimalist ---
+2026-01-25 04:46:17,323 - INFO - 🔨 Creating: Aura Minimalist Pure Sneakers
+2026-01-25 04:46:17,788 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Sneakers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:17.816078, 2026-01-25 03:46:17.816078).
+2026-01-25 04:46:17,788 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:46:18,118 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw T-Shirt", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:18.148298, 2026-01-25 03:46:18.148298).
+2026-01-25 04:46:18,118 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:46:18,397 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential Sweater", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:18.42705, 2026-01-25 03:46:18.42705).
+2026-01-25 04:46:18,397 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:46:18,759 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential T-Shirt", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:18.788064, 2026-01-25 03:46:18.788064).
+2026-01-25 04:46:18,759 - INFO - 🔨 Creating: Aura Minimalist Organic T-Shirt
+2026-01-25 04:46:19,120 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Organic T-Shirt", "slug": "aura-minima..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:19.148139, 2026-01-25 03:46:19.148139).
+2026-01-25 04:46:19,120 - INFO - 🔨 Creating: Aura Minimalist Essential Sneakers
+2026-01-25 04:46:19,426 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Essential Sneakers", "slug": "aura-min..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:19.456247, 2026-01-25 03:46:19.456247).
+2026-01-25 04:46:19,427 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:46:19,744 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Raw Sneakers", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:19.77346, 2026-01-25 03:46:19.77346).
+2026-01-25 04:46:19,744 - INFO - 🔨 Creating: Aura Minimalist Pure Trousers
+2026-01-25 04:46:20,036 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Trousers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:20.066512, 2026-01-25 03:46:20.066512).
+2026-01-25 04:46:20,037 - INFO - 🔨 Creating: Aura Minimalist Raw Sweater
+2026-01-25 04:46:20,333 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw Sweater", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:20.360949, 2026-01-25 03:46:20.360949).
+2026-01-25 04:46:20,333 - INFO - 🔨 Creating: Aura Minimalist Timeless Sneakers
+2026-01-25 04:46:20,638 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Timeless Sneakers", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:20.667017, 2026-01-25 03:46:20.667017).
+2026-01-25 04:46:20,639 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:46:20,922 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless Sweater", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:20.951999, 2026-01-25 03:46:20.951999).
+2026-01-25 04:46:20,922 - INFO - 🔨 Creating: Aura Minimalist Organic Sweater
+2026-01-25 04:46:21,211 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Organic Sweater", "slug": "aura-minima..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:21.240834, 2026-01-25 03:46:21.240834).
+2026-01-25 04:46:21,212 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:46:21,501 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless T-Shirt", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:21.529367, 2026-01-25 03:46:21.529367).
+2026-01-25 04:46:21,501 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:46:21,811 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Pure T-Shirt", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:21.839055, 2026-01-25 03:46:21.839055).
+2026-01-25 04:46:21,811 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:46:22,095 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Pure Sweater", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:22.125719, 2026-01-25 03:46:22.125719).
+2026-01-25 04:46:22,096 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:46:22,411 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Organic Sneakers", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:22.441243, 2026-01-25 03:46:22.441243).
+2026-01-25 04:46:22,411 - INFO - 🔨 Creating: Aura Minimalist Timeless Sneakers
+2026-01-25 04:46:22,709 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Timeless Sneakers", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:22.739044, 2026-01-25 03:46:22.739044).
+2026-01-25 04:46:22,709 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:46:23,056 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless Sweater", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:23.085685, 2026-01-25 03:46:23.085685).
+2026-01-25 04:46:23,056 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:46:23,353 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Coat, Brand: Aura Minimalist. Item: Coat. Style: clean, minimal, neutr..., null, {"name": "Aura Minimalist Organic Coat", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:23.382474, 2026-01-25 03:46:23.382474).
+2026-01-25 04:46:23,353 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:46:23,653 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential T-Shirt", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:23.682671, 2026-01-25 03:46:23.682671).
+2026-01-25 04:46:23,653 - INFO - 🔨 Creating: Aura Minimalist Pure Sneakers
+2026-01-25 04:46:23,959 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Sneakers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:23.98931, 2026-01-25 03:46:23.98931).
+2026-01-25 04:46:23,959 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:46:24,262 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Pure T-Shirt", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:24.291927, 2026-01-25 03:46:24.291927).
+2026-01-25 04:46:24,262 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:46:24,563 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Pure T-Shirt", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:24.592632, 2026-01-25 03:46:24.592632).
+2026-01-25 04:46:24,563 - INFO - 🔨 Creating: Aura Minimalist Organic T-Shirt
+2026-01-25 04:46:24,866 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Organic T-Shirt", "slug": "aura-minima..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:24.895765, 2026-01-25 03:46:24.895765).
+2026-01-25 04:46:24,866 - INFO - 🔨 Creating: Aura Minimalist Raw Sweater
+2026-01-25 04:46:25,167 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw Sweater", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:25.196918, 2026-01-25 03:46:25.196918).
+2026-01-25 04:46:25,167 - INFO - 🔨 Creating: Aura Minimalist Pure Trousers
+2026-01-25 04:46:25,470 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Trousers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:25.500383, 2026-01-25 03:46:25.500383).
+2026-01-25 04:46:25,470 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:46:25,774 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw T-Shirt", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:25.803859, 2026-01-25 03:46:25.803859).
+2026-01-25 04:46:25,775 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:46:26,074 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Coat, Brand: Aura Minimalist. Item: Coat. Style: clean, minimal, neutr..., null, {"name": "Aura Minimalist Essential Coat", "slug": "aura-minimal..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:26.104412, 2026-01-25 03:46:26.104412).
+2026-01-25 04:46:26,074 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:46:26,378 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Coat, Brand: Aura Minimalist. Item: Coat. Style: clean, minimal, neutr..., null, {"name": "Aura Minimalist Organic Coat", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:26.407816, 2026-01-25 03:46:26.407816).
+2026-01-25 04:46:26,378 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:46:26,672 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Raw Sneakers", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:26.700591, 2026-01-25 03:46:26.700591).
+2026-01-25 04:46:26,673 - INFO - 🔨 Creating: Aura Minimalist Timeless Coat
+2026-01-25 04:46:26,965 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Coat, Brand: Aura Minimalist. Item: Coat. Style: clean, minimal, neutr..., null, {"name": "Aura Minimalist Timeless Coat", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:26.994776, 2026-01-25 03:46:26.994776).
+2026-01-25 04:46:26,965 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:46:27,266 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Essential Trousers", "slug": "aura-min..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:27.295561, 2026-01-25 03:46:27.295561).
+2026-01-25 04:46:27,266 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:46:27,559 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Raw Sneakers", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:27.589027, 2026-01-25 03:46:27.589027).
+2026-01-25 04:46:27,559 - INFO - 🔨 Creating: Aura Minimalist Raw Trousers
+2026-01-25 04:46:27,853 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Raw Trousers", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:27.883469, 2026-01-25 03:46:27.883469).
+2026-01-25 04:46:27,854 - INFO - 🔨 Creating: Aura Minimalist Organic Sweater
+2026-01-25 04:46:28,147 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Organic Sweater", "slug": "aura-minima..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:28.176446, 2026-01-25 03:46:28.176446).
+2026-01-25 04:46:28,147 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:46:28,457 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless Sweater", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:28.487228, 2026-01-25 03:46:28.487228).
+2026-01-25 04:46:28,457 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:46:28,752 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw T-Shirt", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:28.78226, 2026-01-25 03:46:28.78226).
+2026-01-25 04:46:28,753 - INFO - 🔨 Creating: Aura Minimalist Essential Sneakers
+2026-01-25 04:46:29,045 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Essential Sneakers", "slug": "aura-min..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:29.074884, 2026-01-25 03:46:29.074884).
+2026-01-25 04:46:29,045 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:46:29,333 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Coat, Brand: Aura Minimalist. Item: Coat. Style: clean, minimal, neutr..., null, {"name": "Aura Minimalist Organic Coat", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:29.363105, 2026-01-25 03:46:29.363105).
+2026-01-25 04:46:29,333 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:46:29,642 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Essential Trousers", "slug": "aura-min..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:29.671196, 2026-01-25 03:46:29.671196).
+2026-01-25 04:46:29,643 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:46:29,980 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Essential Trousers", "slug": "aura-min..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:30.001385, 2026-01-25 03:46:30.001385).
+2026-01-25 04:46:29,980 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:46:30,285 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential T-Shirt", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:30.314929, 2026-01-25 03:46:30.314929).
+2026-01-25 04:46:30,286 - INFO - 🔨 Creating: Aura Minimalist Pure Trousers
+2026-01-25 04:46:30,671 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Trousers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:30.700177, 2026-01-25 03:46:30.700177).
+2026-01-25 04:46:30,672 - INFO - 🔨 Creating: Aura Minimalist Organic Sweater
+2026-01-25 04:46:30,977 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Organic Sweater", "slug": "aura-minima..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:31.007586, 2026-01-25 03:46:31.007586).
+2026-01-25 04:46:30,993 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:46:31,309 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential T-Shirt", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:31.336334, 2026-01-25 03:46:31.336334).
+2026-01-25 04:46:31,310 - INFO - 🔨 Creating: Aura Minimalist Pure Trousers
+2026-01-25 04:46:31,602 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Trousers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:31.631765, 2026-01-25 03:46:31.631765).
+2026-01-25 04:46:31,602 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:46:31,920 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential T-Shirt", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:31.949355, 2026-01-25 03:46:31.949355).
+2026-01-25 04:46:31,920 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:46:32,226 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless T-Shirt", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:32.255819, 2026-01-25 03:46:32.255819).
+2026-01-25 04:46:32,226 - INFO - 🔨 Creating: Aura Minimalist Pure Trousers
+2026-01-25 04:46:32,527 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Pure Trousers", "slug": "aura-minimali..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:32.556699, 2026-01-25 03:46:32.556699).
+2026-01-25 04:46:32,527 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:46:32,906 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw T-Shirt", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:32.931876, 2026-01-25 03:46:32.931876).
+2026-01-25 04:46:32,906 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:46:33,193 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Organic Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Organic Sneakers", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:33.222625, 2026-01-25 03:46:33.222625).
+2026-01-25 04:46:33,193 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:46:33,535 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Pure Sweater", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:33.56466, 2026-01-25 03:46:33.56466).
+2026-01-25 04:46:33,535 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:46:33,804 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless Sweater", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:33.834349, 2026-01-25 03:46:33.834349).
+2026-01-25 04:46:33,805 - INFO - 🔨 Creating: Aura Minimalist Raw Trousers
+2026-01-25 04:46:34,075 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Raw Trousers", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:34.104753, 2026-01-25 03:46:34.104753).
+2026-01-25 04:46:34,075 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:46:34,370 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Timeless Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Timeless Sweater", "slug": "aura-minim..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:34.399723, 2026-01-25 03:46:34.399723).
+2026-01-25 04:46:34,370 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:46:34,666 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential Trousers, Brand: Aura Minimalist. Item: Trousers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Essential Trousers", "slug": "aura-min..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:34.696322, 2026-01-25 03:46:34.696322).
+2026-01-25 04:46:34,666 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:46:34,965 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Pure Sweater, Brand: Aura Minimalist. Item: Sweater. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Pure Sweater", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:34.994585, 2026-01-25 03:46:34.994585).
+2026-01-25 04:46:34,965 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:46:35,270 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw Sneakers, Brand: Aura Minimalist. Item: Sneakers. Style: clean, minimal, n..., null, {"name": "Aura Minimalist Raw Sneakers", "slug": "aura-minimalis..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:35.299885, 2026-01-25 03:46:35.299885).
+2026-01-25 04:46:35,270 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:46:35,589 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Raw T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Raw T-Shirt", "slug": "aura-minimalist..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:35.618801, 2026-01-25 03:46:35.618801).
+2026-01-25 04:46:35,589 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:46:35,872 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Aura Minimalist Essential T-Shirt, Brand: Aura Minimalist. Item: T-Shirt. Style: clean, minimal, ne..., null, {"name": "Aura Minimalist Essential T-Shirt", "slug": "aura-mini..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:35.90123, 2026-01-25 03:46:35.90123).
+2026-01-25 04:46:35,872 - INFO - --- Seeding Vortex Streetwear ---
+2026-01-25 04:46:35,872 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:46:36,171 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:36.200546, 2026-01-25 03:46:36.200546).
+2026-01-25 04:46:36,171 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 04:46:36,472 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Cyber Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:36.501805, 2026-01-25 03:46:36.501805).
+2026-01-25 04:46:36,473 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 04:46:36,758 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Cyber High-tops", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:36.789089, 2026-01-25 03:46:36.789089).
+2026-01-25 04:46:36,759 - INFO - 🔨 Creating: Vortex Streetwear Urban Vest
+2026-01-25 04:46:37,045 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Urban Vest", "slug": "vortex-streetw..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:37.075022, 2026-01-25 03:46:37.075022).
+2026-01-25 04:46:37,045 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 04:46:37,314 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Night Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:37.3438, 2026-01-25 03:46:37.3438).
+2026-01-25 04:46:37,314 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 04:46:37,652 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Glitch Vest", "slug": "vortex-street..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:37.683212, 2026-01-25 03:46:37.683212).
+2026-01-25 04:46:37,653 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 04:46:37,918 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Glitch Vest", "slug": "vortex-street..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:37.948039, 2026-01-25 03:46:37.948039).
+2026-01-25 04:46:37,918 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:46:38,215 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:38.243339, 2026-01-25 03:46:38.243339).
+2026-01-25 04:46:38,216 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 04:46:38,505 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Cyber Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:38.534772, 2026-01-25 03:46:38.534772).
+2026-01-25 04:46:38,507 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 04:46:38,793 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Tactical Tech Jacket", "slug": "vort..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:38.821928, 2026-01-25 03:46:38.821928).
+2026-01-25 04:46:38,794 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 04:46:39,098 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Night Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:39.12746, 2026-01-25 03:46:39.12746).
+2026-01-25 04:46:39,098 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:39,384 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Tactical Hoodie", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:39.412253, 2026-01-25 03:46:39.412253).
+2026-01-25 04:46:39,384 - INFO - 🔨 Creating: Vortex Streetwear Urban High-tops
+2026-01-25 04:46:39,648 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Urban High-tops", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:39.678904, 2026-01-25 03:46:39.678904).
+2026-01-25 04:46:39,648 - INFO - 🔨 Creating: Vortex Streetwear Urban Tech Jacket
+2026-01-25 04:46:39,957 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Urban Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:39.986442, 2026-01-25 03:46:39.986442).
+2026-01-25 04:46:39,957 - INFO - 🔨 Creating: Vortex Streetwear Night Cargo Pants
+2026-01-25 04:46:40,240 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Cargo Pants, Brand: Vortex Streetwear. Item: Cargo Pants. Style: bold, futuri..., null, {"name": "Vortex Streetwear Night Cargo Pants", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:40.270405, 2026-01-25 03:46:40.270405).
+2026-01-25 04:46:40,241 - INFO - 🔨 Creating: Vortex Streetwear Night Cargo Pants
+2026-01-25 04:46:40,540 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Cargo Pants, Brand: Vortex Streetwear. Item: Cargo Pants. Style: bold, futuri..., null, {"name": "Vortex Streetwear Night Cargo Pants", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:40.569545, 2026-01-25 03:46:40.569545).
+2026-01-25 04:46:40,540 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 04:46:40,819 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Glitch Hoodie", "slug": "vortex-stre..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:40.848954, 2026-01-25 03:46:40.848954).
+2026-01-25 04:46:40,819 - INFO - 🔨 Creating: Vortex Streetwear Night Vest
+2026-01-25 04:46:41,122 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Night Vest", "slug": "vortex-streetw..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:41.151846, 2026-01-25 03:46:41.151846).
+2026-01-25 04:46:41,123 - INFO - 🔨 Creating: Vortex Streetwear Glitch Tech Jacket
+2026-01-25 04:46:41,412 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Glitch Tech Jacket", "slug": "vortex..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:41.441377, 2026-01-25 03:46:41.441377).
+2026-01-25 04:46:41,413 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:41,726 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Glitch High-tops", "slug": "vortex-s..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:41.751596, 2026-01-25 03:46:41.751596).
+2026-01-25 04:46:41,727 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 04:46:42,027 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Night Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:42.055568, 2026-01-25 03:46:42.055568).
+2026-01-25 04:46:42,027 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 04:46:42,345 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Urban Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:42.373207, 2026-01-25 03:46:42.373207).
+2026-01-25 04:46:42,348 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:42,660 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Tactical Hoodie", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:42.6884, 2026-01-25 03:46:42.6884).
+2026-01-25 04:46:42,666 - INFO - 🔨 Creating: Vortex Streetwear Urban Cargo Pants
+2026-01-25 04:46:43,068 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Cargo Pants, Brand: Vortex Streetwear. Item: Cargo Pants. Style: bold, futuri..., null, {"name": "Vortex Streetwear Urban Cargo Pants", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:43.096496, 2026-01-25 03:46:43.096496).
+2026-01-25 04:46:43,068 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:43,529 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Glitch High-tops", "slug": "vortex-s..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:43.557919, 2026-01-25 03:46:43.557919).
+2026-01-25 04:46:43,530 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:43,894 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Tactical Hoodie", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:43.90574, 2026-01-25 03:46:43.90574).
+2026-01-25 04:46:43,897 - INFO - 🔨 Creating: Vortex Streetwear Tactical Vest
+2026-01-25 04:46:44,189 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Tactical Vest", "slug": "vortex-stre..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:44.217111, 2026-01-25 03:46:44.217111).
+2026-01-25 04:46:44,189 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 04:46:44,552 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Urban Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:44.581894, 2026-01-25 03:46:44.581894).
+2026-01-25 04:46:44,553 - INFO - 🔨 Creating: Vortex Streetwear Cyber Cargo Pants
+2026-01-25 04:46:44,844 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Cargo Pants, Brand: Vortex Streetwear. Item: Cargo Pants. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Cargo Pants", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:44.874055, 2026-01-25 03:46:44.874055).
+2026-01-25 04:46:44,844 - INFO - 🔨 Creating: Vortex Streetwear Urban Tech Jacket
+2026-01-25 04:46:45,133 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Urban Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:45.162698, 2026-01-25 03:46:45.162698).
+2026-01-25 04:46:45,133 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:45,437 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Glitch High-tops", "slug": "vortex-s..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:45.466852, 2026-01-25 03:46:45.466852).
+2026-01-25 04:46:45,437 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 04:46:45,726 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Night Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:45.756328, 2026-01-25 03:46:45.756328).
+2026-01-25 04:46:45,726 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:46:46,023 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:46.053046, 2026-01-25 03:46:46.053046).
+2026-01-25 04:46:46,023 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:46,313 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Tactical Hoodie", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:46.342526, 2026-01-25 03:46:46.342526).
+2026-01-25 04:46:46,313 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 04:46:46,596 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Glitch Vest", "slug": "vortex-street..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:46.62575, 2026-01-25 03:46:46.62575).
+2026-01-25 04:46:46,596 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 04:46:46,896 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Cyber Vest", "slug": "vortex-streetw..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:46.925755, 2026-01-25 03:46:46.925755).
+2026-01-25 04:46:46,897 - INFO - 🔨 Creating: Vortex Streetwear Cyber Cargo Pants
+2026-01-25 04:46:47,172 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Cargo Pants, Brand: Vortex Streetwear. Item: Cargo Pants. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Cargo Pants", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:47.201869, 2026-01-25 03:46:47.201869).
+2026-01-25 04:46:47,173 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:46:47,454 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:47.48405, 2026-01-25 03:46:47.48405).
+2026-01-25 04:46:47,454 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 04:46:47,734 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Night Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:47.762691, 2026-01-25 03:46:47.762691).
+2026-01-25 04:46:47,734 - INFO - 🔨 Creating: Vortex Streetwear Urban Tech Jacket
+2026-01-25 04:46:48,009 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Urban Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:48.038814, 2026-01-25 03:46:48.038814).
+2026-01-25 04:46:48,009 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 04:46:48,290 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Night Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:48.319919, 2026-01-25 03:46:48.319919).
+2026-01-25 04:46:48,290 - INFO - 🔨 Creating: Vortex Streetwear Night Vest
+2026-01-25 04:46:48,584 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Night Vest", "slug": "vortex-streetw..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:48.613543, 2026-01-25 03:46:48.613543).
+2026-01-25 04:46:48,584 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:46:48,862 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:48.892194, 2026-01-25 03:46:48.892194).
+2026-01-25 04:46:48,862 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 04:46:49,166 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Cyber Vest", "slug": "vortex-streetw..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:49.195141, 2026-01-25 03:46:49.195141).
+2026-01-25 04:46:49,166 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:49,462 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Glitch High-tops", "slug": "vortex-s..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:49.48939, 2026-01-25 03:46:49.48939).
+2026-01-25 04:46:49,462 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 04:46:49,875 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Cyber High-tops", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:49.850695, 2026-01-25 03:46:49.850695).
+2026-01-25 04:46:49,893 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 04:46:50,231 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Cyber Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:50.2592, 2026-01-25 03:46:50.2592).
+2026-01-25 04:46:50,235 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 04:46:51,388 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Urban Hoodie", "slug": "vortex-stree..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:51.413777, 2026-01-25 03:46:51.413777).
+2026-01-25 04:46:51,389 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 04:46:52,149 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Glitch Vest", "slug": "vortex-street..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:52.169184, 2026-01-25 03:46:52.169184).
+2026-01-25 04:46:52,154 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 04:46:52,497 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Glitch Hoodie", "slug": "vortex-stre..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:52.526588, 2026-01-25 03:46:52.526588).
+2026-01-25 04:46:52,498 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 04:46:52,858 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Cargo Pants, Brand: Vortex Streetwear. Item: Cargo Pants. Style: bold, futuri..., null, {"name": "Vortex Streetwear Glitch Cargo Pants", "slug": "vortex..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:52.887748, 2026-01-25 03:46:52.887748).
+2026-01-25 04:46:52,859 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:46:53,220 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Cyber Tech Jacket", "slug": "vortex-..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:53.243094, 2026-01-25 03:46:53.243094).
+2026-01-25 04:46:53,220 - INFO - 🔨 Creating: Vortex Streetwear Night High-tops
+2026-01-25 04:46:53,594 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Night High-tops", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:53.612628, 2026-01-25 03:46:53.612628).
+2026-01-25 04:46:53,594 - INFO - 🔨 Creating: Vortex Streetwear Night Vest
+2026-01-25 04:46:53,914 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Night Vest, Brand: Vortex Streetwear. Item: Vest. Style: bold, futuristic, t..., null, {"name": "Vortex Streetwear Night Vest", "slug": "vortex-streetw..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:53.943346, 2026-01-25 03:46:53.943346).
+2026-01-25 04:46:53,916 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:54,227 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Hoodie, Brand: Vortex Streetwear. Item: Hoodie. Style: bold, futuristic,..., null, {"name": "Vortex Streetwear Tactical Hoodie", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:54.255468, 2026-01-25 03:46:54.255468).
+2026-01-25 04:46:54,227 - INFO - 🔨 Creating: Vortex Streetwear Urban High-tops
+2026-01-25 04:46:54,750 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Urban High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Urban High-tops", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:54.777334, 2026-01-25 03:46:54.777334).
+2026-01-25 04:46:54,754 - INFO - 🔨 Creating: Vortex Streetwear Glitch Tech Jacket
+2026-01-25 04:46:55,110 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Glitch Tech Jacket", "slug": "vortex..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:55.139359, 2026-01-25 03:46:55.139359).
+2026-01-25 04:46:55,110 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:55,426 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Glitch High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Glitch High-tops", "slug": "vortex-s..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:55.456043, 2026-01-25 03:46:55.456043).
+2026-01-25 04:46:55,426 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 04:46:55,718 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Tactical Tech Jacket, Brand: Vortex Streetwear. Item: Tech Jacket. Style: bold, futuri..., null, {"name": "Vortex Streetwear Tactical Tech Jacket", "slug": "vort..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:55.747781, 2026-01-25 03:46:55.747781).
+2026-01-25 04:46:55,719 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 04:46:56,015 - ERROR - ❌ DB Insert Failed: null value in column "id" of relation "docs" violates not-null constraint
+DETAIL:  Failing row contains (null, product, Vortex Streetwear Cyber High-tops, Brand: Vortex Streetwear. Item: High-tops. Style: bold, futurist..., null, {"name": "Vortex Streetwear Cyber High-tops", "slug": "vortex-st..., [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0..., 2026-01-25 03:46:56.039469, 2026-01-25 03:46:56.039469).
+2026-01-25 04:46:56,015 - INFO - ✅ Seeding Complete!

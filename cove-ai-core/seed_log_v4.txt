@@ -1,0 +1,844 @@
+2026-01-25 04:46:46,355 - INFO - 🚀 Starting Premium Brand Seed...
+2026-01-25 04:46:46,355 - INFO - --- Seeding Aura Minimalist ---
+2026-01-25 04:46:46,355 - INFO - 🔨 Creating: Aura Minimalist Organic T-Shirt
+2026-01-25 04:46:46,824 - INFO - 🎨 Generating Image for 6b732e94-c02b-46f4-be2d-836adc1ff35c...
+2026-01-25 04:46:46,824 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:46:57,794 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/6b732e94-c02b-46f4-be2d-836adc1ff35c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_T_Shirt__Style__clean.jpg
+2026-01-25 04:46:58,269 - INFO - ✅ Updated Postgres for 6b732e94-c02b-46f4-be2d-836adc1ff35c
+2026-01-25 04:46:58,397 - INFO - ✅ Updated SQLite for 6b732e94-c02b-46f4-be2d-836adc1ff35c
+2026-01-25 04:46:58,397 - INFO - ✨ Created & Imaged: Aura Minimalist Organic T-Shirt
+2026-01-25 04:46:58,398 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:46:58,739 - INFO - 🎨 Generating Image for 1b304d6d-c0e5-47f2-a78a-db9d6ec19f22...
+2026-01-25 04:46:58,761 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:47:10,198 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/1b304d6d-c0e5-47f2-a78a-db9d6ec19f22_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Sweater__Style__clean.jpg
+2026-01-25 04:47:10,475 - INFO - ✅ Updated Postgres for 1b304d6d-c0e5-47f2-a78a-db9d6ec19f22
+2026-01-25 04:47:10,498 - INFO - ✅ Updated SQLite for 1b304d6d-c0e5-47f2-a78a-db9d6ec19f22
+2026-01-25 04:47:10,499 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Sweater
+2026-01-25 04:47:10,499 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:47:10,786 - INFO - 🎨 Generating Image for c70531b6-330d-4c4c-aed0-9bc380922874...
+2026-01-25 04:47:10,786 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:47:20,895 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/c70531b6-330d-4c4c-aed0-9bc380922874_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sneakers__Style__clean.jpg
+2026-01-25 04:47:21,209 - INFO - ✅ Updated Postgres for c70531b6-330d-4c4c-aed0-9bc380922874
+2026-01-25 04:47:21,233 - INFO - ✅ Updated SQLite for c70531b6-330d-4c4c-aed0-9bc380922874
+2026-01-25 04:47:21,234 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Sneakers
+2026-01-25 04:47:21,234 - INFO - 🔨 Creating: Aura Minimalist Timeless Coat
+2026-01-25 04:47:21,533 - INFO - 🎨 Generating Image for 9c0e2acf-7930-482a-a7aa-f44fba1ffae6...
+2026-01-25 04:47:21,536 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:47:33,500 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9c0e2acf-7930-482a-a7aa-f44fba1ffae6_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Coat__Style__clean.jpg
+2026-01-25 04:47:33,779 - INFO - ✅ Updated Postgres for 9c0e2acf-7930-482a-a7aa-f44fba1ffae6
+2026-01-25 04:47:33,819 - INFO - ✅ Updated SQLite for 9c0e2acf-7930-482a-a7aa-f44fba1ffae6
+2026-01-25 04:47:33,820 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Coat
+2026-01-25 04:47:33,820 - INFO - 🔨 Creating: Aura Minimalist Raw Trousers
+2026-01-25 04:47:34,120 - INFO - 🎨 Generating Image for 7867e22a-0f74-407d-a2d9-f25accf53b7c...
+2026-01-25 04:47:34,121 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:47:46,579 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/7867e22a-0f74-407d-a2d9-f25accf53b7c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Trousers__Style__clean.jpg
+2026-01-25 04:47:46,892 - INFO - ✅ Updated Postgres for 7867e22a-0f74-407d-a2d9-f25accf53b7c
+2026-01-25 04:47:46,933 - INFO - ✅ Updated SQLite for 7867e22a-0f74-407d-a2d9-f25accf53b7c
+2026-01-25 04:47:46,933 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Trousers
+2026-01-25 04:47:46,933 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:47:47,260 - INFO - 🎨 Generating Image for 5f946892-227f-4a00-bb2c-7dab5faaeb38...
+2026-01-25 04:47:47,261 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:47:57,915 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/5f946892-227f-4a00-bb2c-7dab5faaeb38_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Sweater__Style__clean.jpg
+2026-01-25 04:47:58,226 - INFO - ✅ Updated Postgres for 5f946892-227f-4a00-bb2c-7dab5faaeb38
+2026-01-25 04:47:58,281 - INFO - ✅ Updated SQLite for 5f946892-227f-4a00-bb2c-7dab5faaeb38
+2026-01-25 04:47:58,281 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Sweater
+2026-01-25 04:47:58,281 - INFO - 🔨 Creating: Aura Minimalist Timeless Coat
+2026-01-25 04:47:58,562 - INFO - 🎨 Generating Image for 1bd824a9-e53b-44ac-b129-cff7889c6ea7...
+2026-01-25 04:47:58,563 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:48:09,558 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/1bd824a9-e53b-44ac-b129-cff7889c6ea7_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Coat__Style__clean.jpg
+2026-01-25 04:48:10,010 - INFO - ✅ Updated Postgres for 1bd824a9-e53b-44ac-b129-cff7889c6ea7
+2026-01-25 04:48:10,091 - INFO - ✅ Updated SQLite for 1bd824a9-e53b-44ac-b129-cff7889c6ea7
+2026-01-25 04:48:10,094 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Coat
+2026-01-25 04:48:10,096 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:48:10,703 - INFO - 🎨 Generating Image for 212a95a5-f521-4e8c-b9ff-b1020ff0c8ed...
+2026-01-25 04:48:10,727 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:48:23,097 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/212a95a5-f521-4e8c-b9ff-b1020ff0c8ed_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_T_Shirt__Style__clean.jpg
+2026-01-25 04:48:23,455 - INFO - ✅ Updated Postgres for 212a95a5-f521-4e8c-b9ff-b1020ff0c8ed
+2026-01-25 04:48:23,484 - INFO - ✅ Updated SQLite for 212a95a5-f521-4e8c-b9ff-b1020ff0c8ed
+2026-01-25 04:48:23,486 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:48:23,488 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:48:23,827 - INFO - 🎨 Generating Image for ca6e859a-58e9-49ee-98a1-15aef15cc470...
+2026-01-25 04:48:23,840 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:48:35,792 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ca6e859a-58e9-49ee-98a1-15aef15cc470_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_T_Shirt__Style__clean.jpg
+2026-01-25 04:48:36,115 - INFO - ✅ Updated Postgres for ca6e859a-58e9-49ee-98a1-15aef15cc470
+2026-01-25 04:48:36,167 - INFO - ✅ Updated SQLite for ca6e859a-58e9-49ee-98a1-15aef15cc470
+2026-01-25 04:48:36,167 - INFO - ✨ Created & Imaged: Aura Minimalist Raw T-Shirt
+2026-01-25 04:48:36,168 - INFO - 🔨 Creating: Aura Minimalist Organic Trousers
+2026-01-25 04:48:36,463 - INFO - 🎨 Generating Image for 8dc0d306-dbea-4b5b-baa1-2d72d7d98ddc...
+2026-01-25 04:48:36,464 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:48:49,637 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/8dc0d306-dbea-4b5b-baa1-2d72d7d98ddc_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_Trousers__Style__clean.jpg
+2026-01-25 04:48:49,941 - INFO - ✅ Updated Postgres for 8dc0d306-dbea-4b5b-baa1-2d72d7d98ddc
+2026-01-25 04:48:50,037 - INFO - ✅ Updated SQLite for 8dc0d306-dbea-4b5b-baa1-2d72d7d98ddc
+2026-01-25 04:48:50,038 - INFO - ✨ Created & Imaged: Aura Minimalist Organic Trousers
+2026-01-25 04:48:50,072 - INFO - 🔨 Creating: Aura Minimalist Pure Sneakers
+2026-01-25 04:48:50,922 - INFO - 🎨 Generating Image for c58d3388-8045-41d0-b40b-5ab7ab8f8ccc...
+2026-01-25 04:48:50,925 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:49:01,462 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/c58d3388-8045-41d0-b40b-5ab7ab8f8ccc_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_Sneakers__Style__clean.jpg
+2026-01-25 04:49:01,818 - INFO - ✅ Updated Postgres for c58d3388-8045-41d0-b40b-5ab7ab8f8ccc
+2026-01-25 04:49:01,933 - INFO - ✅ Updated SQLite for c58d3388-8045-41d0-b40b-5ab7ab8f8ccc
+2026-01-25 04:49:01,933 - INFO - ✨ Created & Imaged: Aura Minimalist Pure Sneakers
+2026-01-25 04:49:01,933 - INFO - 🔨 Creating: Aura Minimalist Raw Trousers
+2026-01-25 04:49:02,233 - INFO - 🎨 Generating Image for d7704ff0-54bb-4882-84c4-a9e3f47675d2...
+2026-01-25 04:49:02,234 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:49:12,655 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/d7704ff0-54bb-4882-84c4-a9e3f47675d2_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Trousers__Style__clean.jpg
+2026-01-25 04:49:12,935 - INFO - ✅ Updated Postgres for d7704ff0-54bb-4882-84c4-a9e3f47675d2
+2026-01-25 04:49:12,978 - INFO - ✅ Updated SQLite for d7704ff0-54bb-4882-84c4-a9e3f47675d2
+2026-01-25 04:49:12,978 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Trousers
+2026-01-25 04:49:12,978 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:49:13,396 - INFO - 🎨 Generating Image for 1916b090-3073-4913-ba85-55774a239820...
+2026-01-25 04:49:13,400 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:49:43,564 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/1916b090-3073-4913-ba85-55774a239820_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Sweater__Style__clean.jpg
+2026-01-25 04:49:43,861 - INFO - ✅ Updated Postgres for 1916b090-3073-4913-ba85-55774a239820
+2026-01-25 04:49:43,889 - INFO - ✅ Updated SQLite for 1916b090-3073-4913-ba85-55774a239820
+2026-01-25 04:49:43,889 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Sweater
+2026-01-25 04:49:43,892 - INFO - 🔨 Creating: Aura Minimalist Organic T-Shirt
+2026-01-25 04:49:44,199 - INFO - 🎨 Generating Image for 4e1f9d48-2604-4268-8935-628603e5f929...
+2026-01-25 04:49:44,199 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:50:00,533 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4e1f9d48-2604-4268-8935-628603e5f929_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_T_Shirt__Style__clean.jpg
+2026-01-25 04:50:00,804 - INFO - ✅ Updated Postgres for 4e1f9d48-2604-4268-8935-628603e5f929
+2026-01-25 04:50:00,822 - INFO - ✅ Updated SQLite for 4e1f9d48-2604-4268-8935-628603e5f929
+2026-01-25 04:50:00,822 - INFO - ✨ Created & Imaged: Aura Minimalist Organic T-Shirt
+2026-01-25 04:50:00,822 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:50:01,120 - INFO - 🎨 Generating Image for 9fd2b724-b6c1-473c-880e-83fea7b2e72c...
+2026-01-25 04:50:01,127 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:50:10,643 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9fd2b724-b6c1-473c-880e-83fea7b2e72c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_Sneakers__Style__clean.jpg
+2026-01-25 04:50:10,918 - INFO - ✅ Updated Postgres for 9fd2b724-b6c1-473c-880e-83fea7b2e72c
+2026-01-25 04:50:10,975 - INFO - ✅ Updated SQLite for 9fd2b724-b6c1-473c-880e-83fea7b2e72c
+2026-01-25 04:50:10,976 - INFO - ✨ Created & Imaged: Aura Minimalist Organic Sneakers
+2026-01-25 04:50:10,976 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:50:11,296 - INFO - 🎨 Generating Image for 0a641f57-21b3-4b5a-964b-c47d5e50e96c...
+2026-01-25 04:50:11,297 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:50:24,783 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/0a641f57-21b3-4b5a-964b-c47d5e50e96c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_T_Shirt__Style__clean.jpg
+2026-01-25 04:50:25,063 - INFO - ✅ Updated Postgres for 0a641f57-21b3-4b5a-964b-c47d5e50e96c
+2026-01-25 04:50:25,076 - INFO - ✅ Updated SQLite for 0a641f57-21b3-4b5a-964b-c47d5e50e96c
+2026-01-25 04:50:25,076 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:50:25,077 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:50:25,392 - INFO - 🎨 Generating Image for ff795e6c-2c66-4758-849a-fb4c050cb7eb...
+2026-01-25 04:50:25,515 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:50:38,779 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ff795e6c-2c66-4758-849a-fb4c050cb7eb_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_T_Shirt__Style__clean.jpg
+2026-01-25 04:50:39,089 - INFO - ✅ Updated Postgres for ff795e6c-2c66-4758-849a-fb4c050cb7eb
+2026-01-25 04:50:39,145 - INFO - ✅ Updated SQLite for ff795e6c-2c66-4758-849a-fb4c050cb7eb
+2026-01-25 04:50:39,146 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:50:39,150 - INFO - 🔨 Creating: Aura Minimalist Pure Coat
+2026-01-25 04:50:39,537 - INFO - 🎨 Generating Image for 2f34bbe5-1de2-4fd7-95fa-481118ea9a11...
+2026-01-25 04:50:39,545 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:50:53,657 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/2f34bbe5-1de2-4fd7-95fa-481118ea9a11_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_Coat__Style__clean.jpg
+2026-01-25 04:50:53,993 - INFO - ✅ Updated Postgres for 2f34bbe5-1de2-4fd7-95fa-481118ea9a11
+2026-01-25 04:50:54,024 - INFO - ✅ Updated SQLite for 2f34bbe5-1de2-4fd7-95fa-481118ea9a11
+2026-01-25 04:50:54,024 - INFO - ✨ Created & Imaged: Aura Minimalist Pure Coat
+2026-01-25 04:50:54,029 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:50:54,341 - INFO - 🎨 Generating Image for ee282cd8-39d0-459c-8dc5-51649dfdc230...
+2026-01-25 04:50:54,343 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:51:06,821 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ee282cd8-39d0-459c-8dc5-51649dfdc230_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_Sweater__Style__clean.jpg
+2026-01-25 04:51:07,104 - INFO - ✅ Updated Postgres for ee282cd8-39d0-459c-8dc5-51649dfdc230
+2026-01-25 04:51:07,133 - INFO - ✅ Updated SQLite for ee282cd8-39d0-459c-8dc5-51649dfdc230
+2026-01-25 04:51:07,133 - INFO - ✨ Created & Imaged: Aura Minimalist Pure Sweater
+2026-01-25 04:51:07,133 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:51:07,420 - INFO - 🎨 Generating Image for 36ed705b-dae4-484b-8d31-b297a08de153...
+2026-01-25 04:51:07,421 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:51:19,180 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/36ed705b-dae4-484b-8d31-b297a08de153_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_T_Shirt__Style__clean.jpg
+2026-01-25 04:51:19,445 - INFO - ✅ Updated Postgres for 36ed705b-dae4-484b-8d31-b297a08de153
+2026-01-25 04:51:19,467 - INFO - ✅ Updated SQLite for 36ed705b-dae4-484b-8d31-b297a08de153
+2026-01-25 04:51:19,467 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:51:19,467 - INFO - 🔨 Creating: Aura Minimalist Organic T-Shirt
+2026-01-25 04:51:19,762 - INFO - 🎨 Generating Image for ad3ad317-86a4-4f92-bc07-30c4c689acdd...
+2026-01-25 04:51:19,763 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:51:30,901 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ad3ad317-86a4-4f92-bc07-30c4c689acdd_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_T_Shirt__Style__clean.jpg
+2026-01-25 04:51:31,317 - INFO - ✅ Updated Postgres for ad3ad317-86a4-4f92-bc07-30c4c689acdd
+2026-01-25 04:51:31,353 - INFO - ✅ Updated SQLite for ad3ad317-86a4-4f92-bc07-30c4c689acdd
+2026-01-25 04:51:31,355 - INFO - ✨ Created & Imaged: Aura Minimalist Organic T-Shirt
+2026-01-25 04:51:31,356 - INFO - 🔨 Creating: Aura Minimalist Timeless Coat
+2026-01-25 04:51:31,661 - INFO - 🎨 Generating Image for c526ef7e-6ab9-4891-8858-f7bd21c51b31...
+2026-01-25 04:51:31,663 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:51:43,300 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/c526ef7e-6ab9-4891-8858-f7bd21c51b31_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Coat__Style__clean.jpg
+2026-01-25 04:51:44,406 - INFO - ✅ Updated Postgres for c526ef7e-6ab9-4891-8858-f7bd21c51b31
+2026-01-25 04:51:44,509 - INFO - ✅ Updated SQLite for c526ef7e-6ab9-4891-8858-f7bd21c51b31
+2026-01-25 04:51:44,510 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Coat
+2026-01-25 04:51:44,511 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:51:45,034 - INFO - 🎨 Generating Image for 83c20845-2db5-42ff-a2cc-9a5f6d1def0f...
+2026-01-25 04:51:45,034 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:51:56,249 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/83c20845-2db5-42ff-a2cc-9a5f6d1def0f_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_T_Shirt__Style__clean.jpg
+2026-01-25 04:51:56,542 - INFO - ✅ Updated Postgres for 83c20845-2db5-42ff-a2cc-9a5f6d1def0f
+2026-01-25 04:51:56,555 - INFO - ✅ Updated SQLite for 83c20845-2db5-42ff-a2cc-9a5f6d1def0f
+2026-01-25 04:51:56,555 - INFO - ✨ Created & Imaged: Aura Minimalist Raw T-Shirt
+2026-01-25 04:51:56,555 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:51:56,868 - INFO - 🎨 Generating Image for 1874ae39-b605-4023-adbb-e50ec8daab7b...
+2026-01-25 04:51:56,869 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:52:07,561 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/1874ae39-b605-4023-adbb-e50ec8daab7b_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Coat__Style__clean.jpg
+2026-01-25 04:52:07,918 - INFO - ✅ Updated Postgres for 1874ae39-b605-4023-adbb-e50ec8daab7b
+2026-01-25 04:52:08,007 - INFO - ✅ Updated SQLite for 1874ae39-b605-4023-adbb-e50ec8daab7b
+2026-01-25 04:52:08,008 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Coat
+2026-01-25 04:52:08,008 - INFO - 🔨 Creating: Aura Minimalist Timeless Trousers
+2026-01-25 04:52:08,309 - INFO - 🎨 Generating Image for 37851083-e921-4e92-b70a-b76c6b95ea26...
+2026-01-25 04:52:08,343 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:52:21,355 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/37851083-e921-4e92-b70a-b76c6b95ea26_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Trousers__Style__clean.jpg
+2026-01-25 04:52:21,845 - INFO - ✅ Updated Postgres for 37851083-e921-4e92-b70a-b76c6b95ea26
+2026-01-25 04:52:21,893 - INFO - ✅ Updated SQLite for 37851083-e921-4e92-b70a-b76c6b95ea26
+2026-01-25 04:52:21,894 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Trousers
+2026-01-25 04:52:21,895 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:52:22,238 - INFO - 🎨 Generating Image for 7648c31c-cbda-4dd5-9f13-66ced8785b84...
+2026-01-25 04:52:22,244 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:52:34,270 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/7648c31c-cbda-4dd5-9f13-66ced8785b84_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Coat__Style__clean.jpg
+2026-01-25 04:52:34,549 - INFO - ✅ Updated Postgres for 7648c31c-cbda-4dd5-9f13-66ced8785b84
+2026-01-25 04:52:34,608 - INFO - ✅ Updated SQLite for 7648c31c-cbda-4dd5-9f13-66ced8785b84
+2026-01-25 04:52:34,609 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Coat
+2026-01-25 04:52:34,611 - INFO - 🔨 Creating: Aura Minimalist Timeless Coat
+2026-01-25 04:52:34,926 - INFO - 🎨 Generating Image for 07bf8bd7-a21c-41fb-a8a4-96c9533bc99a...
+2026-01-25 04:52:34,926 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:52:45,429 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/07bf8bd7-a21c-41fb-a8a4-96c9533bc99a_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Coat__Style__clean.jpg
+2026-01-25 04:52:45,810 - INFO - ✅ Updated Postgres for 07bf8bd7-a21c-41fb-a8a4-96c9533bc99a
+2026-01-25 04:52:45,866 - INFO - ✅ Updated SQLite for 07bf8bd7-a21c-41fb-a8a4-96c9533bc99a
+2026-01-25 04:52:45,866 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Coat
+2026-01-25 04:52:45,867 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:52:46,192 - INFO - 🎨 Generating Image for ee000822-487b-482d-8af7-ac92e8e66a61...
+2026-01-25 04:52:46,193 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:52:56,717 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ee000822-487b-482d-8af7-ac92e8e66a61_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_T_Shirt__Style__clean.jpg
+2026-01-25 04:52:57,026 - INFO - ✅ Updated Postgres for ee000822-487b-482d-8af7-ac92e8e66a61
+2026-01-25 04:52:57,063 - INFO - ✅ Updated SQLite for ee000822-487b-482d-8af7-ac92e8e66a61
+2026-01-25 04:52:57,066 - INFO - ✨ Created & Imaged: Aura Minimalist Raw T-Shirt
+2026-01-25 04:52:57,066 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:52:57,347 - INFO - 🎨 Generating Image for 070de217-1beb-45e5-a561-8885b6c17184...
+2026-01-25 04:52:57,347 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:53:10,226 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/070de217-1beb-45e5-a561-8885b6c17184_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Trousers__Style__clean.jpg
+2026-01-25 04:53:10,690 - INFO - ✅ Updated Postgres for 070de217-1beb-45e5-a561-8885b6c17184
+2026-01-25 04:53:10,719 - INFO - ✅ Updated SQLite for 070de217-1beb-45e5-a561-8885b6c17184
+2026-01-25 04:53:10,720 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Trousers
+2026-01-25 04:53:10,721 - INFO - 🔨 Creating: Aura Minimalist Organic Trousers
+2026-01-25 04:53:11,025 - INFO - 🎨 Generating Image for 8b11aa2b-b404-432b-b016-53199189b4dc...
+2026-01-25 04:53:11,026 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:53:24,073 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/8b11aa2b-b404-432b-b016-53199189b4dc_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_Trousers__Style__clean.jpg
+2026-01-25 04:53:24,364 - INFO - ✅ Updated Postgres for 8b11aa2b-b404-432b-b016-53199189b4dc
+2026-01-25 04:53:24,382 - INFO - ✅ Updated SQLite for 8b11aa2b-b404-432b-b016-53199189b4dc
+2026-01-25 04:53:24,382 - INFO - ✨ Created & Imaged: Aura Minimalist Organic Trousers
+2026-01-25 04:53:24,382 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:53:24,672 - INFO - 🎨 Generating Image for 29ad9add-3577-4cdf-8b23-f2accacf3c94...
+2026-01-25 04:53:24,673 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:53:35,532 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/29ad9add-3577-4cdf-8b23-f2accacf3c94_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Sweater__Style__clean.jpg
+2026-01-25 04:53:35,863 - INFO - ✅ Updated Postgres for 29ad9add-3577-4cdf-8b23-f2accacf3c94
+2026-01-25 04:53:35,892 - INFO - ✅ Updated SQLite for 29ad9add-3577-4cdf-8b23-f2accacf3c94
+2026-01-25 04:53:35,893 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Sweater
+2026-01-25 04:53:35,893 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:53:36,177 - INFO - 🎨 Generating Image for cab6d827-a166-46b2-8ba9-8d5ce3394a51...
+2026-01-25 04:53:36,178 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:53:46,432 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/cab6d827-a166-46b2-8ba9-8d5ce3394a51_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_T_Shirt__Style__clean.jpg
+2026-01-25 04:53:46,711 - INFO - ✅ Updated Postgres for cab6d827-a166-46b2-8ba9-8d5ce3394a51
+2026-01-25 04:53:46,726 - INFO - ✅ Updated SQLite for cab6d827-a166-46b2-8ba9-8d5ce3394a51
+2026-01-25 04:53:46,726 - INFO - ✨ Created & Imaged: Aura Minimalist Pure T-Shirt
+2026-01-25 04:53:46,726 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:53:47,021 - INFO - 🎨 Generating Image for e6b66a65-fdc8-49f8-baca-88f3b8891e41...
+2026-01-25 04:53:47,024 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:54:02,626 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/e6b66a65-fdc8-49f8-baca-88f3b8891e41_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Coat__Style__clean.jpg
+2026-01-25 04:54:02,911 - INFO - ✅ Updated Postgres for e6b66a65-fdc8-49f8-baca-88f3b8891e41
+2026-01-25 04:54:02,927 - INFO - ✅ Updated SQLite for e6b66a65-fdc8-49f8-baca-88f3b8891e41
+2026-01-25 04:54:02,927 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Coat
+2026-01-25 04:54:02,927 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:54:03,206 - INFO - 🎨 Generating Image for 9b540328-25e7-401c-a009-1b0cf04c19c4...
+2026-01-25 04:54:03,207 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:54:14,828 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9b540328-25e7-401c-a009-1b0cf04c19c4_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Sweater__Style__clean.jpg
+2026-01-25 04:54:15,112 - INFO - ✅ Updated Postgres for 9b540328-25e7-401c-a009-1b0cf04c19c4
+2026-01-25 04:54:15,125 - INFO - ✅ Updated SQLite for 9b540328-25e7-401c-a009-1b0cf04c19c4
+2026-01-25 04:54:15,125 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Sweater
+2026-01-25 04:54:15,126 - INFO - 🔨 Creating: Aura Minimalist Raw Coat
+2026-01-25 04:54:15,422 - INFO - 🎨 Generating Image for 67e211ae-f93e-4127-b74a-2679bbafa99c...
+2026-01-25 04:54:15,423 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:54:29,123 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/67e211ae-f93e-4127-b74a-2679bbafa99c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Coat__Style__clean.jpg
+2026-01-25 04:54:29,404 - INFO - ✅ Updated Postgres for 67e211ae-f93e-4127-b74a-2679bbafa99c
+2026-01-25 04:54:29,427 - INFO - ✅ Updated SQLite for 67e211ae-f93e-4127-b74a-2679bbafa99c
+2026-01-25 04:54:29,428 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Coat
+2026-01-25 04:54:29,428 - INFO - 🔨 Creating: Aura Minimalist Timeless Sneakers
+2026-01-25 04:54:29,728 - INFO - 🎨 Generating Image for f885f66e-ee9f-4245-a02f-3639e31d6b7c...
+2026-01-25 04:54:29,729 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:54:42,331 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/f885f66e-ee9f-4245-a02f-3639e31d6b7c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Sneakers__Style__clean.jpg
+2026-01-25 04:54:42,612 - INFO - ✅ Updated Postgres for f885f66e-ee9f-4245-a02f-3639e31d6b7c
+2026-01-25 04:54:42,662 - INFO - ✅ Updated SQLite for f885f66e-ee9f-4245-a02f-3639e31d6b7c
+2026-01-25 04:54:42,662 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Sneakers
+2026-01-25 04:54:42,663 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:54:42,967 - INFO - 🎨 Generating Image for 33c64937-10f5-46d5-9cfa-d00a922c1e5e...
+2026-01-25 04:54:42,967 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:54:53,040 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/33c64937-10f5-46d5-9cfa-d00a922c1e5e_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sneakers__Style__clean.jpg
+2026-01-25 04:54:53,364 - INFO - ✅ Updated Postgres for 33c64937-10f5-46d5-9cfa-d00a922c1e5e
+2026-01-25 04:54:53,380 - INFO - ✅ Updated SQLite for 33c64937-10f5-46d5-9cfa-d00a922c1e5e
+2026-01-25 04:54:53,380 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Sneakers
+2026-01-25 04:54:53,381 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:54:53,661 - INFO - 🎨 Generating Image for ff54bb7d-c1f4-4884-98ac-03cbd7382f65...
+2026-01-25 04:54:53,668 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:55:05,830 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ff54bb7d-c1f4-4884-98ac-03cbd7382f65_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Coat__Style__clean.jpg
+2026-01-25 04:55:06,106 - INFO - ✅ Updated Postgres for ff54bb7d-c1f4-4884-98ac-03cbd7382f65
+2026-01-25 04:55:06,128 - INFO - ✅ Updated SQLite for ff54bb7d-c1f4-4884-98ac-03cbd7382f65
+2026-01-25 04:55:06,128 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Coat
+2026-01-25 04:55:06,128 - INFO - 🔨 Creating: Aura Minimalist Raw Coat
+2026-01-25 04:55:06,426 - INFO - 🎨 Generating Image for 95d91f9c-4354-44df-918b-dce33a2c488a...
+2026-01-25 04:55:06,427 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:55:17,280 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/95d91f9c-4354-44df-918b-dce33a2c488a_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Coat__Style__clean.jpg
+2026-01-25 04:55:17,563 - INFO - ✅ Updated Postgres for 95d91f9c-4354-44df-918b-dce33a2c488a
+2026-01-25 04:55:17,599 - INFO - ✅ Updated SQLite for 95d91f9c-4354-44df-918b-dce33a2c488a
+2026-01-25 04:55:17,600 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Coat
+2026-01-25 04:55:17,600 - INFO - 🔨 Creating: Aura Minimalist Timeless Trousers
+2026-01-25 04:55:17,888 - INFO - 🎨 Generating Image for d343c1db-57e6-4397-9004-47063074da59...
+2026-01-25 04:55:17,889 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:55:28,318 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/d343c1db-57e6-4397-9004-47063074da59_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Trousers__Style__clean.jpg
+2026-01-25 04:55:28,584 - INFO - ✅ Updated Postgres for d343c1db-57e6-4397-9004-47063074da59
+2026-01-25 04:55:28,600 - INFO - ✅ Updated SQLite for d343c1db-57e6-4397-9004-47063074da59
+2026-01-25 04:55:28,601 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Trousers
+2026-01-25 04:55:28,601 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:55:28,898 - INFO - 🎨 Generating Image for c1fb1218-ea29-4783-a849-f78f7d4ff086...
+2026-01-25 04:55:28,899 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:55:42,338 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/c1fb1218-ea29-4783-a849-f78f7d4ff086_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Trousers__Style__clean.jpg
+2026-01-25 04:55:42,614 - INFO - ✅ Updated Postgres for c1fb1218-ea29-4783-a849-f78f7d4ff086
+2026-01-25 04:55:42,642 - INFO - ✅ Updated SQLite for c1fb1218-ea29-4783-a849-f78f7d4ff086
+2026-01-25 04:55:42,642 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Trousers
+2026-01-25 04:55:42,642 - INFO - 🔨 Creating: Aura Minimalist Timeless Trousers
+2026-01-25 04:55:42,928 - INFO - 🎨 Generating Image for d49a36a8-9d67-468a-b96d-abbcb8d2dc35...
+2026-01-25 04:55:42,929 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:55:55,588 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/d49a36a8-9d67-468a-b96d-abbcb8d2dc35_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Trousers__Style__clean.jpg
+2026-01-25 04:55:55,855 - INFO - ✅ Updated Postgres for d49a36a8-9d67-468a-b96d-abbcb8d2dc35
+2026-01-25 04:55:55,877 - INFO - ✅ Updated SQLite for d49a36a8-9d67-468a-b96d-abbcb8d2dc35
+2026-01-25 04:55:55,878 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Trousers
+2026-01-25 04:55:55,878 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:55:56,177 - INFO - 🎨 Generating Image for 0f8b01c9-81dc-4495-8843-5f283186db5c...
+2026-01-25 04:55:56,177 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:56:08,780 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/0f8b01c9-81dc-4495-8843-5f283186db5c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Trousers__Style__clean.jpg
+2026-01-25 04:56:09,050 - INFO - ✅ Updated Postgres for 0f8b01c9-81dc-4495-8843-5f283186db5c
+2026-01-25 04:56:09,062 - INFO - ✅ Updated SQLite for 0f8b01c9-81dc-4495-8843-5f283186db5c
+2026-01-25 04:56:09,063 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Trousers
+2026-01-25 04:56:09,063 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:56:09,355 - INFO - 🎨 Generating Image for d46acd2b-2c5b-4380-a67b-7c773386bdbb...
+2026-01-25 04:56:09,356 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:56:21,797 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/d46acd2b-2c5b-4380-a67b-7c773386bdbb_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sneakers__Style__clean.jpg
+2026-01-25 04:56:22,076 - INFO - ✅ Updated Postgres for d46acd2b-2c5b-4380-a67b-7c773386bdbb
+2026-01-25 04:56:22,099 - INFO - ✅ Updated SQLite for d46acd2b-2c5b-4380-a67b-7c773386bdbb
+2026-01-25 04:56:22,100 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Sneakers
+2026-01-25 04:56:22,100 - INFO - 🔨 Creating: Aura Minimalist Essential Sneakers
+2026-01-25 04:56:22,385 - INFO - 🎨 Generating Image for 77c5830d-fbd8-45b6-81b8-b2809b5aea54...
+2026-01-25 04:56:22,385 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:56:34,448 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/77c5830d-fbd8-45b6-81b8-b2809b5aea54_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Sneakers__Style__clean.jpg
+2026-01-25 04:56:34,771 - INFO - ✅ Updated Postgres for 77c5830d-fbd8-45b6-81b8-b2809b5aea54
+2026-01-25 04:56:34,784 - INFO - ✅ Updated SQLite for 77c5830d-fbd8-45b6-81b8-b2809b5aea54
+2026-01-25 04:56:34,784 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Sneakers
+2026-01-25 04:56:34,785 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:56:35,107 - INFO - 🎨 Generating Image for 6e592f35-78d9-4ab6-8311-216eb5ca4686...
+2026-01-25 04:56:35,110 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:56:44,527 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/6e592f35-78d9-4ab6-8311-216eb5ca4686_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_T_Shirt__Style__clean.jpg
+2026-01-25 04:56:44,816 - INFO - ✅ Updated Postgres for 6e592f35-78d9-4ab6-8311-216eb5ca4686
+2026-01-25 04:56:44,829 - INFO - ✅ Updated SQLite for 6e592f35-78d9-4ab6-8311-216eb5ca4686
+2026-01-25 04:56:44,830 - INFO - ✨ Created & Imaged: Aura Minimalist Essential T-Shirt
+2026-01-25 04:56:44,830 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:56:45,146 - INFO - 🎨 Generating Image for b50eabc2-37d0-4748-925e-3ef19ac40325...
+2026-01-25 04:56:45,147 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:56:55,132 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/b50eabc2-37d0-4748-925e-3ef19ac40325_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_T_Shirt__Style__clean.jpg
+2026-01-25 04:56:55,402 - INFO - ✅ Updated Postgres for b50eabc2-37d0-4748-925e-3ef19ac40325
+2026-01-25 04:56:55,415 - INFO - ✅ Updated SQLite for b50eabc2-37d0-4748-925e-3ef19ac40325
+2026-01-25 04:56:55,415 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:56:55,415 - INFO - 🔨 Creating: Aura Minimalist Organic Trousers
+2026-01-25 04:56:55,703 - INFO - 🎨 Generating Image for 4a1b0eb6-1c0f-48e7-ac90-1d04eb603e80...
+2026-01-25 04:56:55,703 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:57:07,768 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4a1b0eb6-1c0f-48e7-ac90-1d04eb603e80_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_Trousers__Style__clean.jpg
+2026-01-25 04:57:08,037 - INFO - ✅ Updated Postgres for 4a1b0eb6-1c0f-48e7-ac90-1d04eb603e80
+2026-01-25 04:57:08,050 - INFO - ✅ Updated SQLite for 4a1b0eb6-1c0f-48e7-ac90-1d04eb603e80
+2026-01-25 04:57:08,051 - INFO - ✨ Created & Imaged: Aura Minimalist Organic Trousers
+2026-01-25 04:57:08,051 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:57:08,382 - INFO - 🎨 Generating Image for 4d40e2ad-7a83-4c49-ade1-2dceaba8d2d1...
+2026-01-25 04:57:08,382 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:57:20,746 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4d40e2ad-7a83-4c49-ade1-2dceaba8d2d1_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_T_Shirt__Style__clean.jpg
+2026-01-25 04:57:21,030 - INFO - ✅ Updated Postgres for 4d40e2ad-7a83-4c49-ade1-2dceaba8d2d1
+2026-01-25 04:57:21,048 - INFO - ✅ Updated SQLite for 4d40e2ad-7a83-4c49-ade1-2dceaba8d2d1
+2026-01-25 04:57:21,049 - INFO - ✨ Created & Imaged: Aura Minimalist Pure T-Shirt
+2026-01-25 04:57:21,049 - INFO - 🔨 Creating: Aura Minimalist Pure Sneakers
+2026-01-25 04:57:21,342 - INFO - 🎨 Generating Image for 38c27ed4-e837-4dd4-b3b3-912477f41475...
+2026-01-25 04:57:21,343 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:57:31,187 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/38c27ed4-e837-4dd4-b3b3-912477f41475_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_Sneakers__Style__clean.jpg
+2026-01-25 04:57:31,478 - INFO - ✅ Updated Postgres for 38c27ed4-e837-4dd4-b3b3-912477f41475
+2026-01-25 04:57:31,493 - INFO - ✅ Updated SQLite for 38c27ed4-e837-4dd4-b3b3-912477f41475
+2026-01-25 04:57:31,493 - INFO - ✨ Created & Imaged: Aura Minimalist Pure Sneakers
+2026-01-25 04:57:31,494 - INFO - 🔨 Creating: Aura Minimalist Raw Sweater
+2026-01-25 04:57:31,790 - INFO - 🎨 Generating Image for 237ae8e8-5469-4cd0-a792-7bccabe4b395...
+2026-01-25 04:57:31,791 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:57:43,108 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/237ae8e8-5469-4cd0-a792-7bccabe4b395_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sweater__Style__clean.jpg
+2026-01-25 04:57:43,436 - INFO - ✅ Updated Postgres for 237ae8e8-5469-4cd0-a792-7bccabe4b395
+2026-01-25 04:57:43,530 - INFO - ✅ Updated SQLite for 237ae8e8-5469-4cd0-a792-7bccabe4b395
+2026-01-25 04:57:43,531 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Sweater
+2026-01-25 04:57:43,531 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:57:43,865 - INFO - 🎨 Generating Image for 5cbf39d3-35da-4540-bca6-5a2cf2824d71...
+2026-01-25 04:57:43,866 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:57:54,575 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/5cbf39d3-35da-4540-bca6-5a2cf2824d71_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_T_Shirt__Style__clean.jpg
+2026-01-25 04:57:54,868 - INFO - ✅ Updated Postgres for 5cbf39d3-35da-4540-bca6-5a2cf2824d71
+2026-01-25 04:57:54,893 - INFO - ✅ Updated SQLite for 5cbf39d3-35da-4540-bca6-5a2cf2824d71
+2026-01-25 04:57:54,893 - INFO - ✨ Created & Imaged: Aura Minimalist Essential T-Shirt
+2026-01-25 04:57:54,893 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:57:55,186 - INFO - 🎨 Generating Image for caf60e8f-f51d-474c-9206-c9f07fa51549...
+2026-01-25 04:57:55,186 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:58:04,900 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/caf60e8f-f51d-474c-9206-c9f07fa51549_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sneakers__Style__clean.jpg
+2026-01-25 04:58:05,176 - INFO - ✅ Updated Postgres for caf60e8f-f51d-474c-9206-c9f07fa51549
+2026-01-25 04:58:05,198 - INFO - ✅ Updated SQLite for caf60e8f-f51d-474c-9206-c9f07fa51549
+2026-01-25 04:58:05,199 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Sneakers
+2026-01-25 04:58:05,199 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:58:05,826 - INFO - 🎨 Generating Image for e0dcaa00-e467-4649-ba4d-624ddd9195b5...
+2026-01-25 04:58:05,828 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:58:16,619 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/e0dcaa00-e467-4649-ba4d-624ddd9195b5_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_Coat__Style__clean.jpg
+2026-01-25 04:58:16,899 - INFO - ✅ Updated Postgres for e0dcaa00-e467-4649-ba4d-624ddd9195b5
+2026-01-25 04:58:16,936 - INFO - ✅ Updated SQLite for e0dcaa00-e467-4649-ba4d-624ddd9195b5
+2026-01-25 04:58:16,936 - INFO - ✨ Created & Imaged: Aura Minimalist Organic Coat
+2026-01-25 04:58:16,936 - INFO - 🔨 Creating: Aura Minimalist Pure Sneakers
+2026-01-25 04:58:17,220 - INFO - 🎨 Generating Image for 41013bf5-be9c-4d07-a715-da6d48e31de1...
+2026-01-25 04:58:17,220 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:58:29,374 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/41013bf5-be9c-4d07-a715-da6d48e31de1_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_Sneakers__Style__clean.jpg
+2026-01-25 04:58:29,660 - INFO - ✅ Updated Postgres for 41013bf5-be9c-4d07-a715-da6d48e31de1
+2026-01-25 04:58:29,673 - INFO - ✅ Updated SQLite for 41013bf5-be9c-4d07-a715-da6d48e31de1
+2026-01-25 04:58:29,675 - INFO - ✨ Created & Imaged: Aura Minimalist Pure Sneakers
+2026-01-25 04:58:29,675 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:58:29,972 - INFO - 🎨 Generating Image for 4a7eb8b3-462f-4f40-87c1-ee44a81dfd47...
+2026-01-25 04:58:29,974 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:58:40,454 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4a7eb8b3-462f-4f40-87c1-ee44a81dfd47_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_T_Shirt__Style__clean.jpg
+2026-01-25 04:58:40,734 - INFO - ✅ Updated Postgres for 4a7eb8b3-462f-4f40-87c1-ee44a81dfd47
+2026-01-25 04:58:40,747 - INFO - ✅ Updated SQLite for 4a7eb8b3-462f-4f40-87c1-ee44a81dfd47
+2026-01-25 04:58:40,747 - INFO - ✨ Created & Imaged: Aura Minimalist Pure T-Shirt
+2026-01-25 04:58:40,748 - INFO - 🔨 Creating: Aura Minimalist Timeless Trousers
+2026-01-25 04:58:41,080 - INFO - 🎨 Generating Image for 576fc711-1126-4fa6-9ef0-1c8e3eb9cc0e...
+2026-01-25 04:58:41,080 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:58:51,484 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/576fc711-1126-4fa6-9ef0-1c8e3eb9cc0e_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Trousers__Style__clean.jpg
+2026-01-25 04:58:51,751 - INFO - ✅ Updated Postgres for 576fc711-1126-4fa6-9ef0-1c8e3eb9cc0e
+2026-01-25 04:58:51,780 - INFO - ✅ Updated SQLite for 576fc711-1126-4fa6-9ef0-1c8e3eb9cc0e
+2026-01-25 04:58:51,781 - INFO - ✨ Created & Imaged: Aura Minimalist Timeless Trousers
+2026-01-25 04:58:51,781 - INFO - 🔨 Creating: Aura Minimalist Essential Sneakers
+2026-01-25 04:58:52,069 - INFO - 🎨 Generating Image for db8811a2-ddea-4807-9b20-683802ea2843...
+2026-01-25 04:58:52,070 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:59:01,528 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/db8811a2-ddea-4807-9b20-683802ea2843_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Sneakers__Style__clean.jpg
+2026-01-25 04:59:01,812 - INFO - ✅ Updated Postgres for db8811a2-ddea-4807-9b20-683802ea2843
+2026-01-25 04:59:01,832 - INFO - ✅ Updated SQLite for db8811a2-ddea-4807-9b20-683802ea2843
+2026-01-25 04:59:01,835 - INFO - ✨ Created & Imaged: Aura Minimalist Essential Sneakers
+2026-01-25 04:59:01,835 - INFO - 🔨 Creating: Aura Minimalist Organic Trousers
+2026-01-25 04:59:02,099 - INFO - 🎨 Generating Image for ab22177e-fac2-41fc-8638-f3d03d4cf3a9...
+2026-01-25 04:59:02,100 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:59:12,910 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ab22177e-fac2-41fc-8638-f3d03d4cf3a9_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Organic_Trousers__Style__clean.jpg
+2026-01-25 04:59:13,180 - INFO - ✅ Updated Postgres for ab22177e-fac2-41fc-8638-f3d03d4cf3a9
+2026-01-25 04:59:13,195 - INFO - ✅ Updated SQLite for ab22177e-fac2-41fc-8638-f3d03d4cf3a9
+2026-01-25 04:59:13,195 - INFO - ✨ Created & Imaged: Aura Minimalist Organic Trousers
+2026-01-25 04:59:13,195 - INFO - 🔨 Creating: Aura Minimalist Raw Sweater
+2026-01-25 04:59:13,588 - INFO - 🎨 Generating Image for 43990589-5e8e-4edd-b981-740d5a7056c8...
+2026-01-25 04:59:13,629 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:59:26,254 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/43990589-5e8e-4edd-b981-740d5a7056c8_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sweater__Style__clean.jpg
+2026-01-25 04:59:26,629 - INFO - ✅ Updated Postgres for 43990589-5e8e-4edd-b981-740d5a7056c8
+2026-01-25 04:59:26,767 - INFO - ✅ Updated SQLite for 43990589-5e8e-4edd-b981-740d5a7056c8
+2026-01-25 04:59:26,767 - INFO - ✨ Created & Imaged: Aura Minimalist Raw Sweater
+2026-01-25 04:59:26,767 - INFO - --- Seeding Vortex Streetwear ---
+2026-01-25 04:59:26,772 - INFO - 🔨 Creating: Vortex Streetwear Night High-tops
+2026-01-25 04:59:27,133 - INFO - 🎨 Generating Image for 03fb4346-ea61-4cbf-8bde-d7e3991d1a1a...
+2026-01-25 04:59:27,134 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:59:38,594 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/03fb4346-ea61-4cbf-8bde-d7e3991d1a1a_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_High_tops__Style__bold.jpg
+2026-01-25 04:59:38,868 - INFO - ✅ Updated Postgres for 03fb4346-ea61-4cbf-8bde-d7e3991d1a1a
+2026-01-25 04:59:38,887 - INFO - ✅ Updated SQLite for 03fb4346-ea61-4cbf-8bde-d7e3991d1a1a
+2026-01-25 04:59:38,888 - INFO - ✨ Created & Imaged: Vortex Streetwear Night High-tops
+2026-01-25 04:59:38,888 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:59:39,178 - INFO - 🎨 Generating Image for 1c8d1021-c8dd-4751-b7e5-6703a4707df8...
+2026-01-25 04:59:39,181 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 04:59:50,362 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/1c8d1021-c8dd-4751-b7e5-6703a4707df8_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Tech_Jacket__Style__bold.jpg
+2026-01-25 04:59:50,618 - INFO - ✅ Updated Postgres for 1c8d1021-c8dd-4751-b7e5-6703a4707df8
+2026-01-25 04:59:50,643 - INFO - ✅ Updated SQLite for 1c8d1021-c8dd-4751-b7e5-6703a4707df8
+2026-01-25 04:59:50,644 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:59:50,644 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:59:50,946 - INFO - 🎨 Generating Image for 6906e1de-c8ed-432f-857e-9491eacec5ce...
+2026-01-25 04:59:50,946 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:00:04,290 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/6906e1de-c8ed-432f-857e-9491eacec5ce_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_High_tops__Style__bold.jpg
+2026-01-25 05:00:04,572 - INFO - ✅ Updated Postgres for 6906e1de-c8ed-432f-857e-9491eacec5ce
+2026-01-25 05:00:04,585 - INFO - ✅ Updated SQLite for 6906e1de-c8ed-432f-857e-9491eacec5ce
+2026-01-25 05:00:04,585 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch High-tops
+2026-01-25 05:00:04,585 - INFO - 🔨 Creating: Vortex Streetwear Cyber Cargo Pants
+2026-01-25 05:00:04,873 - INFO - 🎨 Generating Image for 231a59c4-35cc-436a-8d80-3b790eba2d59...
+2026-01-25 05:00:04,877 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:00:18,010 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/231a59c4-35cc-436a-8d80-3b790eba2d59_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:00:18,281 - INFO - ✅ Updated Postgres for 231a59c4-35cc-436a-8d80-3b790eba2d59
+2026-01-25 05:00:18,303 - INFO - ✅ Updated SQLite for 231a59c4-35cc-436a-8d80-3b790eba2d59
+2026-01-25 05:00:18,303 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Cargo Pants
+2026-01-25 05:00:18,303 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:00:18,586 - INFO - 🎨 Generating Image for 8ebb15ba-3ef1-486b-95cb-12b5e8fc7fe3...
+2026-01-25 05:00:18,587 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:00:31,062 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/8ebb15ba-3ef1-486b-95cb-12b5e8fc7fe3_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Hoodie__Style__bold.jpg
+2026-01-25 05:00:31,329 - INFO - ✅ Updated Postgres for 8ebb15ba-3ef1-486b-95cb-12b5e8fc7fe3
+2026-01-25 05:00:31,344 - INFO - ✅ Updated SQLite for 8ebb15ba-3ef1-486b-95cb-12b5e8fc7fe3
+2026-01-25 05:00:31,344 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:00:31,344 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 05:00:31,629 - INFO - 🎨 Generating Image for fbb7cd21-e001-4e62-8a85-236393e7295b...
+2026-01-25 05:00:31,630 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:00:43,035 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/fbb7cd21-e001-4e62-8a85-236393e7295b_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Vest__Style__bold.jpg
+2026-01-25 05:00:43,312 - INFO - ✅ Updated Postgres for fbb7cd21-e001-4e62-8a85-236393e7295b
+2026-01-25 05:00:43,326 - INFO - ✅ Updated SQLite for fbb7cd21-e001-4e62-8a85-236393e7295b
+2026-01-25 05:00:43,326 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Vest
+2026-01-25 05:00:43,327 - INFO - 🔨 Creating: Vortex Streetwear Tactical Cargo Pants
+2026-01-25 05:00:43,630 - INFO - 🎨 Generating Image for 88bfa305-43f1-4492-a780-14b571cac22a...
+2026-01-25 05:00:43,630 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:00:54,606 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/88bfa305-43f1-4492-a780-14b571cac22a_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:00:54,873 - INFO - ✅ Updated Postgres for 88bfa305-43f1-4492-a780-14b571cac22a
+2026-01-25 05:00:54,897 - INFO - ✅ Updated SQLite for 88bfa305-43f1-4492-a780-14b571cac22a
+2026-01-25 05:00:54,899 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Cargo Pants
+2026-01-25 05:00:54,900 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 05:00:55,181 - INFO - 🎨 Generating Image for 13fcc8f9-b8d1-4a66-bfc3-76efc8114705...
+2026-01-25 05:00:55,181 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:01:05,851 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/13fcc8f9-b8d1-4a66-bfc3-76efc8114705_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Hoodie__Style__bold.jpg
+2026-01-25 05:01:06,116 - INFO - ✅ Updated Postgres for 13fcc8f9-b8d1-4a66-bfc3-76efc8114705
+2026-01-25 05:01:06,143 - INFO - ✅ Updated SQLite for 13fcc8f9-b8d1-4a66-bfc3-76efc8114705
+2026-01-25 05:01:06,144 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Hoodie
+2026-01-25 05:01:06,144 - INFO - 🔨 Creating: Vortex Streetwear Urban Vest
+2026-01-25 05:01:06,429 - INFO - 🎨 Generating Image for a3cf54c4-18ef-4e3c-8a6e-6eabd87ba3b6...
+2026-01-25 05:01:06,430 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:01:19,185 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/a3cf54c4-18ef-4e3c-8a6e-6eabd87ba3b6_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Vest__Style__bold.jpg
+2026-01-25 05:01:19,451 - INFO - ✅ Updated Postgres for a3cf54c4-18ef-4e3c-8a6e-6eabd87ba3b6
+2026-01-25 05:01:19,462 - INFO - ✅ Updated SQLite for a3cf54c4-18ef-4e3c-8a6e-6eabd87ba3b6
+2026-01-25 05:01:19,464 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban Vest
+2026-01-25 05:01:19,464 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:01:19,755 - INFO - 🎨 Generating Image for 4c3753b3-6a72-4173-90e3-41913a55f650...
+2026-01-25 05:01:19,755 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:01:31,872 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4c3753b3-6a72-4173-90e3-41913a55f650_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:01:32,171 - INFO - ✅ Updated Postgres for 4c3753b3-6a72-4173-90e3-41913a55f650
+2026-01-25 05:01:32,406 - INFO - ✅ Updated SQLite for 4c3753b3-6a72-4173-90e3-41913a55f650
+2026-01-25 05:01:32,406 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:01:32,407 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 05:01:32,863 - INFO - 🎨 Generating Image for b52bc3ff-6108-4628-aee5-e71d0686c82f...
+2026-01-25 05:01:32,863 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:01:46,542 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/b52bc3ff-6108-4628-aee5-e71d0686c82f_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:01:46,888 - INFO - ✅ Updated Postgres for b52bc3ff-6108-4628-aee5-e71d0686c82f
+2026-01-25 05:01:46,902 - INFO - ✅ Updated SQLite for b52bc3ff-6108-4628-aee5-e71d0686c82f
+2026-01-25 05:01:46,902 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 05:01:46,902 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 05:01:47,214 - INFO - 🎨 Generating Image for 98ac7cf7-09af-4359-b623-187ebfddd932...
+2026-01-25 05:01:47,214 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:02:00,567 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/98ac7cf7-09af-4359-b623-187ebfddd932_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_High_tops__Style__bold.jpg
+2026-01-25 05:02:00,907 - INFO - ✅ Updated Postgres for 98ac7cf7-09af-4359-b623-187ebfddd932
+2026-01-25 05:02:00,950 - INFO - ✅ Updated SQLite for 98ac7cf7-09af-4359-b623-187ebfddd932
+2026-01-25 05:02:00,950 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical High-tops
+2026-01-25 05:02:00,950 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:02:01,234 - INFO - 🎨 Generating Image for 23610794-8019-41ed-9710-ad06384cc747...
+2026-01-25 05:02:01,234 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:02:15,130 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/23610794-8019-41ed-9710-ad06384cc747_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:02:15,444 - INFO - ✅ Updated Postgres for 23610794-8019-41ed-9710-ad06384cc747
+2026-01-25 05:02:15,501 - INFO - ✅ Updated SQLite for 23610794-8019-41ed-9710-ad06384cc747
+2026-01-25 05:02:15,501 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:02:15,501 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:02:15,796 - INFO - 🎨 Generating Image for 8d92f0bb-042e-4a79-9360-3f4276f94f94...
+2026-01-25 05:02:15,796 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:02:27,419 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/8d92f0bb-042e-4a79-9360-3f4276f94f94_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Hoodie__Style__bold.jpg
+2026-01-25 05:02:27,754 - INFO - ✅ Updated Postgres for 8d92f0bb-042e-4a79-9360-3f4276f94f94
+2026-01-25 05:02:27,796 - INFO - ✅ Updated SQLite for 8d92f0bb-042e-4a79-9360-3f4276f94f94
+2026-01-25 05:02:27,796 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:02:27,797 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 05:02:28,086 - INFO - 🎨 Generating Image for 71062b67-c79e-4a5a-9f90-e898687b187b...
+2026-01-25 05:02:28,087 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:02:40,720 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/71062b67-c79e-4a5a-9f90-e898687b187b_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_High_tops__Style__bold.jpg
+2026-01-25 05:02:41,041 - INFO - ✅ Updated Postgres for 71062b67-c79e-4a5a-9f90-e898687b187b
+2026-01-25 05:02:41,054 - INFO - ✅ Updated SQLite for 71062b67-c79e-4a5a-9f90-e898687b187b
+2026-01-25 05:02:41,054 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical High-tops
+2026-01-25 05:02:41,054 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:02:41,380 - INFO - 🎨 Generating Image for 4d5689ef-f98e-4f04-add3-fe202da807be...
+2026-01-25 05:02:41,381 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:02:56,605 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4d5689ef-f98e-4f04-add3-fe202da807be_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:02:56,898 - INFO - ✅ Updated Postgres for 4d5689ef-f98e-4f04-add3-fe202da807be
+2026-01-25 05:02:57,058 - INFO - ✅ Updated SQLite for 4d5689ef-f98e-4f04-add3-fe202da807be
+2026-01-25 05:02:57,063 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:02:57,064 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:02:57,380 - INFO - 🎨 Generating Image for 0111384f-40a7-4dd1-bdc2-b86ff688a4fd...
+2026-01-25 05:02:57,381 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:03:09,737 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/0111384f-40a7-4dd1-bdc2-b86ff688a4fd_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Hoodie__Style__bold.jpg
+2026-01-25 05:03:10,029 - INFO - ✅ Updated Postgres for 0111384f-40a7-4dd1-bdc2-b86ff688a4fd
+2026-01-25 05:03:10,042 - INFO - ✅ Updated SQLite for 0111384f-40a7-4dd1-bdc2-b86ff688a4fd
+2026-01-25 05:03:10,043 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:03:10,043 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:03:10,340 - INFO - 🎨 Generating Image for 9b5348d8-69d8-4bd2-b1b8-87c29b112269...
+2026-01-25 05:03:10,341 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:03:25,874 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9b5348d8-69d8-4bd2-b1b8-87c29b112269_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Hoodie__Style__bold.jpg
+2026-01-25 05:03:26,152 - INFO - ✅ Updated Postgres for 9b5348d8-69d8-4bd2-b1b8-87c29b112269
+2026-01-25 05:03:26,180 - INFO - ✅ Updated SQLite for 9b5348d8-69d8-4bd2-b1b8-87c29b112269
+2026-01-25 05:03:26,180 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:03:26,180 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 05:03:26,488 - INFO - 🎨 Generating Image for 5bc46989-284d-4b4b-8861-db92299be710...
+2026-01-25 05:03:26,488 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:03:37,720 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/5bc46989-284d-4b4b-8861-db92299be710_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Hoodie__Style__bold.jpg
+2026-01-25 05:03:38,000 - INFO - ✅ Updated Postgres for 5bc46989-284d-4b4b-8861-db92299be710
+2026-01-25 05:03:38,013 - INFO - ✅ Updated SQLite for 5bc46989-284d-4b4b-8861-db92299be710
+2026-01-25 05:03:38,013 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban Hoodie
+2026-01-25 05:03:38,013 - INFO - 🔨 Creating: Vortex Streetwear Glitch Tech Jacket
+2026-01-25 05:03:38,302 - INFO - 🎨 Generating Image for 9a784751-7275-4e99-8d6b-d987ea6ceee8...
+2026-01-25 05:03:38,302 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:03:51,649 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9a784751-7275-4e99-8d6b-d987ea6ceee8_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:03:51,931 - INFO - ✅ Updated Postgres for 9a784751-7275-4e99-8d6b-d987ea6ceee8
+2026-01-25 05:03:51,947 - INFO - ✅ Updated SQLite for 9a784751-7275-4e99-8d6b-d987ea6ceee8
+2026-01-25 05:03:51,947 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Tech Jacket
+2026-01-25 05:03:51,948 - INFO - 🔨 Creating: Vortex Streetwear Tactical Vest
+2026-01-25 05:03:52,288 - INFO - 🎨 Generating Image for f9afe8d6-a175-4b54-9021-63b98d5d7316...
+2026-01-25 05:03:52,289 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:04:03,520 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/f9afe8d6-a175-4b54-9021-63b98d5d7316_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Vest__Style__bold.jpg
+2026-01-25 05:04:03,809 - INFO - ✅ Updated Postgres for f9afe8d6-a175-4b54-9021-63b98d5d7316
+2026-01-25 05:04:03,821 - INFO - ✅ Updated SQLite for f9afe8d6-a175-4b54-9021-63b98d5d7316
+2026-01-25 05:04:03,822 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Vest
+2026-01-25 05:04:03,822 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:04:04,127 - INFO - 🎨 Generating Image for 16aab11c-c272-41cd-8f7e-802c0bfac911...
+2026-01-25 05:04:04,127 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:04:19,414 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/16aab11c-c272-41cd-8f7e-802c0bfac911_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:04:19,735 - INFO - ✅ Updated Postgres for 16aab11c-c272-41cd-8f7e-802c0bfac911
+2026-01-25 05:04:19,751 - INFO - ✅ Updated SQLite for 16aab11c-c272-41cd-8f7e-802c0bfac911
+2026-01-25 05:04:19,752 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:04:19,752 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 05:04:20,058 - INFO - 🎨 Generating Image for 24c49dc5-f31a-44f7-8cef-40241893adeb...
+2026-01-25 05:04:20,059 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:04:31,667 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/24c49dc5-f31a-44f7-8cef-40241893adeb_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Vest__Style__bold.jpg
+2026-01-25 05:04:31,941 - INFO - ✅ Updated Postgres for 24c49dc5-f31a-44f7-8cef-40241893adeb
+2026-01-25 05:04:31,962 - INFO - ✅ Updated SQLite for 24c49dc5-f31a-44f7-8cef-40241893adeb
+2026-01-25 05:04:31,963 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Vest
+2026-01-25 05:04:31,963 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:04:32,254 - INFO - 🎨 Generating Image for 8ec5f79f-4990-4c0a-8078-ef0f837aae3c...
+2026-01-25 05:04:32,254 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:04:43,679 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/8ec5f79f-4990-4c0a-8078-ef0f837aae3c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Hoodie__Style__bold.jpg
+2026-01-25 05:04:43,960 - INFO - ✅ Updated Postgres for 8ec5f79f-4990-4c0a-8078-ef0f837aae3c
+2026-01-25 05:04:43,978 - INFO - ✅ Updated SQLite for 8ec5f79f-4990-4c0a-8078-ef0f837aae3c
+2026-01-25 05:04:43,979 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:04:43,979 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 05:04:44,297 - INFO - 🎨 Generating Image for 066e5536-381c-46e0-aad9-757e71e3fde5...
+2026-01-25 05:04:44,298 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:04:59,777 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/066e5536-381c-46e0-aad9-757e71e3fde5_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_High_tops__Style__bold.jpg
+2026-01-25 05:05:00,123 - INFO - ✅ Updated Postgres for 066e5536-381c-46e0-aad9-757e71e3fde5
+2026-01-25 05:05:00,150 - INFO - ✅ Updated SQLite for 066e5536-381c-46e0-aad9-757e71e3fde5
+2026-01-25 05:05:00,158 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber High-tops
+2026-01-25 05:05:00,159 - INFO - 🔨 Creating: Vortex Streetwear Urban Vest
+2026-01-25 05:05:00,523 - INFO - 🎨 Generating Image for 82f52bfe-6ec9-4ea5-a612-5d496071e407...
+2026-01-25 05:05:00,525 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:05:12,103 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/82f52bfe-6ec9-4ea5-a612-5d496071e407_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Vest__Style__bold.jpg
+2026-01-25 05:05:12,438 - INFO - ✅ Updated Postgres for 82f52bfe-6ec9-4ea5-a612-5d496071e407
+2026-01-25 05:05:12,455 - INFO - ✅ Updated SQLite for 82f52bfe-6ec9-4ea5-a612-5d496071e407
+2026-01-25 05:05:12,455 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban Vest
+2026-01-25 05:05:12,456 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:05:12,750 - INFO - 🎨 Generating Image for f23ea255-6dd0-48ec-9965-807f9978c75f...
+2026-01-25 05:05:12,754 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:05:23,425 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/f23ea255-6dd0-48ec-9965-807f9978c75f_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Hoodie__Style__bold.jpg
+2026-01-25 05:05:24,113 - INFO - ✅ Updated Postgres for f23ea255-6dd0-48ec-9965-807f9978c75f
+2026-01-25 05:05:24,132 - INFO - ✅ Updated SQLite for f23ea255-6dd0-48ec-9965-807f9978c75f
+2026-01-25 05:05:24,133 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:05:24,133 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 05:05:24,442 - INFO - 🎨 Generating Image for 9e646606-104e-454f-b487-3fdd952aff13...
+2026-01-25 05:05:24,443 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:05:35,004 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9e646606-104e-454f-b487-3fdd952aff13_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_High_tops__Style__bold.jpg
+2026-01-25 05:05:35,304 - INFO - ✅ Updated Postgres for 9e646606-104e-454f-b487-3fdd952aff13
+2026-01-25 05:05:35,318 - INFO - ✅ Updated SQLite for 9e646606-104e-454f-b487-3fdd952aff13
+2026-01-25 05:05:35,319 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber High-tops
+2026-01-25 05:05:35,319 - INFO - 🔨 Creating: Vortex Streetwear Urban High-tops
+2026-01-25 05:05:35,615 - INFO - 🎨 Generating Image for 12543f62-8ac5-49f9-ac1b-bcb5b35653f0...
+2026-01-25 05:05:35,615 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:05:48,593 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/12543f62-8ac5-49f9-ac1b-bcb5b35653f0_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_High_tops__Style__bold.jpg
+2026-01-25 05:05:48,870 - INFO - ✅ Updated Postgres for 12543f62-8ac5-49f9-ac1b-bcb5b35653f0
+2026-01-25 05:05:48,889 - INFO - ✅ Updated SQLite for 12543f62-8ac5-49f9-ac1b-bcb5b35653f0
+2026-01-25 05:05:48,889 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban High-tops
+2026-01-25 05:05:48,889 - INFO - 🔨 Creating: Vortex Streetwear Tactical Vest
+2026-01-25 05:05:49,226 - INFO - 🎨 Generating Image for f9a753ea-c50c-4fb8-a903-6d171eb43690...
+2026-01-25 05:05:49,226 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:06:03,831 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/f9a753ea-c50c-4fb8-a903-6d171eb43690_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Vest__Style__bold.jpg
+2026-01-25 05:06:04,129 - INFO - ✅ Updated Postgres for f9a753ea-c50c-4fb8-a903-6d171eb43690
+2026-01-25 05:06:04,143 - INFO - ✅ Updated SQLite for f9a753ea-c50c-4fb8-a903-6d171eb43690
+2026-01-25 05:06:04,144 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Vest
+2026-01-25 05:06:04,144 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:06:04,579 - INFO - 🎨 Generating Image for 036f5303-4e27-4a36-b93e-86eff25310c0...
+2026-01-25 05:06:04,579 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:06:16,238 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/036f5303-4e27-4a36-b93e-86eff25310c0_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:06:16,543 - INFO - ✅ Updated Postgres for 036f5303-4e27-4a36-b93e-86eff25310c0
+2026-01-25 05:06:16,576 - INFO - ✅ Updated SQLite for 036f5303-4e27-4a36-b93e-86eff25310c0
+2026-01-25 05:06:16,577 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:06:16,577 - INFO - 🔨 Creating: Vortex Streetwear Night Vest
+2026-01-25 05:06:16,898 - INFO - 🎨 Generating Image for ba9f772c-89a1-416f-9b1e-250d6b5fc880...
+2026-01-25 05:06:16,898 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:06:27,612 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ba9f772c-89a1-416f-9b1e-250d6b5fc880_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Vest__Style__bold.jpg
+2026-01-25 05:06:27,928 - INFO - ✅ Updated Postgres for ba9f772c-89a1-416f-9b1e-250d6b5fc880
+2026-01-25 05:06:28,132 - INFO - ✅ Updated SQLite for ba9f772c-89a1-416f-9b1e-250d6b5fc880
+2026-01-25 05:06:28,132 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Vest
+2026-01-25 05:06:28,132 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:06:28,588 - INFO - 🎨 Generating Image for fa14d922-2ffc-47b4-9289-4f5a533c6e65...
+2026-01-25 05:06:28,589 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:06:40,973 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/fa14d922-2ffc-47b4-9289-4f5a533c6e65_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Hoodie__Style__bold.jpg
+2026-01-25 05:06:41,240 - INFO - ✅ Updated Postgres for fa14d922-2ffc-47b4-9289-4f5a533c6e65
+2026-01-25 05:06:41,274 - INFO - ✅ Updated SQLite for fa14d922-2ffc-47b4-9289-4f5a533c6e65
+2026-01-25 05:06:41,275 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:06:41,275 - INFO - 🔨 Creating: Vortex Streetwear Night Cargo Pants
+2026-01-25 05:06:41,589 - INFO - 🎨 Generating Image for 443e2536-b6b3-42cd-8a4c-ec9ed9d9768c...
+2026-01-25 05:06:41,589 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:06:53,414 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/443e2536-b6b3-42cd-8a4c-ec9ed9d9768c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:06:53,710 - INFO - ✅ Updated Postgres for 443e2536-b6b3-42cd-8a4c-ec9ed9d9768c
+2026-01-25 05:06:53,724 - INFO - ✅ Updated SQLite for 443e2536-b6b3-42cd-8a4c-ec9ed9d9768c
+2026-01-25 05:06:53,726 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Cargo Pants
+2026-01-25 05:06:53,726 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:06:54,014 - INFO - 🎨 Generating Image for 11d20a06-731c-480c-b8e8-9f18665fa7de...
+2026-01-25 05:06:54,015 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:07:07,227 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/11d20a06-731c-480c-b8e8-9f18665fa7de_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:07:07,500 - INFO - ✅ Updated Postgres for 11d20a06-731c-480c-b8e8-9f18665fa7de
+2026-01-25 05:07:07,516 - INFO - ✅ Updated SQLite for 11d20a06-731c-480c-b8e8-9f18665fa7de
+2026-01-25 05:07:07,516 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:07:07,516 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:07:07,817 - INFO - 🎨 Generating Image for d3198f03-afdf-4bfa-91a0-bc4136ba460c...
+2026-01-25 05:07:07,818 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:07:20,243 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/d3198f03-afdf-4bfa-91a0-bc4136ba460c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:07:20,509 - INFO - ✅ Updated Postgres for d3198f03-afdf-4bfa-91a0-bc4136ba460c
+2026-01-25 05:07:20,524 - INFO - ✅ Updated SQLite for d3198f03-afdf-4bfa-91a0-bc4136ba460c
+2026-01-25 05:07:20,525 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:07:20,525 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:07:20,813 - INFO - 🎨 Generating Image for 0c716856-f093-4de4-bc0a-980b0a5998fc...
+2026-01-25 05:07:20,813 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:07:33,375 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/0c716856-f093-4de4-bc0a-980b0a5998fc_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Hoodie__Style__bold.jpg
+2026-01-25 05:07:33,675 - INFO - ✅ Updated Postgres for 0c716856-f093-4de4-bc0a-980b0a5998fc
+2026-01-25 05:07:33,695 - INFO - ✅ Updated SQLite for 0c716856-f093-4de4-bc0a-980b0a5998fc
+2026-01-25 05:07:33,695 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:07:33,696 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 05:07:34,008 - INFO - 🎨 Generating Image for 13be35c2-f0e3-415d-bc08-cde2a68a3d9c...
+2026-01-25 05:07:34,008 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:07:44,264 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/13be35c2-f0e3-415d-bc08-cde2a68a3d9c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Hoodie__Style__bold.jpg
+2026-01-25 05:07:44,556 - INFO - ✅ Updated Postgres for 13be35c2-f0e3-415d-bc08-cde2a68a3d9c
+2026-01-25 05:07:44,569 - INFO - ✅ Updated SQLite for 13be35c2-f0e3-415d-bc08-cde2a68a3d9c
+2026-01-25 05:07:44,569 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban Hoodie
+2026-01-25 05:07:44,569 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:07:44,871 - INFO - 🎨 Generating Image for e99b8e87-abe2-40a4-8aff-44fe2f28898e...
+2026-01-25 05:07:44,872 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:07:56,478 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/e99b8e87-abe2-40a4-8aff-44fe2f28898e_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:07:56,752 - INFO - ✅ Updated Postgres for e99b8e87-abe2-40a4-8aff-44fe2f28898e
+2026-01-25 05:07:56,768 - INFO - ✅ Updated SQLite for e99b8e87-abe2-40a4-8aff-44fe2f28898e
+2026-01-25 05:07:56,768 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:07:56,768 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:07:57,065 - INFO - 🎨 Generating Image for 2bbe2a1a-4698-4394-b5e9-d7f7153b7e5e...
+2026-01-25 05:07:57,065 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:08:08,219 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/2bbe2a1a-4698-4394-b5e9-d7f7153b7e5e_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Hoodie__Style__bold.jpg
+2026-01-25 05:08:08,488 - INFO - ✅ Updated Postgres for 2bbe2a1a-4698-4394-b5e9-d7f7153b7e5e
+2026-01-25 05:08:08,509 - INFO - ✅ Updated SQLite for 2bbe2a1a-4698-4394-b5e9-d7f7153b7e5e
+2026-01-25 05:08:08,510 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Hoodie
+2026-01-25 05:08:08,510 - INFO - 🔨 Creating: Vortex Streetwear Urban Tech Jacket
+2026-01-25 05:08:08,804 - INFO - 🎨 Generating Image for 79daa7ce-7e5c-4d59-842d-61f15ed1c242...
+2026-01-25 05:08:08,809 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:08:21,962 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/79daa7ce-7e5c-4d59-842d-61f15ed1c242_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:08:22,266 - INFO - ✅ Updated Postgres for 79daa7ce-7e5c-4d59-842d-61f15ed1c242
+2026-01-25 05:08:22,279 - INFO - ✅ Updated SQLite for 79daa7ce-7e5c-4d59-842d-61f15ed1c242
+2026-01-25 05:08:22,279 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban Tech Jacket
+2026-01-25 05:08:22,279 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:08:22,591 - INFO - 🎨 Generating Image for 9d1257f4-f05b-42fc-a0b6-11bfb3dd4909...
+2026-01-25 05:08:22,604 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:08:35,218 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9d1257f4-f05b-42fc-a0b6-11bfb3dd4909_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Hoodie__Style__bold.jpg
+2026-01-25 05:08:35,497 - INFO - ✅ Updated Postgres for 9d1257f4-f05b-42fc-a0b6-11bfb3dd4909
+2026-01-25 05:08:35,528 - INFO - ✅ Updated SQLite for 9d1257f4-f05b-42fc-a0b6-11bfb3dd4909
+2026-01-25 05:08:35,529 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:08:35,530 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 05:08:35,830 - INFO - 🎨 Generating Image for 84bccbf4-1c6f-47b6-b53d-59b901ec0b24...
+2026-01-25 05:08:35,832 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:08:46,692 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/84bccbf4-1c6f-47b6-b53d-59b901ec0b24_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Hoodie__Style__bold.jpg
+2026-01-25 05:08:46,966 - INFO - ✅ Updated Postgres for 84bccbf4-1c6f-47b6-b53d-59b901ec0b24
+2026-01-25 05:08:46,979 - INFO - ✅ Updated SQLite for 84bccbf4-1c6f-47b6-b53d-59b901ec0b24
+2026-01-25 05:08:46,979 - INFO - ✨ Created & Imaged: Vortex Streetwear Urban Hoodie
+2026-01-25 05:08:46,979 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 05:08:47,262 - INFO - 🎨 Generating Image for 2d2652ba-8c3f-4872-abf8-4765f02eac7a...
+2026-01-25 05:08:47,262 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:08:59,729 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/2d2652ba-8c3f-4872-abf8-4765f02eac7a_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Vest__Style__bold.jpg
+2026-01-25 05:09:00,018 - INFO - ✅ Updated Postgres for 2d2652ba-8c3f-4872-abf8-4765f02eac7a
+2026-01-25 05:09:00,040 - INFO - ✅ Updated SQLite for 2d2652ba-8c3f-4872-abf8-4765f02eac7a
+2026-01-25 05:09:00,041 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Vest
+2026-01-25 05:09:00,041 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 05:09:00,345 - INFO - 🎨 Generating Image for 9f4cd101-2aa5-455c-890c-9cc697dfe5c9...
+2026-01-25 05:09:00,345 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:09:11,433 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/9f4cd101-2aa5-455c-890c-9cc697dfe5c9_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Vest__Style__bold.jpg
+2026-01-25 05:09:11,701 - INFO - ✅ Updated Postgres for 9f4cd101-2aa5-455c-890c-9cc697dfe5c9
+2026-01-25 05:09:11,715 - INFO - ✅ Updated SQLite for 9f4cd101-2aa5-455c-890c-9cc697dfe5c9
+2026-01-25 05:09:11,716 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Vest
+2026-01-25 05:09:11,716 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 05:09:11,992 - INFO - 🎨 Generating Image for 5502f494-5196-4bf1-8a31-b553c1ef2f36...
+2026-01-25 05:09:11,992 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:09:25,696 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/5502f494-5196-4bf1-8a31-b553c1ef2f36_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Vest__Style__bold.jpg
+2026-01-25 05:09:25,967 - INFO - ✅ Updated Postgres for 5502f494-5196-4bf1-8a31-b553c1ef2f36
+2026-01-25 05:09:25,981 - INFO - ✅ Updated SQLite for 5502f494-5196-4bf1-8a31-b553c1ef2f36
+2026-01-25 05:09:25,981 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Vest
+2026-01-25 05:09:25,982 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:09:26,264 - INFO - 🎨 Generating Image for ffa247f5-3cca-4d46-aaad-d4201608ba36...
+2026-01-25 05:09:26,264 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:09:37,127 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/ffa247f5-3cca-4d46-aaad-d4201608ba36_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:09:37,396 - INFO - ✅ Updated Postgres for ffa247f5-3cca-4d46-aaad-d4201608ba36
+2026-01-25 05:09:37,408 - INFO - ✅ Updated SQLite for ffa247f5-3cca-4d46-aaad-d4201608ba36
+2026-01-25 05:09:37,409 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 05:09:37,409 - INFO - 🔨 Creating: Vortex Streetwear Night Cargo Pants
+2026-01-25 05:09:37,711 - INFO - 🎨 Generating Image for 8518487e-e5dd-4b1e-8e82-e5f65c247665...
+2026-01-25 05:09:37,713 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:09:49,081 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/8518487e-e5dd-4b1e-8e82-e5f65c247665_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:09:49,366 - INFO - ✅ Updated Postgres for 8518487e-e5dd-4b1e-8e82-e5f65c247665
+2026-01-25 05:09:49,391 - INFO - ✅ Updated SQLite for 8518487e-e5dd-4b1e-8e82-e5f65c247665
+2026-01-25 05:09:49,392 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Cargo Pants
+2026-01-25 05:09:49,392 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 05:09:49,693 - INFO - 🎨 Generating Image for 3127b9e0-9211-4d2a-b775-21723ced4386...
+2026-01-25 05:09:49,694 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:10:03,811 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/3127b9e0-9211-4d2a-b775-21723ced4386_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Hoodie__Style__bold.jpg
+2026-01-25 05:10:04,088 - INFO - ✅ Updated Postgres for 3127b9e0-9211-4d2a-b775-21723ced4386
+2026-01-25 05:10:04,101 - INFO - ✅ Updated SQLite for 3127b9e0-9211-4d2a-b775-21723ced4386
+2026-01-25 05:10:04,101 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Hoodie
+2026-01-25 05:10:04,101 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:10:04,390 - INFO - 🎨 Generating Image for a33af5c9-b0bc-4f56-8ef5-1f6ad2d61a8c...
+2026-01-25 05:10:04,390 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:10:15,678 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/a33af5c9-b0bc-4f56-8ef5-1f6ad2d61a8c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Hoodie__Style__bold.jpg
+2026-01-25 05:10:15,949 - INFO - ✅ Updated Postgres for a33af5c9-b0bc-4f56-8ef5-1f6ad2d61a8c
+2026-01-25 05:10:15,966 - INFO - ✅ Updated SQLite for a33af5c9-b0bc-4f56-8ef5-1f6ad2d61a8c
+2026-01-25 05:10:15,967 - INFO - ✨ Created & Imaged: Vortex Streetwear Tactical Hoodie
+2026-01-25 05:10:15,967 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:10:16,256 - INFO - 🎨 Generating Image for db0ab95c-0b0f-4860-a165-87f921dcf80a...
+2026-01-25 05:10:16,257 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:10:31,028 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/db0ab95c-0b0f-4860-a165-87f921dcf80a_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Hoodie__Style__bold.jpg
+2026-01-25 05:10:31,322 - INFO - ✅ Updated Postgres for db0ab95c-0b0f-4860-a165-87f921dcf80a
+2026-01-25 05:10:31,335 - INFO - ✅ Updated SQLite for db0ab95c-0b0f-4860-a165-87f921dcf80a
+2026-01-25 05:10:31,335 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:10:31,335 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:10:31,650 - INFO - 🎨 Generating Image for e2581bbf-dcda-4db6-9595-1d41833ce7a0...
+2026-01-25 05:10:31,650 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:10:45,475 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/e2581bbf-dcda-4db6-9595-1d41833ce7a0_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:10:45,749 - INFO - ✅ Updated Postgres for e2581bbf-dcda-4db6-9595-1d41833ce7a0
+2026-01-25 05:10:45,762 - INFO - ✅ Updated SQLite for e2581bbf-dcda-4db6-9595-1d41833ce7a0
+2026-01-25 05:10:45,763 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:10:45,763 - INFO - 🔨 Creating: Vortex Streetwear Night High-tops
+2026-01-25 05:10:46,050 - INFO - 🎨 Generating Image for 7ddb4886-1a5b-424f-8172-496a71ff3ee2...
+2026-01-25 05:10:46,051 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:11:01,539 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/7ddb4886-1a5b-424f-8172-496a71ff3ee2_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_High_tops__Style__bold.jpg
+2026-01-25 05:11:01,975 - INFO - ✅ Updated Postgres for 7ddb4886-1a5b-424f-8172-496a71ff3ee2
+2026-01-25 05:11:02,023 - INFO - ✅ Updated SQLite for 7ddb4886-1a5b-424f-8172-496a71ff3ee2
+2026-01-25 05:11:02,025 - INFO - ✨ Created & Imaged: Vortex Streetwear Night High-tops
+2026-01-25 05:11:02,025 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 05:11:02,388 - INFO - 🎨 Generating Image for 0a1bf031-d7a7-4c51-910c-cf5184e28742...
+2026-01-25 05:11:02,389 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:11:16,723 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/0a1bf031-d7a7-4c51-910c-cf5184e28742_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Vest__Style__bold.jpg
+2026-01-25 05:11:17,005 - INFO - ✅ Updated Postgres for 0a1bf031-d7a7-4c51-910c-cf5184e28742
+2026-01-25 05:11:17,023 - INFO - ✅ Updated SQLite for 0a1bf031-d7a7-4c51-910c-cf5184e28742
+2026-01-25 05:11:17,023 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Vest
+2026-01-25 05:11:17,023 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 05:11:17,646 - INFO - 🎨 Generating Image for 0fbbcfdf-860f-4f77-aa00-3e2fd20f1858...
+2026-01-25 05:11:17,647 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:11:35,811 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/0fbbcfdf-860f-4f77-aa00-3e2fd20f1858_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_High_tops__Style__bold.jpg
+2026-01-25 05:11:36,100 - INFO - ✅ Updated Postgres for 0fbbcfdf-860f-4f77-aa00-3e2fd20f1858
+2026-01-25 05:11:36,112 - INFO - ✅ Updated SQLite for 0fbbcfdf-860f-4f77-aa00-3e2fd20f1858
+2026-01-25 05:11:36,113 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber High-tops
+2026-01-25 05:11:36,113 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 05:11:36,444 - INFO - 🎨 Generating Image for 02cafa36-a721-4e4b-b681-8945a02b330c...
+2026-01-25 05:11:36,444 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:11:53,136 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/02cafa36-a721-4e4b-b681-8945a02b330c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:11:53,434 - INFO - ✅ Updated Postgres for 02cafa36-a721-4e4b-b681-8945a02b330c
+2026-01-25 05:11:53,452 - INFO - ✅ Updated SQLite for 02cafa36-a721-4e4b-b681-8945a02b330c
+2026-01-25 05:11:53,453 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 05:11:53,453 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:11:53,758 - INFO - 🎨 Generating Image for a748ded4-9233-4138-ba05-134f024eb948...
+2026-01-25 05:11:53,758 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:12:04,590 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/a748ded4-9233-4138-ba05-134f024eb948_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:12:04,859 - INFO - ✅ Updated Postgres for a748ded4-9233-4138-ba05-134f024eb948
+2026-01-25 05:12:04,870 - INFO - ✅ Updated SQLite for a748ded4-9233-4138-ba05-134f024eb948
+2026-01-25 05:12:04,871 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:12:04,871 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:12:05,156 - INFO - 🎨 Generating Image for 4d438168-371b-459f-b166-e69c439576e0...
+2026-01-25 05:12:05,156 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:12:20,313 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4d438168-371b-459f-b166-e69c439576e0_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Tech_Jacket__Style__bold.jpg
+2026-01-25 05:12:20,611 - INFO - ✅ Updated Postgres for 4d438168-371b-459f-b166-e69c439576e0
+2026-01-25 05:12:20,647 - INFO - ✅ Updated SQLite for 4d438168-371b-459f-b166-e69c439576e0
+2026-01-25 05:12:20,647 - INFO - ✨ Created & Imaged: Vortex Streetwear Night Tech Jacket
+2026-01-25 05:12:20,647 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:12:20,952 - INFO - 🎨 Generating Image for 32456b31-fa9b-4c37-bfef-0e52aca9579d...
+2026-01-25 05:12:20,952 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:12:34,256 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/32456b31-fa9b-4c37-bfef-0e52aca9579d_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Glitch_Cargo_Pants__Style__bold.jpg
+2026-01-25 05:12:34,538 - INFO - ✅ Updated Postgres for 32456b31-fa9b-4c37-bfef-0e52aca9579d
+2026-01-25 05:12:34,559 - INFO - ✅ Updated SQLite for 32456b31-fa9b-4c37-bfef-0e52aca9579d
+2026-01-25 05:12:34,560 - INFO - ✨ Created & Imaged: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 05:12:34,560 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:12:34,889 - INFO - 🎨 Generating Image for 4cd4dc83-8351-4a72-91b2-8e468a794d8f...
+2026-01-25 05:12:34,908 - INFO - 🎨 Generating via OpenRouter Chat API (black-forest-labs/flux.2-pro): 'Professional high-end e-commerce product card phot...'
+2026-01-25 05:12:45,877 - INFO - 💾 Cloud image downloaded to: /Users/ssg/Desktop/COVE/cove-ai-core/scripts/../static/generated_assets/4cd4dc83-8351-4a72-91b2-8e468a794d8f_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Hoodie__Style__bold.jpg
+2026-01-25 05:12:46,179 - INFO - ✅ Updated Postgres for 4cd4dc83-8351-4a72-91b2-8e468a794d8f
+2026-01-25 05:12:46,191 - INFO - ✅ Updated SQLite for 4cd4dc83-8351-4a72-91b2-8e468a794d8f
+2026-01-25 05:12:46,191 - INFO - ✨ Created & Imaged: Vortex Streetwear Cyber Hoodie
+2026-01-25 05:12:46,191 - INFO - ✅ Seeding Complete!

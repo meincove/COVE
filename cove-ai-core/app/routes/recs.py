@@ -32,6 +32,7 @@ router = APIRouter()
 
 class RecsFilters(BaseModel):
     type: Optional[Union[str, List[str]]] = None  # Supports single type or list for OR matching
+    outfit_category: Optional[str] = None # ✨ NEW: Explicit category filter
     tier: Optional[str] = None
     color: Optional[str] = None
     size: Optional[str] = None
@@ -39,6 +40,7 @@ class RecsFilters(BaseModel):
     price_max: Optional[float] = None
     sort: Optional[str] = None
     gender: Optional[str] = None  # male, female, unisex
+    brand: Optional[str] = None   # ✨ PHASE 8: Brand Filtering
 
 class RecsIn(BaseModel):
     anchor_slug: Optional[str] = None
@@ -115,6 +117,7 @@ class RecItem(BaseModel):
     score: float
     reason: str
     type: Optional[str] = None
+    outfit_category: Optional[str] = None # ✨ NEW: Expose category
     tier: Optional[str] = None
     color: Optional[str] = None
     size: Optional[str] = None
@@ -131,6 +134,8 @@ class RecItem(BaseModel):
     description: Optional[str] = None
     styleNotes: Optional[str] = None
     fitNotes: Optional[str] = None
+    brand: Optional[str] = None  # ✨ PHASE 8: Brand Filtering
+    gender: Optional[str] = None # ✨ PHASE 8: Gender tag
     # For budget filtering
 
 
@@ -187,6 +192,7 @@ def _search_result_to_rec_item(r, reason: str = "visual_match") -> RecItem:
         score=r.score or 0.0,
         reason=reason,
         type=meta.get("type"),
+        outfit_category=meta.get("outfit_category"), # ✨ Populate
         tier=meta.get("tier"),
         color=meta.get("color"),
         size=meta.get("size"),
@@ -249,6 +255,22 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
         filters.size,
     ])
     has_price_filters = (filters.price_min is not None) or (filters.price_max is not None)
+
+    # ✨ CATEGORY EXPANSION LOGIC
+    # If a filter is a broad category (e.g. "tops"), expand it to all concrete types
+    # (e.g. "t-shirt", "hoodie", "blouse") so the DB query matches correctly.
+    if filters.type and isinstance(filters.type, str):
+        val = filters.type.lower().strip()
+        major_categories = {"tops", "bottoms", "shoes", "outerwear", "accessories"}
+        if val in major_categories:
+            from app.core.config_loader import get_outfit_config
+            outfit_cfg = get_outfit_config()
+            mapping = outfit_cfg.get("category_mappings", {})
+            # Reverse map: Find all types that belong to this category
+            expanded_types = [t for t, cat in mapping.items() if cat == val]
+            if expanded_types:
+                log.info(f"🔄 Expanding category '{val}' to types: {expanded_types}")
+                filters.type = expanded_types
 
     emit(
         "query_received",
@@ -347,25 +369,49 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             cfg = get_search_config()
             
             # Dynamic string filters (type, tier, color, etc.)
-            # Config maps filter_name -> metadata_field
-            # e.g. {"type": "type", "tier": "tier", "color": "colorName"}
             filter_map = cfg.get("filters", {})
+            # ✨ ADD outfit_category to filter map if missing in config
+            if "outfit_category" not in filter_map:
+                filter_map["outfit_category"] = "outfit_category"
+
+            major_categories = {"tops", "bottoms", "shoes", "outerwear", "accessories"}
+
             for filter_key, meta_key in filter_map.items():
-                # Check if this filter is set in the request
                 val = getattr(filters, filter_key, None)
                 if val:
-                    # Check if metadata has the corresponding field
-                    meta_val = (m.get(meta_key) or "").lower().strip()
+                    # Determine effective meta key and value
+                    # If filtering by 'type' but the value is 'tops' (a category), 
+                    # check outfit_category instead of type.
+                    effective_meta_key = meta_key
+                    val_str_check = str(val).lower().strip() if not isinstance(val, list) else ""
                     
-                    # Handle list-based filters (OR matching)
+                    if filter_key == "type" and val_str_check in major_categories:
+                        effective_meta_key = "outfit_category"
+                    
+                    # ✨ Robust Category Logic: Fallback to type mapping if category is missing
+                    raw_val = m.get(effective_meta_key)
+                    if effective_meta_key == "outfit_category" and not raw_val:
+                         from app.core.config_loader import get_outfit_config
+                         type_val = str(m.get("type") or "").lower().strip()
+                         mapping = get_outfit_config().get("category_mappings", {})
+                         raw_val = mapping.get(type_val)
+
+                    meta_val = str(raw_val or "").lower().strip()
+                    
                     if isinstance(val, list):
                         # Product must match at least one of the filter values
-                        if not any(str(v).lower().strip() in meta_val or meta_val == str(v).lower().strip() for v in val):
+                        if not any(str(v).lower().strip() == meta_val for v in val):
                             return False
                     else:
-                        # Single value: allow partial match (e.g. "grey" matching "grey heather")
-                        if str(val).lower().strip() not in meta_val:
-                            return False
+                        val_str = str(val).lower().strip()
+                        if val_str in major_categories or filter_key in ("type", "outfit_category"):
+                            # Exact match for categories and types
+                            if val_str != meta_val:
+                                return False
+                        else:
+                            # Partial match allowed for color/tier/etc
+                            if val_str not in meta_val:
+                                return False
 
             # size (require that size exists and is in stock, if numeric)
 
@@ -419,6 +465,15 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                     if norm_product != norm_filter:
                         log.info(f"   ❌ REJECTED due to gender mismatch")
                         return False
+
+            # Brand filter
+            if filters.brand:
+                product_brand = (m.get("brand") or "").lower().strip()
+                filter_brand = filters.brand.lower().strip()
+                
+                # Partial match allowed? e.g. "aura" matches "aura minimalist"
+                if filter_brand not in product_brand:
+                    return False
             
             return True
 
@@ -488,7 +543,7 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
     if body.exclude_slugs:
         exclude_set = set(s.lower().strip() for s in body.exclude_slugs if s)
         original_count = len(candidates)
-        candidates = [(d, m) for d, m in candidates if (m.get("groupSlug") or "").lower().strip() not in exclude_set]
+        candidates = [(d, m) for d, m in candidates if (m.get("groupSlug") or m.get("slug") or "").lower().strip() not in exclude_set]
         log.debug(f"📚 [PAGINATION] Excluded {original_count - len(candidates)} already-shown products")
 
     raw_sim_scores = [float(c[0].get("score", 0) or 0) for c in candidates]
@@ -503,9 +558,14 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
         pop_score = compute_popularity_score(meta)
         avail_score = compute_availability_score(meta, filters.size)
 
-        final_score = 0.5 * sim_score + 0.3 * pop_score + 0.2 * avail_score
+        # Search Ranking Logic
+        # Prioritize semantic/visual relevance (sim_score) to ensure specific queries work 
+        # even for new/unpopular items (Cold Start problem).
+        # Popularity (pop_score) determines ordering among relevant items.
+        # Relevance > Availability > Popularity
+        final_score = 0.75 * sim_score + 0.05 * pop_score + 0.2 * avail_score
 
-        slug = meta.get("groupSlug") or extract_slug(doc.get("url", "") or "") or ""
+        slug = meta.get("groupSlug") or meta.get("slug") or extract_slug(doc.get("url", "") or "") or ""
         url = meta.get("url") or doc.get("url") or (f"/product/{slug}" if slug else "")
         title_raw = meta.get("name") or doc.get("title", "Product")
         title = clean_title(title_raw)
@@ -539,14 +599,34 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
                 pass
 
         # ✨ PHASE 6: Extract image URL from metadata
-        image_url = meta.get("image")  # From backend_loader
-        if not image_url:
-            # Fallback: check images array (flat JSON)
+        # Prioritize Cloudinary 'imageUrl' (updated by cloud sync) over absolute local paths
+        image_url = meta.get("imageUrl") or meta.get("image_url") or meta.get("image")
+        
+        # Check if we have an array of images and pick the first one if empty
+        if not image_url or "/static/" in str(image_url):
             images = meta.get("images", [])
             if images and isinstance(images, list) and len(images) > 0:
-                first_img = images[0]
-                image_url = first_img if isinstance(first_img, str) else first_img.get("url")
+                img_candidate = images[0]
+                img_path = img_candidate if isinstance(img_candidate, str) else img_candidate.get("url")
+                # If image_url was local but images[0] is remote (Cloudinary), swap it
+                if img_path and (not image_url or "http" in str(img_path)):
+                    image_url = img_path
         
+        # Ensure absolute URL for frontend compatibility (only for local paths)
+        if image_url and str(image_url).startswith("/static/"):
+            base_url = os.getenv("COVE_CORE_BASE_URL", "http://localhost:8000")
+            # Avoid doubling up slashes if base_url ends with /
+            image_url = f"{base_url.rstrip('/')}/{image_url.lstrip('/')}"
+        
+        # ✨ Force populate outfit_category from type mapping if missing
+        outfit_category = meta.get("outfit_category")
+        if not outfit_category and meta.get("type"):
+             from app.core.config_loader import get_outfit_config
+             outfit_cfg = get_outfit_config()
+             mapping = outfit_cfg.get("category_mappings", {})
+             type_val = str(meta.get("type")).lower().strip()
+             outfit_category = mapping.get(type_val)
+
         item = RecItem(
             title=title,
             url=url,
@@ -554,12 +634,15 @@ async def recs_suggest(body: RecsIn) -> RecsOut:
             score=final_score,
             reason=reason,
             type=meta.get("type"),
+            outfit_category=outfit_category, # ✨ Now populated via fallback
             tier=meta.get("tier"),
             color=color_name,
             size=filters.size,
             variantId=variant_id,
             price=price_val,
             imageUrl=image_url,  # ✨ PHASE 6: Product image
+            brand=meta.get("brand"),   # ✨ PHASE 8: Brand
+            gender=meta.get("gender"), # ✨ PHASE 8: Gender
             # Rich product details for fact extraction
             material=meta.get("material"),
             fit=meta.get("fit"),

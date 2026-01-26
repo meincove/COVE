@@ -62,6 +62,16 @@ app.include_router(agent_stream.router)  # Week 6: Agent progress streaming
 app.include_router(metrics.router, prefix="/api", tags=["metrics"])
 app.include_router(events.router)  # Phase 3: Proactive Agent
 
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Create static dir if not exists
+static_path = os.path.join(os.path.dirname(__file__), "..", "static")
+os.makedirs(static_path, exist_ok=True)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory=static_path), name="static")
+
 
 @app.get("/healthz")
 async def health():

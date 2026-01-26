@@ -18,6 +18,7 @@ from typing_extensions import Literal
 from app.vector.store import connect
 from app.vector.store import get_conn
 from app.agent.orchestrator import classify
+from app.agents.multi_agent_orchestrator import MultiAgentOrchestrator, WorkflowState
 from app.routes.rag import _parse_query_attrs  # reuse the same attrs logic as RAG
 from app.agent.filters import (
     build_filters,
@@ -531,25 +532,32 @@ def _get_similar_types(product_type: str) -> List[str]:
 
 
 async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
-
     """
-    Wrapper around Cove's recommendations logic.
-    Uses HTTP endpoint for product recommendations.
+    Direct wrapper around hybrid search for agent recommendations.
+    Bypasses HTTP overhead for reliability and metadata consistency.
     """
-    # HTTP fallback (primary method for now)
     try:
-        async with httpx.AsyncClient(timeout=120) as cx:
-            r = await cx.post(
-                "http://127.0.0.1:8000/ai/recs/suggest",
-                json=payload,
-            )
-        if r.status_code == 200:
-            return r.json()
-        log.warning("recs.suggest non-200 %s: %s", r.status_code, r.text)
+        from app.vector.store import _search_hybrid_rrf_sync, async_embed_query, run_in_threadpool
+        
+        query = payload.get("query", "")
+        filters = payload.get("filters", {})
+        top_k = payload.get("top_k", 20)
+        
+        q_emb = await async_embed_query(query)
+        items = await run_in_threadpool(
+            _search_hybrid_rrf_sync,
+            query=query,
+            q_emb=q_emb,
+            kind="product",
+            top_k=top_k,
+            filters=filters
+        )
+        
+        return {"items": items}
+        
     except Exception as e:
-        log.exception(f"recs.suggest failed: {e}")
-
-    return {}
+        log.exception(f"Direct recs search failed: {e}")
+        return {"items": []}
 
 
 # --- FIT integration helpers -------------------------------------------------
@@ -1048,6 +1056,35 @@ async def _agent_query_impl(
         classification["entities"]["_visual_vibe"] = search_strategy.visual_vibe
         
         log.info(f"🧠 [STRATEGY] Applied Strategy: {search_strategy.semantic_query}")
+
+        # ✨ VITAL FIX: Inject gathered context (from conversation flow) into entities
+        # This ensures that explicit answers (e.g. "Men", "$300") override AI guesses
+        gathered = getattr(body, "_gathered_context", {})
+        if gathered:
+            log.info(f"💉 Injecting gathered context into classification: {gathered}")
+            if "entities" not in classification:
+                classification["entities"] = {}
+                
+            # Map gathered keys to entity keys
+            if gathered.get("gender"):
+                classification["entities"]["gender"] = gathered["gender"].lower()
+            
+            if gathered.get("budget_max"):
+                # Handle potential string/float difference
+                try:
+                    classification["entities"]["price_max"] = float(gathered["budget_max"])
+                except:
+                    pass
+            
+            if gathered.get("occasion"):
+                classification["entities"]["occasion"] = gathered["occasion"]
+                
+            if gathered.get("style"):
+                original_style = classification["entities"].get("style", "")
+                # Append if exists to mix signals, or just overwrite? Overwrite is safer for explicit choice.
+                classification["entities"]["style"] = gathered["style"]
+            
+            log.info(f"💉 Final Entities after Injection: {classification['entities']}")
         
     except Exception as e:
         log.error(f"❌ [STRATEGY] Translation failed, proceeding with basic classification: {e}")
@@ -1059,6 +1096,14 @@ async def _agent_query_impl(
     # This uses LLM classification instead of hardcoded patterns!
     should_skip_flow = skip_conversation_check
     is_outfit_intent = (intent == "outfit_builder" and confidence > 0.6) or body.sessionType == "outfit_builder"
+    is_multimodal_intent = bool(body.imageUrl or body.imageData)
+    
+    # Force multimodal search if image is present
+    if is_multimodal_intent:
+        log.info("🖼️ Image detected in request, prioritizing multimodal_search workflow")
+        intent = "multimodal_search"
+        confidence = 1.0
+        is_outfit_intent = False # Mutually exclusive for now to avoid confusion
     
     # SMART VAGUE QUERY DETECTION
     # ...
@@ -1137,11 +1182,14 @@ async def _agent_query_impl(
                 )
     # ===== END CONVERSATION FLOW HANDLER =====
 
-    # Route outfit requests to orchestrator (if we get here, conversation is complete or skipped)
-    if is_outfit_intent:
-        workflow_name = "outfit_builder"
+    # Route to orchestrator for complex workflows
+    if is_outfit_intent or is_multimodal_intent:
+        workflow_name = "multimodal_search" if is_multimodal_intent else "outfit_builder"
         log.debug(f" 🎯 Routing to Agent Orchestrator: {workflow_name}")
-        if body.sessionType == "outfit_builder":
+        
+        if is_multimodal_intent:
+            log.info(f"🌈 Multimodal search triggered by image input")
+        elif body.sessionType == "outfit_builder":
             log.info(f"🎨 Forced outfit builder from sessionType (bypassing intent classification)")
 
         # Use outfit_builder session type for separate conversation
@@ -1206,7 +1254,9 @@ async def _agent_query_impl(
                     "budget_max": budget_max,
                     "user_size_history": {},  # Could load from profile
                     "original_query": gathered_context.get("original_query", ""),  # Preserve for gender detection
-                    "gender": gathered_context.get("gender") or SessionStateManager.get_gender_preference(body) or (ai_profile.get("gender") if ai_profile else None) # ✨ Use resolved gender from session/profile if available
+                    "gender": gathered_context.get("gender") or SessionStateManager.get_gender_preference(body) or (ai_profile.get("gender") if ai_profile else None), # ✨ Use resolved gender from session/profile if available
+                    "imageUrl": body.imageUrl, # ✨ VISION SUPPORT
+                    "imageData": body.imageData  # ✨ VISION SUPPORT
                 },
                 stream=True  # Enable streaming!
             ):
@@ -1292,6 +1342,20 @@ async def _agent_query_impl(
                     answer="Sorry, I couldn't build your outfit right now. Please try again!",
                     items=[]
                 )
+
+            # Check for interactive confirmation request from Orchestrator
+            if result.get("needs_confirmation"):
+                return AgentOut(
+                    kind="answer",
+                    answer=result.get("question", "I need a bit more info."),
+                    question_options={
+                        "type": "button",
+                        "options": result.get("options", []),
+                        "allow_custom": False,
+                        "key": "gender"
+                    },
+                    reasoning=result.get("reasoning", "Asking for clarification")
+                )
             
             # Track agent executions
             for agent_name, timing_ms in result.get("agent_timings", {}).items():
@@ -1321,7 +1385,7 @@ async def _agent_query_impl(
                 agent_items.append(AgentItem(
                     slug=product.get("slug", ""),
                     title=product.get("title", "Unknown"),
-                    url=product.get("url", f"/product/{product.get('slug', '')}"),  # Required field!
+                    url=product.get("url") or f"/product/{product.get('slug', '')}",  # Required field!
                     score=product.get("score", 0.0),
                     reason=item.get("reason", ""),
                     type=product.get("type", ""),
@@ -1485,6 +1549,16 @@ async def _agent_query_impl(
     from app.mcp_agents.intent_mapping import map_semantic_intent_to_orchestrator
     semantic_intent = classification_result["intent"]
     confidence = classification_result.get("confidence", 0.95)
+
+    # Merge LLM-extracted filters (Entities) into rec_filters
+    # This ensures 'brand' and other complex entities are applied
+    llm_entities = classification_result.get("entities") or {}
+    if llm_entities:
+        for field in ["type", "price_min", "price_max", "sort", "color", "gender", "brand", "tier", "fit"]:
+            if val := llm_entities.get(field):
+                # Prefer LLM extraction over regex/legacy
+                rec_filters[field] = val
+                log.info(f"🧠 [INTELLIGENCE] Applied filter '{field}'='{val}' from semantic understanding")
     
     # === LLM-BASED "SHOW MORE" HANDLING ===
     # When LLM detects user wants more of same (e.g., "I'm not impressed", "got anything else?")
@@ -1537,7 +1611,11 @@ async def _agent_query_impl(
         # Treat as product discovery for the rest of the flow
         semantic_intent = "recommendations"
     
-    intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
+    intent_kind = map_semantic_intent_to_orchestrator(
+        semantic_intent=semantic_intent,
+        query=q,
+        entities=llm_entities
+    )
     
     # Phase 1: Complete thinking event
     thinking_tracker.complete(
@@ -2785,6 +2863,92 @@ async def _agent_query_impl(
         )
 
         # no items → fall through to RAG / chat below
+
+    # --- Branch 3: Multi-Agent Orchestrator (Stylist/Outfit Builder) -----------
+    if intent_kind == "agent_stylist":
+        log.info(f"🚀 [ORCHESTRATOR] Triggering Multi-Agent Orchestrator for query: {q}")
+        
+        # Use orchestrator to execute the workflow
+        orchestrator = MultiAgentOrchestrator()
+        
+        # Build task and context
+        task = {
+            "query": q,
+            "budget_max": numeric_filters.get("price_max", 500),
+            "visual_context": body.visualMetadata
+        }
+        
+        # Ensure we have a guest session ID if clerk user ID is missing
+        user_id = body.clerkUserId or body.guestSessionId or "anonymous"
+        
+        orchestrator_context = {
+            "user_id": user_id,
+            "session_id": body.guestSessionId,
+            "original_query": body.message,
+            "gender": rec_filters.get("gender")
+        }
+        
+        try:
+            # We use the standard (non-streaming) execution here because the 
+            # outer route _agent_query_impl expects a single AgentOut.
+            # (The streaming is handled by agent_stream.py calling this)
+            
+            # Since we want to emit agentic events, we actually need to yield from
+            # the orchestrator if we're in a streaming context.
+            # But the caller _agent_query_impl is NOT a generator.
+            
+            # DESIGN DECISION: We'll run the standard workflow and return final results.
+            # The agentic events (category_candidates etc.) will STILL be emitted
+            # to the global event emitter if we provide the callback.
+            
+            def orchestrator_callback(event):
+                emit_event(event.get("event_type", "thinking:step"), event)
+
+            # Standard execution with callback for event emission
+            # We need to use standard workflow for non-generator compatibility
+            result_dict = await orchestrator._execute_standard_workflow(
+                workflow=orchestrator.workflows.get("outfit_builder"),
+                state=WorkflowState(
+                    query=q,
+                    budget_max=task["budget_max"],
+                    context=orchestrator_context
+                ),
+                workflow_name="outfit_builder"
+            )
+            
+            if result_dict.get("success"):
+                outfit_data = result_dict.get("outfit_items", [])
+                
+                # Convert to AgentItem list
+                items = []
+                for it in outfit_data:
+                    if isinstance(it, dict):
+                        # Pydantic validation: Ensure 'url' and other fields exist
+                        # Default to # if missing to satisfy non-empty string requirement if it exists
+                        it["url"] = it.get("url") or f"/product/{it.get('slug', 'unknown')}"
+                        items.append(AgentItem(**it))
+                
+                # Store in session
+                SessionStateManager.store_session_recs(body, items)
+                SessionStateManager.mark_slugs_as_shown(body, [it.slug for it in items if it.slug])
+                
+                return AgentOut(
+                    kind="recommendations",
+                    answer=result_dict.get("reasoning", "I've built a complete outfit for you!"),
+                    items=items,
+                    debug_plan={**debug_plan, "orchestrator_used": True}
+                )
+            else:
+                log.error(f"Orchestrator failed: {result_dict.get('error')}")
+                # Fallback to general discovery
+                intent_kind = "discover"
+                wants_recs = True
+        except Exception as e:
+            log.exception(f"Exception invoking orchestrator: {e}")
+            # Fallback to general discovery
+            intent_kind = "discover"
+            wants_recs = True
+
 
     # --- Branch 4: generic fallback (LLM chat or RAG) --------------------------
     log.debug(f"💬 [DEBUG] FALLBACK BRANCH: wants_cart={wants_cart}, wants_recs={wants_recs}, intent_kind={intent_kind}")

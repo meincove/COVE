@@ -1,0 +1,1634 @@
+[
+  {
+    "brand": "Vortex Streetwear",
+    "data": {
+      "success": true,
+      "workflow": "outfit_builder",
+      "outfit_items": [
+        {
+          "outfit_id": "outfit_1",
+          "category": "top",
+          "slug": "",
+          "product": {
+            "title": "Vortex Streetwear Urban Hoodie",
+            "price": 132.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317972/cove_assets/q68xjmxouyvr7ud4ywtb.png",
+            "slug": "",
+            "type": "hoodie",
+            "outfit_category": "tops",
+            "color": null,
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "variantId": "vortex-streetwear-urban-hoodie-v1",
+            "productId": "5bc46989-284d-4b4b-8861-db92299be710",
+            "meta": {
+              "name": "Vortex Streetwear Urban Hoodie",
+              "slug": "vortex-streetwear-urban-hoodie",
+              "type": "hoodie",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 132.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317972/cove_assets/q68xjmxouyvr7ud4ywtb.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/13be35c2-f0e3-415d-bc08-cde2a68a3d9c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Hoodie__Style__bold.jpg",
+              "variantId": "vortex-streetwear-urban-hoodie-v1",
+              "description": "A premium Hoodie from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "tops"
+            }
+          },
+          "title": "Vortex Streetwear Urban Hoodie",
+          "type": "hoodie",
+          "price": 132.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317972/cove_assets/q68xjmxouyvr7ud4ywtb.png",
+          "color": null,
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_1",
+          "category": "bottom",
+          "slug": "vortex-streetwear-night-cargo-pants",
+          "product": {
+            "title": "Vortex Streetwear Night Cargo Pants",
+            "url": null,
+            "slug": "vortex-streetwear-night-cargo-pants",
+            "type": "cargo pants",
+            "outfit_category": "bottoms",
+            "price": 186.0,
+            "imageUrl": "/static/assets/8518487e-e5dd-4b1e-8e82-e5f65c247665_men_neutral_Vortex_Streetwear_Night_Cargo_Pants__ghost_mannequin_style.jpg",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Night Cargo Pants",
+              "slug": "vortex-streetwear-night-cargo-pants",
+              "type": "cargo pants",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 186.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "/static/assets/8518487e-e5dd-4b1e-8e82-e5f65c247665_men_neutral_Vortex_Streetwear_Night_Cargo_Pants__ghost_mannequin_style.jpg",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/443e2536-b6b3-42cd-8a4c-ec9ed9d9768c_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Cargo_Pants__Style__bold.jpg",
+              "variantId": "vortex-streetwear-night-cargo-pants-v1",
+              "description": "A premium Cargo Pants from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "bottoms"
+            }
+          },
+          "title": "Vortex Streetwear Night Cargo Pants",
+          "type": "cargo pants",
+          "price": 186.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "http://localhost:8000/static/assets/8518487e-e5dd-4b1e-8e82-e5f65c247665_men_neutral_Vortex_Streetwear_Night_Cargo_Pants__ghost_mannequin_style.jpg",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_1",
+          "category": "shoes",
+          "slug": "vortex-streetwear-night-high-tops",
+          "product": {
+            "title": "Vortex Streetwear Night High-tops",
+            "url": null,
+            "slug": "vortex-streetwear-night-high-tops",
+            "type": "high-tops",
+            "outfit_category": "shoes",
+            "price": 80.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317950/cove_assets/by3nzccxrliamnjwim0h.png",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Night High-tops",
+              "slug": "vortex-streetwear-night-high-tops",
+              "type": "high-tops",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 80.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317950/cove_assets/by3nzccxrliamnjwim0h.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/03fb4346-ea61-4cbf-8bde-d7e3991d1a1a_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_High_tops__Style__bold.jpg",
+              "variantId": "vortex-streetwear-night-high-tops-v1",
+              "description": "A premium High-tops from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "shoes"
+            }
+          },
+          "title": "Vortex Streetwear Night High-tops",
+          "type": "high-tops",
+          "price": 80.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317950/cove_assets/by3nzccxrliamnjwim0h.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_1",
+          "category": "outerwear",
+          "slug": "vortex-streetwear-tactical-tech-jacket",
+          "product": {
+            "title": "Vortex Streetwear Tactical Tech Jacket",
+            "url": null,
+            "slug": "vortex-streetwear-tactical-tech-jacket",
+            "type": "tech jacket",
+            "outfit_category": "outerwear",
+            "price": 172.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318031/cove_assets/po04s4snpq13x7uukeo7.png",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Tactical Tech Jacket",
+              "slug": "vortex-streetwear-tactical-tech-jacket",
+              "type": "tech jacket",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 172.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318031/cove_assets/po04s4snpq13x7uukeo7.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/ffa247f5-3cca-4d46-aaad-d4201608ba36_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_Tech_Jacket__Style__bold.jpg",
+              "variantId": "vortex-streetwear-tactical-tech-jacket-v1",
+              "description": "A premium Tech Jacket from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "outerwear"
+            }
+          },
+          "title": "Vortex Streetwear Tactical Tech Jacket",
+          "type": "tech jacket",
+          "price": 172.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318031/cove_assets/po04s4snpq13x7uukeo7.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "accessories",
+          "product": {
+            "title": "No accessories found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find accessories under \u20ac71 matching filters"
+          },
+          "title": "No accessories found",
+          "slug": "missing-accessories-outfit_1",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_1",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_2",
+          "category": "top",
+          "slug": "vortex-streetwear-cyber-vest",
+          "product": {
+            "title": "Vortex Streetwear Cyber Vest",
+            "url": null,
+            "slug": "vortex-streetwear-cyber-vest",
+            "type": "vest",
+            "outfit_category": "tops",
+            "price": 195.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317964/cove_assets/lydanx7grpas0pemeicc.png",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Cyber Vest",
+              "slug": "vortex-streetwear-cyber-vest",
+              "type": "vest",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 195.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317964/cove_assets/lydanx7grpas0pemeicc.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/fbb7cd21-e001-4e62-8a85-236393e7295b_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Vest__Style__bold.jpg",
+              "variantId": "vortex-streetwear-cyber-vest-v1",
+              "description": "A premium Vest from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "tops"
+            }
+          },
+          "title": "Vortex Streetwear Cyber Vest",
+          "type": "vest",
+          "price": 195.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317964/cove_assets/lydanx7grpas0pemeicc.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "bottom",
+          "product": {
+            "title": "No bottom found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find bottom under \u20ac214 matching filters"
+          },
+          "title": "No bottom found",
+          "slug": "missing-bottom-outfit_2",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_2",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_2",
+          "category": "shoes",
+          "slug": "vortex-streetwear-tactical-high-tops",
+          "product": {
+            "title": "Vortex Streetwear Tactical High-tops",
+            "url": null,
+            "slug": "vortex-streetwear-tactical-high-tops",
+            "type": "high-tops",
+            "outfit_category": "shoes",
+            "price": 157.0,
+            "imageUrl": "/static/assets/98ac7cf7-09af-4359-b623-187ebfddd932_men_neutral_Vortex_Streetwear_Tactical_High_tops__ghost_mannequin_style.jpg",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Tactical High-tops",
+              "slug": "vortex-streetwear-tactical-high-tops",
+              "type": "high-tops",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 157.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "/static/assets/98ac7cf7-09af-4359-b623-187ebfddd932_men_neutral_Vortex_Streetwear_Tactical_High_tops__ghost_mannequin_style.jpg",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/71062b67-c79e-4a5a-9f90-e898687b187b_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Tactical_High_tops__Style__bold.jpg",
+              "variantId": "vortex-streetwear-tactical-high-tops-v1",
+              "description": "A premium High-tops from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "shoes"
+            }
+          },
+          "title": "Vortex Streetwear Tactical High-tops",
+          "type": "high-tops",
+          "price": 157.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "http://localhost:8000/static/assets/98ac7cf7-09af-4359-b623-187ebfddd932_men_neutral_Vortex_Streetwear_Tactical_High_tops__ghost_mannequin_style.jpg",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_2",
+          "category": "outerwear",
+          "slug": "vortex-streetwear-night-tech-jacket",
+          "product": {
+            "title": "Vortex Streetwear Night Tech Jacket",
+            "url": null,
+            "slug": "vortex-streetwear-night-tech-jacket",
+            "type": "tech jacket",
+            "outfit_category": "outerwear",
+            "price": 253.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318042/cove_assets/frepmzpdwbittezvpodb.png",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Night Tech Jacket",
+              "slug": "vortex-streetwear-night-tech-jacket",
+              "type": "tech jacket",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 253.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318042/cove_assets/frepmzpdwbittezvpodb.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/4c3753b3-6a72-4173-90e3-41913a55f650_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Night_Tech_Jacket__Style__bold.jpg",
+              "variantId": "vortex-streetwear-night-tech-jacket-v1",
+              "description": "A premium Tech Jacket from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "outerwear"
+            }
+          },
+          "title": "Vortex Streetwear Night Tech Jacket",
+          "type": "tech jacket",
+          "price": 253.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318042/cove_assets/frepmzpdwbittezvpodb.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "accessories",
+          "product": {
+            "title": "No accessories found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find accessories under \u20ac71 matching filters"
+          },
+          "title": "No accessories found",
+          "slug": "missing-accessories-outfit_2",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_2",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_3",
+          "category": "top",
+          "slug": "vortex-streetwear-urban-vest",
+          "product": {
+            "title": "Vortex Streetwear Urban Vest",
+            "url": null,
+            "slug": "vortex-streetwear-urban-vest",
+            "type": "vest",
+            "outfit_category": "tops",
+            "price": 187.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317977/cove_assets/tdq1pcoeefohinmc1hdb.jpg",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "unisex",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Urban Vest",
+              "slug": "vortex-streetwear-urban-vest",
+              "type": "vest",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 187.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "unisex",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317977/cove_assets/tdq1pcoeefohinmc1hdb.jpg",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/a3cf54c4-18ef-4e3c-8a6e-6eabd87ba3b6_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Urban_Vest__Style__bold.jpg",
+              "variantId": "vortex-streetwear-urban-vest-v1",
+              "description": "A premium Vest from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "tops"
+            }
+          },
+          "title": "Vortex Streetwear Urban Vest",
+          "type": "vest",
+          "price": 187.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317977/cove_assets/tdq1pcoeefohinmc1hdb.jpg",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "unisex",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "bottom",
+          "product": {
+            "title": "No bottom found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find bottom under \u20ac214 matching filters"
+          },
+          "title": "No bottom found",
+          "slug": "missing-bottom-outfit_3",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_3",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_3",
+          "category": "shoes",
+          "slug": "vortex-streetwear-cyber-high-tops",
+          "product": {
+            "title": "Vortex Streetwear Cyber High-tops",
+            "url": null,
+            "slug": "vortex-streetwear-cyber-high-tops",
+            "type": "high-tops",
+            "outfit_category": "shoes",
+            "price": 128.0,
+            "imageUrl": "/static/assets/9e646606-104e-454f-b487-3fdd952aff13_men_neutral_Vortex_Streetwear_Cyber_High_tops__ghost_mannequin_style.jpg",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Cyber High-tops",
+              "slug": "vortex-streetwear-cyber-high-tops",
+              "type": "high-tops",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 128.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "/static/assets/9e646606-104e-454f-b487-3fdd952aff13_men_neutral_Vortex_Streetwear_Cyber_High_tops__ghost_mannequin_style.jpg",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/066e5536-381c-46e0-aad9-757e71e3fde5_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_High_tops__Style__bold.jpg",
+              "variantId": "vortex-streetwear-cyber-high-tops-v1",
+              "description": "A premium High-tops from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "shoes"
+            }
+          },
+          "title": "Vortex Streetwear Cyber High-tops",
+          "type": "high-tops",
+          "price": 128.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "http://localhost:8000/static/assets/9e646606-104e-454f-b487-3fdd952aff13_men_neutral_Vortex_Streetwear_Cyber_High_tops__ghost_mannequin_style.jpg",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_3",
+          "category": "outerwear",
+          "slug": "vortex-streetwear-cyber-tech-jacket",
+          "product": {
+            "title": "Vortex Streetwear Cyber Tech Jacket",
+            "url": null,
+            "slug": "vortex-streetwear-cyber-tech-jacket",
+            "type": "tech jacket",
+            "outfit_category": "outerwear",
+            "price": 318.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317993/cove_assets/bdirs3ga7gjyzsjzdbvc.png",
+            "color": "neutral",
+            "brand": "Vortex Streetwear",
+            "gender": "unisex",
+            "similarity": NaN,
+            "meta": {
+              "name": "Vortex Streetwear Cyber Tech Jacket",
+              "slug": "vortex-streetwear-cyber-tech-jacket",
+              "type": "tech jacket",
+              "brand": "Vortex Streetwear",
+              "color": "neutral",
+              "price": 318.0,
+              "style": {
+                "styleTags": [
+                  "bold",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "unisex",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317993/cove_assets/bdirs3ga7gjyzsjzdbvc.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/1c8d1021-c8dd-4751-b7e5-6703a4707df8_Professional_high_end_e_commerce_product_card_photography_of_Vortex_Streetwear_Cyber_Tech_Jacket__Style__bold.jpg",
+              "variantId": "vortex-streetwear-cyber-tech-jacket-v1",
+              "description": "A premium Tech Jacket from Vortex Streetwear. bold, futuristic, tech-wear, urban, dark moody lighting, neon accents.",
+              "outfit_category": "outerwear"
+            }
+          },
+          "title": "Vortex Streetwear Cyber Tech Jacket",
+          "type": "tech jacket",
+          "price": 318.0,
+          "reason": "Matches style 'aggressive cyberpunk streetwear'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317993/cove_assets/bdirs3ga7gjyzsjzdbvc.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Vortex Streetwear",
+          "gender": "unisex",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "accessories",
+          "product": {
+            "title": "No accessories found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find accessories under \u20ac71 matching filters"
+          },
+          "title": "No accessories found",
+          "slug": "missing-accessories-outfit_3",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_3",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        }
+      ],
+      "total": 602.6666666666666,
+      "within_budget": true,
+      "discount_applied": null,
+      "size_recommendations": [
+        {
+          "product_id": null,
+          "category": "top",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "bottom",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "shoes",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "outerwear",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "accessories",
+          "brand": "Unknown",
+          "recommended_size": "One Size",
+          "confidence": 1.0,
+          "reason": "One size fits all",
+          "warnings": []
+        },
+        {
+          "product_id": null,
+          "category": "top",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "bottom",
+          "brand": "Unknown",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "shoes",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "outerwear",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "accessories",
+          "brand": "Unknown",
+          "recommended_size": "One Size",
+          "confidence": 1.0,
+          "reason": "One size fits all",
+          "warnings": []
+        },
+        {
+          "product_id": null,
+          "category": "top",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "bottom",
+          "brand": "Unknown",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "shoes",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "outerwear",
+          "brand": "Vortex Streetwear",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "accessories",
+          "brand": "Unknown",
+          "recommended_size": "One Size",
+          "confidence": 1.0,
+          "reason": "One size fits all",
+          "warnings": []
+        }
+      ],
+      "reasoning": "Planning: I've found some great options for your casual outfit across 3 categories. Take a look!. Styling: Generated 3 outfits using category-aware search.. Sizing: Analyzed 15 items, recommended sizes for 15. 12 warnings. Budget: Within budget (\u20ac1000.00 remaining)",
+      "confidence": 0.79,
+      "agent_timings": {
+        "stylist": 11501.805067062378,
+        "outfit_builder": 15399.076700210571,
+        "fit": 11.945009231567383,
+        "budget": 5.240917205810547
+      },
+      "errors": []
+    }
+  },
+  {
+    "brand": "Aura Minimalist",
+    "data": {
+      "success": true,
+      "workflow": "outfit_builder",
+      "outfit_items": [
+        {
+          "outfit_id": "outfit_1",
+          "category": "top",
+          "slug": "",
+          "product": {
+            "title": "Aura Minimalist Raw Sweater",
+            "price": 138.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317981/cove_assets/vusktvdiofoptcot8tux.png",
+            "slug": "",
+            "type": "sweater",
+            "outfit_category": "tops",
+            "color": null,
+            "brand": "Aura Minimalist",
+            "gender": "men",
+            "variantId": "aura-minimalist-raw-sweater-v1",
+            "productId": "237ae8e8-5469-4cd0-a792-7bccabe4b395",
+            "meta": {
+              "name": "Aura Minimalist Raw Sweater",
+              "slug": "aura-minimalist-raw-sweater",
+              "type": "sweater",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 138.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317981/cove_assets/vusktvdiofoptcot8tux.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/237ae8e8-5469-4cd0-a792-7bccabe4b395_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sweater__Style__clean.jpg",
+              "variantId": "aura-minimalist-raw-sweater-v1",
+              "description": "A premium Sweater from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "tops"
+            }
+          },
+          "title": "Aura Minimalist Raw Sweater",
+          "type": "sweater",
+          "price": 138.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317981/cove_assets/vusktvdiofoptcot8tux.png",
+          "color": null,
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_1",
+          "category": "bottom",
+          "slug": "aura-minimalist-essential-trousers",
+          "product": {
+            "title": "Aura Minimalist Essential Trousers",
+            "url": null,
+            "slug": "aura-minimalist-essential-trousers",
+            "type": "trousers",
+            "outfit_category": "bottoms",
+            "price": 109.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317947/cove_assets/reayialclg5vvcgec48w.png",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "unisex",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Essential Trousers",
+              "slug": "aura-minimalist-essential-trousers",
+              "type": "trousers",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 109.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "unisex",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317947/cove_assets/reayialclg5vvcgec48w.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/0f8b01c9-81dc-4495-8843-5f283186db5c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Essential_Trousers__Style__clean.jpg",
+              "variantId": "aura-minimalist-essential-trousers-v1",
+              "description": "A premium Trousers from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "bottoms"
+            }
+          },
+          "title": "Aura Minimalist Essential Trousers",
+          "type": "trousers",
+          "price": 109.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317947/cove_assets/reayialclg5vvcgec48w.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "unisex",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "shoes",
+          "product": {
+            "title": "No shoes found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find shoes under \u20ac214 matching filters"
+          },
+          "title": "No shoes found",
+          "slug": "missing-shoes-outfit_1",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_1",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_1",
+          "category": "outerwear",
+          "slug": "aura-minimalist-raw-coat",
+          "product": {
+            "title": "Aura Minimalist Raw Coat",
+            "url": null,
+            "slug": "aura-minimalist-raw-coat",
+            "type": "coat",
+            "outfit_category": "outerwear",
+            "price": 303.0,
+            "imageUrl": "/static/assets/95d91f9c-4354-44df-918b-dce33a2c488a_unisex_neutral_Aura_Minimalist_Raw_Coat__ghost_mannequin_style.jpg",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "unisex",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Raw Coat",
+              "slug": "aura-minimalist-raw-coat",
+              "type": "coat",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 303.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "unisex",
+              "imageUrl": "/static/assets/95d91f9c-4354-44df-918b-dce33a2c488a_unisex_neutral_Aura_Minimalist_Raw_Coat__ghost_mannequin_style.jpg",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/67e211ae-f93e-4127-b74a-2679bbafa99c_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Coat__Style__clean.jpg",
+              "variantId": "aura-minimalist-raw-coat-v1",
+              "description": "A premium Coat from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "outerwear"
+            }
+          },
+          "title": "Aura Minimalist Raw Coat",
+          "type": "coat",
+          "price": 303.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "http://localhost:8000/static/assets/95d91f9c-4354-44df-918b-dce33a2c488a_unisex_neutral_Aura_Minimalist_Raw_Coat__ghost_mannequin_style.jpg",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "unisex",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "accessories",
+          "product": {
+            "title": "No accessories found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find accessories under \u20ac71 matching filters"
+          },
+          "title": "No accessories found",
+          "slug": "missing-accessories-outfit_1",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_1",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_2",
+          "category": "top",
+          "slug": "aura-minimalist-raw-sweater",
+          "product": {
+            "title": "Aura Minimalist Raw Sweater",
+            "url": null,
+            "slug": "aura-minimalist-raw-sweater",
+            "type": "sweater",
+            "outfit_category": "tops",
+            "price": 138.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317981/cove_assets/vusktvdiofoptcot8tux.png",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Raw Sweater",
+              "slug": "aura-minimalist-raw-sweater",
+              "type": "sweater",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 138.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317981/cove_assets/vusktvdiofoptcot8tux.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/237ae8e8-5469-4cd0-a792-7bccabe4b395_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Sweater__Style__clean.jpg",
+              "variantId": "aura-minimalist-raw-sweater-v1",
+              "description": "A premium Sweater from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "tops"
+            }
+          },
+          "title": "Aura Minimalist Raw Sweater",
+          "type": "sweater",
+          "price": 138.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317981/cove_assets/vusktvdiofoptcot8tux.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_2",
+          "category": "bottom",
+          "slug": "aura-minimalist-timeless-trousers",
+          "product": {
+            "title": "Aura Minimalist Timeless Trousers",
+            "url": null,
+            "slug": "aura-minimalist-timeless-trousers",
+            "type": "trousers",
+            "outfit_category": "bottoms",
+            "price": 134.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317960/cove_assets/rvgqmwoao5vt6doet3tc.png",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "unisex",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Timeless Trousers",
+              "slug": "aura-minimalist-timeless-trousers",
+              "type": "trousers",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 134.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "unisex",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317960/cove_assets/rvgqmwoao5vt6doet3tc.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/d49a36a8-9d67-468a-b96d-abbcb8d2dc35_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Trousers__Style__clean.jpg",
+              "variantId": "aura-minimalist-timeless-trousers-v1",
+              "description": "A premium Trousers from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "bottoms"
+            }
+          },
+          "title": "Aura Minimalist Timeless Trousers",
+          "type": "trousers",
+          "price": 134.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317960/cove_assets/rvgqmwoao5vt6doet3tc.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "unisex",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "shoes",
+          "product": {
+            "title": "No shoes found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find shoes under \u20ac214 matching filters"
+          },
+          "title": "No shoes found",
+          "slug": "missing-shoes-outfit_2",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_2",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_2",
+          "category": "outerwear",
+          "slug": "aura-minimalist-timeless-coat",
+          "product": {
+            "title": "Aura Minimalist Timeless Coat",
+            "url": null,
+            "slug": "aura-minimalist-timeless-coat",
+            "type": "coat",
+            "outfit_category": "outerwear",
+            "price": 266.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317970/cove_assets/p7ix1ajegiw0acyvnfwe.png",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "unisex",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Timeless Coat",
+              "slug": "aura-minimalist-timeless-coat",
+              "type": "coat",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 266.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "unisex",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317970/cove_assets/p7ix1ajegiw0acyvnfwe.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/9c0e2acf-7930-482a-a7aa-f44fba1ffae6_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Coat__Style__clean.jpg",
+              "variantId": "aura-minimalist-timeless-coat-v1",
+              "description": "A premium Coat from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "outerwear"
+            }
+          },
+          "title": "Aura Minimalist Timeless Coat",
+          "type": "coat",
+          "price": 266.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769317970/cove_assets/p7ix1ajegiw0acyvnfwe.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "unisex",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "accessories",
+          "product": {
+            "title": "No accessories found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find accessories under \u20ac71 matching filters"
+          },
+          "title": "No accessories found",
+          "slug": "missing-accessories-outfit_2",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_2",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_3",
+          "category": "top",
+          "slug": "aura-minimalist-timeless-sweater",
+          "product": {
+            "title": "Aura Minimalist Timeless Sweater",
+            "url": null,
+            "slug": "aura-minimalist-timeless-sweater",
+            "type": "sweater",
+            "outfit_category": "tops",
+            "price": 145.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318025/cove_assets/aexsabfb3rmk5fcuxfrf.png",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Timeless Sweater",
+              "slug": "aura-minimalist-timeless-sweater",
+              "type": "sweater",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 145.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318025/cove_assets/aexsabfb3rmk5fcuxfrf.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/1b304d6d-c0e5-47f2-a78a-db9d6ec19f22_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Timeless_Sweater__Style__clean.jpg",
+              "variantId": "aura-minimalist-timeless-sweater-v1",
+              "description": "A premium Sweater from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "tops"
+            }
+          },
+          "title": "Aura Minimalist Timeless Sweater",
+          "type": "sweater",
+          "price": 145.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318025/cove_assets/aexsabfb3rmk5fcuxfrf.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_3",
+          "category": "bottom",
+          "slug": "aura-minimalist-raw-trousers",
+          "product": {
+            "title": "Aura Minimalist Raw Trousers",
+            "url": null,
+            "slug": "aura-minimalist-raw-trousers",
+            "type": "trousers",
+            "outfit_category": "bottoms",
+            "price": 215.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318107/cove_assets/yjnurqxu4yif0p5xfjqt.jpg",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Raw Trousers",
+              "slug": "aura-minimalist-raw-trousers",
+              "type": "trousers",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 215.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318107/cove_assets/yjnurqxu4yif0p5xfjqt.jpg",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/d7704ff0-54bb-4882-84c4-a9e3f47675d2_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Raw_Trousers__Style__clean.jpg",
+              "variantId": "aura-minimalist-raw-trousers-v1",
+              "description": "A premium Trousers from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "bottoms"
+            }
+          },
+          "title": "Aura Minimalist Raw Trousers",
+          "type": "trousers",
+          "price": 215.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318107/cove_assets/yjnurqxu4yif0p5xfjqt.jpg",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "shoes",
+          "product": {
+            "title": "No shoes found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find shoes under \u20ac214 matching filters"
+          },
+          "title": "No shoes found",
+          "slug": "missing-shoes-outfit_3",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_3",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "outfit_id": "outfit_3",
+          "category": "outerwear",
+          "slug": "aura-minimalist-pure-coat",
+          "product": {
+            "title": "Aura Minimalist Pure Coat",
+            "url": null,
+            "slug": "aura-minimalist-pure-coat",
+            "type": "coat",
+            "outfit_category": "outerwear",
+            "price": 89.0,
+            "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318049/cove_assets/ptvg2woteo3hz3ix4lhm.png",
+            "color": "neutral",
+            "brand": "Aura Minimalist",
+            "gender": "men",
+            "similarity": NaN,
+            "meta": {
+              "name": "Aura Minimalist Pure Coat",
+              "slug": "aura-minimalist-pure-coat",
+              "type": "coat",
+              "brand": "Aura Minimalist",
+              "color": "neutral",
+              "price": 89.0,
+              "style": {
+                "styleTags": [
+                  "clean",
+                  "premium",
+                  "fashion"
+                ]
+              },
+              "gender": "men",
+              "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318049/cove_assets/ptvg2woteo3hz3ix4lhm.png",
+              "colorName": "neutral",
+              "image_url": "http://localhost:8000/static/generated_assets/2f34bbe5-1de2-4fd7-95fa-481118ea9a11_Professional_high_end_e_commerce_product_card_photography_of_Aura_Minimalist_Pure_Coat__Style__clean.jpg",
+              "variantId": "aura-minimalist-pure-coat-v1",
+              "description": "A premium Coat from Aura Minimalist. clean, minimal, neutral colors, high-end fabric, soft lighting.",
+              "outfit_category": "outerwear"
+            }
+          },
+          "title": "Aura Minimalist Pure Coat",
+          "type": "coat",
+          "price": 89.0,
+          "reason": "Matches style 'premium minimalist'",
+          "imageUrl": "https://res.cloudinary.com/dhazllgf8/image/upload/v1769318049/cove_assets/ptvg2woteo3hz3ix4lhm.png",
+          "color": "neutral",
+          "url": null,
+          "brand": "Aura Minimalist",
+          "gender": "men",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "category": "accessories",
+          "product": {
+            "title": "No accessories found",
+            "price": 0,
+            "type": "notification",
+            "description": "Could not find accessories under \u20ac71 matching filters"
+          },
+          "title": "No accessories found",
+          "slug": "missing-accessories-outfit_3",
+          "url": "#",
+          "type": "notification",
+          "price": 0,
+          "reason": "Budget/inventory constraint",
+          "is_notification": true,
+          "outfit_id": "outfit_3",
+          "recommended_size": "M",
+          "size_confidence": 0.7,
+          "size_warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        }
+      ],
+      "total": 512.3333333333334,
+      "within_budget": true,
+      "discount_applied": null,
+      "size_recommendations": [
+        {
+          "product_id": null,
+          "category": "top",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "bottom",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "shoes",
+          "brand": "Unknown",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "outerwear",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "accessories",
+          "brand": "Unknown",
+          "recommended_size": "One Size",
+          "confidence": 1.0,
+          "reason": "One size fits all",
+          "warnings": []
+        },
+        {
+          "product_id": null,
+          "category": "top",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "bottom",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "shoes",
+          "brand": "Unknown",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "outerwear",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "accessories",
+          "brand": "Unknown",
+          "recommended_size": "One Size",
+          "confidence": 1.0,
+          "reason": "One size fits all",
+          "warnings": []
+        },
+        {
+          "product_id": null,
+          "category": "top",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "bottom",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "shoes",
+          "brand": "Unknown",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "outerwear",
+          "brand": "Aura Minimalist",
+          "recommended_size": "M",
+          "confidence": 0.7,
+          "reason": "Your usual M. Standard sizing",
+          "warnings": [
+            "We don't have your size history yet. Recommendation based on brand standards."
+          ]
+        },
+        {
+          "product_id": null,
+          "category": "accessories",
+          "brand": "Unknown",
+          "recommended_size": "One Size",
+          "confidence": 1.0,
+          "reason": "One size fits all",
+          "warnings": []
+        }
+      ],
+      "reasoning": "Planning: I've found some great options for your MEETING outfit across 3 categories. Take a look!. Styling: Generated 3 outfits using category-aware search.. Sizing: Analyzed 15 items, recommended sizes for 15. 12 warnings. Budget: Within budget (\u20ac1000.00 remaining)",
+      "confidence": 0.79,
+      "agent_timings": {
+        "stylist": 11913.275957107544,
+        "outfit_builder": 17285.173892974854,
+        "fit": 1.3260841369628906,
+        "budget": 1.1472702026367188
+      },
+      "errors": []
+    }
+  }
+]

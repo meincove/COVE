@@ -116,6 +116,11 @@ class MultiAgentOrchestrator:
         """
         query_lower = query.lower()
         
+        # 0. Multimodal Priority: If image present, route to multimodal
+        if context.get("imageUrl") or context.get("imageData"):
+            log.info("🖼️ Image detected in context, routing to multimodal_search")
+            return "multimodal_search"
+        
         # 1. Fast Path: Keyword Shortcuts
         for workflow_name, workflow in self.workflows.items():
             triggers = workflow.get("trigger_patterns", [])
@@ -417,6 +422,19 @@ Rules:
                     "results": step_results,
                     "status": f"Completed {', '.join(agent_names)}"
                 }
+                
+                # ✨ EARLY EXIT: Check if any agent requested confirmation
+                should_halt = False
+                for name in agent_names:
+                    res = state.agent_results.get(name, {})
+                    data = res.get("data", {}) if hasattr(res, "get") else {}
+                    if data.get("needs_confirmation"):
+                        log.info(f"🛑 Halting workflow for confirmation request by {name}")
+                        should_halt = True
+                        break
+                
+                if should_halt:
+                    break
                     
             except Exception as e:
                 # Roll back to checkpoint on error
@@ -482,6 +500,19 @@ Rules:
                     # Parallel execution
                     log.info(f"   ⚡ Executing {len(group_steps)} agents in parallel")
                     await self._execute_parallel_steps(group_steps, state)
+                
+                # ✨ EARLY EXIT: Check if any agent requested confirmation
+                should_halt = False
+                for step in group_steps:
+                    res = state.agent_results.get(step.agent, {})
+                    data = res.get("data", {}) if hasattr(res, "get") else {}
+                    if data.get("needs_confirmation"):
+                        log.info(f"🛑 Halting workflow for confirmation request by {step.agent}")
+                        should_halt = True
+                        break
+                
+                if should_halt:
+                    break
                     
             except Exception as e:
                 # Roll back to checkpoint on error
@@ -600,13 +631,38 @@ Rules:
         }
         
         # Agent-specific task building
-        if agent_name == "stylist":
+        if agent_name == "vision" or agent_name == "fashion_analyzer":
+            return {
+                "query": state.query,
+                "imageUrl": state.context.get("imageUrl"),
+                "imageData": state.context.get("imageData")
+            }
+
+        elif agent_name == "stylist":
+            # If coming from vision/fashion analyzer, inject visual tags into query
+            analyzer_result = state.agent_results.get("fashion_analyzer") or state.agent_results.get("vision", {})
+            if analyzer_result.get("success"):
+                data = analyzer_result.get("data", {})
+                tags = data.get("search_tags") or data.get("tags", [])
+                description = data.get("core_item") or data.get("description", "")
+                vibe = data.get("vibe", "")
+                
+                if tags or vibe:
+                    log.info(f"🎨 Injecting visual DNA into stylist: {vibe} {tags}")
+                    # Prepend tags and vibe to query
+                    boosted_query = f"{state.query} style: {vibe} {', '.join(tags)} {description}".strip()
+                    return {
+                        "query": boosted_query,
+                        "budget_max": state.budget_max,
+                        "visual_context": data
+                    }
             return base_task
 
         elif agent_name == "outfit_builder":
             # Pass candidates from stylist
             stylist_result = state.agent_results.get("stylist", {})
             intent = stylist_result.get("data", {}).get("intent", {})
+            brand_filter = intent.get("brand_filter") or intent.get("filters", {}).get("brand")
             
             return {
                 "candidates": stylist_result.get("data", {}).get("candidates", {}),
@@ -614,7 +670,8 @@ Rules:
                 # FIX: Explicitly pass style/occasion/gender for OutfitBuilder to use
                 "style": intent.get("style", "casual"),
                 "occasion": intent.get("occasion", "casual"),
-                "gender": intent.get("gender"), 
+                "gender": intent.get("gender") or intent.get("filters", {}).get("gender"), 
+                "brand_filter": intent.get("brand_filter") or intent.get("filters", {}).get("brand"), 
                 "user_preferences": stylist_result.get("data", {}).get("user_preferences", {}),
                 "budget_max": state.budget_max
             }
@@ -670,7 +727,18 @@ Rules:
         
         success = success_count >= min_required
         
-        
+        # ✨ CONFIRMATION CHECK: If any agent asked for info, bubble it up immediately
+        if stylist_result.get("data", {}).get("needs_confirmation"):
+            return {
+                "success": True,
+                "workflow": workflow_name,
+                "outfit_items": [],
+                "needs_confirmation": True,
+                "question": stylist_result["data"]["question"],
+                "options": stylist_result["data"]["options"],
+                "reasoning": stylist_result["reasoning"],
+                "agent_timings": state.agent_timings
+            }
         # Build final outfit
         builder_result = state.agent_results.get("outfit_builder", {})
         
