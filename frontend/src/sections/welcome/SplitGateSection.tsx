@@ -3,7 +3,7 @@
 import React, { forwardRef, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
-import ParticleWave from "@/src/components/ParticleWave"
+import ParticleWave from "@/components/ParticleWave"
 
 type Side = "shop" | "platform" | null
 

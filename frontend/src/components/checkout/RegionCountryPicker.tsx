@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Region, buildRegionOptions, EU_CODES } from "@/src/lib/geo/countries";
+import { Region, buildRegionOptions, EU_CODES } from "@/lib/geo/countries";
 
 export type RegionCountryValue = {
   region: Region;

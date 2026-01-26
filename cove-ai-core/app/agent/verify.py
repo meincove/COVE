@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Tuple
 import re
 import httpx
+from app.config import COVE_CORE_BASE_URL
 
 _PRICE_RE = re.compile(r"(?<!\d)(\d{1,4}(?:\.\d{1,2})?)")
 _SIZE_TOKS = {"XS","S","M","L","XL","XXL"}
@@ -18,7 +19,7 @@ def extract_entities(answer_text: str) -> Dict[str, List[str]]:
 async def _get_product(slug: str) -> Optional[dict]:
     try:
         async with httpx.AsyncClient(timeout=8) as cx:
-            r = await cx.get("http://127.0.0.1:8000/ai/tools/product.get", params={"slug": slug})
+            r = await cx.get(f"{COVE_CORE_BASE_URL}/ai/tools/product.get", params={"slug": slug})
             if r.status_code == 200:
                 return r.json()
     except Exception:

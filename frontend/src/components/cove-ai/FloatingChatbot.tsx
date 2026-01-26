@@ -4,15 +4,15 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { MessageCircle, X, Shirt, ShoppingCart, Plus, Smile, ArrowUp, Image as ImageIcon, ArrowLeft, Minus, Trash2, LogIn, UserPlus, MoreHorizontal, RefreshCw, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import CoveChatWidget from "@/src/components/cove-ai/CoveChatWidget";
-import ProactiveBubble from "@/src/components/cove-ai/ProactiveBubble";
-import BubblesStatusPill from "@/src/components/cove-ai/BubblesStatusPill";
-import { useProactiveSignals, ProactiveResponse } from "@/src/hooks/useProactiveSignals";
-import { useLayoutStore } from "@/src/store/layoutStore";
+import CoveChatWidget from "@/components/cove-ai/CoveChatWidget";
+import ProactiveBubble from "@/components/cove-ai/ProactiveBubble";
+import BubblesStatusPill from "@/components/cove-ai/BubblesStatusPill";
+import { useProactiveSignals, ProactiveResponse } from "@/hooks/useProactiveSignals";
+import { useLayoutStore } from "@/store/layoutStore";
 // OutfitModal removed - outfits now shown only in Outfit Builder tab
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuthModal } from "@/src/context/AuthModalContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 export default function FloatingChatbot() {
     const [isOpen, setIsOpen] = useState(false);

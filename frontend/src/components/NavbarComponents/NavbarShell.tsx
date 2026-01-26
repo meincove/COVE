@@ -5,7 +5,7 @@
 // import { LAYOUT_SPRING } from "./constants";
 // import { useNavbarTheme } from "./ThemeScope";
 
-// import { useIslandMenu } from "@/src/components/NavbarComponents/islandMenuStore";
+// import { useIslandMenu } from "@/components/NavbarComponents/islandMenuStore";
 
 // type Props = React.PropsWithChildren<{ isIsland: boolean }>;
 
@@ -391,7 +391,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { LAYOUT_SPRING } from "./constants";
 import { useNavbarTheme } from "./ThemeScope";
-import { useIslandMenu } from "@/src/components/NavbarComponents/islandMenuStore";
+import { useIslandMenu } from "@/components/NavbarComponents/islandMenuStore";
 
 type Props = React.PropsWithChildren<{ isIsland: boolean }>;
 

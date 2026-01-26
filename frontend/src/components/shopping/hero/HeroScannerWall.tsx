@@ -2,7 +2,7 @@
 
 // import * as React from "react"
 // import { motion, useMotionValue, animate, useAnimationFrame } from "framer-motion"
-// import type { UiProduct } from "@/src/lib/catalog/shared"
+// import type { UiProduct } from "@/lib/catalog/shared"
 
 // type Tile = {
 //     key: string
@@ -292,8 +292,8 @@
 
 import * as React from "react"
 import { motion, useMotionValue } from "framer-motion"
-import type { UiProduct } from "@/src/lib/catalog/shared"
-import { ScannerGrid, type ScannerTile } from "@/src/lib/scanner/layout"
+import type { UiProduct } from "@/lib/catalog/shared"
+import { ScannerGrid, type ScannerTile } from "@/lib/scanner/layout"
 
 function safeImg(src?: string) {
     if (!src) return "/clothing-images/fallback.jpg"

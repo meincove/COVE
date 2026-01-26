@@ -1,4 +1,4 @@
-import type { UiProduct } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
 
 export type ScannerTile = {
     key: string

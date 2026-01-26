@@ -2,9 +2,9 @@
 // "use client";
 
 // import { useEffect, useMemo, useState } from "react";
-// import LeftActions from "@/src/components/Navbar/NavbarComponents/NavbarParts/LeftActions";
-// import RightActions from "@/src/components/Navbar/NavbarComponents/NavbarParts/RightActions";
-// import SearchBar from "@/src/components/Navbar/NavbarComponents/NavbarParts/SearchBar";
+// import LeftActions from "@/components/Navbar/NavbarComponents/NavbarParts/LeftActions";
+// import RightActions from "@/components/Navbar/NavbarComponents/NavbarParts/RightActions";
+// import SearchBar from "@/components/Navbar/NavbarComponents/NavbarParts/SearchBar";
 
 // const DEV_FLAG_KEY = "cove:overlayDebug";
 
@@ -200,9 +200,9 @@
 // "use client";
 
 // import { useEffect, useMemo, useState } from "react";
-// import LeftActions from "@/src/components/Navbar/NavbarComponents/NavbarParts/LeftActions";
-// import RightActions from "@/src/components/Navbar/NavbarComponents/NavbarParts/RightActions";
-// import SearchBar from "@/src/components/Navbar/NavbarComponents/NavbarParts/SearchBar";
+// import LeftActions from "@/components/Navbar/NavbarComponents/NavbarParts/LeftActions";
+// import RightActions from "@/components/Navbar/NavbarComponents/NavbarParts/RightActions";
+// import SearchBar from "@/components/Navbar/NavbarComponents/NavbarParts/SearchBar";
 
 // const DEV_FLAG_KEY = "cove:overlayDebug";
 

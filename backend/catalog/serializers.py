@@ -40,13 +40,16 @@ class ColorGroupSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     color_variants = ColorGroupSerializer(many=True, read_only=True)  # related_name='color_variants'
 
+    brand_name = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductMasterGroup
         fields = (
             "product_id",
             "name",
             "slug",
-            "brand_id",  # NEW: Brand identifier for multi-brand support
+            "brand_id",
+            "brand_name",  # NEW: Human readable brand name
             "tier",
             "type",
             "material",
@@ -64,5 +67,11 @@ class ProductSerializer(serializers.ModelSerializer):
             "color_family",
             "in_stock",
             "featured",
+            "affiliate_url",
             "color_variants",
         )
+
+    def get_brand_name(self, obj):
+        # Optimized lookup using context map (avoiding N+1 queries)
+        brand_map = self.context.get('brand_map', {})
+        return brand_map.get(obj.brand_id, obj.brand_id)

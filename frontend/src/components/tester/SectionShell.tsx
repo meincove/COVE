@@ -3,7 +3,7 @@
 
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { useLocalScrollProgress } from "@/src/hooks/useLocalScrollProgress";
+import { useLocalScrollProgress } from "@/hooks/useLocalScrollProgress";
 
 type Props = {
   /** selector for the scroll container (your frame) */

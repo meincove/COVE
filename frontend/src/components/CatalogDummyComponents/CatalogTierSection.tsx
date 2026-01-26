@@ -9,7 +9,7 @@ import localFont from 'next/font/local'
 import {
   applyTierFilters,
   getAvailableValuesForDimension,
-} from '@/src/lib/catalogFilterBrain'
+} from '@/lib/catalogFilterBrain'
 import type { CatalogCard } from '@/types/product'
 import type { TierFilterState, TierKey } from '@/types/filters'
 import CarouselStage from './CarouselStage'

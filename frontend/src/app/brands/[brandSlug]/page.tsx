@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState, use } from "react"
 import { useRouter } from "next/navigation"
-import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
-import CarouselStage from "@/src/components/Catalog/CarouselStage"
-import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
-import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
-import HeroScanner from "@/src/components/shopping/HeroScanner"
-import CategoryBanner from "@/src/components/shopping/CategoryBanner"
-import ProductGridCard from "@/src/components/shopping/ProductGridCard"
+import LshapedNavbar, { FilterGroup } from "@/components/shopping/LShapedNavbar"
+import CarouselStage from "@/components/Catalog/CarouselStage"
+import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/lib/catalog/shared"
+import { uiProductToCatalogCard } from "@/lib/catalog/adapter"
+import HeroScanner from "@/components/shopping/HeroScanner"
+import CategoryBanner from "@/components/shopping/CategoryBanner"
+import ProductGridCard from "@/components/shopping/ProductGridCard"
 
 // --- Shared Types & Utils (duplicated) ---
 type ApiImage = { image_name?: string; url?: string }
@@ -74,26 +74,40 @@ export default function BrandStorefrontPage({ params }: { params: Promise<{ bran
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
 
     // Fetch All Data (could be optimized)
+    const [brandDetails, setBrandDetails] = useState<{ brand_id: string, brand_name: string } | null>(null)
+
+    // Fetch Brand Details & Products
     useEffect(() => {
         let cancelled = false
-            ; (async () => {
-                try {
-                    // Fetch products filtered by brand ID if possible, or just fetch all and filter client side
-                    // Assuming API supports ?brand_id, but here we fetch all for simplicity like CategoryPage
-                    const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=300`, { cache: "no-store" })
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-                    const json = await res.json()
-                    const items: ApiProduct[] = json.results || []
-                    const mapped = items.map(mapApi)
-                    if (!cancelled) setAllProducts(mapped)
-                } catch {
-                    if (!cancelled) setAllProducts([])
-                }
-            })()
-        return () => {
-            cancelled = true
+        const fetchData = async () => {
+            try {
+                // 1. Get Brand Details to know the ID
+                const decodedSlug = decodeURIComponent(brandSlug)
+                const brandRes = await fetch(`${API_BASE}/api/brands/${decodedSlug}/`)
+                if (!brandRes.ok) throw new Error('Brand not found')
+                const brandData = await brandRes.json()
+
+                if (cancelled) return
+                setBrandDetails(brandData)
+
+                // 2. Fetch products for this SPECIFIC brand using the dedicated endpoint
+                // This avoids pagination limits of the global list and ensures we get the right items
+                const productsRes = await fetch(`${API_BASE}/api/brands/${brandData.brand_id}/products/?status=active&page_size=100`, { cache: "no-store" })
+                if (!productsRes.ok) throw new Error(`HTTP ${productsRes.status}`)
+                const json = await productsRes.json()
+                const items: ApiProduct[] = json.products || [] // Note: Endpoint returns { count, products: [...] }
+
+                const mapped = items.map(mapApi)
+                console.log(`[Storefront] Fetched ${mapped.length} products for brand ${brandData.brand_id}`)
+                if (!cancelled) setAllProducts(mapped)
+            } catch (e) {
+                console.error("Failed to load storefront", e)
+                if (!cancelled) setAllProducts([])
+            }
         }
-    }, [])
+        fetchData()
+        return () => { cancelled = true }
+    }, [brandSlug])
 
     // --- Filter logic ---
 
@@ -102,8 +116,10 @@ export default function BrandStorefrontPage({ params }: { params: Promise<{ bran
     const normalizedBrandSlug = brandSlug.toLowerCase()
 
     const brandProducts = useMemo(() => {
-        return allProducts.filter(p => (p.brandId ?? "").toLowerCase().replace(/\s+/g, '-') === normalizedBrandSlug)
-    }, [allProducts, normalizedBrandSlug])
+        // Since we now fetch specific brand products, 'allProducts' IS the brand products.
+        // We just return them directly.
+        return allProducts
+    }, [allProducts])
 
     // 2. Compute available Sidebar Filters based on the Brand Products
     const filterGroups: FilterGroup[] = useMemo(() => {

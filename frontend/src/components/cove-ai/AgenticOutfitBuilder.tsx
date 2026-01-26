@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Search, Sparkles, ShoppingBag } from "lucide-react";
-import { useOutfitStore, ProductCandidate } from "@/src/hooks/useOutfitStore";
+import { useOutfitStore, ProductCandidate } from "@/hooks/useOutfitStore";
 import BrandSelectionStep from "./BrandSelectionStep";
 import GenderSelectionStep from "./GenderSelectionStep";
 
@@ -30,6 +30,14 @@ interface AgenticOutfitBuilderProps {
     onBrandSelect?: (brand: string | null) => void;
 }
 
+/**
+ * AgenticOutfitBuilder - Shows live AI product exploration
+ * 
+ * Displays:
+ * - Category tabs (Tops, Bottoms, Shoes, Accessories)
+ * - Product cards appearing with fade-in animation
+ * - "Searching..." → "Found X options" → "Selected ✓" flow
+ */
 export default function AgenticOutfitBuilder({
     streamEvents,
     isActive,

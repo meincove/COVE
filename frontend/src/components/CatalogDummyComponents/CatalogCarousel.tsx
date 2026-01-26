@@ -8,7 +8,7 @@
 // import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // import CatalogCard from './CatalogCard'
-// import { useModal } from '@/src/context/ModalContext'
+// import { useModal } from '@/context/ModalContext'
 // import type { CatalogCardDTO } from '@/types/catalog'
 // import CatalogDetailPanel from './CatalogDetailPanel'
 
@@ -444,7 +444,7 @@ import { useInView } from 'react-intersection-observer'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import CatalogCard from './CatalogCard'
-import { useModal } from '@/src/context/ModalContext'
+import { useModal } from '@/context/ModalContext'
 import type { CatalogCardDTO } from '@/types/catalog'
 import CatalogDetailPanel from './CatalogDetailPanel'
 

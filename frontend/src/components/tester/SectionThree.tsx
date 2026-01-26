@@ -3,8 +3,8 @@
 
 // import Image from "next/image";
 // import { useRef } from "react";
-// import { useLocalScrollProgress } from "@/src/hooks/useLocalScrollProgress";
-// import SectionHUD from "@/src/components/dev/SectionHUD";
+// import { useLocalScrollProgress } from "@/hooks/useLocalScrollProgress";
+// import SectionHUD from "@/components/dev/SectionHUD";
 
 // // helpers
 // const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
@@ -171,7 +171,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useLocalScrollProgress } from "@/src/hooks/useLocalScrollProgress";
+import { useLocalScrollProgress } from "@/hooks/useLocalScrollProgress";
 
 // small helpers so the math is readable
 function clamp(v: number, min: number, max: number) {

@@ -4,7 +4,7 @@
 
 // import { useEffect, useState } from 'react'
 // import CatalogCardBase from './CatalogCardBase'
-// import { useModal } from '@/src/context/ModalContext'
+// import { useModal } from '@/context/ModalContext'
 // import { colorThemes, colorNameToThemeKey } from '@/utils/colorThemes'
 // import type { CatalogCard as CatalogCardModel } from '@/types/product'
 // import { getVariantMeta } from '@/data/variantMetaIndex'
@@ -146,11 +146,11 @@
 
 import { useEffect, useState } from 'react'
 import CatalogCardBase from './CatalogCardBase'
-import { useModal } from '@/src/context/ModalContext'
+import { useModal } from '@/context/ModalContext'
 import { colorThemes, colorNameToThemeKey } from '@/utils/colorThemes'
 import type { CatalogCard as CatalogCardModel } from '@/types/product'
 import { getVariantMeta } from '@/data/variantMetaIndex'
-import type { SuggestionVariant } from '@/src/components/ui/CoveSuggestionPill'
+import type { SuggestionVariant } from '@/components/ui/CoveSuggestionPill'
 
 type CardMode = 'normal' | 'hero'
 

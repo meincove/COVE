@@ -2,8 +2,8 @@
 
 import React from "react"
 import { usePathname } from "next/navigation"
-import NavbarController from "@/src/components/Navbar/NavbarController"
-import { cn } from "@/src/lib/utils"
+import NavbarController from "@/components/Navbar/NavbarController"
+import { cn } from "@/lib/utils"
 
 export default function ScrollShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()

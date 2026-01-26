@@ -4,8 +4,8 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import CatalogModalRoot from '@/src/components/Catalog/CatalogModalRoot'
-import CatalogTierSection from '@/src/components/Catalog/CatalogTierSection'
+import CatalogModalRoot from '@/components/Catalog/CatalogModalRoot'
+import CatalogTierSection from '@/components/Catalog/CatalogTierSection'
 import type { CatalogData, CatalogCard, ProductColor } from '@/types/product'
 import type { TierFilters, TierFilterState, TierKey } from '@/types/filters'
 
@@ -108,7 +108,8 @@ export default function CatalogPage() {
 
         // Fetch all pages (backend now allows up to 500 per page)
         while (hasMore) {
-          const response = await fetch(`http://localhost:8001/api/products/?page=${page}&page_size=500`)
+          const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
+          const response = await fetch(`${apiBase}/api/products/?page=${page}&page_size=500`)
 
           if (!response.ok) {
             throw new Error(`Failed to fetch products: ${response.statusText}`)

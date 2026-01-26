@@ -119,16 +119,16 @@ ALLOWED_HOSTS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    o.strip() for o in os.getenv(
-        "CORS_ALLOWED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
-    ).split(",") if o.strip()
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8080,http://127.0.0.1:8080",
     ).split(",") if o.strip()
 ]
 
@@ -303,15 +303,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS setup
-# CORS/CSRF from environment (comma-separated; safe defaults for dev)
-CORS_ALLOWED_ORIGINS = [
-    o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",") if o.strip()
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,https://*.ngrok-free.app").split(",") if o.strip()
-]
+# CORS/CSRF from environment (comma-separated; safe defaults for dev) at the top was sufficient.
+# Removing duplicate overrides here to avoid confusion.
 
 from corsheaders.defaults import default_headers
 
@@ -343,6 +336,9 @@ STATIC_URL = '/static/'
 # ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useCartStore } from "@/src/store/cartStore"; 
+import { useCartStore } from "@/store/cartStore"; 
 
 interface CartModalProps {
   open: boolean;

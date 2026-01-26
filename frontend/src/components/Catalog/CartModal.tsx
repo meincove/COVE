@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useCartStore } from "@/src/store/cartStore"; 
+import { useCartStore } from "@/store/cartStore";
 
 interface CartModalProps {
   open: boolean;
@@ -19,9 +19,9 @@ export default function CartModal({ open, onClose }: CartModalProps) {
   const router = useRouter();
   const { items, removeItem, clearCart } = useCartStore();
 
-  const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
+  const itemCount = items.reduce((sum: number, it: any) => sum + it.quantity, 0);
   const subtotal = items.reduce(
-    (sum, it) => sum + it.price * it.quantity,
+    (sum: number, it: any) => sum + it.price * it.quantity,
     0
   );
 
@@ -95,7 +95,7 @@ export default function CartModal({ open, onClose }: CartModalProps) {
                   </p>
                 </div>
               ) : (
-                items.map((item) => (
+                items.map((item: any) => (
                   <div
                     key={`${item.variantId}-${item.size}`}
                     className="flex items-center gap-3 rounded-2xl bg-slate-900/70 border border-slate-800 px-3 py-3"

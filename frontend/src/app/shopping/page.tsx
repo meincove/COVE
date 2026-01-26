@@ -1,13 +1,13 @@
 // "use client"
 
 // import { useEffect, useMemo, useState } from "react"
-// import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
-// import HeroScanner from "@/src/components/shopping/HeroScanner"
-// import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
-// import { useBrowseModal } from "@/src/hooks/useBrowseModal"
-// import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
-// import CarouselStage from "@/src/components/Catalog/CarouselStage"
-// import CategoryBanner from "@/src/components/shopping/CategoryBanner"
+// import LshapedNavbar, { FilterGroup } from "@/components/shopping/LShapedNavbar"
+// import HeroScanner from "@/components/shopping/HeroScanner"
+// import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/lib/catalog/shared"
+// import { useBrowseModal } from "@/hooks/useBrowseModal"
+// import { uiProductToCatalogCard } from "@/lib/catalog/adapter"
+// import CarouselStage from "@/components/Catalog/CarouselStage"
+// import CategoryBanner from "@/components/shopping/CategoryBanner"
 
 // type ApiImage = { image_name?: string; url?: string }
 // type ApiVariant = { variant_id?: string; images?: ApiImage[] }
@@ -292,7 +292,7 @@
 
 
 import { Suspense } from "react"
-import ShoppingPageClient from "@/src/components/shopping/ShoppingPageClient"
+import ShoppingPageClient from "@/components/shopping/ShoppingPageClient"
 
 export default function ShoppingPage() {
     return (

@@ -1,7 +1,7 @@
 'use client'
 
 import type { TierFilterState } from '@/types/filters'
-import DimensionBlock from '@/src/components/Catalog/DimensionBlock'
+import DimensionBlock from '@/components/Catalog/DimensionBlock'
 
 interface CatalogFilterPanelProps {
   tierLabel: string

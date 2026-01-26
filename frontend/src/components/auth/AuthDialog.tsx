@@ -3,7 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { useEffect, useMemo } from 'react'
-import { useAuthModal } from '@/src/context/AuthModalContext'
+import { useAuthModal } from '@/context/AuthModalContext'
 
 interface AuthDialogProps {
     isOpen: boolean

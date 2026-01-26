@@ -1,7 +1,7 @@
 "use client";
 
-import { useLayoutStore } from "@/src/store/layoutStore";
-import { useCartStore } from "@/src/store/cartStore";
+import { useLayoutStore } from "@/store/layoutStore";
+import { useCartStore } from "@/store/cartStore";
 import {
     DndContext,
     closestCenter,

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useSignIn, useSignUp, useAuth } from '@clerk/nextjs'
 import { useRouter, usePathname } from 'next/navigation'
-import { useAuthModal } from '@/src/context/AuthModalContext'
+import { useAuthModal } from '@/context/AuthModalContext'
 import OwlCharacterModal from './OwlCharacterModal'
 import ValidatedInput from './ValidatedInput'
 

@@ -8,12 +8,12 @@ import { ShoppingCart, Heart, ExternalLink, Sparkles, Check, X, ShoppingBag } fr
 
 import type { AgentItem } from "@/types/agent";
 import type { CartItem } from "@/types/cart";
-import { useCartStore } from "@/src/store/cartStore";
+import { useCartStore } from "@/store/cartStore";
 import {
   resolveAgentItemForChat,
   fallbackResolveAgentItemForChat,
   type ResolvedProductForChat,
-} from "@/src/lib/agentItemResolver";
+} from "@/lib/agentItemResolver";
 
 type ChatProductCardProps = {
   item: AgentItem;

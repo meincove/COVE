@@ -3,7 +3,7 @@ import { postJson } from "@/utils/api";
 // NOTE: your `types` folder is outside `src`, so use a relative import:
 import type { SaveOrderPayload } from "../../types/checkout";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
 /**
  * Calls your Django endpoint to persist an order after checkout.

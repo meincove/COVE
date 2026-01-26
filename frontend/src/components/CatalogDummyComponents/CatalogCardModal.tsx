@@ -2,9 +2,9 @@
 
 // import { useState } from 'react'
 // import { motion } from 'framer-motion'
-// import { Button } from '@/src/components/ui/button'
+// import { Button } from '@/components/ui/button'
 // import { useRouter } from 'next/navigation'
-// import { useProductStore } from '@/src/store/productStore'
+// import { useProductStore } from '@/store/productStore'
 // // import type { CatalogCard as ProductCatalogCard } from '@/types/product'
 // import type { CatalogColor } from '@/types/catalog'
 
@@ -328,9 +328,9 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Button } from '@/src/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { useProductStore } from '@/src/store/productStore'
+import { useProductStore } from '@/store/productStore'
 import type { CatalogColor } from '@/types/catalog'
 
 interface CatalogCardModalProps {

@@ -1,7 +1,7 @@
 // frontend/src/app/api/history/save/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-const DJANGO_BASE = process.env.DJANGO_BASE_URL || 'http://127.0.0.1:8001';
+const DJANGO_BASE = process.env.DJANGO_BACKEND_URL || 'http://127.0.0.1:8001';
 
 export async function POST(request: NextRequest) {
     try {

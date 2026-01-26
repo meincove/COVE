@@ -3,8 +3,8 @@
 import { useRef, useState } from 'react'
 
 // ✅ Use dummy components + new slider
-import CatalogModalRoot from '@/src/components/CatalogDummyComponents/CatalogModalRoot'
-import CatalogSceneSlider from '@/src/components/CatalogDummyComponents/CatalogSceneSlider'
+import CatalogModalRoot from '@/components/CatalogDummyComponents/CatalogModalRoot'
+import CatalogSceneSlider from '@/components/CatalogDummyComponents/CatalogSceneSlider'
 
 import rawCatalogData from '@/data/catalogData.json'
 import type { CatalogData, CatalogCard } from '@/types/product'

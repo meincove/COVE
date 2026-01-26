@@ -1,4 +1,4 @@
-import { MagnetLines } from "@/src/components/Try-on";
+import { MagnetLines } from "@/components/Try-on";
 
 
 export default function HeroSection() {

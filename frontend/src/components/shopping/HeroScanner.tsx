@@ -1,10 +1,10 @@
 // "use client"
 
 // import * as React from "react"
-// import type { UiProduct } from "@/src/lib/catalog/shared"
-// import HeroScannerWall from "@/src/components/shopping/hero/HeroScannerWall"
-// import SplineFaintBg from "@/src/components/background/SplineFaintBg"
-// import HeroScannerOverlay from "@/src/components/shopping/hero/HeroScannerOverlay"
+// import type { UiProduct } from "@/lib/catalog/shared"
+// import HeroScannerWall from "@/components/shopping/hero/HeroScannerWall"
+// import SplineFaintBg from "@/components/background/SplineFaintBg"
+// import HeroScannerOverlay from "@/components/shopping/hero/HeroScannerOverlay"
 // import { useRouter } from "next/navigation"
 
 // function FpsMeter() {
@@ -317,11 +317,11 @@
 "use client"
 
 import * as React from "react"
-import type { UiProduct } from "@/src/lib/catalog/shared"
-import HeroScannerWall from "@/src/components/shopping/hero/HeroScannerWall"
-import HeroScannerOverlay from "@/src/components/shopping/hero/HeroScannerOverlay"
-import DottedCanvasBg from "@/src/components/shopping/hero/DottedCanvasBg"
-import HeroScannerBottomBar from "@/src/components/shopping/hero/HeroScannerBottomBar"
+import type { UiProduct } from "@/lib/catalog/shared"
+import HeroScannerWall from "@/components/shopping/hero/HeroScannerWall"
+import HeroScannerOverlay from "@/components/shopping/hero/HeroScannerOverlay"
+import DottedCanvasBg from "@/components/shopping/hero/DottedCanvasBg"
+import HeroScannerBottomBar from "@/components/shopping/hero/HeroScannerBottomBar"
 
 
 

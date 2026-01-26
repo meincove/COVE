@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveSectionProgress } from "@/src/hooks/useActiveSectionProgress";
+import { useActiveSectionProgress } from "@/hooks/useActiveSectionProgress";
 
 const LABELS = ["Section 1", "Section 2", "Section 3"];
 

@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react"
-import LshapedNavbar, { FilterGroup } from "@/src/components/shopping/LShapedNavbar"
-import HeroScanner from "@/src/components/shopping/HeroScanner"
-import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/src/lib/catalog/shared"
-import { useBrowseModal } from "@/src/hooks/useBrowseModal"
-import { uiProductToCatalogCard } from "@/src/lib/catalog/adapter"
-import CarouselStage from "@/src/components/Catalog/CarouselStage"
-import CategoryBanner from "@/src/components/shopping/CategoryBanner"
+import LshapedNavbar, { FilterGroup } from "@/components/shopping/LShapedNavbar"
+import HeroScanner from "@/components/shopping/HeroScanner"
+import { UiProduct, resolveImgPath, FALLBACK_IMG } from "@/lib/catalog/shared"
+import { useBrowseModal } from "@/hooks/useBrowseModal"
+import { uiProductToCatalogCard } from "@/lib/catalog/adapter"
+import CarouselStage from "@/components/Catalog/CarouselStage"
+import CategoryBanner from "@/components/shopping/CategoryBanner"
 
 type ApiImage = { image_name?: string; url?: string }
 type ApiVariant = { variant_id?: string; images?: ApiImage[] }
@@ -16,6 +16,7 @@ type ApiProduct = {
     slug?: string
     name: string
     brand_id?: string
+    brand_name?: string  // NEW
     base_price?: number | string
     old_price?: number | string
     is_new?: boolean
@@ -23,6 +24,7 @@ type ApiProduct = {
     fit?: string
     tier?: string
     color_variants?: ApiVariant[]
+    affiliate_url?: string
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001"
@@ -33,6 +35,10 @@ const TYPE_SECTIONS = [
     { type: "shirt", title: "Shirt" },
     { type: "tee", title: "Tee" },
     { type: "pants", title: "Pants" },
+    { type: "dress", title: "Dress" },
+    { type: "shoes", title: "Shoes" },
+    { type: "accessories", title: "Accessories" },
+    { type: "other", title: "Other" },
 ] as const
 
 function num(v: unknown, fallback = 0) {
@@ -57,6 +63,7 @@ function mapApi(p: ApiProduct): UiProduct {
         variantId: firstVariantId,
         name: p.name,
         brandId: p.brand_id,
+        brandName: p.brand_name || p.brand_id || "COVE", // NEW: Use name if available
         price: num(p.base_price, 0),
         oldPrice: p.old_price != null ? num(p.old_price, 0) : undefined,
         badge: p.is_new ? "NEW" : "",
@@ -67,6 +74,7 @@ function mapApi(p: ApiProduct): UiProduct {
         imageSrc: img,
         colorNames: [],
         sizes: [],
+        affiliateUrl: p.affiliate_url, // Map from API
     } as UiProduct
 }
 
@@ -88,13 +96,31 @@ export default function ShoppingPageClient() {
         let cancelled = false
             ; (async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=240`, { cache: "no-store" })
+                    console.log('[ShoppingPageClient] API_BASE:', API_BASE)
+                    console.log('[ShoppingPageClient] Fetching from:', `${API_BASE}/api/products/?page=1&page_size=10000`)
+                    const res = await fetch(`${API_BASE}/api/products/?page=1&page_size=10000`, { cache: "no-store" })
+                    console.log('[ShoppingPageClient] Response status:', res.status)
                     if (!res.ok) throw new Error(`HTTP ${res.status}`)
                     const json = await res.json()
-                    const items: ApiProduct[] = json.results || []
-                    const mapped = items.map(mapApi)
+                    // Handle pagination or array
+                    const items: ApiProduct[] = Array.isArray(json) ? json : (json.results || [])
+                    console.log('[ShoppingPageClient] Raw items count:', items.length)
+
+                    // Safe mapping
+                    const mapped: UiProduct[] = []
+                    items.forEach((p, idx) => {
+                        try {
+                            mapped.push(mapApi(p))
+                        } catch (err) {
+                            console.error(`[ShoppingPageClient] Failed to map product index ${idx}:`, err)
+                        }
+                    })
+                    console.log('[ShoppingPageClient] Successfully mapped:', mapped.length)
+                    if (mapped.length > 0) console.log('[ShoppingPageClient] First item:', mapped[0])
+
                     if (!cancelled) setAllProducts(mapped)
-                } catch {
+                } catch (error) {
+                    console.error('[ShoppingPageClient] Fetch error:', error)
                     if (!cancelled) setAllProducts([])
                 }
             })()
@@ -148,16 +174,29 @@ export default function ShoppingPageClient() {
         return true
     }
 
-    const sections = useMemo(() => {
-        return TYPE_SECTIONS.map((s) => {
-            const items = allProducts
-                .filter((p) => (p.type ?? "").toLowerCase().includes(s.type))
-                .filter(passesFilters)
-                .slice(0, 12)
+    // Prepare sections with stats
+    // We compute the FULL list of products for each section to get accurate brand counts
+    const sectionsWithData = useMemo(() => {
+        return TYPE_SECTIONS.map((section) => {
+            // All products for this type (ignoring slice for now)
+            const fullSectionProducts = allProducts
+                .filter(p => (p.type ?? "").toLowerCase().includes(section.type))
 
-            return { type: s.type, title: s.title, items }
+            // Unique brands in this entire section
+            const uniqueBrands = new Set(fullSectionProducts.map(p => p.brandId || "COVE").filter(Boolean))
+            const brandCount = uniqueBrands.size
+
+            // Products valid for display (filtered by nav filters)
+            const displayProducts = fullSectionProducts.filter(passesFilters)
+
+            return {
+                ...section,
+                fullProducts: fullSectionProducts, // Use this for headers/stats if you want stats ignoring filters
+                displayProducts: displayProducts,
+                brandCount
+            }
         })
-    }, [allProducts, activeFilters, searchValue])
+    }, [allProducts, activeFilters, searchValue]) // Re-calc if products or filters change
 
     const modalItems = useMemo(() => {
         if (!type) return []
@@ -185,8 +224,6 @@ export default function ShoppingPageClient() {
         return top.length > 5 ? top : allProducts.slice(0, 15)
     }, [allProducts])
 
-    const carouselCards = useMemo(() => bestSellers.map(uiProductToCatalogCard), [bestSellers])
-
     return (
         <LshapedNavbar
             searchValue={searchValue}
@@ -204,15 +241,20 @@ export default function ShoppingPageClient() {
             }
         >
             <div className="relative pb-32">
-                {TYPE_SECTIONS.map((section, index) => {
-                    const sectionProducts = allProducts
-                        .filter(p => (p.type ?? "").toLowerCase().includes(section.type))
-                        .slice(0, 15)
+                {sectionsWithData.map((section, index) => {
+                    const { displayProducts, brandCount } = section
 
-                    if (sectionProducts.length === 0) return null
+                    // Show only if there are products after filtering (or should we show empty sections?)
+                    // Let's hide if 0 to keep it clean
+                    if (displayProducts.length === 0) return null
 
-                    const cards = sectionProducts.map(uiProductToCatalogCard)
-                    const bannerImg = sectionProducts[0]?.imageSrc || FALLBACK_IMG
+                    // Shuffle products for fair visibility
+                    const shuffled = [...displayProducts].sort(() => Math.random() - 0.5)
+
+                    // Slice for carousel - Increased to 30
+                    const carouselItems = shuffled.slice(0, 30)
+                    const cards = carouselItems.map(uiProductToCatalogCard)
+                    const bannerImg = carouselItems[0]?.imageSrc || FALLBACK_IMG
 
                     return (
                         <div key={section.type} className="mb-12 border-b border-black/5 pb-12 last:border-0">
@@ -226,6 +268,7 @@ export default function ShoppingPageClient() {
                                         {section.title}
                                     </h2>
                                     <p className="text-sm text-black/60 leading-relaxed max-w-sm mb-6 line-clamp-3">
+                                        Featuring {brandCount} Brand{brandCount !== 1 ? 's' : ''}.
                                         Explore our premium range of {section.title.toLowerCase()}s.
                                         Crafted for style and comfort.
                                     </p>
@@ -245,7 +288,7 @@ export default function ShoppingPageClient() {
                                     <CategoryBanner
                                         title={section.title}
                                         imageSrc={bannerImg}
-                                        products={sectionProducts}
+                                        products={section.fullProducts} // START FIX: Pass full products to banner so all brands appear
                                     />
                                 </div>
                             </div>

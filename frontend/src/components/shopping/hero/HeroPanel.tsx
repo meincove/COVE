@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
-import type { UiProduct } from "@/src/lib/catalog/shared"
+import type { UiProduct } from "@/lib/catalog/shared"
 
 type Layout = { x: number; y: number; z: number; r: number; s: number }
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))

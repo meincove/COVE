@@ -83,7 +83,7 @@
 // import dynamic from 'next/dynamic'
 
 // // Lazy-load the particle animation
-// const CoveParticleSphere = dynamic(() => import('@/src/components/ui/particleSphere/CoveParticleSphere'), { ssr: false })
+// const CoveParticleSphere = dynamic(() => import('@/components/ui/particleSphere/CoveParticleSphere'), { ssr: false })
 
 // interface VoiceAssistantModalProps {
 //   isOpen: boolean
@@ -170,7 +170,7 @@
 
 import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import CoveParticleSphere from '@/src/components/ui/particleSphere/CoveParticleSphereCanvas'
+import CoveParticleSphere from '@/components/ui/particleSphere/CoveParticleSphereCanvas'
 
 interface VoiceAssistantModalProps {
   isOpen: boolean
