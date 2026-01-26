@@ -13,6 +13,7 @@ export type AgentItem = {
   imageUrl?: string;  // For displaying in UI
   image_url?: string; // Potential backend key
   outfit_id?: string; // Multi-outfit grouping
+  gender?: string;
 };
 
 export type AgentCartPayload = {

@@ -4,10 +4,13 @@ export interface ProductCandidate {
     title: string;
     price: number;
     imageUrl?: string;
-    slug?: string;
+    slug: string;
     type?: string;
+    gender?: string;
     vettingStatus?: "analyzing" | "rejected" | "accepted";
     rejectionReason?: string;
+    outfit_id?: string;
+    stylist_note?: string;
 }
 
 export interface CategoryState {
@@ -32,44 +35,54 @@ interface OutfitStore {
     reset: () => void;
 }
 
-export const useOutfitStore = create<OutfitStore>((set) => ({
-    categories: {},
-    activeCategory: null,
-    budgetMax: 500,
-    budgetUsed: 0,
+import { persist, createJSONStorage } from 'zustand/middleware';
 
-    setCategoryState: (category, newState) => set((state) => ({
-        categories: {
-            ...state.categories,
-            [category]: {
-                ...(state.categories[category] || { status: "waiting", candidates: [] }),
-                ...newState
-            }
-        }
-    })),
+export const useOutfitStore = create<OutfitStore>()(
+    persist(
+        (set) => ({
+            categories: {},
+            activeCategory: null,
+            budgetMax: 500,
+            budgetUsed: 0,
 
-    setActiveCategory: (category) => set({ activeCategory: category }),
-
-    updateCandidate: (category, slug, updates) => set((state) => {
-        const catState = state.categories[category];
-        if (!catState) return state;
-
-        const updatedCandidates = catState.candidates.map(c =>
-            c.slug === slug ? { ...c, ...updates } : c
-        );
-
-        return {
-            categories: {
-                ...state.categories,
-                [category]: {
-                    ...catState,
-                    candidates: updatedCandidates
+            setCategoryState: (category, newState) => set((state) => ({
+                categories: {
+                    ...state.categories,
+                    [category]: {
+                        ...(state.categories[category] || { status: "waiting", candidates: [] }),
+                        ...newState
+                    }
                 }
-            }
-        };
-    }),
+            })),
 
-    setBudget: (max, used) => set({ budgetMax: max, budgetUsed: used }),
+            setActiveCategory: (category) => set({ activeCategory: category }),
 
-    reset: () => set({ categories: {}, activeCategory: null, budgetMax: 500, budgetUsed: 0 })
-}));
+            updateCandidate: (category, slug, updates) => set((state) => {
+                const catState = state.categories[category];
+                if (!catState) return state;
+
+                const updatedCandidates = catState.candidates.map(c =>
+                    c.slug === slug ? { ...c, ...updates } : c
+                );
+
+                return {
+                    categories: {
+                        ...state.categories,
+                        [category]: {
+                            ...catState,
+                            candidates: updatedCandidates
+                        }
+                    }
+                };
+            }),
+
+            setBudget: (max, used) => set({ budgetMax: max, budgetUsed: used }),
+
+            reset: () => set({ categories: {}, activeCategory: null, budgetMax: 500, budgetUsed: 0 })
+        }),
+        {
+            name: 'cove-outfit-store', // key in storage
+            storage: createJSONStorage(() => sessionStorage), // session persistence
+        }
+    )
+);

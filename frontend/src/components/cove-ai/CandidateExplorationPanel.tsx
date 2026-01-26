@@ -10,6 +10,7 @@ interface ProductCandidate {
     imageUrl?: string;
     slug: string;
     type?: string;
+    gender?: string;
     vettingStatus?: 'analyzing' | 'accepted' | 'rejected';
 }
 
@@ -39,7 +40,18 @@ export default function CandidateExplorationPanel({
 }: CandidateExplorationPanelProps) {
     if (!isOpen) return null;
 
-    const categoryList = ["Tops", "Bottoms", "Shoes"];
+    // ✨ DYNAMIC CATEGORIES: Show whatever the agent has found, don't hardcode!
+    // Sort logically: Tops -> Bottoms -> Shoes -> Accessories/Outerwear
+    const categoryOrder = ["Tops", "Bottoms", "Shoes", "Outerwear", "Accessories", "Dress"];
+    const categoryList = Object.keys(categories).sort((a, b) => {
+        const idxA = categoryOrder.indexOf(a);
+        const idxB = categoryOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+    });
+
     const totalCandidates = categoryList.reduce((sum, cat) =>
         sum + (categories[cat]?.candidates?.length || 0), 0
     );
@@ -96,82 +108,120 @@ export default function CandidateExplorationPanel({
                         </div>
 
                         {/* Categories & Candidates */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-white">
                             {categoryList.map((cat) => {
                                 const state = categories[cat];
                                 const status = state?.status;
                                 const candidates = state?.candidates || [];
+                                const isSearching = status === "searching";
 
                                 return (
-                                    <div key={cat} className="space-y-3">
-                                        {/* Category Header */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`p-1.5 rounded-lg ${status === 'found' || status === 'selected' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {status === "searching" ? (
-                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    <div key={cat} className="space-y-4">
+                                        {/* Category Header with Badge */}
+                                        <div className="flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-2 border-b border-transparent transition-colors duration-200">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-xl transition-colors duration-300 ${status === 'found' || status === 'selected' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'}`}>
+                                                    {isSearching ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
                                                     ) : (
-                                                        <ShoppingBag className="h-4 w-4" />
+                                                        <ShoppingBag className="h-5 w-5" />
                                                     )}
                                                 </div>
-                                                <span className="text-base font-semibold text-gray-900">{cat}</span>
+                                                <span className="text-lg font-bold text-gray-900 tracking-tight">{cat}</span>
                                             </div>
 
-                                            <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                                                {status === "searching" && "Searching..."}
-                                                {status === "found" && `${state?.totalFound || candidates.length} options`}
-                                                {status === "selected" && "Selection Made"}
+                                            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-300 ${isSearching
+                                                ? 'bg-emerald-50 text-emerald-600 animate-pulse'
+                                                : status === 'found'
+                                                    ? 'bg-gray-100 text-gray-700'
+                                                    : 'bg-gray-50 text-gray-400'
+                                                }`}>
+                                                {isSearching && "Analysing Trends..."}
+                                                {status === "found" && `${state?.totalFound || candidates.length} Options Found`}
+                                                {status === "selected" && "Item Selected"}
                                                 {!status && "Waiting"}
                                             </span>
                                         </div>
 
                                         {/* Candidates Grid */}
-                                        {candidates.length > 0 ? (
-                                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                                {candidates.slice(0, 8).map((candidate, idx) => (
-                                                    <div
-                                                        key={candidate.slug || idx}
-                                                        className={`group relative rounded-xl overflow-hidden border bg-gray-50 transition-all ${candidate.vettingStatus === 'accepted'
-                                                            ? 'border-emerald-500 ring-2 ring-emerald-500/10'
-                                                            : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-                                                            }`}
-                                                    >
-                                                        {/* Product Image */}
-                                                        <div className="aspect-[3/4] bg-white relative">
-                                                            {candidate.imageUrl ? (
-                                                                <img
-                                                                    src={candidate.imageUrl}
-                                                                    alt={candidate.title}
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                                    <ShoppingBag className="h-6 w-6" />
-                                                                </div>
-                                                            )}
-
-                                                            {/* Vetting Badge */}
-                                                            {candidate.vettingStatus === 'accepted' && (
-                                                                <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
-                                                                    MATCH
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Price Overlay */}
-                                                        <div className="absolute bottom-0 inset-x-0 bg-white/90 backdrop-blur-sm p-2 border-t border-gray-100">
-                                                            <p className="text-xs font-semibold text-gray-900 text-center">
-                                                                €{candidate.price?.toFixed(0) || '0'}
-                                                            </p>
-                                                        </div>
+                                        {(candidates.length > 0 || isSearching) ? (
+                                            <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 gap-4">
+                                                {/* Premium Loading Skeletons */}
+                                                {isSearching && Array.from({ length: 4 }).map((_, i) => (
+                                                    <div key={`skel-${i}`} className="space-y-3 animate-pulse">
+                                                        <div className="aspect-[3/4] bg-gray-100 rounded-xl" />
+                                                        <div className="h-3 bg-gray-100 rounded w-3/4 mx-auto" />
                                                     </div>
                                                 ))}
+
+                                                {/* Product Cards */}
+                                                <AnimatePresence mode="popLayout">
+                                                    {candidates.slice(0, 12).map((candidate, idx) => (
+                                                        <motion.div
+                                                            key={candidate.slug || idx}
+                                                            layout
+                                                            initial={{ opacity: 0, scale: 0.9 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            transition={{ delay: idx * 0.05 }}
+                                                            className={`group relative rounded-xl overflow-hidden bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer ${candidate.vettingStatus === 'accepted'
+                                                                ? 'ring-2 ring-emerald-500 ring-offset-2'
+                                                                : 'border border-gray-100'
+                                                                }`}
+                                                        >
+                                                            {/* Image Container */}
+                                                            <div className="aspect-[3/4] bg-gray-50 relative overflow-hidden">
+                                                                {candidate.imageUrl ? (
+                                                                    <img
+                                                                        src={candidate.imageUrl}
+                                                                        alt={candidate.title}
+                                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-2">
+                                                                        <ShoppingBag className="h-8 w-8" />
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Overlay Gradient on Hover */}
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                                            </div>
+
+                                                            {/* Minimal Info */}
+                                                            <div className="p-3 bg-white">
+                                                                <p className="font-semibold text-gray-900 text-sm truncate" title={candidate.title}>
+                                                                    {candidate.title}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                                                    <span>€{candidate.price?.toFixed(0)}</span>
+                                                                    {candidate.gender && (
+                                                                        <>
+                                                                            <span className="text-gray-300">•</span>
+                                                                            <span className="uppercase text-[10px] font-bold tracking-wider text-gray-400">
+                                                                                {candidate.gender === 'male' ? 'MEN' : candidate.gender === 'female' ? 'WOMEN' : candidate.gender === 'unisex' ? 'UNISEX' : candidate.gender}
+                                                                            </span>
+                                                                        </>
+                                                                    )}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Match Badge */}
+                                                            {candidate.vettingStatus === 'accepted' && (
+                                                                <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md z-10 flex items-center gap-1">
+                                                                    <Sparkles className="h-2.5 w-2.5" /> MATCH
+                                                                </div>
+                                                            )}
+                                                        </motion.div>
+                                                    ))}
+                                                </AnimatePresence>
                                             </div>
                                         ) : (
-                                            /* Empty State per Category */
-                                            status !== "searching" && (
-                                                <div className="h-24 rounded-xl border border-dashed border-gray-200 flex items-center justify-center bg-gray-50/50">
-                                                    <span className="text-sm text-gray-400">No items found yet</span>
+                                            /* Refined Empty State */
+                                            !isSearching && (
+                                                <div className="py-8 flex flex-col items-center justify-center text-center opacity-50">
+                                                    <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+                                                        <Search className="h-5 w-5 text-gray-300" />
+                                                    </div>
+                                                    <p className="text-sm font-medium text-gray-400">Waiting to search...</p>
                                                 </div>
                                             )
                                         )}
@@ -181,10 +231,16 @@ export default function CandidateExplorationPanel({
                         </div>
 
                         {/* Footer */}
-                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
-                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
-                                <Sparkles className="h-3 w-3 text-emerald-500" />
-                                <span>The AI is selecting the best matches for your outfit</span>
+                        <div className="p-4 border-t border-gray-100 bg-white/80 backdrop-blur-md flex justify-between items-center z-20">
+                            <span className="text-xs text-gray-400 font-medium">
+                                AI is filtering for fit & budget
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span className="text-xs text-emerald-600 font-semibold tracking-wide uppercase">Live Processing</span>
                             </div>
                         </div>
                     </motion.div>

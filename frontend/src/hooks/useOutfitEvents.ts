@@ -19,7 +19,11 @@ export function useOutfitEvents(streamEvents: StreamEvent[]) {
     const processedCountRef = useRef(0);
 
     useEffect(() => {
-        if (!streamEvents.length) return;
+        // Reset counter if stream is cleared (new query)
+        if (streamEvents.length === 0) {
+            processedCountRef.current = 0;
+            return;
+        }
 
         // Process only NEW events
         const newEvents = streamEvents.slice(processedCountRef.current);
@@ -36,10 +40,20 @@ export function useOutfitEvents(streamEvents: StreamEvent[]) {
             let category = event.category;
             if (category) {
                 const lower = category.toLowerCase();
-                if (lower.includes('top') || lower.includes('shirt') || lower.includes('sweater')) category = 'Tops';
-                else if (lower.includes('bottom') || lower.includes('pant') || lower.includes('jean') || lower.includes('short')) category = 'Bottoms';
-                else if (lower.includes('shoe') || lower.includes('sneaker') || lower.includes('boot')) category = 'Shoes';
-                else category = category.charAt(0).toUpperCase() + category.slice(1); // Fallback
+
+                // ✨ FIX: Check specific "high-top" case first to prevent it matching "top"
+                if (lower.includes('high-top') || lower.includes('shoe') || lower.includes('sneaker') || lower.includes('boot')) {
+                    category = 'Shoes';
+                }
+                else if (lower.includes('top') || lower.includes('shirt') || lower.includes('sweater') || lower.includes('hoodie')) {
+                    category = 'Tops';
+                }
+                else if (lower.includes('bottom') || lower.includes('pant') || lower.includes('jean') || lower.includes('short')) {
+                    category = 'Bottoms';
+                }
+                else {
+                    category = category.charAt(0).toUpperCase() + category.slice(1); // Fallback
+                }
             }
 
             if (!category) return;
@@ -55,9 +69,20 @@ export function useOutfitEvents(streamEvents: StreamEvent[]) {
 
                 case "category_candidates":
                     console.log('📦 [useOutfitEvents] Storing candidates for', category, ':', event.candidates?.length || 0, 'items');
+
+                    // ✨ AUTO-ACCEPT: Mark all incoming candidates as accepted so they appear in the UI immediately
+                    const acceptedCandidates = (event.candidates || []).map(c => ({
+                        ...c,
+                        vettingStatus: 'accepted' as const,
+                        // Ensure outfit_id is distributed if multiple looks are desired, 
+                        // but for now default to outfit_1 to ensure visibility. 
+                        // ideally backend should assign outfit_id.
+                        outfit_id: c.outfit_id || "outfit_1"
+                    }));
+
                     setCategoryState(category, {
                         status: "found",
-                        candidates: event.candidates || [],
+                        candidates: acceptedCandidates,
                         totalFound: event.total_found,
                     });
                     break;

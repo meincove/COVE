@@ -39,3 +39,7 @@ ai_server.log
 backend_server.log
 catalog_load.log
 embedding_generation*.log
+
+# Static Assets
+cove-ai-core/static/assets/
+cove-ai-core/static/generated_assets/

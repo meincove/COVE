@@ -163,6 +163,13 @@ export default function ChatProductCard({ item, index = 0 }: ChatProductCardProp
               <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-900">{item.tier}</span>
             </div>
           )}
+          {item.gender && (
+            <div className="px-2 py-1 rounded-md bg-black/80 backdrop-blur shadow-sm border border-neutral-900">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-white">
+                {item.gender === 'male' ? 'MEN' : item.gender === 'female' ? 'WOMEN' : item.gender === 'unisex' ? 'UNISEX' : item.gender}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Like Button */}

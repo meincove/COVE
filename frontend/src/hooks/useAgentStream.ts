@@ -60,7 +60,10 @@ export function useAgentStream() {
         message: string,
         userId?: string,
         sessionId?: string,
-        sessionType?: string  // ✨ PHASE 6: For outfit_builder workflow
+        sessionType?: string,  // ✨ PHASE 6: For outfit_builder workflow
+        imageUrl?: string,     // ✨ VISION: Image URL
+        imageData?: string,    // ✨ VISION: Base64 data
+        brand?: string | null  // 🏷️ BRAND FILTER
     ) => {
         // Abort previous request if exists
         if (abortControllerRef.current) {
@@ -98,6 +101,9 @@ export function useAgentStream() {
                     guestSessionId: sessionId,
                     top_k: 4,
                     sessionType,  // ✨ PHASE 6: Triggers orchestrator for outfit_builder
+                    imageUrl,     // ✨ VISION
+                    imageData,    // ✨ VISION
+                    brand         // 🏷️ BRAND FILTER
                 }),
                 signal: abortController.signal,
             });

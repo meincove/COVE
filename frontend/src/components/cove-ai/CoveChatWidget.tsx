@@ -34,7 +34,7 @@ import SuggestedQueries from "@/src/components/cove-ai/SuggestedQueries";
 import { AgentThinkingSteps } from "@/src/components/cove-ai/AgentThinkingSteps";
 import LoadingSkeleton from './LoadingSkeleton';
 import AgenticOutfitBuilder from './AgenticOutfitBuilder';
-import { useOutfitStore } from '@/src/hooks/useOutfitStore';
+import { useOutfitStore, ProductCandidate } from '@/src/hooks/useOutfitStore';
 import Toast, { ToastType } from "@/src/components/cove-ai/Toast";
 import { useAgentStreaming } from "@/src/hooks/useAgentStreaming";
 import { useAgentStream } from "@/src/hooks/useAgentStream";
@@ -107,6 +107,7 @@ type AssistantMeta =
 type ChatMessage = BaseMessage & {
   meta?: AssistantMeta;
   suggestedActions?: import("@/types/agent").SuggestedAction[];
+  imageUrl?: string; // ✨ VISION: For user-uploaded images or assistant image results
 };
 
 function makeId() {
@@ -178,6 +179,8 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
   const [isCandidatePanelOpen, setIsCandidatePanelOpen] = useState(false);
 
 
+
+
   const { user, isSignedIn } = useUser();
 
   const { guestSessionId, ensureGuestSessionId } = useCartSessionStore();
@@ -210,6 +213,32 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     questionOptions,  // Interactive question options for conversation flow
   } = useAgentStream();
 
+  // Auto-scroll ref
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Auto-scroll on new messages
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isStreamingProgress, agenticEvents.length]);
+
+  // Subscribe to store for reactive UI updates
+  const outfitCategories = useOutfitStore(state => state.categories);
+
+  // Auto-open panel when candidates are found (UX Restoration)
+  useEffect(() => {
+    // Check if we have any found candidates
+    const hasCandidates = Object.values(outfitCategories).some(c => c.status === 'found' && c.candidates.length > 0);
+
+    if (hasCandidates && !isCandidatePanelOpen && !manuallyClosedRef.current) {
+      console.log("🔓 Auto-opening candidate panel (UX Restoration)");
+      setIsCandidatePanelOpen(true);
+    }
+  }, [outfitCategories, isCandidatePanelOpen]);
+
   // Phase 3: Layout Store integration for Virtual Trial Room
   const setGeneratedOutfit = useLayoutStore((s) => s.setGeneratedOutfit);
 
@@ -221,8 +250,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
   // Updates the global outfit store from streaming events (normalizes categories etc.)
   useOutfitEvents(agenticEvents);
 
-  // Subscribe to store for reactive UI updates
-  const outfitCategories = useOutfitStore(state => state.categories);
+
 
   // ✨ FIX: Panel Interaction Logic
   const manuallyClosedRef = useRef(false);
@@ -257,17 +285,25 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     }
   }, [isStreamingProgress, agenticEvents.length]);
 
+  // ✨ FIX: Close Candidate Panel if Question appears (Ambiguity Check)
+  useEffect(() => {
+    if (questionOptions) {
+      setIsCandidatePanelOpen(false);
+    }
+  }, [questionOptions]);
+
   // Week 6: Router for navigation (no page refresh)
   const router = useRouter();
 
   // Week 6: Disabled auto-load of chat history (prevents seeing old chats)
   // Users start fresh each time - history is still saved to DB
-  /*
+  // Week 6: ENABLED auto-load of chat history
+  // Users start fresh each time - history is still saved to DB
   useEffect(() => {
     if (!historyLoading && history.length > 0 && messages.length === 0) {
       // Convert history to chat messages
       const historyMessages: ChatMessage[] = history.map((h, i) => ({
-        id: `history - ${ i } -${ Date.now() } `,
+        id: `history-${i}-${Date.now()}`,
         role: h.role,
         content: h.content,
         meta: h.meta,
@@ -275,8 +311,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       setMessages(historyMessages);
       setHasStartedChat(true); // Mark as started if we have history
     }
-  }, [history, historyLoading]);
-  */
+  }, [history, historyLoading, messages.length]);
 
   // Clear messages when user signs out or signs in (prevents showing wrong user's history)
   useEffect(() => {
@@ -398,7 +433,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
         id: makeId(),
         role: 'user',
         content: msg.trim(),
-        // TODO: Handle image display in message if needed
+        imageUrl: image ? URL.createObjectURL(image) : undefined, // ✨ VISION: Local preview
       };
 
       setMessages(prev => [...prev, userMsg]);
@@ -406,13 +441,11 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
 
       if (!hasStartedChat) {
         setHasStartedChat(true);
-        // Mark that user has chatted (for personalized greeting on next visit)
         if (typeof window !== 'undefined') {
           localStorage.setItem('cove_has_chatted', 'true');
         }
       }
 
-      // Save user message to history
       saveMessage({
         role: 'user',
         content: userMsg.content,
@@ -421,12 +454,28 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       try {
         const sessionId = guestSessionId ?? ensureGuestSessionId();
 
+        // ✨ VISION: Convert File to Base64 if present
+        let imageData: string | undefined = undefined;
+        if (image) {
+          imageData = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64String = reader.result as string;
+              // Extract just the base64 part if it contains the prefix
+              resolve(base64String.split(',')[1] || base64String);
+            };
+            reader.readAsDataURL(image);
+          });
+        }
+
         // Send via streaming query
         await sendStreamingQuery(
           userMsg.content,
           isSignedIn && user ? user.id : undefined,
           sessionId,
-          mode === 'outfit_builder' ? 'outfit_builder' : undefined
+          mode === 'outfit_builder' ? 'outfit_builder' : undefined,
+          undefined, // imageUrl
+          imageData  // imageData (base64)
         );
       } catch (err: any) {
         console.error("Error talking to agent:", err);
@@ -787,13 +836,69 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       // Only for outfit builder responses, not simple product queries
       // Use STRICT phrases to avoid false positives from casual "outfit" mentions
       const introLower = introText.toLowerCase();
-      const isOutfitResponse = introLower.includes('built a complete outfit') ||
+      // Check for textual triggers
+      const hasTextTrigger = introLower.includes('built a complete outfit') ||
         introLower.includes('complete outfit for you') ||
         introLower.includes("i've built") ||
         introLower.includes('your outfit is ready') ||
-        introLower.includes('€0.00 total');  // Outfit builder signature
+        introLower.includes('look 1') ||
+        introLower.includes('generated 3 outfits') || // Broader
+        introLower.includes('styling:') || // Structure shared by LLM
+        introLower.includes('€0.00 total');
+
+      // Check for data triggers (stronger signal)
+      const hasOutfitData = streamedItems.some(item => item.outfit_id || (item as any).outfit_id);
+
+      const isOutfitResponse = hasTextTrigger || hasOutfitData;
+
       if (isOutfitResponse) {
         setGeneratedOutfit(streamedItems);
+
+        // ✨ ROBUSTNESS: Hydrate OutfitStore directly from final items
+        // This ensures AgenticOutfitBuilder has data even if streaming events failed
+        const { setCategoryState, setActiveCategory } = useOutfitStore.getState();
+
+        // Group items by category
+        const grouped: Record<string, ProductCandidate[]> = {};
+        let firstCategory: string | null = null;
+
+        streamedItems.forEach(item => {
+          // Normalize category
+          let cat = item.category || item.type || 'Other';
+          const lower = cat.toLowerCase();
+          if (lower.includes('top') || lower.includes('shirt') || lower.includes('sweater')) cat = 'Tops';
+          else if (lower.includes('bottom') || lower.includes('pant') || lower.includes('jean') || lower.includes('short')) cat = 'Bottoms';
+          else if (lower.includes('shoe') || lower.includes('sneaker') || lower.includes('boot')) cat = 'Shoes';
+          else cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+          if (!grouped[cat]) grouped[cat] = [];
+
+          // Map AgentItem -> ProductCandidate
+          const candidate: ProductCandidate = {
+            title: item.title,
+            price: item.price || 0,
+            imageUrl: item.imageUrl,
+            slug: item.slug || `generated-slug-${Date.now()}-${Math.random()}`,
+            type: item.type,
+            gender: (item as any).gender,
+            outfit_id: item.outfit_id,
+            stylist_note: (item as any).stylist_note || item.reason
+          };
+
+          grouped[cat].push(candidate);
+          if (!firstCategory) firstCategory = cat;
+        });
+
+        // Update Store
+        Object.keys(grouped).forEach(cat => {
+          setCategoryState(cat, {
+            status: "found",
+            candidates: grouped[cat],
+            totalFound: grouped[cat].length
+          });
+        });
+
+        if (firstCategory) setActiveCategory(firstCategory);
       }
 
       // Remove thinking message and add final result
@@ -1118,6 +1223,31 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
             <AgenticOutfitBuilder
               streamEvents={agenticEvents}
               isActive={true}
+              onBrandSelect={async (brand) => {
+                // Trigger outfit building when brand is selected
+                // This replaces the old auto-start or text-based start
+                console.log("🎨 Brand selected:", brand);
+
+                const sessionId = guestSessionId ?? ensureGuestSessionId();
+                const genderTerm = "outfit"; // We could track gender state here if needed, but backend handles context
+                // Or we can construct a prompt:
+                const prompt = brand
+                  ? `Build me a ${brand} outfit`
+                  : `Build me a complete outfit`;
+
+                // If brand is null (All Brands), we just proceed without a specific brand filter
+                // But we pass the 'brand' param to the API explicitly so it knows to filter if present
+
+                await sendStreamingQuery(
+                  prompt,
+                  isSignedIn && user ? user.id : undefined,
+                  sessionId,
+                  'outfit_builder', // sessionType
+                  undefined, // imageUrl
+                  undefined, // imageData
+                  brand      // brand filter
+                );
+              }}
             />
           </div>
         ) : (
@@ -1178,6 +1308,17 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
                   />
                 )}
                 */}
+
+                    {/* VISION: Show uploaded image preview in bubble if present */}
+                    {m.imageUrl && (
+                      <div className="mb-3 rounded-lg overflow-hidden border border-gray-100 shadow-sm bg-gray-50/50">
+                        <img
+                          src={m.imageUrl}
+                          alt="Fashion reference"
+                          className="max-h-60 w-full object-contain mx-auto"
+                        />
+                      </div>
+                    )}
 
                     {/* Show content (answer text) always */}
                     {m.content && <p className="whitespace-pre-wrap font-normal">{m.content}</p>}
@@ -1325,7 +1466,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
             {/* Welcome suggestions removed - PersonalizedGreeting handles the empty state */}
 
             {/* Generic Query Thinking Indicator - shows spinning icon when not an outfit query */}
-            {isStreamingProgress && agenticEvents.length === 0 && mode !== 'outfit_builder' && (
+            {isStreamingProgress && agenticEvents.length === 0 && (mode as string) !== 'outfit_builder' && (
               <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-200">
                 <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-3 flex items-center gap-2.5">
                   {/* Spinning Icon */}
@@ -1370,8 +1511,8 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
               </div>
             )}
 
-            {/* ✨ Chat mode: Show outfit notification when agentic events complete */}
-            {agenticEvents.length > 0 && (
+            {/* ✨ Chat mode: Show outfit notification when agentic events complete OR we have outfit data */}
+            {(agenticEvents.length > 0 || Object.keys(outfitCategories).length > 0) && !questionOptions && (
               <div className="px-3 mb-4">
                 {isStreamingProgress ? (
                   /* Show "Building outfit" when streaming */
@@ -1381,25 +1522,40 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
                   </div>
                 ) : (
                   /* Done streaming - show "Outfit Ready" notification */
-                  <button
-                    onClick={() => {
-                      onTabChange?.('outfit_builder');
-                      onOutfitReady?.();
-                    }}
-                    className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
-                      <span className="text-base">✨</span>
-                    </div>
-                    <div className="text-left flex-1">
-                      <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
-                      <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
-                    </div>
-                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  </button>
+                  /* Done streaming - show "Outfit Ready" notification */
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => {
+                        onTabChange?.('outfit_builder');
+                        onOutfitReady?.();
+                      }}
+                      className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                        <span className="text-base">✨</span>
+                      </div>
+                      <div className="text-left flex-1">
+                        <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
+                        <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
+                      </div>
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    </button>
+
+                    {/* View Candidates Button */}
+                    <button
+                      onClick={() => setIsCandidatePanelOpen(true)}
+                      className="w-full py-1.5 text-xs text-emerald-600 font-medium hover:text-emerald-700 hover:underline flex items-center justify-center gap-1"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      Review Search Candidates
+                    </button>
+                  </div>
                 )}
               </div>
             )}
+
+            {/* Scroll Anchor */}
+            <div ref={messagesEndRef} />
           </>
         )}
 
@@ -1418,7 +1574,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
         />
         <button
           type="submit"
-          disabled={!input.trim()}
+          disabled={!input?.trim()}
           className="px-3 py-1 text-sm rounded-full bg-black text-white disabled:opacity-40"
         >
           Send

@@ -68,7 +68,7 @@ export function fallbackResolveAgentItemForChat(
     type: item.type,
     colorName: item.color,
     priceLabel: undefined,
-    imageUrl: undefined,
+    imageUrl: item.imageUrl || item.image_url,
     productUrl:
       item.url && item.url.startsWith("/") ? item.url : undefined,
     fromCatalog: false,
