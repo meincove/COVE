@@ -49,12 +49,13 @@ def _build_sql_filters(filters: Dict[str, Any]) -> tuple[str, List[Any]]:
     if "type" in filters and filters["type"]:
         val = filters["type"]
         if isinstance(val, list):
-            # List of types: meta->>'type' = ANY(%s)
-            clauses.append("meta->>'type' = ANY(%s)")
-            params.append(val)
+            # List of types: lower(meta->>'type') = ANY(%s)
+            clauses.append("lower(meta->>'type') = ANY(%s)")
+            # Ensure values are lowercase
+            params.append([str(v).lower() for v in val])
         else:
             # Single type
-            clauses.append("meta->>'type' = %s")
+            clauses.append("lower(meta->>'type') = lower(%s)")
             params.append(val)
             
     # 2. Price Range
@@ -405,6 +406,7 @@ def search_results_to_dict(results: List[SearchResult]) -> List[Dict[str, Any]]:
             'title': r.title,
             'text': r.text,
             'url': r.url,
+            'slug': r.meta.get('slug') or r.meta.get('groupSlug'),
             'meta': r.meta,
             'brand': r.meta.get('brand'),
             'gender': r.meta.get('gender'),

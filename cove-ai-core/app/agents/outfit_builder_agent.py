@@ -330,26 +330,7 @@ CRITICAL RULES FOR BANS:
                     if category not in ["accessories", "other"]:  # Don't fail for accessories
                         missing_categories.append((outfit_id, category))
                     
-                    # Create notification item
-                    item_entry = {
-                        "category": category,
-                        "product": {
-                            "title": f"No {category} found",
-                            "price": 0,
-                            "type": "notification",
-                            "description": f"Could not find {category} under €{budget_for_category:.0f} matching filters"
-                        },
-                        "title": f"No {category} found",
-                        "slug": f"missing-{category}-{outfit_id}",
-                        "url": "#",
-                        "type": "notification",
-                        "price": 0,
-                        "reason": "Budget/inventory constraint",
-                        "is_notification": True,
-                        "outfit_id": outfit_id
-                    }
-                    outfit_items.append(item_entry)
-                    all_outfit_items.append(item_entry)
+                    # Skip notification items entirely - just continue to next category
                     continue
                 
                 # 💰 BUDGET SELECTION LOGIC

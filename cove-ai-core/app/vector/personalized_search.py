@@ -382,6 +382,7 @@ def personalized_results_to_dict(results: List[PersonalizedResult]) -> List[Dict
             'title': r.title,
             'text': r.text,
             'url': r.url,
+            'slug': r.meta.get('slug') or r.meta.get('groupSlug'),
             'meta': r.meta,
             'search_score': r.search_score,
             'cf_score': r.cf_score,
