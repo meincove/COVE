@@ -28,6 +28,8 @@ interface AgenticOutfitBuilderProps {
     isActive: boolean;
     onGenderSelect?: (gender: 'mens' | 'womens') => void;
     onBrandSelect?: (brand: string | null) => void;
+    uploadedImage?: { file: File; preview: string } | null;
+    onTriggerImageUpload?: () => void;
 }
 
 /**
@@ -42,7 +44,9 @@ export default function AgenticOutfitBuilder({
     streamEvents,
     isActive,
     onGenderSelect,
-    onBrandSelect
+    onBrandSelect,
+    uploadedImage,
+    onTriggerImageUpload
 }: AgenticOutfitBuilderProps) {
     // Use global store
     const { categories, setCategoryState, updateCandidate, activeCategory, setActiveCategory, budgetMax } = useOutfitStore();
@@ -57,7 +61,19 @@ export default function AgenticOutfitBuilder({
     // Track how many events we've processed
     const processedCountRef = useRef(0);
 
-    // ... (rest of useEffect remains same) ...
+    // VTO States
+    const [vtoLoading, setVtoLoading] = useState<number | null>(null); // lookup by outfit number (1, 2, 3)
+    const [vtoResults, setVtoResults] = useState<Record<number, string>>({}); // look num -> image url
+    const [waitingForImage, setWaitingForImage] = useState(false); // ✨ UX: Track if we asked for an upload
+
+    // ✨ AUTO-TRIGGER VTO: When image arrives and we were waiting, run it!
+    useEffect(() => {
+        if (waitingForImage && uploadedImage) {
+            console.log("📸 Image uploaded! Auto-triggering VTO...");
+            handleVTO(activeOutfit);
+            setWaitingForImage(false); // Reset flag
+        }
+    }, [uploadedImage, waitingForImage, activeOutfit]);
 
     // Check if building has started (any category activity) - Force skip steps if events exist
     const hasExternalEvents = streamEvents.length > 0;
@@ -67,12 +83,6 @@ export default function AgenticOutfitBuilder({
     const currentStep = 'building';
     const isBuilding = true;
 
-    // (Handlers removed as they are no longer reachable from UI)
-
-    // (Brand Selection Block Removed)
-
-    // ... (rest of outfits rendering) ...
-
     // ✨ DERIVED STATE: Group items into outfits
     const outfits: Record<string, ProductCandidate[]> = {
         outfit_1: [],
@@ -80,7 +90,6 @@ export default function AgenticOutfitBuilder({
         outfit_3: []
     };
 
-    // Flatten and group
     // Flatten and group
     Object.values(categories).forEach(catState => {
         // Strategy: Only add items that are officially "selected" or "accepted".
@@ -114,6 +123,60 @@ export default function AgenticOutfitBuilder({
     });
 
     const currentOutfitItems = outfits[`outfit_${activeOutfit}`] || [];
+
+    const handleVTO = async (lookNum: number) => {
+        const items = outfits[`outfit_${lookNum}`];
+        if (!items || items.length === 0) return;
+
+        if (!uploadedImage) {
+            setWaitingForImage(true); // ✨ Mark that we are waiting
+            onTriggerImageUpload?.();
+            return;
+        }
+
+        // Proceed if we have image (or it just arrived)
+
+        setVtoLoading(lookNum);
+
+        try {
+            // Convert file to base64
+            const imageData: string = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64String = reader.result as string;
+                    resolve(base64String.split(',')[1] || base64String);
+                };
+                reader.readAsDataURL(uploadedImage.file);
+            });
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_AI_CORE_BASE_URL || 'http://localhost:8000'}/ai/vto/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: items.map(i => ({
+                        title: i.title,
+                        imageUrl: i.imageUrl,
+                        type: i.type,
+                        slug: i.slug
+                    })),
+                    imageData: imageData
+                })
+            });
+
+            const data = await res.json();
+            if (data.ok && data.vto_image_url) {
+                setVtoResults(prev => ({ ...prev, [lookNum]: data.vto_image_url }));
+            } else {
+                console.error("VTO Failed:", data.error || data.reasoning);
+                alert(`Failed to generate preview: ${data.error || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("VTO Error:", err);
+            alert("An error occurred while generating the virtual try-on.");
+        } finally {
+            setVtoLoading(null);
+        }
+    };
 
 
     return (
@@ -262,10 +325,79 @@ export default function AgenticOutfitBuilder({
                                 €{currentOutfitItems.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2)}
                             </span>
                         </div>
-                        <button className="w-full py-2.5 bg-neutral-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
-                            <ShoppingBag className="h-3.5 w-3.5" />
-                            Add Look to Cart
-                        </button>
+                        {/* VTO Preview if generated */}
+                        {/* VTO Preview if generated */}
+                        {vtoResults[activeOutfit] && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="mb-4 rounded-xl overflow-hidden shadow-2xl relative bg-neutral-900 group ring-1 ring-white/10"
+                            >
+                                {/* Floating Badge */}
+                                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] text-white font-bold uppercase tracking-wider z-20 flex items-center gap-1.5 shadow-lg">
+                                    <Sparkles className="w-3 h-3 text-emerald-400 fill-emerald-400/20" />
+                                    AI Preview
+                                </div>
+                                <div className="absolute top-3 right-3 z-20">
+                                    <div className="h-6 w-6 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-[pulse_2s_infinite]" />
+                                    </div>
+                                </div>
+
+                                {/* Container - enforced 3:4 ratio */}
+                                <div className="relative aspect-[3/4] w-full isolate">
+
+                                    {/* 1. Backdrop (Blurred + Darkened) */}
+                                    <div className="absolute inset-0 z-0">
+                                        <img
+                                            src={vtoResults[activeOutfit]}
+                                            alt=""
+                                            className="w-full h-full object-cover blur-2xl scale-125 opacity-50"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                                    </div>
+
+                                    {/* 2. Main Image (Crisp + Centered) */}
+                                    <img
+                                        src={vtoResults[activeOutfit]}
+                                        alt="Virtual Preview"
+                                        className="relative w-full h-full object-contain z-10 drop-shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+                                    />
+
+                                    {/* 3. Subtle shine/vignette */}
+                                    <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 z-20 rounded-xl" />
+                                </div>
+                            </motion.div>
+                        )}
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleVTO(activeOutfit)}
+                                disabled={vtoLoading !== null}
+                                className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md
+                                    ${vtoLoading === activeOutfit
+                                        ? 'bg-emerald-100 text-emerald-700 cursor-wait'
+                                        : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                    }`}
+                            >
+                                {vtoLoading === activeOutfit ? (
+                                    <>
+                                        <div className="h-3 w-3 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        Virtual Try-On
+                                    </>
+                                )}
+                            </button>
+
+                            <button className="flex-1 py-2.5 bg-neutral-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                <ShoppingBag className="h-3.5 w-3.5" />
+                                Add Look to Cart
+                            </button>
+                        </div>
                     </div>
                 </>
             ) : (

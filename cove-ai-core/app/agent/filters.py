@@ -28,8 +28,8 @@ def build_filters(attrs: Dict[str, List[str]], numeric: Dict[str, Any]) -> Dict[
     if attrs.get("sizes"):
         f["size"] = attrs["sizes"][0]
 
-    # numeric filters (price_min / price_max / gender / sort)
-    for key in ("price_min", "price_max", "sort", "gender"):
+    # numeric filters (price_min / price_max / gender / sort / brand)
+    for key in ("price_min", "price_max", "sort", "gender", "brand"):
         if key in numeric:
             f[key] = numeric[key]
 

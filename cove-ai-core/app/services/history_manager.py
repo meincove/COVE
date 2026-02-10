@@ -203,15 +203,15 @@ class HistoryManager:
         if summary:
             system_content += f"\n\nPREVIOUS CONVERSATION SUMMARY:\n{summary}"
 
-        # Inject conversation facts if available
+        messages = [{"role": "system", "content": system_content}]
+
+        # Inject conversation facts if available (as an extra system message)
         if conversation_facts:
             from app.services.fact_extractor import get_fact_extractor
             fact_extractor = get_fact_extractor()
             # Note: Assuming get_context_for_llm is synchronous, but if async it needs await.
-            # Checking original code: facts_context = fact_extractor.get_context_for_llm(conversation_facts)
-            # It seems synchronous.
             facts_context = fact_extractor.get_context_for_llm(conversation_facts)
-            
+
             if facts_context:
                 messages.append({
                     "role": "system",
@@ -225,8 +225,6 @@ class HistoryManager:
                         + facts_context
                     )
                 })
-        
-        messages = [{"role": "system", "content": system_content}]
         
         # Add history messages
         for msg in history:

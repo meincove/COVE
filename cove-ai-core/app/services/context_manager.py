@@ -45,8 +45,8 @@ async def get_conversation_context(
         
         # Get facts from database
         facts = await get_facts(
-            clerk_user_id=clerk_user_id or "",
-            guest_session_id=session_id
+            clerk_user_id=clerk_user_id if clerk_user_id else None,
+            guest_session_id=session_id if session_id else None
         )
         
         # Extract products shown

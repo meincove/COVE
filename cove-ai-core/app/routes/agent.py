@@ -894,17 +894,10 @@ async def _agent_query_impl(
     # Check if this is    # ✨ WEEK 3 DAY 2: Context-Aware Reasoning
     # Resolve intent using conversation history (handle follow-ups)
     
-    # 1. Get/Create Manager
-    from app.services.conversation_manager import get_conversation_manager
-    conv_manager = get_conversation_manager()
-    user_id = body.clerkUserId or body.guestSessionId or "anonymous"
-    
-    # 2. Add User Message to History
-    conv_manager.add_message(user_id, "user", q)
-    
-    # 3. Resolve Inteht (LLM)
-    # "Make it blue" -> "Show me blue blazers"
-    resolved_context = await conv_manager.resolve_intent(user_id, q)
+    # Resolve query using conversation context (if available)
+    from app.services.conversation_context import resolve_query_with_context
+    resolved_context = await resolve_query_with_context(body, q)
+
     resolved_query = resolved_context.get("resolved_query", q)
     modification_type = resolved_context.get("modification_type", "new_topic")
     
@@ -1049,8 +1042,8 @@ async def _agent_query_impl(
                 # Handle potential string/float difference
                 try:
                     classification["entities"]["price_max"] = float(gathered["budget_max"])
-                except:
-                    pass
+                except Exception as e:
+                    log.debug("Failed to parse budget_max from gathered context: %s", e)
             
             if gathered.get("occasion"):
                 classification["entities"]["occasion"] = gathered["occasion"]
@@ -2410,9 +2403,10 @@ async def _agent_query_impl(
                 "top_k": search_top_k,  # Use expanded top_k
                 "exclude_slugs": list(shown_slugs) if shown_slugs else None,
                 "visual_vibe": rec_filters.get("_visual_vibe"), # Pass vibe signal
-                "user_profile": accumulated_profile, # Pass session preferences for ranking
+                "user_profile": accumulated_profile, # Re-enabled user profile
                 "sku_boost": is_sku_query # Boost BM25 for exact matches
             }
+            log.info(f"🔍 [DEBUG] rec_payload: {json.dumps(rec_payload, default=str)}")
             rec_resp = await _call_recs_suggest(rec_payload)
             
             # Phase 1: Complete tool tracking
@@ -2562,8 +2556,15 @@ async def _agent_query_impl(
         # --- FALLBACK LOGIC (executes for empty results OR rejected results) ---
         should_show = availability.get("should_show_results", False)
         
+        if not should_show and items:
+            log.warning(f"❌ [AVAILABILITY] Quality Check flagged items, but forcing display (Visual Search Priority).")
+            # FORCE SHOW: Visual search is ground truth.
+            should_show = True
+            availability["should_show_results"] = True
+            availability["honesty_message"] = "These look like what you asked for."
+
         if not should_show:
-            log.warning(f"❌ [AVAILABILITY] Initial search failed/rejected (items={len(items)}). Attempting Semantic Fallback.")
+            log.warning(f"❌ [AVAILABILITY] Initial search failed (0 items). Attempting Semantic Fallback.")
             
             # Check if we have a mapped category we can fall back to
             types_list = attrs.get("types", [])
@@ -2840,7 +2841,7 @@ async def _agent_query_impl(
 
         intro_line = verification["refined_answer"]
         suggestions = verification["suggestions"]
-        print(f"✅ [VERIFIER] Status: {verification['status']} | Suggestions: {len(suggestions)}")
+        log.debug("✅ [VERIFIER] Status: %s | Suggestions: %s", verification.get("status"), len(suggestions))
 
         return AgentOut(
             kind="recommendations",
@@ -2869,8 +2870,10 @@ async def _agent_query_impl(
             "visual_context": body.visualMetadata
         }
         
-        # Ensure we have a guest session ID if clerk user ID is missing
-        user_id = body.clerkUserId or body.guestSessionId or "anonymous"
+        # Use best-available identity for personalization
+        user_id = get_base_user_id(body.guestSessionId, body.clerkUserId)
+        if not user_id:
+            log.warning("Missing clerkUserId/guestSessionId; proceeding without user-scoped personalization.")
         
         orchestrator_context = {
             "user_id": user_id,
@@ -3021,7 +3024,7 @@ async def _agent_query_impl(
     )
     answer = verification["refined_answer"]
     suggestions = verification["suggestions"]
-    print(f"✅ [VERIFIER] Status: {verification['status']} | Suggestions: {len(suggestions)}")
+    log.debug("✅ [VERIFIER] Status: %s | Suggestions: %s", verification.get("status"), len(suggestions))
 
     return AgentOut(
         kind=api_response_kind,  # Use mapped API kind for Pydantic validation

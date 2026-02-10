@@ -33,6 +33,13 @@
                 "timeout_ms": 3000,
                 "parallel_group": 2,
                 "description": "Optimize pricing and apply discounts"
+            },
+            {
+                "agent": "vto_agent",
+                "required": false,
+                "timeout_ms": 120000,
+                "parallel_group": 3,
+                "description": "Generate virtual try-on preview"
             }
         ],
         "min_success_agents": 2,

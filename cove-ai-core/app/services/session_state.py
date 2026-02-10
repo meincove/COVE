@@ -6,12 +6,22 @@ Extracted from app/routes/agent.py to improve separation of concerns.
 """
 from typing import Any, Dict, List, Optional, Set
 from datetime import datetime
+import os
+import time
+import json
+import logging
+
+from app.core.redis_client import get_redis_client, redis_available
+
+log = logging.getLogger("cove.session_state")
 
 # In-memory session caches (single-process only)
 # TODO: Move to Redis for production scalability
+_SESSION_TTL_SECONDS = int(os.getenv("SESSION_STATE_TTL_SECONDS", "21600"))  # 6 hours
 
 _SESSION_RECS: Dict[str, List[Dict[str, Any]]] = {}
 _SESSION_LAST_USER_MSG: Dict[str, str] = {}
+_SESSION_LAST_SEEN: Dict[str, float] = {}
 
 # Track when we asked user for missing information
 _SESSION_AWAITING_SIZE: Dict[str, Dict[str, Any]] = {}
@@ -46,7 +56,7 @@ def get_namespaced_session_id(
     guest_id: Optional[str],
     clerk_id: Optional[str],
     session_type: str = "main"
-) -> str:
+) -> Optional[str]:
     """
     Create namespaced session ID for separate chat sessions.
     
@@ -54,19 +64,21 @@ def get_namespaced_session_id(
         - guest_abc123:main
         - clerk_user_xyz:outfit_builder
     """
-    base = clerk_id or guest_id or "anonymous"
+    base = clerk_id or guest_id
+    if not base:
+        return None
     return f"{base}:{session_type}"
 
 
 def get_base_user_id(
     guest_id: Optional[str],
     clerk_id: Optional[str]
-) -> str:
+) -> Optional[str]:
     """
     Get base user ID without session namespace.
     Used for accessing user-level data shared across sessions.
     """
-    return clerk_id or guest_id or "anonymous"
+    return clerk_id or guest_id
 
 
 class SessionStateManager:
@@ -80,12 +92,123 @@ class SessionStateManager:
         """Extract session key from request body."""
         # Handles both Pydantic models (body.guestSessionId) and dicts
         if hasattr(body, "guestSessionId"):
-            return get_namespaced_session_id(
+            key = get_namespaced_session_id(
                 body.guestSessionId,
                 body.clerkUserId,
                 body.sessionType
             )
+            if key:
+                if redis_available():
+                    SessionStateManager._touch_redis(key)
+                else:
+                    SessionStateManager._touch_and_prune(key)
+            return key
         return None
+
+    @staticmethod
+    def _redis_key(session_key: str, suffix: str) -> str:
+        return f"cove:session:{session_key}:{suffix}"
+
+    @staticmethod
+    def _touch_redis(session_key: str) -> None:
+        client = get_redis_client()
+        if not client:
+            return
+        try:
+            meta_key = SessionStateManager._redis_key(session_key, "__meta")
+            client.setex(meta_key, _SESSION_TTL_SECONDS, "1")
+        except Exception as e:
+            log.debug("Redis touch failed: %s", e)
+
+    @staticmethod
+    def _redis_get(session_key: str, suffix: str, default):
+        client = get_redis_client()
+        if not client:
+            return default
+        key = SessionStateManager._redis_key(session_key, suffix)
+        try:
+            raw = client.get(key)
+            if raw is None:
+                return default
+            # Refresh TTL on access
+            if _SESSION_TTL_SECONDS > 0:
+                client.expire(key, _SESSION_TTL_SECONDS)
+            return json.loads(raw)
+        except Exception as e:
+            log.debug("Redis get failed for %s: %s", key, e)
+            return default
+
+    @staticmethod
+    def _redis_set(session_key: str, suffix: str, value) -> None:
+        client = get_redis_client()
+        if not client:
+            return
+        key = SessionStateManager._redis_key(session_key, suffix)
+        try:
+            payload = json.dumps(value)
+            if _SESSION_TTL_SECONDS > 0:
+                client.setex(key, _SESSION_TTL_SECONDS, payload)
+            else:
+                client.set(key, payload)
+        except Exception as e:
+            log.debug("Redis set failed for %s: %s", key, e)
+
+    @staticmethod
+    def _redis_delete(session_key: str, suffix: str) -> None:
+        client = get_redis_client()
+        if not client:
+            return
+        key = SessionStateManager._redis_key(session_key, suffix)
+        try:
+            client.delete(key)
+        except Exception as e:
+            log.debug("Redis delete failed for %s: %s", key, e)
+
+    @staticmethod
+    def _touch_and_prune(key: str) -> None:
+        """Update last seen and prune stale sessions."""
+        now = time.time()
+        _SESSION_LAST_SEEN[key] = now
+
+        if _SESSION_TTL_SECONDS <= 0:
+            return
+
+        cutoff = now - _SESSION_TTL_SECONDS
+        stale_keys = [k for k, ts in _SESSION_LAST_SEEN.items() if ts < cutoff]
+        for k in stale_keys:
+            SessionStateManager._purge_session(k)
+
+    @staticmethod
+    def _purge_session(key: str) -> None:
+        """Remove all cached state for a session key."""
+        if redis_available():
+            for suffix in (
+                "recs",
+                "last_user_msg",
+                "awaiting_size",
+                "awaiting_color",
+                "awaiting_quantity",
+                "shown_slugs",
+                "search_context",
+                "user_prefs",
+                "accum_profile",
+                "interactions",
+                "body_profile",
+                "__meta",
+            ):
+                SessionStateManager._redis_delete(key, suffix)
+        _SESSION_LAST_SEEN.pop(key, None)
+        _SESSION_RECS.pop(key, None)
+        _SESSION_LAST_USER_MSG.pop(key, None)
+        _SESSION_AWAITING_SIZE.pop(key, None)
+        _SESSION_AWAITING_COLOR.pop(key, None)
+        _SESSION_AWAITING_QUANTITY.pop(key, None)
+        _SESSION_SHOWN_SLUGS.pop(key, None)
+        _SESSION_SEARCH_CONTEXT.pop(key, None)
+        _SESSION_USER_PREFERENCES.pop(key, None)
+        _SESSION_ACCUMULATED_PROFILE.pop(key, None)
+        _SESSION_INTERACTIONS.pop(key, None)
+        _SESSION_BODY_PROFILE.pop(key, None)
 
     # --- Recommendations Context ---
     
@@ -95,16 +218,22 @@ class SessionStateManager:
         if not key:
             return
         # Handle both dicts and Pydantic objects
-        _SESSION_RECS[key] = [
+        normalized = [
             it.dict() if hasattr(it, "dict") else it 
             for it in items
         ]
+        if redis_available():
+            cls._redis_set(key, "recs", normalized)
+        else:
+            _SESSION_RECS[key] = normalized
 
     @classmethod
     def get_session_recs(cls, body) -> List[Dict[str, Any]]:
         key = cls.get_session_key(body)
         if not key:
             return []
+        if redis_available():
+            return cls._redis_get(key, "recs", [])
         return _SESSION_RECS.get(key, [])
 
     # --- Pending Questions State ---
@@ -113,52 +242,82 @@ class SessionStateManager:
     def set_awaiting_size(cls, body, product_info: Dict[str, Any]) -> None:
         key = cls.get_session_key(body)
         if key:
-            _SESSION_AWAITING_SIZE[key] = product_info
+            if redis_available():
+                cls._redis_set(key, "awaiting_size", product_info)
+            else:
+                _SESSION_AWAITING_SIZE[key] = product_info
 
     @classmethod
     def get_awaiting_size(cls, body) -> Optional[Dict[str, Any]]:
         key = cls.get_session_key(body)
-        return _SESSION_AWAITING_SIZE.get(key) if key else None
+        if not key:
+            return None
+        if redis_available():
+            return cls._redis_get(key, "awaiting_size", None)
+        return _SESSION_AWAITING_SIZE.get(key)
 
     @classmethod
     def clear_awaiting_size(cls, body) -> None:
         key = cls.get_session_key(body)
-        if key and key in _SESSION_AWAITING_SIZE:
-            del _SESSION_AWAITING_SIZE[key]
+        if key:
+            if redis_available():
+                cls._redis_delete(key, "awaiting_size")
+            elif key in _SESSION_AWAITING_SIZE:
+                del _SESSION_AWAITING_SIZE[key]
 
     @classmethod
     def set_awaiting_color(cls, body, product_info: Dict[str, Any]) -> None:
         key = cls.get_session_key(body)
         if key:
-            _SESSION_AWAITING_COLOR[key] = product_info
+            if redis_available():
+                cls._redis_set(key, "awaiting_color", product_info)
+            else:
+                _SESSION_AWAITING_COLOR[key] = product_info
 
     @classmethod
     def get_awaiting_color(cls, body) -> Optional[Dict[str, Any]]:
         key = cls.get_session_key(body)
-        return _SESSION_AWAITING_COLOR.get(key) if key else None
+        if not key:
+            return None
+        if redis_available():
+            return cls._redis_get(key, "awaiting_color", None)
+        return _SESSION_AWAITING_COLOR.get(key)
 
     @classmethod
     def clear_awaiting_color(cls, body) -> None:
         key = cls.get_session_key(body)
-        if key and key in _SESSION_AWAITING_COLOR:
-            del _SESSION_AWAITING_COLOR[key]
+        if key:
+            if redis_available():
+                cls._redis_delete(key, "awaiting_color")
+            elif key in _SESSION_AWAITING_COLOR:
+                del _SESSION_AWAITING_COLOR[key]
             
     @classmethod
     def set_awaiting_quantity(cls, body, product_info: Dict[str, Any]) -> None:
         key = cls.get_session_key(body)
         if key:
-            _SESSION_AWAITING_QUANTITY[key] = product_info
+            if redis_available():
+                cls._redis_set(key, "awaiting_quantity", product_info)
+            else:
+                _SESSION_AWAITING_QUANTITY[key] = product_info
 
     @classmethod
     def get_awaiting_quantity(cls, body) -> Optional[Dict[str, Any]]:
         key = cls.get_session_key(body)
-        return _SESSION_AWAITING_QUANTITY.get(key) if key else None
+        if not key:
+            return None
+        if redis_available():
+            return cls._redis_get(key, "awaiting_quantity", None)
+        return _SESSION_AWAITING_QUANTITY.get(key)
 
     @classmethod
     def clear_awaiting_quantity(cls, body) -> None:
         key = cls.get_session_key(body)
-        if key and key in _SESSION_AWAITING_QUANTITY:
-            del _SESSION_AWAITING_QUANTITY[key]
+        if key:
+            if redis_available():
+                cls._redis_delete(key, "awaiting_quantity")
+            elif key in _SESSION_AWAITING_QUANTITY:
+                del _SESSION_AWAITING_QUANTITY[key]
 
     # --- Conversation Context ---
 
@@ -166,28 +325,44 @@ class SessionStateManager:
     def update_last_user_message(cls, body) -> None:
         key = cls.get_session_key(body)
         if key and hasattr(body, "message"):
-            _SESSION_LAST_USER_MSG[key] = body.message
+            if redis_available():
+                cls._redis_set(key, "last_user_msg", body.message)
+            else:
+                _SESSION_LAST_USER_MSG[key] = body.message
 
     @classmethod
     def get_last_user_message(cls, body) -> Optional[str]:
         key = cls.get_session_key(body)
-        return _SESSION_LAST_USER_MSG.get(key) if key else None
+        if not key:
+            return None
+        if redis_available():
+            return cls._redis_get(key, "last_user_msg", None)
+        return _SESSION_LAST_USER_MSG.get(key)
 
     # --- Shown Items Tracking ---
 
     @classmethod
     def get_shown_slugs(cls, body) -> Set[str]:
         key = cls.get_session_key(body)
-        return _SESSION_SHOWN_SLUGS.get(key, set()) if key else set()
+        if not key:
+            return set()
+        if redis_available():
+            return set(cls._redis_get(key, "shown_slugs", []))
+        return _SESSION_SHOWN_SLUGS.get(key, set())
 
     @classmethod
     def mark_slugs_as_shown(cls, body, slugs: List[str]) -> None:
         key = cls.get_session_key(body)
         if not key:
             return
-        if key not in _SESSION_SHOWN_SLUGS:
-            _SESSION_SHOWN_SLUGS[key] = set()
-        _SESSION_SHOWN_SLUGS[key].update(slugs)
+        if redis_available():
+            existing = set(cls._redis_get(key, "shown_slugs", []))
+            existing.update(slugs)
+            cls._redis_set(key, "shown_slugs", list(existing))
+        else:
+            if key not in _SESSION_SHOWN_SLUGS:
+                _SESSION_SHOWN_SLUGS[key] = set()
+            _SESSION_SHOWN_SLUGS[key].update(slugs)
 
     @classmethod
     def filter_out_shown_items(cls, body, items: List[Any]) -> List[Any]:
@@ -215,17 +390,25 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if key:
             import time
-            _SESSION_SEARCH_CONTEXT[key] = {
+            payload = {
                 "filters": filters,
                 "intent": intent,
                 "timestamp": time.time()
             }
+            if redis_available():
+                cls._redis_set(key, "search_context", payload)
+            else:
+                _SESSION_SEARCH_CONTEXT[key] = payload
 
     @classmethod
     def get_search_context(cls, body) -> Optional[Dict[str, Any]]:
         """Retrieve active search context."""
         key = cls.get_session_key(body)
-        return _SESSION_SEARCH_CONTEXT.get(key) if key else None
+        if not key:
+            return None
+        if redis_available():
+            return cls._redis_get(key, "search_context", None)
+        return _SESSION_SEARCH_CONTEXT.get(key)
 
     # --- User Preferences (persist for entire session) ---
 
@@ -234,15 +417,25 @@ class SessionStateManager:
         """Store user's gender preference for the session."""
         key = cls.get_session_key(body)
         if key:
-            if key not in _SESSION_USER_PREFERENCES:
-                _SESSION_USER_PREFERENCES[key] = {}
-            _SESSION_USER_PREFERENCES[key]["gender"] = gender.lower().strip()
+            if redis_available():
+                prefs = cls._redis_get(key, "user_prefs", {})
+                prefs["gender"] = gender.lower().strip()
+                cls._redis_set(key, "user_prefs", prefs)
+            else:
+                if key not in _SESSION_USER_PREFERENCES:
+                    _SESSION_USER_PREFERENCES[key] = {}
+                _SESSION_USER_PREFERENCES[key]["gender"] = gender.lower().strip()
 
     @classmethod
     def get_gender_preference(cls, body) -> Optional[str]:
         """Get user's stored gender preference."""
         key = cls.get_session_key(body)
-        if key and key in _SESSION_USER_PREFERENCES:
+        if not key:
+            return None
+        if redis_available():
+            prefs = cls._redis_get(key, "user_prefs", {})
+            return prefs.get("gender")
+        if key in _SESSION_USER_PREFERENCES:
             return _SESSION_USER_PREFERENCES[key].get("gender")
         return None
 
@@ -250,7 +443,11 @@ class SessionStateManager:
     def get_all_preferences(cls, body) -> Dict[str, Any]:
         """Get all stored preferences for the session."""
         key = cls.get_session_key(body)
-        return _SESSION_USER_PREFERENCES.get(key, {}) if key else {}
+        if not key:
+            return {}
+        if redis_available():
+            return cls._redis_get(key, "user_prefs", {})
+        return _SESSION_USER_PREFERENCES.get(key, {})
 
     # --- Entity Accumulator (Guest Intelligence) ---
 
@@ -263,11 +460,14 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if not key:
             return
-        
-        if key not in _SESSION_ACCUMULATED_PROFILE:
-            _SESSION_ACCUMULATED_PROFILE[key] = {"entities_seen": {}, "query_count": 0}
-        
-        profile = _SESSION_ACCUMULATED_PROFILE[key]
+
+        if redis_available():
+            profile = cls._redis_get(key, "accum_profile", {"entities_seen": {}, "query_count": 0})
+        else:
+            if key not in _SESSION_ACCUMULATED_PROFILE:
+                _SESSION_ACCUMULATED_PROFILE[key] = {"entities_seen": {}, "query_count": 0}
+            profile = _SESSION_ACCUMULATED_PROFILE[key]
+
         profile["query_count"] += 1
         seen = profile["entities_seen"]
         
@@ -291,6 +491,9 @@ class SessionStateManager:
                 seen["price_range"] = []
             seen["price_range"].append({"min": entities["price_min"]})
 
+        if redis_available():
+            cls._redis_set(key, "accum_profile", profile)
+
     @classmethod
     def get_accumulated_profile(cls, body) -> Dict[str, Any]:
         """
@@ -298,10 +501,16 @@ class SessionStateManager:
         Returns most frequently mentioned preferences.
         """
         key = cls.get_session_key(body)
-        if not key or key not in _SESSION_ACCUMULATED_PROFILE:
+        if not key:
             return {}
-        
-        profile = _SESSION_ACCUMULATED_PROFILE[key]
+        if redis_available():
+            profile = cls._redis_get(key, "accum_profile", None)
+            if not profile:
+                return {}
+        else:
+            if key not in _SESSION_ACCUMULATED_PROFILE:
+                return {}
+            profile = _SESSION_ACCUMULATED_PROFILE[key]
         seen = profile.get("entities_seen", {})
         
         # Build inferred profile from most common values
@@ -349,29 +558,35 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if not key or not slug:
             return
-        
-        if key not in _SESSION_INTERACTIONS:
-            _SESSION_INTERACTIONS[key] = []
-        
+        if redis_available():
+            existing = cls._redis_get(key, "interactions", [])
+        else:
+            if key not in _SESSION_INTERACTIONS:
+                _SESSION_INTERACTIONS[key] = []
+            existing = _SESSION_INTERACTIONS[key]
+
         # Add interaction with timestamp
         interaction = {
             "slug": slug,
             "action": action,
-            "timestamp": datetime.now(),
+            "timestamp": datetime.now().isoformat(),
             "meta": meta or {}
         }
-        
+
         # Prevent duplicate consecutive interactions for same slug
-        existing = _SESSION_INTERACTIONS[key]
         if existing and existing[-1].get("slug") == slug and existing[-1].get("action") == action:
-            # Update timestamp instead of adding duplicate
-            existing[-1]["timestamp"] = datetime.now()
+            existing[-1]["timestamp"] = datetime.now().isoformat()
         else:
-            _SESSION_INTERACTIONS[key].append(interaction)
-        
+            existing.append(interaction)
+
         # Keep only last 50 interactions to limit memory
-        if len(_SESSION_INTERACTIONS[key]) > 50:
-            _SESSION_INTERACTIONS[key] = _SESSION_INTERACTIONS[key][-50:]
+        if len(existing) > 50:
+            existing = existing[-50:]
+
+        if redis_available():
+            cls._redis_set(key, "interactions", existing)
+        else:
+            _SESSION_INTERACTIONS[key] = existing
 
     @classmethod
     def get_session_interactions(cls, body) -> List[Dict[str, Any]]:
@@ -384,6 +599,8 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if not key:
             return []
+        if redis_available():
+            return cls._redis_get(key, "interactions", [])
         return _SESSION_INTERACTIONS.get(key, [])
     
     @classmethod
@@ -433,11 +650,12 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if not key:
             return
-        
-        if key not in _SESSION_BODY_PROFILE:
-            _SESSION_BODY_PROFILE[key] = {}
-        
-        profile = _SESSION_BODY_PROFILE[key]
+        if redis_available():
+            profile = cls._redis_get(key, "body_profile", {})
+        else:
+            if key not in _SESSION_BODY_PROFILE:
+                _SESSION_BODY_PROFILE[key] = {}
+            profile = _SESSION_BODY_PROFILE[key]
         
         # Only update provided fields
         if height_cm is not None:
@@ -453,7 +671,10 @@ class SessionStateManager:
                 profile["usual_sizes"] = {}
             profile["usual_sizes"].update(usual_sizes)
         
-        profile["updated_at"] = datetime.now()
+        profile["updated_at"] = datetime.now().isoformat()
+
+        if redis_available():
+            cls._redis_set(key, "body_profile", profile)
 
     @classmethod
     def get_body_profile(cls, body) -> Dict[str, Any]:
@@ -466,6 +687,8 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if not key:
             return {}
+        if redis_available():
+            return cls._redis_get(key, "body_profile", {})
         return _SESSION_BODY_PROFILE.get(key, {})
     
     @classmethod
@@ -477,11 +700,12 @@ class SessionStateManager:
         key = cls.get_session_key(body)
         if not key:
             return
-        
-        if key not in _SESSION_BODY_PROFILE:
-            _SESSION_BODY_PROFILE[key] = {}
-        
-        profile = _SESSION_BODY_PROFILE[key]
+        if redis_available():
+            profile = cls._redis_get(key, "body_profile", {})
+        else:
+            if key not in _SESSION_BODY_PROFILE:
+                _SESSION_BODY_PROFILE[key] = {}
+            profile = _SESSION_BODY_PROFILE[key]
         if "usual_sizes" not in profile:
             profile["usual_sizes"] = {}
         
@@ -498,6 +722,9 @@ class SessionStateManager:
         category_history = profile["size_history"][category]
         most_common = max(category_history, key=category_history.get)
         profile["usual_sizes"][category] = most_common
+
+        if redis_available():
+            cls._redis_set(key, "body_profile", profile)
     
     @classmethod
     def has_complete_body_profile(cls, body) -> bool:

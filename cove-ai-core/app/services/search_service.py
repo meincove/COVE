@@ -1,4 +1,5 @@
 from typing import Dict, Any, List
+
 import logging
 from app.vector.store import _search_hybrid_rrf_sync, run_in_threadpool
 from app.providers.embedding import embed_query as async_embed_query
@@ -15,10 +16,13 @@ async def search_products_hybrid(payload: Dict[str, Any]) -> Dict[str, Any]:
         filters = payload.get("filters", {})
         top_k = payload.get("top_k", 20)
         
+
+        
         # Standard top-level imports now work because this service 
         # doesn't import agents or routes.
         
         q_emb = await async_embed_query(query)
+
         items = await run_in_threadpool(
             _search_hybrid_rrf_sync,
             query=query,

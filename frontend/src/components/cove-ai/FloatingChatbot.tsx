@@ -423,6 +423,8 @@ export default function FloatingChatbot() {
                                                 if (tab === 'outfit_builder') setHasOutfitReady(false);
                                             }}
                                             onOutfitReady={() => setHasOutfitReady(true)}
+                                            uploadedImage={uploadedImage}
+                                            onTriggerImageUpload={() => fileInputRef.current?.click()}
                                         />
                                     </div>
                                     {activeView === 'cart' && (

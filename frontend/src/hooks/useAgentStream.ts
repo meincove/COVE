@@ -34,6 +34,7 @@ export type StreamState = {
     agenticEvents: any[];
     // Interactive question options for conversation flow
     questionOptions: QuestionOptions | null;
+    vto_image_url: string | null;
 };
 
 export function useAgentStream() {
@@ -52,6 +53,7 @@ export function useAgentStream() {
         tools_used: null,
         agenticEvents: [],  // ✨ PHASE 6: Live exploration
         questionOptions: null,  // Interactive question options
+        vto_image_url: null,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -89,6 +91,7 @@ export function useAgentStream() {
             tools_used: null,
             agenticEvents: [],  // ✨ PHASE 6
             questionOptions: null,
+            vto_image_url: null,
         });
 
         try {
@@ -195,6 +198,7 @@ export function useAgentStream() {
                     // Phase 1: Capture thinking_events and tools_used from done event
                     thinking_events: data.thinking_events || null,
                     tools_used: data.tools_used || null,
+                    vto_image_url: data.vto_image_url || null,
                 }));
                 break;
 

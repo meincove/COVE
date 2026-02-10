@@ -70,6 +70,7 @@ type RecommendationsMeta = {
   // Phase 1: Enhanced thinking
   thinking_events?: AgentResponse["thinking_events"];
   tools_used?: AgentResponse["tools_used"];
+  vto_image_url?: string;
 };
 
 // Week 4: New metadata types
@@ -156,9 +157,11 @@ interface CoveChatWidgetProps {
   onQuickAction?: (text: string) => void;
   onTabChange?: (tab: 'chat' | 'outfit_builder' | 'cart') => void;
   onOutfitReady?: () => void;
+  uploadedImage?: { file: File; preview: string } | null;
+  onTriggerImageUpload?: () => void;
 }
 
-function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, onTabChange, onOutfitReady }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>) {
+function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, onTabChange, onOutfitReady, uploadedImage, onTriggerImageUpload }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -225,7 +228,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
   }, [messages, isStreamingProgress, agenticEvents.length]);
 
   // Subscribe to store for reactive UI updates
-  const outfitCategories = useOutfitStore(state => state.categories);
+  const { categories: outfitCategories, reset: resetOutfitStore } = useOutfitStore();
 
   // Auto-open panel when candidates are found (UX Restoration)
   useEffect(() => {
@@ -317,7 +320,20 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     // Clear messages and reset chat when auth state changes
     setMessages([]);
     setHasStartedChat(false);
-  }, [isSignedIn, user?.id]);
+
+    // ✨ FIX: Clear invalid session artifacts on sign-out
+    if (!isSignedIn) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('cove_has_chatted');
+        sessionStorage.clear(); // Clear ephemeral data
+        // Reset persisted store state (clears cove_guest_session in localStorage too)
+        useCartSessionStore.getState().resetSession();
+      }
+
+      // Force regeneration of session ID so next guest user starts fresh
+      ensureGuestSessionId();
+    }
+  }, [isSignedIn, user?.id, ensureGuestSessionId]);
 
   // Make sure we *have* a guest session id
   useEffect(() => {
@@ -428,6 +444,9 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     sendQuickMessage: async (msg: string, image?: File) => {
       if (!msg.trim() && !image) return;
 
+      // ✨ FIX: Reset outfit state on new message to prevent stale "Outfit Ready" notifications
+      resetOutfitStore();
+
       const userMsg: ChatMessage = {
         id: makeId(),
         role: 'user',
@@ -501,6 +520,9 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     }
 
     // Otherwise, handle internally (fallback for standalone usage)
+    // ✨ FIX: Reset outfit state on new message
+    resetOutfitStore();
+
     const userMsg: ChatMessage = {
       id: makeId(),
       role: 'user',
@@ -552,6 +574,9 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       role: "user",
       content: input.trim(),
     };
+
+    // ✨ FIX: Reset outfit state on new message
+    resetOutfitStore();
 
     setMessages((prev) => [...prev, userMsg]);
     const query = input.trim().toLowerCase();
@@ -664,6 +689,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
             thinking_steps: data.thinking_steps,  // Week 4: FIX - Include thinking steps!
             thinking_events: data.thinking_events,  // Phase 1: Enhanced thinking
             tools_used: data.tools_used,  // Phase 1: Tool tracking
+            vto_image_url: data.vto_image_url, // ✨ Phase 3: Virtual Try-On
           } as RecommendationsMeta)
           : undefined,
       };
@@ -1222,6 +1248,8 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
             <AgenticOutfitBuilder
               streamEvents={agenticEvents}
               isActive={true}
+              uploadedImage={uploadedImage}
+              onTriggerImageUpload={onTriggerImageUpload}
               onBrandSelect={async (brand) => {
                 // Trigger outfit building when brand is selected
                 // This replaces the old auto-start or text-based start
@@ -1315,6 +1343,21 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
                           src={m.imageUrl}
                           alt="Fashion reference"
                           className="max-h-60 w-full object-contain mx-auto"
+                        />
+                      </div>
+                    )}
+
+                    {/* ✨ PHASE 3: Virtual Try-On Image (Rendered outfit on user) */}
+                    {recMeta?.vto_image_url && (
+                      <div className="mb-4 rounded-xl overflow-hidden border-2 border-emerald-100 shadow-xl bg-emerald-50 group relative">
+                        <div className="absolute top-2 left-2 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[10px] text-white font-bold uppercase tracking-wider z-10 flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Virtual Try-On
+                        </div>
+                        <img
+                          src={recMeta.vto_image_url}
+                          alt="Virtual Preview"
+                          className="w-full h-auto object-cover hover:scale-105 transition-transform duration-700"
                         />
                       </div>
                     )}
@@ -1510,48 +1553,58 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
               </div>
             )}
 
-            {/* ✨ Chat mode: Show outfit notification when agentic events complete OR we have outfit data */}
-            {(agenticEvents.length > 0 || Object.keys(outfitCategories).length > 0) && !questionOptions && (
-              <div className="px-3 mb-4">
-                {isStreamingProgress ? (
-                  /* Show "Building outfit" when streaming */
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-sm text-gray-600">Building your outfit...</span>
-                  </div>
-                ) : (
-                  /* Done streaming - show "Outfit Ready" notification */
-                  /* Done streaming - show "Outfit Ready" notification */
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() => {
-                        onTabChange?.('outfit_builder');
-                        onOutfitReady?.();
-                      }}
-                      className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
-                        <span className="text-base">✨</span>
-                      </div>
-                      <div className="text-left flex-1">
-                        <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
-                        <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
-                      </div>
-                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    </button>
+            {/* ✨ Chat mode: Show outfit notification when valid candidates exist AND we are in an outfit building context */}
+            {(() => {
+              // Check if we have actual found candidates
+              const hasValidCandidates = Object.values(outfitCategories).some(c => c.status === 'found' && c.candidates.length > 0);
+              // Also check if we have agentic events that imply building (fallback)
+              const hasBuildingEvents = agenticEvents.length > 0;
 
-                    {/* View Candidates Button */}
-                    <button
-                      onClick={() => setIsCandidatePanelOpen(true)}
-                      className="w-full py-1.5 text-xs text-emerald-600 font-medium hover:text-emerald-700 hover:underline flex items-center justify-center gap-1"
-                    >
-                      <Sparkles className="h-3 w-3" />
-                      Review Search Candidates
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+              // Logic: show if we have events (actively building) OR if we have valid candidates (finished building)
+              const shouldShow = (hasBuildingEvents || hasValidCandidates) && !questionOptions;
+
+              return shouldShow && (
+                <div className="px-3 mb-4">
+                  {isStreamingProgress ? (
+                    /* Show "Building outfit" when streaming */
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-sm text-gray-600">Building your outfit...</span>
+                    </div>
+                  ) : (
+                    /* Done streaming - show "Outfit Ready" notification */
+                    /* Done streaming - show "Outfit Ready" notification */
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          onTabChange?.('outfit_builder');
+                          onOutfitReady?.();
+                        }}
+                        className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
+                      >
+                        <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                          <span className="text-base">✨</span>
+                        </div>
+                        <div className="text-left flex-1">
+                          <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
+                          <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
+                        </div>
+                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      </button>
+
+                      {/* View Candidates Button */}
+                      <button
+                        onClick={() => setIsCandidatePanelOpen(true)}
+                        className="w-full py-1.5 text-xs text-emerald-600 font-medium hover:text-emerald-700 hover:underline flex items-center justify-center gap-1"
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Review Search Candidates
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Scroll Anchor */}
             <div ref={messagesEndRef} />

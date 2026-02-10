@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import logging
 import json
 import uuid
 from time import time
@@ -555,10 +556,10 @@ def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]
     """
     now = time()
     if (now - _vocab_cache["t"] < ttl_sec) and _vocab_cache["colors"]:
-        print(f"📚 [VOCAB] Using cached vocab (age: {now - _vocab_cache['t']:.1f}s)")
+        log.debug("📚 [VOCAB] Using cached vocab (age: %.1fs)", now - _vocab_cache["t"])
         return _vocab_cache
     
-    print(f"📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...")
+    log.debug("📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...")
 
     colors, types, brands = set(), set(), set()
     with conn.cursor() as cur:
@@ -600,8 +601,10 @@ def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]
         )
         brands |= {r[0] for r in cur.fetchall() if r[0]}
 
-    print(f"📚 [VOCAB] Loaded {len(colors)} colors from ai_core.docs: {sorted(colors)}")
-    print(f"📚 [VOCAB] Loaded {len(types)} types from ai_core.docs: {sorted(types)}")
-    print(f"📚 [VOCAB] Loaded {len(brands)} brands from ai_core.docs: {sorted(brands)}")
+    log.debug("📚 [VOCAB] Loaded %s colors from ai_core.docs", len(colors))
+    log.debug("📚 [VOCAB] Loaded %s types from ai_core.docs", len(types))
+    log.debug("📚 [VOCAB] Loaded %s brands from ai_core.docs", len(brands))
     _vocab_cache.update({"t": now, "colors": colors, "types": types, "brands": brands})
     return _vocab_cache
+# Local logger for structured output
+log = logging.getLogger("cove.vector")

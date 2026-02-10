@@ -27,6 +27,7 @@ from app.routes import agent_stream  # Week 6: Agent with thinking progress
 from app.routes import metrics  # Week 6: Metrics and monitoring
 from app.routes import feedback # Week 3 Day 3: Enhanced User Profile
 from app.routes import events  # Phase 3: Proactive Agent
+from app.routes import vto     # ✨ New VTO router
 
 
 app = FastAPI(title="Cove AI Core")
@@ -58,6 +59,7 @@ app.include_router(assistant.router)
 app.include_router(feedback.router, prefix="/ai") # e.g. /ai/feedback
 # app.include_router(streaming.router, prefix="/ai") -> Removed (redundant)
 app.include_router(agent_stream.router)  # Week 6: Agent progress streaming
+app.include_router(vto.router)           # ✨ New VTO router
 # Week 6: Metrics endpoints
 app.include_router(metrics.router, prefix="/api", tags=["metrics"])
 app.include_router(events.router)  # Phase 3: Proactive Agent
@@ -74,5 +76,9 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 
 @app.get("/healthz")
+async def healthz():
+    return {"ok": True}
+
+@app.get("/health")
 async def health():
-    return {"ok": True}              # <- no trailing comma
+    return {"ok": True}

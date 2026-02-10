@@ -12,8 +12,9 @@ from app.agents.budget_agent import BudgetAgent
 from app.agents.outfit_builder_agent import OutfitBuilderAgent
 from app.agents.vision_agent import VisionAgent
 from app.agents.fashion_analyzer import FashionAnalyzerAgent
+from app.agents.vto_agent import VTOAgent
 
 # Import orchestrator
 from app.agents.multi_agent_orchestrator import orchestrator
 
-__all__ = ["StylistAgent", "FitAgent", "BudgetAgent", "OutfitBuilderAgent", "VisionAgent", "FashionAnalyzerAgent", "orchestrator"]
+__all__ = ["StylistAgent", "FitAgent", "BudgetAgent", "OutfitBuilderAgent", "VisionAgent", "FashionAnalyzerAgent", "VTOAgent", "orchestrator"]

@@ -9,6 +9,7 @@ type CartSessionState = {
   setCartId: (id: string | null) => void;
   setGuestSessionId: (id: string | null) => void;
   ensureGuestSessionId: () => string;
+  resetSession: () => void;
 };
 
 function makeGuestId() {
@@ -37,6 +38,8 @@ export const useCartSessionStore = create<CartSessionState>()(
         set({ guestSessionId: newId });
         return newId;
       },
+
+      resetSession: () => set({ cartId: null, guestSessionId: null }),
     }),
     {
       name: "cove_guest_session", // unique name
