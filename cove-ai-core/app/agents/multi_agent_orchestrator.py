@@ -646,22 +646,21 @@ Rules:
                 # Build task from state
                 task = self._build_agent_task(agent_name, state)
                 
-                # ✨ CRITICAL FIX: Disable Granular Streaming for Stylist/Builder
-                # The granular callback mechanism causes 'NoneType' await errors in the live environment.
-                # We disable it here to restore system stability. Agents will run without sending intermediate events.
+                # ✨ FIXED: Re-enable stream_callback for stylist and outfit_builder
+                # Pass stream_callback to agents that support it for real-time progress updates
                 
-                # if (agent_name == "stylist" or agent_name == "outfit_builder") and stream_callback:
-                #      result = await asyncio.wait_for(
-                #         agent_info["handler"](task, state.context, stream_callback=stream_callback),
-                #         timeout=step.timeout_ms / 1000
-                #      )
-                # else:
-                
-                # Fallback to standard execution (no callback passage)
-                result = await asyncio.wait_for(
-                    agent_info["handler"](task, state.context),
-                    timeout=step.timeout_ms / 1000
-                )
+                if (agent_name == "stylist" or agent_name == "outfit_builder") and stream_callback:
+                    # Pass stream_callback to streaming-capable agents
+                    result = await asyncio.wait_for(
+                        agent_info["handler"](task, state.context, stream_callback=stream_callback),
+                        timeout=step.timeout_ms / 1000
+                    )
+                else:
+                    # Standard execution for non-streaming agents
+                    result = await asyncio.wait_for(
+                        agent_info["handler"](task, state.context),
+                        timeout=step.timeout_ms / 1000
+                    )
                 
                 # Store result
                 duration_ms = (time.time() - start) * 1000
