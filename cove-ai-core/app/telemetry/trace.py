@@ -1,9 +1,10 @@
 # app/telemetry/trace.py
 from __future__ import annotations
-import os, json, time, uuid
+import os, json, time, uuid, logging
 from typing import Any, Dict
 
 TRACE_ENABLED = os.getenv("TRACE", "true").lower() == "true"
+log = logging.getLogger("cove.trace")
 
 def new_trace_id() -> str:
     return uuid.uuid4().hex[:16]
@@ -17,4 +18,4 @@ def emit(event: str, trace_id: str, payload: Dict[str, Any]) -> None:
         "trace_id": trace_id,
         **payload
     }
-    print(json.dumps(row, ensure_ascii=False), flush=True)
+    log.info(json.dumps(row, ensure_ascii=False))

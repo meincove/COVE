@@ -34,7 +34,15 @@ except Exception as e:
         "default_occasion": "casual",
         "default_style": "casual"
     }
-
+# Load outfit config (for category mappings and constraints)
+_outfit_config_path = Path(__file__).parent.parent.parent / "data" / "outfit_config.json"
+try:
+    with open(_outfit_config_path, "r") as f:
+        _OUTFIT_CONFIG = json.load(f)
+    log.info(f"✓ Loaded outfit config from {_outfit_config_path}")
+except Exception as e:
+    log.warning(f"Failed to load outfit config: {e}")
+    _OUTFIT_CONFIG = {"category_mappings": {}}
 
 class StylistAgent(BaseAgent):
     """
@@ -90,8 +98,15 @@ class StylistAgent(BaseAgent):
             log.info(f"🔮 Detected Vibe Keywords: {vibe_keywords}")
 
         budget = task.get("budget_max", _STYLIST_CONFIG.get("default_budget", 500))
+        brand_context = context.get("brand") # Brand passed from orchestrator context
         categories = task.get("categories", _STYLIST_CONFIG.get("default_categories", ["top", "bottom"]))
         
+        # 🐛 DEBUG STREAMING
+        if stream_callback:
+            log.info(f"✅ STYLIST: stream_callback RECEIVED. Type: {type(stream_callback)}")
+        else:
+            log.warning("⚠️ STYLIST: stream_callback is NONE! Streaming events will be skipped.")
+            
         # Parse occasion and style from query (using config)
         occasion, style = self._parse_query(query)
         
@@ -107,7 +122,7 @@ class StylistAgent(BaseAgent):
         # Import here to avoid circular dependency
         
         # Import here to avoid circular dependency
-        from app.routes.agent import _call_recs_suggest
+        # from app.routes.agent import _call_recs_suggest # ✨ MOVED TO LAZY IMPORT
         
         # ✨ WEEK 2 DAY 4: Recall user preferences for personalization
         user_preferences = {"dislikes": [], "likes": [], "colors": [], "recalled_memories": []}
@@ -146,7 +161,8 @@ class StylistAgent(BaseAgent):
         
         # ✨ WEEK 3 DAY 2: Intelligent Analysis (LLM)
         # Replaces simple config parsing with full reasoning
-        analysis = await self._analyze_request_with_llm(query, budget, categories, user_preferences, vibe_keywords)
+        visual_context = task.get("visual_context")
+        analysis = await self._analyze_request_with_llm(query, budget, categories, user_preferences, vibe_keywords, visual_context)
         occasion = analysis.get("occasion", occasion) # Override heuristic
         style = analysis.get("style", style) # Override heuristic
         
@@ -161,15 +177,47 @@ class StylistAgent(BaseAgent):
         else:
             detected_gender = analysis.get("gender")
         
-        # If the LLM is unsure about gender AND context didn't provide it, ask the user!
-        if detected_gender == "ask_gender":
-            log.info("✋ Stylist requesting gender clarification")
+        # Use original_query for gender detection (preserves "boyfriend", "girlfriend" etc.)
+        original_query = context.get("original_query", "") or query
+
+        # FALLBACK: If LLM didn't detect gender, use keyword matching on ORIGINAL query
+        # We do this BEFORE halting to avoid unnecessary "ask_gender" stops
+        if not detected_gender or detected_gender == "ask_gender":
+            query_lower = original_query.lower()
+            if any(kw in query_lower for kw in ["boyfriend", "husband", "for him", "for men", "men's", "mens", "male"]):
+                detected_gender = "male"
+                log.info(f"   👤 Gender detected via keyword fallback: male")
+            elif any(kw in query_lower for kw in ["girlfriend", "wife", "for her", "for women", "women's", "womens", "female"]):
+                detected_gender = "female"
+                log.info(f"   👤 Gender detected via keyword fallback: female")
+            
+            # Update analysis with inferred gender
+            if detected_gender and detected_gender != "ask_gender":
+                 analysis["gender"] = detected_gender
+
+        # If STILL ambiguous, DEFAULT TO UNISEX instead of halting.
+        # If STILL ambiguous (or None), STOP AND ASK.
+        
+        # Normalize for check
+        g_check = str(detected_gender).lower().strip() if detected_gender else ""
+        
+        if not detected_gender or g_check in ["ask_gender", "none", "null", "unknown", ""]:
+            log.info(f"⚠️ Gender ambiguous ('{detected_gender}'). Requesting user clarification.")
             return AgentResult(
                 success=True,
-                data={},
-                reasoning="To give you the best recommendations, are you shopping for men, women, or looking for unisex styles?",
-                confidence=1.0,
-                tools_used=["stylist_clarification"]
+                data={
+                    "needs_confirmation": True,
+                    "confirmation_type": "gender",
+                    "question": "To find the best fit, is this outfit for Men or Women?",
+                    "options": [
+                        {"label": "Women", "value": "women"},
+                        {"label": "Men", "value": "men"},
+                        {"label": "Unisex", "value": "unisex"}
+                    ],
+                    "candidates": {} # Ensure next agents don't crash
+                },
+                reasoning="Asking for gender clarification.",
+                confidence=1.0
             )
         
         # KEY CHANGE: Allow LLM to expand categories (e.g. add shoes)
@@ -188,6 +236,7 @@ class StylistAgent(BaseAgent):
                 try:
                     # ✨ PHASE 6: Emit category_start event for live exploration
                     if stream_callback:
+                        log.info(f"📤 STYLIST emitting category_start for: {category}")
                         await stream_callback({
                             "event_type": "category_start",
                             "category": category,
@@ -195,6 +244,8 @@ class StylistAgent(BaseAgent):
                             "total_categories": len(categories),
                             "status": f"Searching for {category}..."
                         })
+                    else:
+                        log.warning(f"⚠️ STYLIST: No stream_callback for category {category}")
                     
                     # ✨ HYBRID SEARCH IMPLEMENTATION
                     
@@ -258,36 +309,44 @@ class StylistAgent(BaseAgent):
                     if hard_filters:
                         # Only apply valid filters
                         if hard_filters.get("type"):
-                            # ✨ TYPE EXPANSION: Map generic categories to actual product types
-                            # e.g., "shoes" -> ["sneakers", "boots", "loafers", "heels"]
                             type_value = hard_filters["type"]
-                            expanded_types = self._expand_type_filter(type_value)
-                            if expanded_types and len(expanded_types) > 1:
-                                # Use list of types for OR matching
-                                search_payload["filters"]["type"] = expanded_types
-                                log.info(f"   🔄 Expanded type '{type_value}' -> {expanded_types}")
-                            else:
-                                search_payload["filters"]["type"] = type_value
+                            
+                            # ✨ FIX: Handle comma-separated LLM output (e.g. "pants, skirt")
+                            if isinstance(type_value, str) and "," in type_value:
+                                type_list = [t.strip() for t in type_value.split(",")]
+                                search_payload["filters"]["type"] = type_list
+                                log.info(f"   🔄 SPLIT types to list: {type_list}")
+                            
+                            # ✨ TYPE EXPANSION: Map generic categories to actual product types
+                            elif isinstance(type_value, str):
+                                # e.g., "shoes" -> ["sneakers", "boots", "loafers", "heels"]
+                                expanded_types = self._expand_type_filter(type_value)
+                                if expanded_types and len(expanded_types) > 1:
+                                    # Use list of types for OR matching
+                                    search_payload["filters"]["type"] = expanded_types
+                                    log.info(f"   🔄 Expanded type '{type_value}' -> {expanded_types}")
+                                else:
+                                    search_payload["filters"]["type"] = type_value
                         if hard_filters.get("color"):
                             search_payload["filters"]["color"] = hard_filters["color"]
+                        
+                        # ✨ APPLY BRAND FILTER
+                        brand_val = brand_context or hard_filters.get("brand") or analysis.get("brand_filter")
+                        if brand_val:
+                            search_payload["filters"]["brand"] = brand_val
+                            log.info(f"   🏷️ Applied Brand Filter: {brand_val}")
+                            
                         log.info(f"   🛡️ Applied Hard Filters for {category}: {search_payload['filters']}")
                     
                     # ✨ CRITICAL: Apply gender from LLM analysis
+                    # Gender is already determined at the start of execute() (Context > LLM > Keyword Fallback > Unisex)
                     detected_gender = analysis.get("gender")
                     
                     # Use original_query for gender detection (preserves "boyfriend", "girlfriend" etc.)
                     original_query = context.get("original_query", "") or query
-                    log.info(f"   🔍 Gender Check - Original Query: '{original_query[:100]}'")
+                    # log.info(f"   🔍 Gender Check - Original Query: '{original_query[:100]}'")
                     
-                    # FALLBACK: If LLM didn't detect gender, use keyword matching on ORIGINAL query
-                    if not detected_gender or detected_gender == "unisex":
-                        query_lower = original_query.lower()
-                        if any(kw in query_lower for kw in ["boyfriend", "husband", "for him", "for men", "men's", "mens", "male"]):
-                            detected_gender = "male"
-                            log.info(f"   👤 Gender detected via keyword fallback: male")
-                        elif any(kw in query_lower for kw in ["girlfriend", "wife", "for her", "for women", "women's", "womens", "female"]):
-                            detected_gender = "female"
-                            log.info(f"   👤 Gender detected via keyword fallback: female")
+                    # (Redundant fallback removed - already handled at start of execute)
                     
                     if detected_gender and detected_gender not in ["unisex", None]:
                         # Normalize LLM gender output to database values
@@ -301,8 +360,23 @@ class StylistAgent(BaseAgent):
                         search_payload["filters"]["gender"] = normalized_gender
                         log.info(f"   👤 Enforcing gender filter: {detected_gender} -> {normalized_gender}")
                     
-                    result = await _call_recs_suggest(search_payload)
-                    items = result.get("items", [])
+                    # result = await _call_recs_suggest(search_payload)
+                    # items = result.get("items", [])
+                    
+                    # ✨ DIRECT DB SEARCH (Avoids HTTP overhead and sync issues)
+                    from app.vector.store import _search_hybrid_rrf_sync, run_in_threadpool
+                    from app.providers.embedding import embed_query as async_embed_query
+
+                    q_emb = await async_embed_query(search_payload["query"])
+                    
+                    items = await run_in_threadpool(
+                        _search_hybrid_rrf_sync,
+                        query=search_payload["query"],
+                        q_emb=q_emb,
+                        kind="product",
+                        top_k=search_payload.get("top_k", 20),
+                        filters=search_payload.get("filters")
+                    )
                     
                     # ✨ FALLBACK LOGIC (Retry strategies)
                     if not items:
@@ -314,7 +388,8 @@ class StylistAgent(BaseAgent):
                             if hard_filters.get("color"):
                                 search_payload["query"] += f" {hard_filters['color']}"
                             
-                            result = await _call_recs_suggest(search_payload)
+                            from app.services.search_service import search_products_hybrid
+                            result = await search_products_hybrid(search_payload)
                             items = result.get("items", [])
 
                         # Strategy 2: Remove Type Filter (Extreme Fallback) - ONLY if still 0 items
@@ -322,40 +397,45 @@ class StylistAgent(BaseAgent):
                             log.info(f"   ⚠️ Still no items for {category}. Retrying without strict type filter...")
                             del search_payload["filters"]["type"]
                              # The query usually contains the type (e.g. "hoodie"), so we just rely on semantic search
+                             # and trusting the vector similarity
                             
-                            result = await _call_recs_suggest(search_payload)
+                            from app.services.search_service import search_products_hybrid
+                            result = await search_products_hybrid(search_payload)
                             items = result.get("items", [])
                             log.info(f"   🔄 Extreme fallback found {len(items)} items for {category}")
 
                     # ✨ PHASE 6: Emit category_candidates event with discovered products
-                    # Use a robust check for items
-                    if stream_callback and items and len(items) > 0:
-                        # Send top 5 candidates with essential info for UI
-                        preview_candidates = []
-                        for item in items[:5]:
-                            try:
-                                candidate_data = self._extract_product_data(item)
-                                if candidate_data:
-                                    preview_candidates.append(candidate_data)
-                            except Exception as exc:
-                                log.warning(f"Error parsing item for candidates: {exc}")
+                    # First, filter candidates strictly for this category to prevent leakage (e.g. shoes in tops)
+                    filtered_candidates = [
+                        item for item in items 
+                        if self._validate_category_relevance(category, item)
+                    ]
 
-                        await stream_callback({
-                            "event_type": "category_candidates",
-                            "category": category,
-                            "candidates": preview_candidates,
-                            "total_found": len(items),
-                            "status": f"Found {len(items)} options for {category}"
-                        })
-                    elif stream_callback:
-                         # Emit empty candidates validation
-                        await stream_callback({
-                            "event_type": "category_candidates",
-                            "category": category,
-                            "candidates": [],
-                            "total_found": 0,
-                            "status": f"No {category} found matching your criteria"
-                        })
+                    # ✨ SAFE STREAMING: Prevent callback crashes from killing the agent
+                    if stream_callback:
+                        try:
+                            # Send top 5 candidates with essential info for UI
+                            preview_candidates = []
+                            # ... check candidates ...
+                            if filtered_candidates:
+                                 for item in filtered_candidates[:5]:
+                                     try:
+                                         candidate_data = self._extract_product_data(item)
+                                         if candidate_data:
+                                             preview_candidates.append(candidate_data)
+                                     except Exception: pass
+
+                            await stream_callback({
+                                "event_type": "category_candidates",
+                                "category": category,
+                                "candidates": preview_candidates,
+                                "total_found": len(filtered_candidates),
+                                "status": f"Found {len(filtered_candidates)} options for {category}"
+                            })
+                        except (TypeError, Exception) as e:
+                            log.warning(f"⚠️ Stream callback failed for {category}: {e}")
+                            # Continue execution - do not crash
+
                     
                     if items:
                         # ✨ WEEK 2 DAY 4: Filter based on user preferences
@@ -396,7 +476,7 @@ class StylistAgent(BaseAgent):
                         valid_items = []
                         for item in items:
                             clean = self._extract_product_data(item)
-                            if clean and self._validate_category_relevance(category, clean['title']):
+                            if clean and self._validate_category_relevance(category, clean):
                                 valid_items.append(clean)
                         
                         candidates[category] = valid_items
@@ -533,7 +613,8 @@ class StylistAgent(BaseAgent):
         budget: float, 
         provided_categories: List[str], 
         user_preferences: Dict[str, Any] = None,
-        vibe_keywords: List[str] = None
+        vibe_keywords: List[str] = None,
+        visual_context: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """
         Use LLM to interpret style/occasion and generate Hybrid Search plans (Query + Filters).
@@ -569,44 +650,95 @@ class StylistAgent(BaseAgent):
             else:
                  category_constraint = "CONSTRAINT: You are the stylist. Decide what items make a COMPLETE outfit for this occasion. usually Top + Bottom + Shoes."
 
+            # Visual DNA Context
+            dna_context = ""
+            if visual_context:
+                dna_context = f"\nVISUAL SEARCH DNA (FROM IMAGE):\n{json.dumps(visual_context, indent=2)}\nUse this silhouette, vibe, and color as your PRIMARY STYLE GUIDE."
+
+            # ✨ DYNAMIC RULES LOADING (Refactor: No Hardcoding)
+            occasion_rules_text = "FASHION EXPERTISE - OCCASION RULES (STRICTLY FOLLOW THESE CONSTRAINTS):\n"
+            # Get brands list for extraction
+            brands_list = ", ".join(vocab.get("brands", []))
+            
+            occasions_config = _STYLIST_CONFIG.get("occasions", {})
+            
+            for occ_name, occ_data in occasions_config.items():
+                # specific rules for this occasion
+                rules = occ_data.get("rules", {})
+                desc = occ_data.get("description", "")
+                
+                if rules:
+                    occasion_rules_text += f"\n{occ_name.upper()} ({desc}) REQUIRES:\n"
+                    for cat, rule in rules.items():
+                        allowed = ", ".join(rule.get("allowed", []))
+                        excluded = ", ".join(rule.get("excluded", []))
+                        
+                        rule_str = ""
+                        if allowed:
+                            rule_str += f"MUST BE [{allowed}]"
+                        if excluded:
+                            if rule_str: rule_str += " AND "
+                            rule_str += f"NEVER [{excluded}]"
+                            
+                        if rule_str:
+                            occasion_rules_text += f"   - {cat.title()}: {rule_str}\n"
+
             prompt = f"""You are an Expert Fashion Stylist AI using HYBRID SEARCH.
 User Request: "{query}"
 Budget: €{budget}
 {category_constraint}
 {prefs_text}
 {vibe_context}
+{dna_context}
 
 DATABASE VOCABULARY (Use these EXACT values for filters):
 - Allowed Types: {valid_types}
 - Allowed Colors: {valid_colors}
+- Allowed Brands: {brands_list}
 - Allowed Genders: women, men, unisex
 
+{occasion_rules_text}
+
+CRITICAL: If the user asks for a specific occasion, you MUST apply its corresponding ALLOWED/EXCLUDED rules from the list above.
+- Example: If occasion is FORMAL, you MUST NOT include shorts or tees.
+- Example: If occasion is GYM, you MUST NOT include blazers or heels.
+
+CRITICAL RULES FOR BANS:
+1. **Formal/Wedding/Elegant:** MUST BAN: ["tee", "t-shirt", "hoodie", "sweatshirt", "graphic", "logo", "polo", "short", "denim", "sneaker", "runner", "sandal", "slide"].
+2. **Gym/Active:** MUST BAN: ["denim", "jeans", "boot", "loafer", "leather", "formal", "dress shoe", "heel"].
+3. **Streetwear/Casual:** DO NOT BAN sneakers, hoodies, or tees. These are essential.
+4. **Be Precise:** Only ban items that truly clash with the requested style.
+
 Task:
-1. Analyze Occasion/Style.
+1. Analyze Occasion/Style - REASON about formality level first.
 2. CRITICAL: Detect Gender.
    - If user says "men", "boyfriend", "him" -> "male"
    - If user says "women", "girlfriend", "her" -> "female"
-   - If user says multiple specific genders, likely specific.
    - If completely ambiguous (e.g. "I need a hoodie"), set gender to "ask_gender".
    - If phrasing implies self (e.g. "for me") and no profile, set "ask_gender".
-3. Decide categories.
+3. Decide categories based on occasion appropriateness.
 4. For EACH category, generate a search PLAN:
-   - "query": KEYWORD description for search (e.g. "beige hoodie"). Keep it simple and objective.
+   - "query": VIBE and AESTHETIC description (e.g., "minimalist luxury", "aggressive techwear"). 
+     - **CRITICAL**: Do NOT include generic category names (like "tops" or "shoes") in the query, as these are handled by filters.
+     - **CRITICAL**: Focus on style/vibe keywords that would appear in descriptions.
    - "filters": Strict metadata constraints.
-     - "type": MUST be one of Allowed Types (e.g. "hoodie"). Crucial for relevance.
-     - "color": MUST be one of Allowed Colors if user specified a color preference. Otherwise null.
+     - "type": MUST be occasion-appropriate from Allowed Types. This is the PRIMARY key for relevance.
+     - "color": MUST be one of Allowed Colors if specified.
+     - "brand": MUST be one of Allowed Brands if specified.
 
 Response JSON Format:
 {{
     "gender": "detected gender (women/men/unisex/ask_gender)",
+    "brand_filter": "extracted brand name or null",
     "occasion": "detected occasion",
+    "formality": "formal/smart_casual/casual/evening (important!)",
     "style": "detected style",
-    "reasoning": "thought process",
+    "reasoning": "EXPLAIN why you chose these product types for this occasion",
     "categories": ["list", "of", "categories"],
     "category_plans": {{
         "CategoryName": {{
-            "query": "semantic text",
-            "filters": {{ "type": "valid_type_or_null", "color": "valid_color_or_null" }}
+            "query": "semantic text with formality context",
+            "filters": {{ "type": "occasion_appropriate_type", "color": "valid_color_or_null", "brand": "valid_brand_or_null" }}
         }}
     }}
 }}
@@ -658,6 +790,18 @@ DO NOT output markdown. Just the JSON object.
                     return obj.get(key, default)
                 return getattr(obj, key, default)
 
+            # DEBUG RAW ITEM
+            if "vortex" in str(get_val(item, "title", "")).lower():
+                 import json
+                 try:
+                     # Try to dump if dict
+                     if isinstance(item, dict):
+                         log.info(f"📦 RAW VORTEX ITEM (DICT): {json.dumps(item, default=str)[:500]}...")
+                     else:
+                         log.info(f"📦 RAW VORTEX ITEM (OBJ): {item}")
+                 except:
+                     pass
+
             # Handle price (float, int, or string like "$100")
             raw_price = get_val(item, "price", 0)
             price = 0.0
@@ -672,52 +816,168 @@ DO NOT output markdown. Just the JSON object.
             # Handle image (imageUrl, image_url, image, images[])
             image_url = get_val(item, "imageUrl") or get_val(item, "image_url") or get_val(item, "image")
             
-            # Check for images list
-            if not image_url:
-                images = get_val(item, "images")
+            # ✨ PREFER META IMAGE (CLOUDINARY) over local paths
+            meta = get_val(item, "meta") or {}
+            meta_img = meta.get("imageUrl") or meta.get("image_url") or meta.get("image")
+            
+            # If current is local/missing but meta has Cloudinary/Remote, swap immediately
+            if meta_img and ("cloudinary" in str(meta_img) or "http" in str(meta_img)):
+                 image_url = meta_img
+
+            # Check if we have an array of images and pick the first one if empty
+            if not image_url or "/static/" in str(image_url):
+                images = get_val(item, "images", [])
+                if not images:
+                    images = meta.get("images", [])
+
                 if images and isinstance(images, list) and len(images) > 0:
-                    image_url = images[0]
-                
+                    img_candidate = images[0]
+                    # Handle dict vs string in images list
+                    img_path = img_candidate if isinstance(img_candidate, str) else get_val(img_candidate, "url")
+                    
+                    # If found a remote image, use it
+                    if img_path and "http" in str(img_path):
+                        image_url = img_path
+
+            # Fallback for brand/gender from meta dictionary if missing at top level
+            brand = get_val(item, "brand")
+            if not brand:
+                meta = get_val(item, "meta")
+                if isinstance(meta, dict):
+                    brand = meta.get("brand")
+            
+            gender = get_val(item, "gender")
+            if not gender:
+                meta = get_val(item, "meta")
+                if isinstance(meta, dict):
+                    gender = meta.get("gender")
+
+            # ✨ FORCE PRIORITIZE META PRICE if top-level is 0
+            if price == 0:
+                 meta_price = get_val(get_val(item, "meta", {}), "price") or get_val(get_val(item, "meta", {}), "base_price")
+                 if meta_price:
+                     try:
+                         # Handle string price "$100" or just numbers
+                         import re
+                         nums = re.findall(r"[\d\.]+", str(meta_price))
+                         if nums:
+                             price = float(nums[0])
+                     except:
+                         pass
+
+            # Ensure absolute image URL for frontend compatibility (only for local paths)
+            final_image_url = image_url
+            s_url = str(final_image_url) if final_image_url else ""
+            if s_url and (s_url.startswith("/static/") or s_url.startswith("static/")):
+                base_url = os.getenv("COVE_CORE_BASE_URL", "http://localhost:8000")
+                final_image_url = f"{base_url.rstrip('/')}/{s_url.lstrip('/')}"
+                log.info(f"   🔄 Fixed relative URL: {final_image_url}")
+
+            # ✨ Populate outfit_category from type mapping if missing
+            outfit_category = get_val(item, "outfit_category") or (get_val(item, "meta") or {}).get("outfit_category")
+            
+            # ✨ PREFER META TYPE if top-level is generic "product"
+            sku_type = get_val(item, "type", "product")
+            if sku_type == "product":
+                 meta_type = (get_val(item, "meta") or {}).get("type")
+                 if meta_type:
+                     sku_type = meta_type
+            
+            if not outfit_category and sku_type:
+                 mappings = _OUTFIT_CONFIG.get("category_mappings", {})
+                 type_val = str(sku_type).lower().strip()
+                 outfit_category = mappings.get(type_val)
+
             return {
                 "title": get_val(item, "title", "Unknown Product"),
                 "price": price,
-                "imageUrl": image_url,
+                "imageUrl": final_image_url,
                 "slug": get_val(item, "slug", ""),
-                "type": get_val(item, "type", "product"),
+                "type": sku_type,
+                "outfit_category": outfit_category, # ✨ Added for UI grouping
                 "color": get_val(item, "color"),  # For compatibility matching
+                "brand": brand,
+                "gender": gender,
+                "variantId": get_val(item, "variantId") or (get_val(item, "meta") or {}).get("variantId"),
+                "productId": get_val(item, "productId") or (get_val(item, "meta") or {}).get("productId") or get_val(item, "id"),
+                "meta": get_val(item, "meta", {})
             }
         except Exception as e:
             log.warning(f"Failed to extract product data: {e}")
             return None
 
-    def _validate_category_relevance(self, category: str, item_title: str) -> bool:
+        return True
+
+    def _validate_category_relevance(self, category: str, item: Dict[str, Any]) -> bool:
         """
-        Check if item title seems relevant to the category.
-        Prevents 'Pants' appearing in 'Tops' search results.
+        Configuration-driven category check. STRICTLY title-independent.
+        Uses category_mappings from outfit_config.json and explicit metadata.
         """
-        title = item_title.lower()
-        category = category.lower()
+        category = category.lower().strip()
+        # Handle singular/plural mismatch (heuristic)
+        if category.endswith("s") and category != "shoes" and category != "jeans":
+             pass # keep plural
+        elif category in ["top", "shoe", "bottom"]:
+             # Map singular to standard plural config keys
+             if category == "top": category = "tops"
+             if category == "shoe": category = "shoes"
+             if category == "bottom": category = "bottoms"
         
-        # Negative Keywords (What to REJECT)
-        reject_map = {
-            "tops": ["pants", "jeans", "shorts", "skirt", "trouser", "shoe", "sneaker", "boot", "sandal", "heel", "loafer"],
-            "bottoms": ["shirt", "blouse", "tee", "top", "sweat", "hoodie", "jacket", "coat", "sweater", "cardigan", "shoe", "sneaker", "boot"],
-            "shoes": ["shirt", "blouse", "tee", "top", "sweat", "hoodie", "jacket", "coat", "pant", "jean", "skirt", "dress", "hat", "belt", "bag"],
-            "accessories": ["shirt", "blouse", "tee", "top", "sweat", "pant", "jean", "skirt", "shoe", "sneaker", "boot"]
-        }
+        meta = item.get("meta") or {}
         
-        rejects = reject_map.get(category, [])
-        for word in rejects:
-            if word in title:
-                # Exception: "shirt" in "t-shirt" (handled by simple 'word in title'?)
-                # Wait, "shirt" is in "t-shirt".
-                # If bottoms rejects "shirt". "t-shirt" is rejected. Correct.
-                # If tops rejects "pants". "sweatpants" is rejected. Correct.
-                # Exception: "shorts" in "short sleeve"?
-                if word == "shorts" and "short sleeve" in title:
-                    continue 
+        # 1. Metadata Field Check (outfit_category)
+        item_category = (item.get("outfit_category") or meta.get("outfit_category") or "").lower().strip()
+        if item_category and item_category != category:
+            log.info(f"   🚫 Metadata rejection: '{item.get('title')}' is tagged '{item_category}', but we need '{category}'")
+            return False
+            
+        # 2. Type-to-Category Mapping Check (from outfit_config.json)
+        item_type = (item.get("type") or "").lower().strip()
+        
+        # ✨ FIX: If top-level type is generic "product", ignore it and look in meta
+        if not item_type or item_type == "product":
+             item_type = (meta.get("type") or "").lower().strip()
+
+        if item_type and item_type != "product":
+            mappings = _OUTFIT_CONFIG.get("category_mappings", {})
+            mapped_category = mappings.get(item_type)
+            
+            if mapped_category and mapped_category != category:
+                log.info(f"   🚫 Mapping rejection: Type '{item_type}' maps to '{mapped_category}', but we need '{category}'")
+                return False
+        
+        # 3. Decision
+        if not item_category and (not item_type or item_type == "product"):
+            log.warning(f"   ⚠️ Ambiguous item: '{item.get('title')}' has no outfit_category or specific type. Allowing.")
+            
+        # ✨ ANTI-LEAKAGE: Title Keyword Check
+        # Sometimes vector search returns semantically similar items (e.g. "tops" -> "high-tops")
+        # We must explicitly reject them if the category is clearly wrong.
+        title = (item.get("title") or "").lower()
+        
+        # Block Shoes in Tops
+        if category in ["tops", "top", "shirt", "hoodie", "sweater"]:
+            if any(x in title for x in ["shoe", "sneaker", "boot", "high-top", "footwear", "runner", "slide", "sandal"]):
+                log.info(f"   🚫 Anti-leakage: Rejected '{title}' for Tops")
                 return False
                 
+        # Block Tops in Shoes
+        if category in ["shoes", "shoe", "footwear", "sneakers", "boots"]:
+            # Be careful with "high-top" which contains "top"
+            if any(x in title for x in ["shirt", "hoodie", "tee", "sweatshirt", "jacket", "vest"]):
+                log.info(f"   🚫 Anti-leakage: Rejected '{title}' for Shoes")
+                return False
+            # If title has "top" but NOT "high-top" or "low-top"
+            if "top" in title and "high-top" not in title and "low-top" not in title:
+                 log.info(f"   🚫 Anti-leakage: Rejected '{title}' for Shoes (ambiguous 'top')")
+                 return False
+
+        # Block Bottoms in Tops
+        if category in ["tops", "top"]:
+             if any(x in title for x in ["pant", "jean", "trouser", "short", "skirt", "legging"]):
+                 log.info(f"   🚫 Anti-leakage: Rejected '{title}' for Tops")
+                 return False
+
         return True
 
     def _expand_type_filter(self, type_value: str) -> List[str]:
@@ -736,6 +996,7 @@ DO NOT output markdown. Just the JSON object.
             with open(config_path) as f:
                 outfit_config = json.load(f)
             
+            # Use 'category_mappings' (plural) as per the fixed JSON
             category_mappings = outfit_config.get("category_mappings", {})
             
             # Build reverse mapping: generic -> [specific types]
@@ -743,13 +1004,18 @@ DO NOT output markdown. Just the JSON object.
             for specific_type, generic_category in category_mappings.items():
                 if generic_category not in reverse_map:
                     reverse_map[generic_category] = []
+                # Ensure we capture all specific types for a category
                 if specific_type not in reverse_map[generic_category]:
                     reverse_map[generic_category].append(specific_type)
             
             # Return expanded types if mapping exists
             type_lower = type_value.lower()
             if type_lower in reverse_map:
-                return reverse_map[type_lower]
+                expanded = reverse_map[type_lower]
+                # Also include the type itself if not present
+                if type_lower not in expanded:
+                     expanded.append(type_lower)
+                return expanded
             
             # No expansion needed
             return [type_value]
@@ -768,11 +1034,12 @@ DO NOT output markdown. Just the JSON object.
                 v = catalog_vocab(conn)
                 return {
                     "types": sorted(list(v.get("types", []))),
-                    "colors": sorted(list(v.get("colors", [])))
+                    "colors": sorted(list(v.get("colors", []))),
+                    "brands": sorted(list(v.get("brands", [])))
                 }
         except Exception as e:
             log.warning(f"Failed to load vocab for hybrid search prompt: {e}")
-            return {"types": [], "colors": []}
+            return {"types": [], "colors": [], "brands": []}
 
 
 # Auto-register agent in global registry

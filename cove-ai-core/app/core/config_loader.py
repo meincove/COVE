@@ -36,6 +36,14 @@ def get_fuzzy_matching_config() -> Dict:
         return json.load(f)
 
 
+@lru_cache(maxsize=1)
+def get_outfit_config() -> Dict:
+    """Load outfit configuration (category mappings, weather rules)"""
+    config_path = _CONFIG_DIR / "outfit_config.json"
+    with open(config_path) as f:
+        return json.load(f)
+
+
 def get_config_value(config_name: str, *keys, default=None):
     """
     Get a nested config value with fallback.

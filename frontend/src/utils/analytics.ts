@@ -21,20 +21,37 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 const BATCH_SIZE = 10;          // Batch events (2024 best practice)
 const BATCH_INTERVAL = 5000;    // 5 seconds
-const STORAGE_KEY = 'cove_analytics';
+// STORAGE_KEY removed (unused)
+
+// ... (imports/types if needed, but simple types work)
+
+interface AnalyticsMetadata {
+    [key: string]: any;
+}
+
+interface AnalyticsEvent {
+    user_id: string;
+    product_id: string;
+    interaction_type: string;
+    session_id: string;
+    time_on_page: number;
+    scroll_depth: number;
+    consent_given: boolean;
+    metadata: AnalyticsMetadata;
+}
 
 // Event queue
-let eventQueue = [];
-let batchTimer = null;
-let pageLoadTime = Date.now();
+let eventQueue: AnalyticsEvent[] = [];
+let batchTimer: NodeJS.Timeout | null = null;
+const pageLoadTime = Date.now();
 let maxScrollDepth = 0;
 
 /**
  * Get or create anonymous user ID
  */
-function getUserId() {
+function getUserId(): string {
     // Check if user is logged in (from Clerk or session)
-    const clerkUser = window?.Clerk?.user;
+    const clerkUser = (window as any)?.Clerk?.user;
     if (clerkUser?.id) {
         return `user_${clerkUser.id}`;
     }
@@ -46,7 +63,7 @@ function getUserId() {
 /**
  * Get or create session ID
  */
-function getSessionId() {
+function getSessionId(): string {
     const stored = sessionStorage.getItem('cove_session_id');
     if (stored) return stored;
 
@@ -58,10 +75,8 @@ function getSessionId() {
 
 /**
  * Check GDPR consent status
- * 
- * Note: Adjust this based on your actual consent management
  */
-function getConsentStatus() {
+function getConsentStatus(): boolean {
     // Check cookie consent (from your consent banner)
     const consent = localStorage.getItem('cookie_consent');
     return consent === 'accepted';
@@ -70,14 +85,14 @@ function getConsentStatus() {
 /**
  * Get time spent on current page
  */
-function getTimeOnPage() {
+function getTimeOnPage(): number {
     return Math.floor((Date.now() - pageLoadTime) / 1000); // seconds
 }
 
 /**
  * Get scroll depth
  */
-function getScrollDepth() {
+function getScrollDepth(): number {
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -111,12 +126,8 @@ async function flushEvents() {
 
 /**
  * Track user interaction with product
- * 
- * @param {string} productId - Product variant ID (e.g., "CCH001")
- * @param {string} type - Interaction type (view_item, add_to_cart, etc.)
- * @param {object} metadata - Additional context
  */
-export function trackInteraction(productId, type, metadata = {}) {
+export function trackInteraction(productId: string, type: string, metadata: AnalyticsMetadata = {}) {
     // Skip if tracking disabled
     if (typeof window === 'undefined') return;
 
@@ -124,7 +135,7 @@ export function trackInteraction(productId, type, metadata = {}) {
     const userId = getUserId();
     const sessionId = getSessionId();
 
-    const event = {
+    const event: AnalyticsEvent = {
         user_id: userId,
         product_id: productId,
         interaction_type: type,
@@ -161,35 +172,35 @@ export function trackInteraction(productId, type, metadata = {}) {
 /**
  * Track product view
  */
-export function trackProductView(productId, metadata = {}) {
+export function trackProductView(productId: string, metadata: AnalyticsMetadata = {}) {
     trackInteraction(productId, 'view_item', metadata);
 }
 
 /**
  * Track add to cart
  */
-export function trackAddToCart(productId, metadata = {}) {
+export function trackAddToCart(productId: string, metadata: AnalyticsMetadata = {}) {
     trackInteraction(productId, 'add_to_cart', metadata);
 }
 
 /**
  * Track remove from cart
  */
-export function trackRemoveFromCart(productId, metadata = {}) {
+export function trackRemoveFromCart(productId: string, metadata: AnalyticsMetadata = {}) {
     trackInteraction(productId, 'remove_from_cart', metadata);
 }
 
 /**
  * Track checkout start
  */
-export function trackBeginCheckout(metadata = {}) {
+export function trackBeginCheckout(metadata: AnalyticsMetadata = {}) {
     trackInteraction('checkout', 'begin_checkout', metadata);
 }
 
 /**
  * Track purchase
  */
-export function trackPurchase(productIds, metadata = {}) {
+export function trackPurchase(productIds: string[], metadata: AnalyticsMetadata = {}) {
     productIds.forEach(productId => {
         trackInteraction(productId, 'purchase', metadata);
     });
@@ -218,7 +229,7 @@ export function initAnalytics() {
     });
 
     // Track scroll depth
-    let scrollTimeout;
+    let scrollTimeout: NodeJS.Timeout;
     window.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
@@ -240,7 +251,7 @@ export function cleanupAnalytics() {
     flushEvents();
 }
 
-export default {
+const analytics = {
     trackInteraction,
     trackProductView,
     trackAddToCart,
@@ -250,3 +261,5 @@ export default {
     initAnalytics,
     cleanupAnalytics
 };
+
+export default analytics;

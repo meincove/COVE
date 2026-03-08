@@ -73,6 +73,26 @@
                 "default": 500
             },
             {
+                "step": "gender",
+                "question": "Who is this outfit for?",
+                "input_type": "gender",
+                "options": [
+                    {
+                        "label": "Men",
+                        "value": "men"
+                    },
+                    {
+                        "label": "Women",
+                        "value": "women"
+                    },
+                    {
+                        "label": "Unisex",
+                        "value": "unisex"
+                    }
+                ],
+                "required": true
+            },
+            {
                 "step": "style",
                 "question": "Any style preferences? (optional)",
                 "input_type": "style",

@@ -1,0 +1,12 @@
+{
+  "repro_vortex_high": {
+    "flow_name": "outfit_builder_conversation",
+    "current_step": 2,
+    "answers": {
+      "budget": 1000,
+      "style": "streetwear",
+      "occasion": "yes, show me"
+    },
+    "original_query": "I want a Vortex Streetwear outfit under \u20ac1000"
+  }
+}

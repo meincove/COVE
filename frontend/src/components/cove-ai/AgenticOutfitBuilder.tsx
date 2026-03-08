@@ -3,23 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Search, Sparkles, ShoppingBag } from "lucide-react";
+import { useOutfitStore, ProductCandidate } from "@/hooks/useOutfitStore";
+import BrandSelectionStep from "./BrandSelectionStep";
+import GenderSelectionStep from "./GenderSelectionStep";
 
-interface ProductCandidate {
-    title: string;
-    price: number;
-    imageUrl?: string;
-    slug?: string;
-    type?: string;
-    vettingStatus?: "analyzing" | "rejected" | "accepted";
-    rejectionReason?: string;
-}
-
-interface CategoryState {
-    status: "waiting" | "searching" | "found" | "selected";
-    candidates: ProductCandidate[];
-    selectedItem?: ProductCandidate;
-    totalFound?: number;
-}
+// ... interfaces ...
 
 interface AgenticOutfitBuilderProps {
     streamEvents: Array<{
@@ -38,6 +26,10 @@ interface AgenticOutfitBuilderProps {
         source?: string;
     }>;
     isActive: boolean;
+    onGenderSelect?: (gender: 'mens' | 'womens') => void;
+    onBrandSelect?: (brand: string | null) => void;
+    uploadedImage?: { file: File; preview: string } | null;
+    onTriggerImageUpload?: () => void;
 }
 
 /**
@@ -48,273 +40,377 @@ interface AgenticOutfitBuilderProps {
  * - Product cards appearing with fade-in animation
  * - "Searching..." → "Found X options" → "Selected ✓" flow
  */
-import { useOutfitStore } from "@/hooks/useOutfitStore";
-
-// ... interfaces ...
-
 export default function AgenticOutfitBuilder({
     streamEvents,
-    isActive
+    isActive,
+    onGenderSelect,
+    onBrandSelect,
+    uploadedImage,
+    onTriggerImageUpload
 }: AgenticOutfitBuilderProps) {
     // Use global store
     const { categories, setCategoryState, updateCandidate, activeCategory, setActiveCategory, budgetMax } = useOutfitStore();
 
+    // Current outfit view (1, 2, or 3)
+    const [activeOutfit, setActiveOutfit] = useState(1);
+
+    // Flow State
+    const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+    const [step, setStep] = useState<'building'>('building');
+
     // Track how many events we've processed
     const processedCountRef = useRef(0);
 
-    // Process streaming events -> Sync to Store
+    // VTO States
+    const [vtoLoading, setVtoLoading] = useState<number | null>(null); // lookup by outfit number (1, 2, 3)
+    const [vtoResults, setVtoResults] = useState<Record<number, string>>({}); // look num -> image url
+    const [waitingForImage, setWaitingForImage] = useState(false); // ✨ UX: Track if we asked for an upload
+
+    // ✨ AUTO-TRIGGER VTO: When image arrives and we were waiting, run it!
     useEffect(() => {
-        if (!streamEvents.length) return;
+        if (waitingForImage && uploadedImage) {
+            console.log("📸 Image uploaded! Auto-triggering VTO...");
+            handleVTO(activeOutfit);
+            setWaitingForImage(false); // Reset flag
+        }
+    }, [uploadedImage, waitingForImage, activeOutfit]);
 
-        // Process only NEW events (ones we haven't seen yet)
-        const newEvents = streamEvents.slice(processedCountRef.current);
+    // Check if building has started (any category activity) - Force skip steps if events exist
+    const hasExternalEvents = streamEvents.length > 0;
 
-        newEvents.forEach((event) => {
-            // Handle budget_set event (no category)
-            if (event.event_type === "budget_set" && event.budget_max) {
-                console.log('💰 Setting budget max:', event.budget_max);
-                useOutfitStore.getState().setBudget(event.budget_max, 0);
-                return;
+    // Determine current effective step
+    // If events are flowing, we are definitely building.
+    const currentStep = 'building';
+    const isBuilding = true;
+
+    // ✨ DERIVED STATE: Group items into outfits
+    const outfits: Record<string, ProductCandidate[]> = {
+        outfit_1: [],
+        outfit_2: [],
+        outfit_3: []
+    };
+
+    // Flatten and group
+    Object.values(categories).forEach(catState => {
+        // Strategy: Only add items that are officially "selected" or "accepted".
+        // Raw candidates from search (status=analyzing/undefined) should NOT be in the billable outfit.
+
+        // 1. Check for specific selected item (Single Source of Truth)
+        if (catState.selectedItem) {
+            const oid = catState.selectedItem.outfit_id || "outfit_1";
+            if (outfits[oid]) {
+                outfits[oid].push(catState.selectedItem);
             }
-
-            // Normalize category name: capitalize first letter for consistency
-            const rawCategory = event.category;
-            const category = rawCategory
-                ? rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1).toLowerCase()
-                : null;
-
-            if (!category) return;
-
-            switch (event.event_type) {
-                case "category_start":
-                    setCategoryState(category, {
-                        status: "searching",
-                        candidates: [], // Clear old candidates on restart
-                    });
-                    setActiveCategory(category);
-                    break;
-
-                case "category_candidates":
-                    console.log('📦 Storing candidates for', category, ':', event.candidates?.length || 0, 'items');
-                    setCategoryState(category, {
-                        status: "found",
-                        candidates: event.candidates || [],
-                        totalFound: event.total_found,
-                    });
-                    break;
-
-                case "item_selected":
-                    setCategoryState(category, {
-                        status: "selected",
-                        selectedItem: event.selected_item,
-                    });
-                    break;
-
-                case "category_vetting":
-                    if (event.slug) {
-                        updateCandidate(category, event.slug, {
-                            vettingStatus: event.status as any,
-                            rejectionReason: event.reason
-                        });
-                    }
-                    break;
-
-                case "category_error":
-                case "error":
-                    // If specific slug failed
-                    if (event.slug) {
-                        updateCandidate(category, event.slug, {
-                            vettingStatus: "rejected",
-                            rejectionReason: event.message || "Analysis failed"
-                        });
-                    } else {
-                        // Whole category failed
-                        setCategoryState(category, {
-                            status: "found",
-                            candidates: [], // Or keep existing?
-                            totalFound: 0
-                        });
-                    }
-                    break;
-            }
-        });
-
-        // Update processed count
-        processedCountRef.current = streamEvents.length;
-    }, [streamEvents, setCategoryState, updateCandidate, setActiveCategory]);
-
-    if (!isActive) return null;
-
-    const categoryOrder = ["Tops", "Bottoms", "Shoes", "Accessories"];
-    const displayCategories = Object.keys(categories).length > 0
-        ? Object.keys(categories)
-        : categoryOrder;
-
-    // DEBUG: Log store state to see what we have
-    const categoryCandidateCounts = Object.entries(categories).map(([k, v]) => `${k}: ${v.candidates?.length || 0}`).join(', ');
-    console.log('🔍 RENDER DEBUG:', {
-        activeCategory,
-        categoryCandidateCounts,
-        activeCandidates: activeCategory ? categories[activeCategory]?.candidates?.slice(0, 2) : null
+        }
+        // 2. Fallback: Check for vetted/accepted candidates (if no single selection yet)
+        else {
+            catState.candidates.forEach(c => {
+                // ✨ SHOW ALL: In AI Stylist mode, all candidates are part of the proposed outfit
+                // We do not wait for explicit 'accepted' status
+                const oid = c.outfit_id || "outfit_1";
+                if (outfits[oid]) {
+                    outfits[oid].push(c);
+                }
+            });
+        }
     });
 
+    const hasOutfits = Object.values(outfits).some(list => list.length > 0);
+
+    const outfitTotals = [1, 2, 3].map(num => {
+        const items = outfits[`outfit_${num}`] || [];
+        return items.reduce((sum, item) => sum + (item.price || 0), 0);
+    });
+
+    const currentOutfitItems = outfits[`outfit_${activeOutfit}`] || [];
+
+    const handleVTO = async (lookNum: number) => {
+        const items = outfits[`outfit_${lookNum}`];
+        if (!items || items.length === 0) return;
+
+        if (!uploadedImage) {
+            setWaitingForImage(true); // ✨ Mark that we are waiting
+            onTriggerImageUpload?.();
+            return;
+        }
+
+        // Proceed if we have image (or it just arrived)
+
+        setVtoLoading(lookNum);
+
+        try {
+            // Convert file to base64
+            const imageData: string = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64String = reader.result as string;
+                    resolve(base64String.split(',')[1] || base64String);
+                };
+                reader.readAsDataURL(uploadedImage.file);
+            });
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_AI_CORE_BASE_URL || 'http://localhost:8000'}/ai/vto/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: items.map(i => ({
+                        title: i.title,
+                        imageUrl: i.imageUrl,
+                        type: i.type,
+                        slug: i.slug
+                    })),
+                    imageData: imageData
+                })
+            });
+
+            const data = await res.json();
+            if (data.ok && data.vto_image_url) {
+                setVtoResults(prev => ({ ...prev, [lookNum]: data.vto_image_url }));
+            } else {
+                console.error("VTO Failed:", data.error || data.reasoning);
+                alert(`Failed to generate preview: ${data.error || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("VTO Error:", err);
+            alert("An error occurred while generating the virtual try-on.");
+        } finally {
+            setVtoLoading(null);
+        }
+    };
+
+
     return (
-        <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 rounded-2xl p-4 border border-white/10">
-            {/* Header with Budget */}
+        <div className="bg-white rounded-2xl p-4 border border-neutral-200 shadow-sm h-full flex flex-col font-sans">
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-purple-400" />
-                    <h3 className="text-lg font-semibold text-white">Building Your Outfit</h3>
-                </div>
-
-                {/* Budget Display */}
-                <div className="flex flex-col items-end">
-                    <div className="text-sm font-medium text-neutral-300">
-                        <span className="text-white">€{Object.values(categories).reduce((sum, c) => sum + (c.selectedItem?.price || 0), 0).toFixed(2)}</span>
-                        <span className="text-neutral-500"> / €{budgetMax.toFixed(2)}</span>
+                    <div className="h-8 w-8 rounded-full bg-violet-100 flex items-center justify-center">
+                        <Sparkles className="h-4 w-4 text-violet-600" />
                     </div>
-                    {/* Progress Bar */}
-                    <div className="w-24 h-1 bg-neutral-800 rounded-full mt-1 overflow-hidden">
-                        <div
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
-                            style={{
-                                width: `${Math.min(100, (Object.values(categories).reduce((sum, c) => sum + (c.selectedItem?.price || 0), 0) / budgetMax) * 100)}%`
-                            }}
-                        />
+                    <div>
+                        <h3 className="text-sm font-bold text-neutral-900 leading-tight">
+                            {isBuilding ? "Curating Looks..." : "Your Outfits"}
+                        </h3>
+                        {isBuilding && (
+                            <p className="text-[10px] text-neutral-500"> finding matches...</p>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Vertical Category List */}
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                {displayCategories.map((cat) => {
-                    const state = categories[cat];
-                    const candidates = state?.candidates || [];
-                    const selectedItem = state?.selectedItem;
-                    const status = state?.status;
+            {/* Content: Always show tabs/items if we have any outfits, otherwise show loader */}
+            {hasOutfits || isBuilding ? (
+                <>
+                    {/* Outfit Tabs */}
+                    <div className="flex bg-neutral-100 rounded-lg p-1 mb-4">
+                        {[1, 2, 3].map((num) => {
+                            const hasItems = outfits[`outfit_${num}`]?.length > 0;
+                            const total = outfitTotals[num - 1] || 0;
+                            const isActiveTab = activeOutfit === num;
 
-                    return (
-                        <div key={cat} className="bg-white/5 rounded-xl p-3">
-                            {/* Category Header */}
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                    {status === "searching" && (
-                                        <Search className="h-4 w-4 text-purple-400 animate-pulse" />
+                            return (
+                                <button
+                                    key={num}
+                                    onClick={() => setActiveOutfit(num)}
+                                    className={`
+                                        flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200
+                                        ${isActiveTab
+                                            ? 'bg-white text-neutral-900 shadow-sm ring-1 ring-black/5'
+                                            : hasItems
+                                                ? 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'
+                                                : 'text-neutral-400 cursor-default'
+                                        }
+                                    `}
+                                    disabled={!hasItems && !isActiveTab}
+                                >
+                                    <div className="flex items-center justify-center gap-1">
+                                        Look {num}
+                                    </div>
+                                    {hasItems && (
+                                        <div className={`text-[10px] ${isActiveTab ? 'text-violet-600 font-bold' : 'opacity-75'}`}>
+                                            €{total.toFixed(0)}
+                                        </div>
                                     )}
-                                    {status === "found" && (
-                                        <Check className="h-4 w-4 text-emerald-400" />
-                                    )}
-                                    {status === "selected" && (
-                                        <Check className="h-4 w-4 text-green-400" />
-                                    )}
-                                    {!status && (
-                                        <ShoppingBag className="h-4 w-4 text-neutral-500" />
-                                    )}
-                                    <span className="text-sm font-medium text-white">{cat}</span>
-                                </div>
-                                <span className="text-xs text-neutral-500">
-                                    {status === "searching" && "Searching..."}
-                                    {status === "found" && `${state?.totalFound || candidates.length} options`}
-                                    {status === "selected" && "✓ Selected"}
-                                    {!status && "Waiting..."}
-                                </span>
-                            </div>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                            {/* Products Row - Horizontal scrollable */}
-                            {candidates.length > 0 ? (
-                                <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-                                    <AnimatePresence>
-                                        {candidates.map((product, idx) => {
-                                            const isSelected = selectedItem?.slug === product.slug;
+                    {/* Current Outfit Items - Vertical Stack */}
+                    <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeOutfit}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
+                                className="space-y-2"
+                            >
+                                {currentOutfitItems.length === 0 && isBuilding && (
+                                    <div className="p-4 text-center text-xs text-neutral-400">
+                                        Items will appear here...
+                                    </div>
+                                )}
 
-                                            return (
-                                                <motion.div
-                                                    key={product.slug || idx}
-                                                    initial={{ opacity: 0, scale: 0.8 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    transition={{ delay: idx * 0.05 }}
-                                                    draggable
-                                                    onDragStart={(e) => {
-                                                        // Store product data for drag
-                                                        const dragData = JSON.stringify({ ...product, category: cat });
-                                                        (e as any).dataTransfer?.setData('application/json', dragData);
-                                                    }}
-                                                    className={`
-                                                        relative flex-shrink-0 w-24 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing
-                                                        ${isSelected
-                                                            ? 'border-green-500 ring-2 ring-green-500/30'
-                                                            : 'border-transparent hover:border-purple-500/50'
-                                                        }
-                                                    `}
-                                                >
-                                                    {/* Image */}
-                                                    <div className="aspect-square bg-neutral-800">
-                                                        {product.imageUrl ? (
-                                                            <img
-                                                                src={product.imageUrl}
-                                                                alt={product.title}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center">
-                                                                <ShoppingBag className="h-6 w-6 text-neutral-600" />
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                {currentOutfitItems.map((item, idx) => (
+                                    <motion.div
+                                        key={item.slug || idx}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className="group flex gap-3 bg-white border border-neutral-100 hover:border-violet-200 hover:shadow-md rounded-xl p-2 transition-all cursor-pointer"
+                                        onClick={() => {
+                                            if (item.slug) {
+                                                window.location.href = `/product/${item.slug}`;
+                                            }
+                                        }}
+                                    >
+                                        {/* Image */}
+                                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-neutral-50 border border-neutral-100 flex-shrink-0 relative">
+                                            {item.imageUrl ? (
+                                                <img
+                                                    src={item.imageUrl}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <ShoppingBag className="h-5 w-5 text-neutral-300" />
+                                                </div>
+                                            )}
+                                        </div>
 
-                                                    {/* Info */}
-                                                    <div className="p-1.5 bg-neutral-900">
-                                                        <p className="text-[10px] text-neutral-300 truncate">
-                                                            {product.title}
-                                                        </p>
-                                                        <p className="text-xs font-semibold text-white">
-                                                            €{product.price?.toFixed(2) || "0.00"}
-                                                        </p>
-                                                    </div>
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
+                                                        {item.type || 'Item'}
+                                                    </p>
+                                                    <p className="text-xs text-neutral-900 font-medium truncate pr-2">
+                                                        {item.title}
+                                                    </p>
+                                                </div>
+                                                <div className="h-5 w-5 rounded-full bg-neutral-50 flex items-center justify-center group-hover:bg-violet-50 group-hover:text-violet-600 transition-colors">
+                                                    <Check className="h-3 w-3 text-neutral-300 group-hover:text-violet-600" />
+                                                </div>
+                                            </div>
 
-                                                    {/* Selected Badge */}
-                                                    {isSelected && (
-                                                        <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
-                                                            <Check className="h-2.5 w-2.5 text-white" />
-                                                        </div>
-                                                    )}
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <p className="text-xs text-violet-600 font-bold">
+                                                    €{item.price?.toFixed(2) || "0.00"}
+                                                </p>
+                                            </div>
 
-                                                    {/* Drag Hint */}
-                                                    <div className="absolute inset-0 bg-purple-500/0 hover:bg-purple-500/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                                        <span className="text-[9px] text-white/70 bg-black/50 px-1 rounded">
-                                                            Drag to add
-                                                        </span>
-                                                    </div>
-                                                </motion.div>
-                                            );
-                                        })}
-                                    </AnimatePresence>
-                                </div>
-                            ) : (
-                                <div className="h-12 flex items-center justify-center text-neutral-500 text-xs">
-                                    {status === "searching" ? (
-                                        <span className="flex items-center gap-2">
-                                            <div className="h-3 w-3 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                                            Looking for products...
-                                        </span>
-                                    ) : status === "found" ? (
-                                        "No matching products found"
-                                    ) : (
-                                        "Waiting to search..."
-                                    )}
-                                </div>
-                            )}
+                                            {item.stylist_note && (
+                                                <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-100 rounded-md max-w-full">
+                                                    <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0 animate-pulse"></span>
+                                                    <p className="text-[10px] text-amber-700 font-medium leading-tight truncate">
+                                                        {item.stylist_note.replace("⚠️ Stylist Note:", "").trim()}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Total & Add All Button */}
+                    <div className="mt-3 pt-3 border-t border-neutral-100">
+                        <div className="flex items-center justify-between mb-3 px-1">
+                            <span className="text-xs font-medium text-neutral-500">Look {activeOutfit} Total</span>
+                            <span className="text-sm font-bold text-neutral-900">
+                                €{currentOutfitItems.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2)}
+                            </span>
                         </div>
-                    );
-                })}
-            </div>
+                        {/* VTO Preview if generated */}
+                        {/* VTO Preview if generated */}
+                        {vtoResults[activeOutfit] && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="mb-4 rounded-xl overflow-hidden shadow-2xl relative bg-neutral-900 group ring-1 ring-white/10"
+                            >
+                                {/* Floating Badge */}
+                                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] text-white font-bold uppercase tracking-wider z-20 flex items-center gap-1.5 shadow-lg">
+                                    <Sparkles className="w-3 h-3 text-emerald-400 fill-emerald-400/20" />
+                                    AI Preview
+                                </div>
+                                <div className="absolute top-3 right-3 z-20">
+                                    <div className="h-6 w-6 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-[pulse_2s_infinite]" />
+                                    </div>
+                                </div>
 
-            {/* Empty State */}
-            {Object.keys(categories).length === 0 && (
-                <div className="min-h-[150px] flex items-center justify-center text-neutral-500">
+                                {/* Container - enforced 3:4 ratio */}
+                                <div className="relative aspect-[3/4] w-full isolate">
+
+                                    {/* 1. Backdrop (Blurred + Darkened) */}
+                                    <div className="absolute inset-0 z-0">
+                                        <img
+                                            src={vtoResults[activeOutfit]}
+                                            alt=""
+                                            className="w-full h-full object-cover blur-2xl scale-125 opacity-50"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                                    </div>
+
+                                    {/* 2. Main Image (Crisp + Centered) */}
+                                    <img
+                                        src={vtoResults[activeOutfit]}
+                                        alt="Virtual Preview"
+                                        className="relative w-full h-full object-contain z-10 drop-shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+                                    />
+
+                                    {/* 3. Subtle shine/vignette */}
+                                    <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 z-20 rounded-xl" />
+                                </div>
+                            </motion.div>
+                        )}
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleVTO(activeOutfit)}
+                                disabled={vtoLoading !== null}
+                                className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md
+                                    ${vtoLoading === activeOutfit
+                                        ? 'bg-emerald-100 text-emerald-700 cursor-wait'
+                                        : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                    }`}
+                            >
+                                {vtoLoading === activeOutfit ? (
+                                    <>
+                                        <div className="h-3 w-3 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        Virtual Try-On
+                                    </>
+                                )}
+                            </button>
+
+                            <button className="flex-1 py-2.5 bg-neutral-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                <ShoppingBag className="h-3.5 w-3.5" />
+                                Add Look to Cart
+                            </button>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                /* Empty State */
+                <div className="flex-1 flex items-center justify-center text-neutral-400">
                     <div className="text-center">
-                        <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Waiting to start search...</p>
+                        <div className="h-10 w-10 mx-auto mb-2 rounded-full bg-neutral-50 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-neutral-300" />
+                        </div>
+                        <p className="text-xs font-medium text-neutral-500">Ready to style you</p>
+                        <p className="text-[10px] text-neutral-400 mt-1">
+                            "Create a date night look"
+                        </p>
                     </div>
                 </div>
             )}

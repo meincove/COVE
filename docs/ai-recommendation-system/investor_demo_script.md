@@ -6,10 +6,14 @@
 
 ---
 
-## Scene 1: The Problem (30 seconds)
+## Scene 1: The Vision & The Problem (1 minute)
 
 **You (Presenter):**
-> "Traditional e-commerce chatbots are reactive - they wait for you to tell them exactly what you want. COVE's AI is different. It's **agentic** - it thinks, plans, and takes action to solve your problems."
+> "Meet **Cove**. We are building Europe's AI-driven fashion marketplace.
+> 
+> The problem with online fashion today is the 'Query Gap'. You know what you want—*a complete outfit for a summer wedding in Tuscany under €300*—but the search bar only understands keywords like 'blue dress'.
+> 
+> Enter **Bubbles**, our proprietary Agentic RAG AI. Bubbles doesn't just match keywords; it understands *intent*, *style*, and *fit*. It's not a chatbot; it's a shopping agent that thinks, plans, and negotiates for you."
 
 ---
 
@@ -128,7 +132,29 @@ Here are items within your €100 budget...
 
 ---
 
-## Scene 7: The "Wow" Moment - Error Handling (30 seconds)
+## Scene 7: The Vision - Virtual Try-On (45 seconds)
+
+**Action:** *Stop Live Demo. Switch to Presentation Slide / Video.*
+
+**You:**
+> "What you just saw is the live shopping experience. But our vision for **Bubbles** goes further—into hyper-personalization with Generative AI.
+>
+> We are solving the biggest pain point in e-commerce: **Returns**.
+>
+> By combining our **Size Fit Engine** with **Generative AI**, we allow users to visualize the garment on themselves before buying."
+
+**Visuals:**
+*Show slide/video of the VTO flow:*
+1.  **Input:** User uploads a photo + selects a garment (e.g., the Navy Blazer from the outfit).
+2.  **Process:** The VTO Agent maps the garment to the user's body pose.
+3.  **Result:** A realistic visualization of the user wearing the item.
+
+**You:**
+> "This isn't just a filter. This is the **IDM-VTO** model running on our infrastructure, generating realistic fabric drape and lighting. This reduces decision fatigue and drastically increases conversion."
+
+---
+
+## Scene 8: The "Wow" Moment - Error Handling (30 seconds)
 
 **Action:** Type nonsense
 
@@ -148,18 +174,13 @@ Can I help you browse our catalog?
 ## Closing (30 seconds)
 
 **You:**
-> "So what did we just see?
+> "So what defines the **Cove Ecosystem**?
 > 
-> ✅ **Multi-agent coordination** - different AIs working together  
-> ✅ **Visible thinking** - users see the AI reasoning  
-> ✅ **Honest recommendations** - trust over tricks  
-> ✅ **Intelligent bundling** - complete outfits, not just items  
-> ✅ **Budget optimization** - automatic discounts  
-> ✅ **Robust error handling** - production-ready  
+> 1.  **Bubbles (The Agent):** It plans outfits, negotiates prices, and manages your wardrobe.
+> 2.  **XMail & XVoice (The Brand Suite):** We don't just help buyers. We automate customer support for our partner brands, reducing their overhead by up to 80%.
+> 3.  **Cove AI (The Core):** A privacy-first, config-driven intelligence layer that gets smarter with every interaction.
 > 
-> This isn't a chatbot. This is **truly agentic AI** that thinks, plans, and acts autonomously to help customers find exactly what they need.
-> 
-> And it's **100% config-driven** - we can adjust all agent behavior without writing code. Want to change styling rules? Edit a JSON file. New discount codes? Update the config. No developer needed."
+> This is more than a marketplace. It's the first **AI-Native Fashion Platform** in Europe."
 
 ---
 

@@ -34,7 +34,7 @@ import SuggestedQueries from "@/components/cove-ai/SuggestedQueries";
 import { AgentThinkingSteps } from "@/components/cove-ai/AgentThinkingSteps";
 import LoadingSkeleton from './LoadingSkeleton';
 import AgenticOutfitBuilder from './AgenticOutfitBuilder';
-import { useOutfitStore } from '@/hooks/useOutfitStore';
+import { useOutfitStore, ProductCandidate } from '@/hooks/useOutfitStore';
 import Toast, { ToastType } from "@/components/cove-ai/Toast";
 import { useAgentStreaming } from "@/hooks/useAgentStreaming";
 import { useAgentStream } from "@/hooks/useAgentStream";
@@ -45,6 +45,8 @@ import EnhancedThinking from "@/components/cove-ai/EnhancedThinking";  // Phase 
 import PersonalizedGreeting from "@/components/cove-ai/PersonalizedGreeting";
 import InteractiveQuestionOptions from "@/components/cove-ai/InteractiveQuestionOptions";
 import { useLayoutStore } from "@/store/layoutStore";
+import CandidateExplorationPanel from "@/components/cove-ai/CandidateExplorationPanel";
+import { useOutfitEvents } from "@/hooks/useOutfitEvents";
 
 // ---------- TYPES ----------
 
@@ -68,6 +70,7 @@ type RecommendationsMeta = {
   // Phase 1: Enhanced thinking
   thinking_events?: AgentResponse["thinking_events"];
   tools_used?: AgentResponse["tools_used"];
+  vto_image_url?: string;
 };
 
 // Week 4: New metadata types
@@ -104,6 +107,7 @@ type AssistantMeta =
 type ChatMessage = BaseMessage & {
   meta?: AssistantMeta;
   suggestedActions?: import("@/types/agent").SuggestedAction[];
+  imageUrl?: string; // ✨ VISION: For user-uploaded images or assistant image results
 };
 
 function makeId() {
@@ -153,9 +157,11 @@ interface CoveChatWidgetProps {
   onQuickAction?: (text: string) => void;
   onTabChange?: (tab: 'chat' | 'outfit_builder' | 'cart') => void;
   onOutfitReady?: () => void;
+  uploadedImage?: { file: File; preview: string } | null;
+  onTriggerImageUpload?: () => void;
 }
 
-function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, onTabChange, onOutfitReady }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>) {
+function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, onTabChange, onOutfitReady, uploadedImage, onTriggerImageUpload }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -170,6 +176,12 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
 
   // Week 4: Toast notifications
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+  // Candidate Exploration Panel state - auto-opens during outfit building
+  const [isCandidatePanelOpen, setIsCandidatePanelOpen] = useState(false);
+
+
+
 
   const { user, isSignedIn } = useUser();
 
@@ -203,6 +215,32 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     questionOptions,  // Interactive question options for conversation flow
   } = useAgentStream();
 
+  // Auto-scroll ref
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Auto-scroll on new messages
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isStreamingProgress, agenticEvents.length]);
+
+  // Subscribe to store for reactive UI updates
+  const { categories: outfitCategories, reset: resetOutfitStore } = useOutfitStore();
+
+  // Auto-open panel when candidates are found (UX Restoration)
+  useEffect(() => {
+    // Check if we have any found candidates
+    const hasCandidates = Object.values(outfitCategories).some(c => c.status === 'found' && c.candidates.length > 0);
+
+    if (hasCandidates && !isCandidatePanelOpen && !manuallyClosedRef.current) {
+      console.log("🔓 Auto-opening candidate panel (UX Restoration)");
+      setIsCandidatePanelOpen(true);
+    }
+  }, [outfitCategories, isCandidatePanelOpen]);
+
   // Phase 3: Layout Store integration for Virtual Trial Room
   const setGeneratedOutfit = useLayoutStore((s) => s.setGeneratedOutfit);
 
@@ -210,17 +248,64 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
   const sessionId = guestSessionId || ensureGuestSessionId();
   const { history, isLoading: historyLoading, saveMessage } = useChatHistory(sessionId);
 
+  // ✨ PHASE 6: Centralized Outfit Event Processing
+  // Updates the global outfit store from streaming events (normalizes categories etc.)
+  useOutfitEvents(agenticEvents);
+
+
+
+  // ✨ FIX: Panel Interaction Logic
+  const manuallyClosedRef = useRef(false);
+
+  // Reset manual close flag when new stream starts
+  useEffect(() => {
+    if (agenticEvents.length === 0) {
+      manuallyClosedRef.current = false;
+    }
+  }, [agenticEvents.length]);
+
+  // Auto-open panel when agentic events arrive - Respect Manual Close!
+  useEffect(() => {
+    // Only auto-open if we are ACTIVELY streaming.
+    // If streaming is finished, do not auto-open (prevents loop with auto-dismiss).
+    // ✨ CHANGED: Removed the mode check so this opens in outfit_builder too (consolidated UI)
+    if (agenticEvents.length > 0 && !isCandidatePanelOpen && !manuallyClosedRef.current && isStreamingProgress) {
+      setIsCandidatePanelOpen(true);
+    }
+  }, [agenticEvents, isCandidatePanelOpen, isStreamingProgress]);
+
+  // Auto-dismiss panel when streaming ends
+  useEffect(() => {
+    // If streaming finished, start exit timer.
+    // We intentionally exclude isCandidatePanelOpen from deps so this ONLY
+    // fires when streaming state changes (finishes), not when user toggles the panel later.
+    if (!isStreamingProgress && agenticEvents.length > 0) {
+      const timer = setTimeout(() => {
+        setIsCandidatePanelOpen(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isStreamingProgress, agenticEvents.length]);
+
+  // ✨ FIX: Close Candidate Panel if Question appears (Ambiguity Check)
+  useEffect(() => {
+    if (questionOptions) {
+      setIsCandidatePanelOpen(false);
+    }
+  }, [questionOptions]);
+
   // Week 6: Router for navigation (no page refresh)
   const router = useRouter();
 
   // Week 6: Disabled auto-load of chat history (prevents seeing old chats)
   // Users start fresh each time - history is still saved to DB
-  /*
+  // Week 6: ENABLED auto-load of chat history
+  // Users start fresh each time - history is still saved to DB
   useEffect(() => {
     if (!historyLoading && history.length > 0 && messages.length === 0) {
       // Convert history to chat messages
       const historyMessages: ChatMessage[] = history.map((h, i) => ({
-        id: `history - ${ i } -${ Date.now() } `,
+        id: `history-${i}-${Date.now()}`,
         role: h.role,
         content: h.content,
         meta: h.meta,
@@ -228,20 +313,36 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       setMessages(historyMessages);
       setHasStartedChat(true); // Mark as started if we have history
     }
-  }, [history, historyLoading]);
-  */
+  }, [history, historyLoading, messages.length]);
 
   // Clear messages when user signs out or signs in (prevents showing wrong user's history)
   useEffect(() => {
     // Clear messages and reset chat when auth state changes
     setMessages([]);
     setHasStartedChat(false);
-  }, [isSignedIn, user?.id]);
+
+    // ✨ FIX: Clear invalid session artifacts on sign-out
+    if (!isSignedIn) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('cove_has_chatted');
+        sessionStorage.clear(); // Clear ephemeral data
+        // Reset persisted store state (clears cove_guest_session in localStorage too)
+        useCartSessionStore.getState().resetSession();
+      }
+
+      // Force regeneration of session ID so next guest user starts fresh
+      ensureGuestSessionId();
+    }
+  }, [isSignedIn, user?.id, ensureGuestSessionId]);
 
   // Make sure we *have* a guest session id
   useEffect(() => {
     ensureGuestSessionId();
   }, [ensureGuestSessionId]);
+
+  // Auto-open Candidate Panel when building starts (agentic events arrive)
+  // Only if we are NOT in outfit builder mode (since that view already shows progress)
+
 
   // Derive a friendly user name once, memoized
   const userName = useMemo(() => {
@@ -343,11 +444,14 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     sendQuickMessage: async (msg: string, image?: File) => {
       if (!msg.trim() && !image) return;
 
+      // ✨ FIX: Reset outfit state on new message to prevent stale "Outfit Ready" notifications
+      resetOutfitStore();
+
       const userMsg: ChatMessage = {
         id: makeId(),
         role: 'user',
         content: msg.trim(),
-        // TODO: Handle image display in message if needed
+        imageUrl: image ? URL.createObjectURL(image) : undefined, // ✨ VISION: Local preview
       };
 
       setMessages(prev => [...prev, userMsg]);
@@ -355,13 +459,11 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
 
       if (!hasStartedChat) {
         setHasStartedChat(true);
-        // Mark that user has chatted (for personalized greeting on next visit)
         if (typeof window !== 'undefined') {
           localStorage.setItem('cove_has_chatted', 'true');
         }
       }
 
-      // Save user message to history
       saveMessage({
         role: 'user',
         content: userMsg.content,
@@ -370,12 +472,28 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       try {
         const sessionId = guestSessionId ?? ensureGuestSessionId();
 
+        // ✨ VISION: Convert File to Base64 if present
+        let imageData: string | undefined = undefined;
+        if (image) {
+          imageData = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64String = reader.result as string;
+              // Extract just the base64 part if it contains the prefix
+              resolve(base64String.split(',')[1] || base64String);
+            };
+            reader.readAsDataURL(image);
+          });
+        }
+
         // Send via streaming query
         await sendStreamingQuery(
           userMsg.content,
           isSignedIn && user ? user.id : undefined,
           sessionId,
-          mode === 'outfit_builder' ? 'outfit_builder' : undefined
+          mode === 'outfit_builder' ? 'outfit_builder' : undefined,
+          undefined, // imageUrl
+          imageData  // imageData (base64)
         );
       } catch (err: any) {
         console.error("Error talking to agent:", err);
@@ -402,6 +520,9 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     }
 
     // Otherwise, handle internally (fallback for standalone usage)
+    // ✨ FIX: Reset outfit state on new message
+    resetOutfitStore();
+
     const userMsg: ChatMessage = {
       id: makeId(),
       role: 'user',
@@ -453,6 +574,9 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       role: "user",
       content: input.trim(),
     };
+
+    // ✨ FIX: Reset outfit state on new message
+    resetOutfitStore();
 
     setMessages((prev) => [...prev, userMsg]);
     const query = input.trim().toLowerCase();
@@ -565,6 +689,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
             thinking_steps: data.thinking_steps,  // Week 4: FIX - Include thinking steps!
             thinking_events: data.thinking_events,  // Phase 1: Enhanced thinking
             tools_used: data.tools_used,  // Phase 1: Tool tracking
+            vto_image_url: data.vto_image_url, // ✨ Phase 3: Virtual Try-On
           } as RecommendationsMeta)
           : undefined,
       };
@@ -736,13 +861,69 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       // Only for outfit builder responses, not simple product queries
       // Use STRICT phrases to avoid false positives from casual "outfit" mentions
       const introLower = introText.toLowerCase();
-      const isOutfitResponse = introLower.includes('built a complete outfit') ||
+      // Check for textual triggers
+      const hasTextTrigger = introLower.includes('built a complete outfit') ||
         introLower.includes('complete outfit for you') ||
         introLower.includes("i've built") ||
         introLower.includes('your outfit is ready') ||
-        introLower.includes('€0.00 total');  // Outfit builder signature
+        introLower.includes('look 1') ||
+        introLower.includes('generated 3 outfits') || // Broader
+        introLower.includes('styling:') || // Structure shared by LLM
+        introLower.includes('€0.00 total');
+
+      // Check for data triggers (stronger signal)
+      const hasOutfitData = streamedItems.some(item => item.outfit_id || (item as any).outfit_id);
+
+      const isOutfitResponse = hasTextTrigger || hasOutfitData;
+
       if (isOutfitResponse) {
         setGeneratedOutfit(streamedItems);
+
+        // ✨ ROBUSTNESS: Hydrate OutfitStore directly from final items
+        // This ensures AgenticOutfitBuilder has data even if streaming events failed
+        const { setCategoryState, setActiveCategory } = useOutfitStore.getState();
+
+        // Group items by category
+        const grouped: Record<string, ProductCandidate[]> = {};
+        let firstCategory: string | null = null;
+
+        streamedItems.forEach(item => {
+          // Normalize category
+          let cat = item.category || item.type || 'Other';
+          const lower = cat.toLowerCase();
+          if (lower.includes('top') || lower.includes('shirt') || lower.includes('sweater')) cat = 'Tops';
+          else if (lower.includes('bottom') || lower.includes('pant') || lower.includes('jean') || lower.includes('short')) cat = 'Bottoms';
+          else if (lower.includes('shoe') || lower.includes('sneaker') || lower.includes('boot')) cat = 'Shoes';
+          else cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+          if (!grouped[cat]) grouped[cat] = [];
+
+          // Map AgentItem -> ProductCandidate
+          const candidate: ProductCandidate = {
+            title: item.title,
+            price: item.price || 0,
+            imageUrl: item.imageUrl,
+            slug: item.slug || `generated-slug-${Date.now()}-${Math.random()}`,
+            type: item.type,
+            gender: (item as any).gender,
+            outfit_id: item.outfit_id,
+            stylist_note: (item as any).stylist_note || item.reason
+          };
+
+          grouped[cat].push(candidate);
+          if (!firstCategory) firstCategory = cat;
+        });
+
+        // Update Store
+        Object.keys(grouped).forEach(cat => {
+          setCategoryState(cat, {
+            status: "found",
+            candidates: grouped[cat],
+            totalFound: grouped[cat].length
+          });
+        });
+
+        if (firstCategory) setActiveCategory(firstCategory);
       }
 
       // Remove thinking message and add final result
@@ -1061,86 +1242,91 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       {/* Messages list - Muted neutral background, hidden scrollbar */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-16 pb-4 space-y-4 bg-neutral-100/80 scrollbar-hide">
 
-        {/* Personalized Greeting - Mode-specific */}
-        {messages.length === 0 && !isStreamingProgress && (
-          mode === 'outfit_builder' ? (
-            <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl p-4 border border-gray-200">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">✨</span>
-                <h3 className="text-lg font-semibold text-gray-800">Outfit Builder</h3>
-              </div>
-              <p className="text-gray-600 text-sm mb-4">
-                I'll help you create the perfect look! Just tell me about your occasion, budget, or style preferences.
-              </p>
-              <div className="space-y-2">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Try asking:</p>
-                {[
-                  "Casual weekend outfit under €200",
-                  "Date night look for fancy restaurant",
-                  "Professional outfit for important meeting",
-                  "Summer streetwear fit"
-                ].map((suggestion, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      handleInternalQuickAction(suggestion);
-                    }}
-                    className="block w-full text-left px-3 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+        {/* OUTFIT BUILDER MODE: Show only the outfit builder, no chat messages */}
+        {mode === 'outfit_builder' ? (
+          <div className="flex flex-col h-full">
+            <AgenticOutfitBuilder
+              streamEvents={agenticEvents}
+              isActive={true}
+              uploadedImage={uploadedImage}
+              onTriggerImageUpload={onTriggerImageUpload}
+              onBrandSelect={async (brand) => {
+                // Trigger outfit building when brand is selected
+                // This replaces the old auto-start or text-based start
+                console.log("🎨 Brand selected:", brand);
+
+                const sessionId = guestSessionId ?? ensureGuestSessionId();
+                const genderTerm = "outfit"; // We could track gender state here if needed, but backend handles context
+                // Or we can construct a prompt:
+                const prompt = brand
+                  ? `Build me a ${brand} outfit`
+                  : `Build me a complete outfit`;
+
+                // If brand is null (All Brands), we just proceed without a specific brand filter
+                // But we pass the 'brand' param to the API explicitly so it knows to filter if present
+
+                await sendStreamingQuery(
+                  prompt,
+                  isSignedIn && user ? user.id : undefined,
+                  sessionId,
+                  'outfit_builder', // sessionType
+                  undefined, // imageUrl
+                  undefined, // imageData
+                  brand      // brand filter
+                );
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            {/* CHAT MODE: Show personalized greeting when no messages */}
+            {messages.length === 0 && !isStreamingProgress && (
+              <PersonalizedGreeting onQuickAction={handleInternalQuickAction} />
+            )}
+
+            {messages.map((m) => {
+              const isUser = m.role === "user";
+
+              const cartMeta = isCartProposalMeta(m.meta)
+                ? (m.meta as CartProposalMeta)
+                : undefined;
+              const recMeta = isRecommendationsMeta(m.meta)
+                ? (m.meta as RecommendationsMeta)
+                : undefined;
+              // Week 4: Extract new metadata
+              const checkoutMeta = isCheckoutMeta(m.meta)
+                ? (m.meta as CheckoutReadyMeta)
+                : undefined;
+              const orderMeta = isOrderHistoryMeta(m.meta)
+                ? (m.meta as OrderHistoryMeta)
+                : undefined;
+              const emailMeta = isEmailConfirmationMeta(m.meta)
+                ? (m.meta as EmailConfirmationMeta)
+                : undefined;
+
+              return (
+                <div
+                  key={m.id}
+                  className={`flex ${isUser ? "flex-col items-end" : "items-start gap-2"} animate-in fade-in slide-in-from-bottom-4 duration-300`}
+                >
+                  {/* Bot Avatar - Left side, top aligned, smaller */}
+                  {!isUser && (
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center mt-1">
+                      <span className="text-white text-[10px] font-bold">B</span>
+                    </div>
+                  )}
+
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed overflow-hidden ${isUser
+                      ? "bg-gray-900 text-white font-medium shadow-md"
+                      : "bg-white border border-gray-200 shadow-sm text-gray-700"
+                      }`}
                   >
-                    "{suggestion}"
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <PersonalizedGreeting onQuickAction={handleInternalQuickAction} />
-          )
-        )}
+                    {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
 
-        {messages.map((m) => {
-          const isUser = m.role === "user";
-
-          const cartMeta = isCartProposalMeta(m.meta)
-            ? (m.meta as CartProposalMeta)
-            : undefined;
-          const recMeta = isRecommendationsMeta(m.meta)
-            ? (m.meta as RecommendationsMeta)
-            : undefined;
-          // Week 4: Extract new metadata
-          const checkoutMeta = isCheckoutMeta(m.meta)
-            ? (m.meta as CheckoutReadyMeta)
-            : undefined;
-          const orderMeta = isOrderHistoryMeta(m.meta)
-            ? (m.meta as OrderHistoryMeta)
-            : undefined;
-          const emailMeta = isEmailConfirmationMeta(m.meta)
-            ? (m.meta as EmailConfirmationMeta)
-            : undefined;
-
-          return (
-            <div
-              key={m.id}
-              className={`flex ${isUser ? "flex-col items-end" : "items-start gap-2"} animate-in fade-in slide-in-from-bottom-4 duration-300`}
-            >
-              {/* Bot Avatar - Left side, top aligned, smaller */}
-              {!isUser && (
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center mt-1">
-                  <span className="text-white text-[10px] font-bold">B</span>
-                </div>
-              )}
-
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed overflow-hidden ${isUser
-                  ? "bg-gray-900 text-white font-medium shadow-md"
-                  : "bg-white border border-gray-200 shadow-sm text-gray-700"
-                  }`}
-              >
-                {/* Phase 1: Old streaming thinking pills removed - now using EnhancedThinking component below */}
-
-                {/* Phase 1: Show enhanced thinking if available */}
-                {/* ✨ BUBBLES CHANGE: Hiding thinking details in chat, only shown in header pill */}
-                {/*
+                    {/* Phase 1: Show enhanced thinking if available */}
+                    {/* ✨ BUBBLES CHANGE: Hiding thinking details in chat, only shown in header pill */}
+                    {/*
                 {recMeta && (recMeta.thinking_events || recMeta.tools_used) && (
                   <EnhancedThinking
                     thinking_events={recMeta.thinking_events}
@@ -1150,219 +1336,280 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
                 )}
                 */}
 
-                {/* Show content (answer text) always */}
-                {m.content && <p className="whitespace-pre-wrap font-normal">{m.content}</p>}
+                    {/* VISION: Show uploaded image preview in bubble if present */}
+                    {m.imageUrl && (
+                      <div className="mb-3 rounded-lg overflow-hidden border border-gray-100 shadow-sm bg-gray-50/50">
+                        <img
+                          src={m.imageUrl}
+                          alt="Fashion reference"
+                          className="max-h-60 w-full object-contain mx-auto"
+                        />
+                      </div>
+                    )}
 
-                {/* Week 4: Fallback for original thinking steps if no enhanced thinking */}
-                {/*
+                    {/* ✨ PHASE 3: Virtual Try-On Image (Rendered outfit on user) */}
+                    {recMeta?.vto_image_url && (
+                      <div className="mb-4 rounded-xl overflow-hidden border-2 border-emerald-100 shadow-xl bg-emerald-50 group relative">
+                        <div className="absolute top-2 left-2 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-[10px] text-white font-bold uppercase tracking-wider z-10 flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Virtual Try-On
+                        </div>
+                        <img
+                          src={recMeta.vto_image_url}
+                          alt="Virtual Preview"
+                          className="w-full h-auto object-cover hover:scale-105 transition-transform duration-700"
+                        />
+                      </div>
+                    )}
+
+                    {/* Show content (answer text) always */}
+                    {m.content && <p className="whitespace-pre-wrap font-normal">{m.content}</p>}
+
+                    {/* Week 4: Fallback for original thinking steps if no enhanced thinking */}
+                    {/*
                 {!recMeta?.thinking_events && !recMeta?.tools_used &&
                   recMeta?.thinking_steps && recMeta.thinking_steps.length > 0 && (
                     <AgentThinkingSteps steps={recMeta.thinking_steps} />
                   )}
                 */}
 
-                {/* Recommendations - hide in outfit_builder mode (shown in OutfitCanvas) */}
-                {/* Round 3: Added mt-4 for better separation */}
-                {recMeta?.items && recMeta.items.length > 0 && mode !== 'outfit_builder' && (
-                  <div className="mt-4">
-                    <ProductCarousel items={recMeta.items} />
-                  </div>
-                )}
+                    {/* Recommendations - show ONLY if not an outfit response */}
+                    {/* Outfits are displayed in the Outfit Builder tab, not as carousels in chat */}
+                    {recMeta?.items && recMeta.items.length > 0 && (() => {
+                      // Detect if this is an outfit response (should not show carousel)
+                      const contentLower = m.content?.toLowerCase() || '';
+                      const isOutfitContent = contentLower.includes('built a complete outfit') ||
+                        contentLower.includes('complete outfit for you') ||
+                        contentLower.includes("i've built") ||
+                        contentLower.includes('your outfit is ready') ||
+                        contentLower.includes('€0.00 total') ||
+                        contentLower.includes('curated outfit') ||
+                        contentLower.includes('look 1') ||
+                        contentLower.includes('3 outfits');
 
-                {/* cart proposal confirm / cancel */}
-                {cartMeta && !cartMeta.confirmed && !cartMeta.cancelled && (
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      className="px-3 py-1 text-xs rounded-full bg-emerald-500 text-black hover:bg-emerald-400 transition"
-                      onClick={() => handleConfirmCartProposal(m.id)}
-                    >
-                      Add to cart
-                    </button>
-                    <button
-                      className="px-3 py-1 text-xs rounded-full bg-neutral-700 text-neutral-100 hover:bg-neutral-600 transition"
-                      onClick={() => handleCancelCartProposal(m.id)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
+                      // Only show carousel for regular product recommendations, not outfits
+                      if (isOutfitContent) return null;
 
-                {/* Week 4: Checkout choice buttons */}
-                {checkoutMeta && (
-                  <div className="mt-3 space-y-2">
-                    <button
-                      onClick={() => window.location.href = (checkoutMeta.checkoutPageUrl || '/checkoutpage')}
-                      className="block w-full px-4 py-2 text-center rounded-lg border border-gray-300 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                    >
-                      📋 Review Cart First
-                    </button>
-                    <button
-                      onClick={() => window.open(checkoutMeta.paymentUrl, '_blank')}
-                      className="block w-full px-4 py-2 text-center rounded-lg bg-green-500 text-white font-medium hover:bg-green-400 transition"
-                    >
-                      💳 Proceed to Payment ({checkoutMeta.currency || 'EUR'} {(checkoutMeta.total || 0).toFixed(2)})
-                    </button>
-                  </div>
-                )}
-
-                {/* Week 4: Order history */}
-                {orderMeta && orderMeta.orders && Array.isArray(orderMeta.orders) && orderMeta.orders.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {orderMeta.orders.map((order, idx) => (
-                      <div
-                        key={order.orderId}
-                        className="p-2 rounded-lg bg-neutral-700/50 border border-neutral-600"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium">Order #{order.orderId}</p>
-                            <p className="text-xs text-neutral-400">
-                              {new Date(order.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{order.currency}{order.total}</p>
-                            <p className="text-xs text-neutral-400">{order.itemCount} items</p>
-                          </div>
+                      return (
+                        <div className="mt-4">
+                          <ProductCarousel items={recMeta.items} />
                         </div>
-                        <p className="text-xs text-emerald-400 mt-1">{order.status}</p>
+                      );
+                    })()}
+
+                    {/* cart proposal confirm / cancel */}
+                    {cartMeta && !cartMeta.confirmed && !cartMeta.cancelled && (
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          className="px-3 py-1 text-xs rounded-full bg-emerald-500 text-black hover:bg-emerald-400 transition"
+                          onClick={() => handleConfirmCartProposal(m.id)}
+                        >
+                          Add to cart
+                        </button>
+                        <button
+                          className="px-3 py-1 text-xs rounded-full bg-neutral-700 text-neutral-100 hover:bg-neutral-600 transition"
+                          onClick={() => handleCancelCartProposal(m.id)}
+                        >
+                          Cancel
+                        </button>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Week 4: Checkout choice buttons */}
+                    {checkoutMeta && (
+                      <div className="mt-3 space-y-2">
+                        <button
+                          onClick={() => window.location.href = (checkoutMeta.checkoutPageUrl || '/checkoutpage')}
+                          className="block w-full px-4 py-2 text-center rounded-lg border border-gray-300 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                        >
+                          📋 Review Cart First
+                        </button>
+                        <button
+                          onClick={() => window.open(checkoutMeta.paymentUrl, '_blank')}
+                          className="block w-full px-4 py-2 text-center rounded-lg bg-green-500 text-white font-medium hover:bg-green-400 transition"
+                        >
+                          💳 Proceed to Payment ({checkoutMeta.currency || 'EUR'} {(checkoutMeta.total || 0).toFixed(2)})
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Week 4: Order history */}
+                    {orderMeta && orderMeta.orders && Array.isArray(orderMeta.orders) && orderMeta.orders.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {orderMeta.orders.map((order, idx) => (
+                          <div
+                            key={order.orderId}
+                            className="p-2 rounded-lg bg-neutral-700/50 border border-neutral-600"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium">Order #{order.orderId}</p>
+                                <p className="text-xs text-neutral-400">
+                                  {new Date(order.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-medium">{order.currency}{order.total}</p>
+                                <p className="text-xs text-neutral-400">{order.itemCount} items</p>
+                              </div>
+                            </div>
+                            <p className="text-xs text-emerald-400 mt-1">{order.status}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Week 4: Email confirmation */}
+                    {emailMeta && (
+                      <div className="mt-2 p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                        <p className="text-xs text-green-400">
+                          ✓ Email sent to {emailMeta.sentTo}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Week 6: Suggested Actions (Context-aware quick replies) */}
+                    {!isUser && m.suggestedActions && m.suggestedActions.length > 0 && (
+                      <SuggestedQueries
+                        suggestions={m.suggestedActions}
+                        onSelect={(query) => {
+                          // Auto-send by setting input and triggering submit
+                          setInput(query);
+                          // Trigger form submission after a brief delay to ensure input is set
+                          setTimeout(() => {
+                            const form = document.querySelector('form') as HTMLFormElement;
+                            form?.requestSubmit();
+                          }, 50);
+                        }}
+                        disabled={loading}
+                      />
+                    )}
                   </div>
-                )}
 
-                {/* Week 4: Email confirmation */}
-                {emailMeta && (
-                  <div className="mt-2 p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-                    <p className="text-xs text-green-400">
-                      ✓ Email sent to {emailMeta.sentTo}
-                    </p>
-                  </div>
-                )}
-
-                {/* Week 6: Suggested Actions (Context-aware quick replies) */}
-                {!isUser && m.suggestedActions && m.suggestedActions.length > 0 && (
-                  <SuggestedQueries
-                    suggestions={m.suggestedActions}
-                    onSelect={(query) => {
-                      // Auto-send by setting input and triggering submit
-                      setInput(query);
-                      // Trigger form submission after a brief delay to ensure input is set
-                      setTimeout(() => {
-                        const form = document.querySelector('form') as HTMLFormElement;
-                        form?.requestSubmit();
-                      }, 50);
-                    }}
-                    disabled={loading}
-                  />
-                )}
-              </div>
-
-              {/* Message Status - only for user messages */}
-              {isUser && (() => {
-                const msgIndex = messages.findIndex(msg => msg.id === m.id);
-                const hasNextBotMessage = messages.slice(msgIndex + 1).some(msg => msg.role === 'assistant');
-                const isLastMessage = msgIndex === messages.length - 1;
-                const showRead = hasNextBotMessage || (isLastMessage && isStreamingProgress);
-                // Generate timestamp for status
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
-                return (
-                  <span className="text-[10px] text-gray-400 mt-0.5 mr-1">
-                    {showRead ? 'Read' : 'Delivered'} · {timeStr}
-                  </span>
-                );
-              })()}
-            </div>
-          );
-        })}
-
-        {/* Welcome suggestions removed - PersonalizedGreeting handles the empty state */}
-
-        {/* Generic Query Thinking Indicator - shows spinning icon when not an outfit query */}
-        {isStreamingProgress && agenticEvents.length === 0 && mode !== 'outfit_builder' && (
-          <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-3 flex items-center gap-2.5">
-              {/* Spinning Icon */}
-              <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-              <span className="text-sm text-gray-500 font-medium">Thinking...</span>
-            </div>
-          </div>
-        )}
-
-        {/* Round 3: Skeleton hidden as thinking is in pill */}
-        {/* {loading && thinkingSteps.length === 0 && <LoadingSkeleton />} */}
-
-        {/* Interactive Question Options for Conversation Flow */}
-        {!isStreamingProgress && questionOptions && questionOptions.options && questionOptions.options.length > 0 && (
-          <div className="px-3 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <InteractiveQuestionOptions
-              inputType={questionOptions.input_type}
-              options={questionOptions.options}
-              allowCustom={questionOptions.allow_custom}
-              sliderConfig={questionOptions.slider_config}
-              onSelect={(value) => {
-                // Auto-send the selected value
-                setInput(value);
-                setTimeout(() => {
-                  const form = document.querySelector('form') as HTMLFormElement;
-                  form?.requestSubmit();
-                }, 50);
-              }}
-              onFocusInput={() => {
-                // Focus the main input field for custom typing
-                // Use setTimeout to ensure the DOM is ready
-                setTimeout(() => {
-                  const inputEl = document.querySelector('input[type="text"][placeholder="Write a message..."]') as HTMLInputElement;
-                  if (inputEl) {
-                    inputEl.focus();
-                    inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                }, 100);
-              }}
-              disabled={loading}
-            />
-          </div>
-        )}
-
-        {/* ✨ PHASE 6: Live Product Exploration during outfit building */}
-        {/* Only show this block when we have active outfit events (not leftover from previous query) */}
-        {/* For generic queries, the pill shows "Thinking..." - this block is outfit-specific */}
-        {(mode === 'outfit_builder' || agenticEvents.length > 0) && (
-          <div className="px-3 mb-4">
-            {mode === 'outfit_builder' ? (
-              <AgenticOutfitBuilder
-                streamEvents={agenticEvents}
-                isActive={true}
-              />
-            ) : isStreamingProgress && agenticEvents.length > 0 ? (
-              /* Only show "Building outfit" when we have CURRENT agentic events during streaming */
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm text-gray-600">Building your outfit...</span>
-              </div>
-            ) : !isStreamingProgress && agenticEvents.length > 0 ? (
-              /* Done streaming - show "Outfit Ready" notification */
-              <button
-                onClick={() => {
-                  onTabChange?.('outfit_builder');
-                  onOutfitReady?.(); // Notify parent
-                }}
-                className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
-              >
-                <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
-                  <span className="text-base">✨</span>
+                  {/* Message Status - only for user messages */}
+                  {isUser && (() => {
+                    const msgIndex = messages.findIndex(msg => msg.id === m.id);
+                    const hasNextBotMessage = messages.slice(msgIndex + 1).some(msg => msg.role === 'assistant');
+                    const isLastMessage = msgIndex === messages.length - 1;
+                    const showRead = hasNextBotMessage || (isLastMessage && isStreamingProgress);
+                    // Generate timestamp for status
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+                    return (
+                      <span className="text-[10px] text-gray-400 mt-0.5 mr-1">
+                        {showRead ? 'Read' : 'Delivered'} · {timeStr}
+                      </span>
+                    );
+                  })()}
                 </div>
-                <div className="text-left flex-1">
-                  <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
-                  <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
-                </div>
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              </button>
-            ) : null}
-          </div>
-        )}
+              );
+            })}
 
+            {/* Welcome suggestions removed - PersonalizedGreeting handles the empty state */}
+
+            {/* Generic Query Thinking Indicator - shows spinning icon when not an outfit query */}
+            {isStreamingProgress && agenticEvents.length === 0 && (mode as string) !== 'outfit_builder' && (
+              <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-3 flex items-center gap-2.5">
+                  {/* Spinning Icon */}
+                  <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                  <span className="text-sm text-gray-500 font-medium">Thinking...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Round 3: Skeleton hidden as thinking is in pill */}
+            {/* {loading && thinkingSteps.length === 0 && <LoadingSkeleton />} */}
+
+            {/* Interactive Question Options for Conversation Flow */}
+            {!isStreamingProgress && questionOptions && questionOptions.options && questionOptions.options.length > 0 && (
+              <div className="px-3 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <InteractiveQuestionOptions
+                  inputType={questionOptions.input_type}
+                  options={questionOptions.options}
+                  allowCustom={questionOptions.allow_custom}
+                  sliderConfig={questionOptions.slider_config}
+                  onSelect={(value) => {
+                    // Auto-send the selected value
+                    setInput(value);
+                    setTimeout(() => {
+                      const form = document.querySelector('form') as HTMLFormElement;
+                      form?.requestSubmit();
+                    }, 50);
+                  }}
+                  onFocusInput={() => {
+                    // Focus the main input field for custom typing
+                    // Use setTimeout to ensure the DOM is ready
+                    setTimeout(() => {
+                      const inputEl = document.querySelector('input[type="text"][placeholder="Write a message..."]') as HTMLInputElement;
+                      if (inputEl) {
+                        inputEl.focus();
+                        inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }}
+                  disabled={loading}
+                />
+              </div>
+            )}
+
+            {/* ✨ Chat mode: Show outfit notification when valid candidates exist AND we are in an outfit building context */}
+            {(() => {
+              // Check if we have actual found candidates
+              const hasValidCandidates = Object.values(outfitCategories).some(c => c.status === 'found' && c.candidates.length > 0);
+              // Also check if we have agentic events that imply building (fallback)
+              const hasBuildingEvents = agenticEvents.length > 0;
+
+              // Logic: show if we have events (actively building) OR if we have valid candidates (finished building)
+              const shouldShow = (hasBuildingEvents || hasValidCandidates) && !questionOptions;
+
+              return shouldShow && (
+                <div className="px-3 mb-4">
+                  {isStreamingProgress ? (
+                    /* Show "Building outfit" when streaming */
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-200">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-sm text-gray-600">Building your outfit...</span>
+                    </div>
+                  ) : (
+                    /* Done streaming - show "Outfit Ready" notification */
+                    /* Done streaming - show "Outfit Ready" notification */
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          onTabChange?.('outfit_builder');
+                          onOutfitReady?.();
+                        }}
+                        className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-3 hover:bg-emerald-100 transition-colors group"
+                      >
+                        <div className="h-8 w-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                          <span className="text-base">✨</span>
+                        </div>
+                        <div className="text-left flex-1">
+                          <p className="font-medium text-emerald-900 text-sm">Outfit Ready!</p>
+                          <p className="text-xs text-emerald-600">Tap to view in Outfit Builder</p>
+                        </div>
+                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      </button>
+
+                      {/* View Candidates Button */}
+                      <button
+                        onClick={() => setIsCandidatePanelOpen(true)}
+                        className="w-full py-1.5 text-xs text-emerald-600 font-medium hover:text-emerald-700 hover:underline flex items-center justify-center gap-1"
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Review Search Candidates
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+
+            {/* Scroll Anchor */}
+            <div ref={messagesEndRef} />
+          </>
+        )}
 
       </div>
 
@@ -1379,7 +1626,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
         />
         <button
           type="submit"
-          disabled={!input.trim()}
+          disabled={!input?.trim()}
           className="px-3 py-1 text-sm rounded-full bg-black text-white disabled:opacity-40"
         >
           Send
@@ -1387,16 +1634,25 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       </form>
 
       {/* Week 4: Toast notifications */}
-      {
-        toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )
-      }
-    </div >
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Candidate Exploration Panel - Visible in Chat Mode */}
+      <CandidateExplorationPanel
+        isOpen={isCandidatePanelOpen}
+        onClose={() => {
+          setIsCandidatePanelOpen(false);
+          manuallyClosedRef.current = true; // Prevent auto-reopen
+        }}
+        categories={outfitCategories}
+        isBuilding={isStreamingProgress}
+      />
+    </div>
   );
 }
 

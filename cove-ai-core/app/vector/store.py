@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import logging
 import json
 import uuid
 from time import time
@@ -78,15 +79,10 @@ async def search_hybrid(
     query: str,
     kind: str,
     top_k: int = 6,
+    filters: Optional[Dict[str, Any]] = None
 ) -> List[Dict[str, Any]]:
     """
     Async wrapper for TRUE hybrid search (BM25 + Vector + RRF).
-    
-    This is the main search entrypoint used throughout the app.
-    1. Generates embedding asynchronously.
-    2. Runs hybrid search (BM25 + Vector + RRF) in threadpool.
-    
-    Returns results with RRF-fused scores for best accuracy.
     """
     # 1. Async embedding
     q_emb = await async_embed_query(query)
@@ -97,17 +93,13 @@ async def search_hybrid(
         query=query, 
         q_emb=q_emb, 
         kind=kind, 
-        top_k=top_k
+        top_k=top_k,
+        filters=filters
     )
 
-def _search_hybrid_rrf_sync(query: str, q_emb: List[float], kind: str, top_k: int) -> List[Dict[str, Any]]:
+def _search_hybrid_rrf_sync(query: str, q_emb: List[float], kind: str, top_k: int, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
     Synchronous implementation of hybrid search with RRF fusion.
-    
-    Uses industry-standard approach:
-    - BM25 for keyword matching
-    - Vector for semantic similarity  
-    - RRF (k=60) for fusion
     """
     from app.vector.hybrid_search import search_hybrid_rrf, search_results_to_dict
     
@@ -120,7 +112,8 @@ def _search_hybrid_rrf_sync(query: str, q_emb: List[float], kind: str, top_k: in
             top_k=top_k,
             bm25_k=20,      # Candidate pool for BM25
             vector_k=20,     # Candidate pool for vector
-            rrf_constant=60  # Industry standard
+            rrf_constant=60,  # Industry standard
+            filters=filters
         )
         
         return search_results_to_dict(results)
@@ -129,33 +122,39 @@ async def search_keyword(
     query: str,
     kind: str = "product",
     top_k: int = 6,
+    filters: Optional[Dict[str, Any]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Async wrapper for keyword search.
     """
-    return await run_in_threadpool(_search_keyword_sync, query=query, kind=kind, top_k=top_k)
+    return await run_in_threadpool(_search_keyword_sync, query=query, kind=kind, top_k=top_k, filters=filters)
 
-def _search_keyword_sync(query: str, kind: str, top_k: int) -> List[Dict[str, Any]]:
+def _search_keyword_sync(query: str, kind: str, top_k: int, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     q = (query or "").strip()
     if not q:
         return []
 
+    from app.vector.hybrid_search import _build_sql_filters
+    filter_sql, filter_params = _build_sql_filters(filters or {})
+
     with get_conn_sync() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """
+                f"""
                 SELECT title, text, COALESCE(url, meta->>'url', '') AS url,
                        ts_rank(
                            setweight(to_tsvector('simple', COALESCE(title,'')), 'A') ||
                            setweight(to_tsvector('simple', COALESCE(text,'')),  'B'),
                            plainto_tsquery('simple', %s)
-                       ) AS score
+                       ) AS score,
+                       meta
                 FROM ai_core.docs
                 WHERE kind = %s
+                {filter_sql}
                 ORDER BY score DESC
                 LIMIT %s
                 """,
-                (q, kind, top_k),
+                (q, kind, *filter_params, top_k),
             )
             rows = cur.fetchall()
 
@@ -165,6 +164,7 @@ def _search_keyword_sync(query: str, kind: str, top_k: int) -> List[Dict[str, An
             "text": r[1] or "",
             "url": r[2] or "",
             "score": float(r[3]) if r[3] is not None else 0.0,
+            "meta": r[4],
         }
         for r in rows
     ]
@@ -280,13 +280,14 @@ def connect() -> psycopg.Connection:
 # OUTFIT CATEGORY SEARCH (v2 Architecture)
 # ---------------------------------------------------------------------
 
-async def search_by_outfit_category(
+async def search_by_outfit_category_v2(
     outfit_category: str,
     style_query: str = "",
     gender: Optional[str] = None,
     price_max: Optional[float] = None,
     exclude_slugs: Optional[List[str]] = None,
     top_k: int = 10,
+    brand: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Category-constrained vector search for outfit building.
@@ -301,6 +302,7 @@ async def search_by_outfit_category(
         price_max: Optional maximum price filter
         exclude_slugs: Products to exclude (for generating multiple unique outfits)
         top_k: Number of results to return
+        brand: Optional brand filter to restrict search to specific brands
         
     Returns:
         List of product dicts sorted by vector similarity
@@ -310,7 +312,17 @@ async def search_by_outfit_category(
     
     # Generate embedding for style context
     query_text = f"{style_query} {outfit_category}" if style_query else outfit_category
-    q_emb = await async_embed_query(query_text)
+    
+    log.error(f"[STORE v2 DEBUG] async_embed_query: {async_embed_query}, type: {type(async_embed_query)}")
+    
+    call_res = async_embed_query(query_text)
+    log.error(f"[STORE v2 DEBUG] call_res type: {type(call_res)}")
+    
+    if call_res is None:
+         log.error("[STORE v2 DEBUG] CRITICAL: async_embed_query returned None!")
+         q_emb = []
+    else:
+         q_emb = await call_res
     
     # Run constrained search in threadpool
     return await run_in_threadpool(
@@ -321,6 +333,7 @@ async def search_by_outfit_category(
         price_max=price_max,
         exclude_slugs=exclude_slugs or [],
         top_k=top_k,
+        brand=brand
     )
 
 
@@ -331,6 +344,7 @@ def _search_by_category_sync(
     price_max: Optional[float],
     exclude_slugs: List[str],
     top_k: int,
+    brand: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Synchronous category-constrained ANN search."""
     import logging
@@ -352,14 +366,25 @@ def _search_by_category_sync(
             
             # Gender filter (allow unisex to match any)
             if gender:
-                gender_normalized = {"male": "men", "men": "men", "female": "women", "women": "women"}.get(gender.lower(), gender.lower())
-                sql += " AND (LOWER(meta->>'gender') = %s OR LOWER(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)"
-                params.append(gender_normalized)
+                g = gender.lower()
+                target_genders = [g]
+                if g in ("male", "man", "men", "mens"):
+                    target_genders = ["male", "men", "man", "mens"]
+                elif g in ("female", "woman", "women", "womens"):
+                    target_genders = ["female", "women", "woman", "womens"]
+                    
+                sql += " AND (lower(meta->>'gender') = ANY(%s) OR lower(meta->>'gender') = 'unisex' OR meta->>'gender' IS NULL)"
+                params.append(target_genders)
             
             # Price filter
             if price_max:
                 sql += " AND (meta->>'price')::float <= %s"
                 params.append(price_max)
+            
+            # Brand filter (PREMIUM PILOT)
+            if brand:
+                sql += " AND lower(meta->>'brand') = %s"
+                params.append(brand.lower())
             
             # Exclude already-used items
             if exclude_slugs:
@@ -386,6 +411,7 @@ def _search_by_category_sync(
                     "price": (r["meta"] or {}).get("price"),
                     "imageUrl": (r["meta"] or {}).get("imageUrl") or (r["meta"] or {}).get("image"),
                     "color": (r["meta"] or {}).get("color"),
+                    "brand": (r["meta"] or {}).get("brand"),
                     "gender": (r["meta"] or {}).get("gender"),
                     "similarity": r["similarity"],
                     "meta": r["meta"],
@@ -530,12 +556,12 @@ def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]
     """
     now = time()
     if (now - _vocab_cache["t"] < ttl_sec) and _vocab_cache["colors"]:
-        print(f"📚 [VOCAB] Using cached vocab (age: {now - _vocab_cache['t']:.1f}s)")
+        log.debug("📚 [VOCAB] Using cached vocab (age: %.1fs)", now - _vocab_cache["t"])
         return _vocab_cache
     
-    print(f"📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...")
+    log.debug("📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...")
 
-    colors, types = set(), set()
+    colors, types, brands = set(), set(), set()
     with conn.cursor() as cur:
         # Colors from ai_core.docs meta->'colors' array (colorName field)
         # This is the correct location based on schema
@@ -562,8 +588,23 @@ def catalog_vocab(conn: psycopg.Connection, ttl_sec: int = 60) -> Dict[str, Any]
             """
         )
         types |= {r[0] for r in cur.fetchall() if r[0]}
+        
+        # Brands from meta->>'brand'
+        cur.execute(
+            """
+            SELECT DISTINCT lower(meta->>'brand')
+            FROM ai_core.docs
+            WHERE kind = 'product'
+              AND meta->>'brand' IS NOT NULL
+              AND meta->>'brand' != ''
+            """
+        )
+        brands |= {r[0] for r in cur.fetchall() if r[0]}
 
-    print(f"📚 [VOCAB] Loaded {len(colors)} colors from ai_core.docs: {sorted(colors)}")
-    print(f"📚 [VOCAB] Loaded {len(types)} types from ai_core.docs: {sorted(types)}")
-    _vocab_cache.update({"t": now, "colors": colors, "types": types})
+    log.debug("📚 [VOCAB] Loaded %s colors from ai_core.docs", len(colors))
+    log.debug("📚 [VOCAB] Loaded %s types from ai_core.docs", len(types))
+    log.debug("📚 [VOCAB] Loaded %s brands from ai_core.docs", len(brands))
+    _vocab_cache.update({"t": now, "colors": colors, "types": types, "brands": brands})
     return _vocab_cache
+# Local logger for structured output
+log = logging.getLogger("cove.vector")

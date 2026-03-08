@@ -9,7 +9,7 @@ Implements:
 - Observability with Metrics
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, AsyncGenerator
 from dataclasses import dataclass, field
 import time
 import logging
@@ -115,6 +115,11 @@ class MultiAgentOrchestrator:
         Returns workflow name or None (if general chat).
         """
         query_lower = query.lower()
+        
+        # 0. Multimodal Priority: If image present, route to multimodal
+        if context.get("imageUrl") or context.get("imageData"):
+            log.info("🖼️ Image detected in context, routing to multimodal_search")
+            return "multimodal_search"
         
         # 1. Fast Path: Keyword Shortcuts
         for workflow_name, workflow in self.workflows.items():
@@ -238,12 +243,13 @@ Rules:
         self,
         workflow: Dict[str, Any],
         state: WorkflowState,
-        workflow_name: str
+        workflow_name: str,
+        stream_callback: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Execute workflow without streaming (standard mode)."""
         try:
             # Execute agents with checkpointing
-            await self._execute_with_checkpoints(workflow, state)
+            await self._execute_with_checkpoints(workflow, state, stream_callback)
             
             # Synthesize final result
             final = self._synthesize_results(state, workflow_name)
@@ -312,13 +318,31 @@ Rules:
         self,
         workflow: Dict[str, Any],
         state: WorkflowState
-    ):
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """
+        Execute workflow steps in streaming mode.
+        Wrapper around _execute_steps that ensures agentic events are captured.
+        """
+        # We pass a dummy callback to enable the internal event queueing 
+        # mechanism in _execute_steps for agents like outfit_builder
+        async def _noop_callback(event):
+            pass
+            
+        steps = workflow.get("steps", [])
+        async for update in self._execute_steps(steps, state, stream_callback=_noop_callback):
+            yield update
+
+    async def _execute_steps(
+        self, 
+        steps_config: List[Dict[str, Any]], 
+        state: WorkflowState,
+        stream_callback: Optional[Any] = None
+    ) -> AsyncGenerator[Dict[str, Any], None]:
         """
         Execute workflow with streaming progress updates.
         Yields progress events as agents complete.
         ✨ PHASE 6: Now also yields agentic exploration events (category_start, category_candidates, item_selected)
         """
-        steps_config = workflow.get("steps", [])
         
         # Parse steps from config
         steps = [
@@ -343,6 +367,15 @@ Rules:
             log.info(f"   Group {i}/{total_groups}: {agent_names}")
             
             # Yield progress update
+            if stream_callback:
+                await stream_callback({
+                    "type": "progress",
+                    "step": i,
+                    "total": total_groups,
+                    "agents": agent_names,
+                    "status": f"Running {', '.join(agent_names)}..."
+                })
+            
             yield {
                 "type": "progress",
                 "step": i,
@@ -360,17 +393,25 @@ Rules:
                     step = group_steps[0]
                     
                     # ✨ PHASE 6: Create async queue for agentic events (stylist AND outfit_builder)
-                    if step.agent in ("stylist", "outfit_builder"):
+                    if step.agent in ("stylist", "outfit_builder") and stream_callback:
                         agentic_queue = asyncio.Queue()
                         
-                        async def agentic_callback(event):
+                        # ✨ ROBUST: Safe Async Callback Wrapper
+                        # Explicitly defined as async def to guarantee a Coroutine is returned.
+                        async def safe_agentic_callback_wrapper(event):
                             """Callback for stylist/outfit_builder to emit exploration events"""
-                            await agentic_queue.put(event)
-                        
+                            try:
+                                await agentic_queue.put(event)
+                            except Exception as e:
+                                # Start a background logger or just log robustly
+                                # We must NOT propagate exceptions that would crash the await
+                                logging.getLogger("cove.orchestrator").warning(f"Failed to enqueue agentic event: {e}")
+
                         # Run agent execution in background
                         async def run_agent():
                             try:
-                                await self._execute_agent_step(step, state, stream_callback=agentic_callback)
+                                # Pass safer wrapper
+                                await self._execute_agent_step(step, state, stream_callback=safe_agentic_callback_wrapper)
                             finally:
                                 # Ensure we ALWAYS signal completion, even if agent crashes/times out
                                 await agentic_queue.put(None)
@@ -381,7 +422,14 @@ Rules:
                         while True:
                             event = await agentic_queue.get()
                             if event is None:
+                                log.info("📤 AGENTIC QUEUE: Received completion signal (None)")
                                 break  # Agent done
+                            log.info(f"📤 AGENTIC QUEUE yielding event: {event.get('event_type')}")
+                            if stream_callback:
+                                await stream_callback({
+                                    "type": "agentic_event",
+                                    **event
+                                })
                             yield {
                                 "type": "agentic_event",
                                 **event
@@ -390,14 +438,13 @@ Rules:
                         # Wait for agent to fully complete
                         await agent_task
                     else:
-                        # Sequential execution (non-streaming agent)
-                        await self._execute_agent_step(group_steps[0], state)
+                        # Sequential execution (non-streaming agent or no stream_callback)
+                        await self._execute_agent_step(group_steps[0], state, stream_callback)
                 else:
                     # Parallel execution
                     log.info(f"   ⚡ Executing {len(group_steps)} agents in parallel")
-                    await self._execute_parallel_steps(group_steps, state)
+                    await self._execute_parallel_steps(group_steps, state, stream_callback)
                 
-                # Yield completion update
                 # Yield completion update
                 step_results = {}
                 for name in agent_names:
@@ -407,6 +454,15 @@ Rules:
                     else:
                         step_results[name] = res
                 
+                if stream_callback:
+                    await stream_callback({
+                        "type": "step_complete",
+                        "step": i,
+                        "agents": agent_names,
+                        "results": step_results,
+                        "status": f"Completed {', '.join(agent_names)}"
+                    })
+                
                 yield {
                     "type": "step_complete",
                     "step": i,
@@ -414,6 +470,19 @@ Rules:
                     "results": step_results,
                     "status": f"Completed {', '.join(agent_names)}"
                 }
+                
+                # ✨ EARLY EXIT: Check if any agent requested confirmation
+                should_halt = False
+                for name in agent_names:
+                    res = self._get_result_dict(state.agent_results.get(name))
+                    data = res.get("data", {})
+                    if data.get("needs_confirmation"):
+                        log.info(f"🛑 Halting workflow for confirmation request by {name}")
+                        should_halt = True
+                        break
+                
+                if should_halt:
+                    break
                     
             except Exception as e:
                 # Roll back to checkpoint on error
@@ -421,6 +490,14 @@ Rules:
                 self._rollback_to_checkpoint(state, checkpoint)
                 
                 # Yield error update
+                if stream_callback:
+                    await stream_callback({
+                        "type": "step_error",
+                        "step": i,
+                        "agents": agent_names,
+                        "error": str(e)
+                    })
+                
                 yield {
                     "type": "step_error",
                     "step": i,
@@ -439,7 +516,8 @@ Rules:
     async def _execute_with_checkpoints(
         self,
         workflow: Dict[str, Any],
-        state: WorkflowState
+        state: WorkflowState,
+        stream_callback: Optional[Any] = None
     ):
         """
         Execute agents with checkpointing for resilience.
@@ -474,11 +552,24 @@ Rules:
             try:
                 if len(group_steps) == 1:
                     # Sequential execution
-                    await self._execute_agent_step(group_steps[0], state)
+                    await self._execute_agent_step(group_steps[0], state, stream_callback)
                 else:
                     # Parallel execution
                     log.info(f"   ⚡ Executing {len(group_steps)} agents in parallel")
-                    await self._execute_parallel_steps(group_steps, state)
+                    await self._execute_parallel_steps(group_steps, state, stream_callback)
+                
+                # ✨ EARLY EXIT: Check if any agent requested confirmation
+                should_halt = False
+                for step in group_steps:
+                    res = self._get_result_dict(state.agent_results.get(step.agent))
+                    data = res.get("data", {})
+                    if data.get("needs_confirmation"):
+                        log.info(f"🛑 Halting workflow for confirmation request by {step.agent}")
+                        should_halt = True
+                        break
+                
+                if should_halt:
+                    break
                     
             except Exception as e:
                 # Roll back to checkpoint on error
@@ -509,14 +600,15 @@ Rules:
     async def _execute_parallel_steps(
         self,
         steps: List[AgentStep],
-        state: WorkflowState
+        state: WorkflowState,
+        stream_callback: Optional[Any] = None
     ):
         """
         Execute multiple agent steps in parallel (fan-out/fan-in).
         2024 Best Practice - parallel execution for speed.
         """
         tasks = [
-            self._execute_agent_step(step, state)
+            self._execute_agent_step(step, state, stream_callback)
             for step in steps
         ]
         
@@ -554,14 +646,17 @@ Rules:
                 # Build task from state
                 task = self._build_agent_task(agent_name, state)
                 
-                # ✨ PHASE 6: Pass stream_callback to stylist/builder for live exploration
+                # ✨ FIXED: Re-enable stream_callback for stylist and outfit_builder
+                # Pass stream_callback to agents that support it for real-time progress updates
+                
                 if (agent_name == "stylist" or agent_name == "outfit_builder") and stream_callback:
+                    # Pass stream_callback to streaming-capable agents
                     result = await asyncio.wait_for(
                         agent_info["handler"](task, state.context, stream_callback=stream_callback),
                         timeout=step.timeout_ms / 1000
                     )
                 else:
-                    # Execute with timeout
+                    # Standard execution for non-streaming agents
                     result = await asyncio.wait_for(
                         agent_info["handler"](task, state.context),
                         timeout=step.timeout_ms / 1000
@@ -588,6 +683,12 @@ Rules:
                     await asyncio.sleep(retry_delay)
                 else:
                     raise
+
+    def _get_result_dict(self, result: Any) -> Dict[str, Any]:
+        """Convert AgentResult or dict to standardized dict."""
+        if result and hasattr(result, "to_dict"):
+            return result.to_dict()
+        return result if isinstance(result, dict) else {}
     
     def _build_agent_task(self, agent_name: str, state: WorkflowState) -> Dict[str, Any]:
         """Build task dict for specific agent from state."""
@@ -597,22 +698,62 @@ Rules:
         }
         
         # Agent-specific task building
-        if agent_name == "stylist":
+        if agent_name == "vision" or agent_name == "fashion_analyzer":
+            return {
+                "query": state.query,
+                "imageUrl": state.context.get("imageUrl"),
+                "imageData": state.context.get("imageData")
+            }
+
+        elif agent_name == "stylist":
+            # If coming from vision/fashion analyzer, inject visual tags into query
+            analyzer_result = self._get_result_dict(state.agent_results.get("fashion_analyzer") or state.agent_results.get("vision"))
+            if analyzer_result.get("success"):
+                data = analyzer_result.get("data", {})
+                tags = data.get("search_tags") or data.get("tags", [])
+                description = data.get("core_item") or data.get("description", "")
+                vibe = data.get("vibe", "")
+                
+                if tags or vibe:
+                    log.info(f"🎨 Injecting visual DNA into stylist: {vibe} {tags}")
+                    # Prepend tags and vibe to query
+                    boosted_query = f"{state.query} style: {vibe} {', '.join(tags)} {description}".strip()
+                    return {
+                        "query": boosted_query,
+                        "budget_max": state.budget_max,
+                        "visual_context": data
+                    }
             return base_task
 
         elif agent_name == "outfit_builder":
             # Pass candidates from stylist
-            stylist_result = state.agent_results.get("stylist", {})
+            stylist_result = self._get_result_dict(state.agent_results.get("stylist"))
+            intent = stylist_result.get("data", {}).get("intent", {})
+            
+            # Prioritize context-level filters passed from agent.py
+            brand_filter = state.context.get("brand") or \
+                           intent.get("brand_filter") or \
+                           intent.get("filters", {}).get("brand")
+            
+            gender = state.context.get("gender") or \
+                     intent.get("gender") or \
+                     intent.get("filters", {}).get("gender")
+
             return {
                 "candidates": stylist_result.get("data", {}).get("candidates", {}),
-                "intent": stylist_result.get("data", {}).get("intent", {}),
+                "intent": intent,
+                # FIX: Explicitly pass style/occasion/gender for OutfitBuilder to use
+                "style": intent.get("style", "casual"),
+                "occasion": intent.get("occasion", "casual"),
+                "gender": gender, 
+                "brand_filter": brand_filter,
                 "user_preferences": stylist_result.get("data", {}).get("user_preferences", {}),
                 "budget_max": state.budget_max
             }
         
         elif agent_name == "fit":
             # Pass outfit items from builder
-            builder_result = state.agent_results.get("outfit_builder", {})
+            builder_result = self._get_result_dict(state.agent_results.get("outfit_builder"))
             return {
                 "items": builder_result.get("data", {}).get("outfit_items", []),
                 "user_size_history": state.context.get("user_size_history", {})
@@ -620,10 +761,19 @@ Rules:
         
         elif agent_name == "budget":
             # Pass outfit items from builder
-            builder_result = state.agent_results.get("outfit_builder", {})
+            builder_result = self._get_result_dict(state.agent_results.get("outfit_builder"))
             return {
                 "items": builder_result.get("data", {}).get("outfit_items", []),
                 "budget_max": state.budget_max
+            }
+        
+        elif agent_name == "vto_agent":
+            # Pass final outfit items from builder
+            builder_result = self._get_result_dict(state.agent_results.get("outfit_builder"))
+            return {
+                "items": builder_result.get("data", {}).get("outfit_items", []),
+                "imageUrl": state.context.get("imageUrl"),
+                "imageData": state.context.get("imageData")
             }
         
         return base_task
@@ -651,19 +801,42 @@ Rules:
         Synthesize final result from all agent outputs.
         Combines stylist items + fit sizes + budget optimization.
         """
-        stylist_result = state.agent_results.get("stylist", {})
-        fit_result = state.agent_results.get("fit", {})
-        budget_result = state.agent_results.get("budget", {})
+        def get_res_dict(name):
+            res = state.agent_results.get(name)
+            if res and hasattr(res, "to_dict"):
+                return res.to_dict()
+            return res or {}
+
+        stylist_result = get_res_dict("stylist")
+        fit_result = get_res_dict("fit")
+        budget_result = get_res_dict("budget")
         
         # Check if minimum agents succeeded
-        success_count = sum(1 for r in state.agent_results.values() if r.get("success"))
+        success_count = 0
+        for r in state.agent_results.values():
+            is_success = r.success if hasattr(r, "success") else r.get("success")
+            if is_success:
+                success_count += 1
+        
         min_required = 2  # From config
         
         success = success_count >= min_required
         
-        
+        # ✨ CONFIRMATION CHECK: If any agent asked for info, bubble it up immediately
+        if stylist_result.get("data", {}).get("needs_confirmation"):
+            return {
+                "success": True,
+                "workflow": workflow_name,
+                "outfit_items": [],
+                "needs_confirmation": True,
+                "question": stylist_result["data"]["question"],
+                "options": stylist_result["data"]["options"],
+                "reasoning": stylist_result["reasoning"],
+                "agent_timings": state.agent_timings
+            }
         # Build final outfit
-        builder_result = state.agent_results.get("outfit_builder", {})
+        builder_result = get_res_dict("outfit_builder")
+        vto_result = get_res_dict("vto_agent")
         
         # Prefer Builder items, fallback to Stylist (legacy)
         outfit_items = builder_result.get("data", {}).get("outfit_items") or \
@@ -713,7 +886,8 @@ Rules:
             "reasoning": reasoning,
             "confidence": self._calculate_overall_confidence(state),
             "agent_timings": state.agent_timings,
-            "errors": state.errors
+            "errors": state.errors,
+            "vto_image_url": vto_result.get("data", {}).get("vto_image_url")
         }
     
     def _enrich_items_with_sizes(
@@ -753,8 +927,10 @@ Rules:
         confidences = []
         
         for agent_name, result in state.agent_results.items():
-            if result.get("success"):
-                confidences.append(result.get("confidence", 0.5))
+            is_success = result.success if hasattr(result, "success") else result.get("success")
+            if is_success:
+                confidence = result.confidence if hasattr(result, "confidence") else result.get("confidence", 0.5)
+                confidences.append(confidence)
         
         if not confidences:
             return 0.0

@@ -18,6 +18,7 @@ from typing_extensions import Literal
 from app.vector.store import connect
 from app.vector.store import get_conn
 from app.agent.orchestrator import classify
+from app.agents.multi_agent_orchestrator import MultiAgentOrchestrator, WorkflowState
 from app.routes.rag import _parse_query_attrs  # reuse the same attrs logic as RAG
 from app.agent.filters import (
     build_filters,
@@ -77,7 +78,8 @@ from app.schemas.agent import (
     AgentItem,
     AgentStatus,
     AgentCartAddIn,
-    AgentCartAddOut
+    AgentCartAddOut,
+    VTOIn
 )
 from app.services.product import get_available_colors
 # from app.services.intent import looks_like_cart_add, get_recently_discussed_product_index
@@ -530,26 +532,8 @@ def _get_similar_types(product_type: str) -> List[str]:
         return []
 
 
-async def _call_recs_suggest(payload: Dict[str, Any]) -> Dict[str, Any]:
-
-    """
-    Wrapper around Cove's recommendations logic.
-    Uses HTTP endpoint for product recommendations.
-    """
-    # HTTP fallback (primary method for now)
-    try:
-        async with httpx.AsyncClient(timeout=120) as cx:
-            r = await cx.post(
-                f"{COVE_CORE_BASE_URL}/ai/recs/suggest",
-                json=payload,
-            )
-        if r.status_code == 200:
-            return r.json()
-        log.warning("recs.suggest non-200 %s: %s", r.status_code, r.text)
-    except Exception as e:
-        log.exception(f"recs.suggest failed: {e}")
-
-    return {}
+# ✨ REFACTORED: Use shared service to prevent circular imports
+from app.services.search_service import search_products_hybrid as _call_recs_suggest
 
 
 # --- FIT integration helpers -------------------------------------------------
@@ -910,17 +894,10 @@ async def _agent_query_impl(
     # Check if this is    # ✨ WEEK 3 DAY 2: Context-Aware Reasoning
     # Resolve intent using conversation history (handle follow-ups)
     
-    # 1. Get/Create Manager
-    from app.services.conversation_manager import get_conversation_manager
-    conv_manager = get_conversation_manager()
-    user_id = body.clerkUserId or body.guestSessionId or "anonymous"
-    
-    # 2. Add User Message to History
-    conv_manager.add_message(user_id, "user", q)
-    
-    # 3. Resolve Inteht (LLM)
-    # "Make it blue" -> "Show me blue blazers"
-    resolved_context = await conv_manager.resolve_intent(user_id, q)
+    # Resolve query using conversation context (if available)
+    from app.services.conversation_context import resolve_query_with_context
+    resolved_context = await resolve_query_with_context(body, q)
+
     resolved_query = resolved_context.get("resolved_query", q)
     modification_type = resolved_context.get("modification_type", "new_topic")
     
@@ -1048,6 +1025,35 @@ async def _agent_query_impl(
         classification["entities"]["_visual_vibe"] = search_strategy.visual_vibe
         
         log.info(f"🧠 [STRATEGY] Applied Strategy: {search_strategy.semantic_query}")
+
+        # ✨ VITAL FIX: Inject gathered context (from conversation flow) into entities
+        # This ensures that explicit answers (e.g. "Men", "$300") override AI guesses
+        gathered = getattr(body, "_gathered_context", {})
+        if gathered:
+            log.info(f"💉 Injecting gathered context into classification: {gathered}")
+            if "entities" not in classification:
+                classification["entities"] = {}
+                
+            # Map gathered keys to entity keys
+            if gathered.get("gender"):
+                classification["entities"]["gender"] = gathered["gender"].lower()
+            
+            if gathered.get("budget_max"):
+                # Handle potential string/float difference
+                try:
+                    classification["entities"]["price_max"] = float(gathered["budget_max"])
+                except Exception as e:
+                    log.debug("Failed to parse budget_max from gathered context: %s", e)
+            
+            if gathered.get("occasion"):
+                classification["entities"]["occasion"] = gathered["occasion"]
+                
+            if gathered.get("style"):
+                original_style = classification["entities"].get("style", "")
+                # Append if exists to mix signals, or just overwrite? Overwrite is safer for explicit choice.
+                classification["entities"]["style"] = gathered["style"]
+            
+            log.info(f"💉 Final Entities after Injection: {classification['entities']}")
         
     except Exception as e:
         log.error(f"❌ [STRATEGY] Translation failed, proceeding with basic classification: {e}")
@@ -1059,14 +1065,25 @@ async def _agent_query_impl(
     # This uses LLM classification instead of hardcoded patterns!
     should_skip_flow = skip_conversation_check
     is_outfit_intent = (intent == "outfit_builder" and confidence > 0.6) or body.sessionType == "outfit_builder"
+    is_multimodal_intent = bool(body.imageUrl or body.imageData)
+    
+    # Force multimodal search if image is present
+    if is_multimodal_intent:
+        log.info("🖼️ Image detected in request, prioritizing multimodal_search workflow")
+        intent = "multimodal_search"
+        confidence = 1.0
+        is_outfit_intent = False # Mutually exclusive for now to avoid confusion
     
     # SMART VAGUE QUERY DETECTION
-    # If user says "something casual for the weekend" (no explicit "outfit"/"look" keyword),
-    # skip the conversation flow and use default budget for immediate results
-    # BUT: If user explicitly opened outfit builder (sessionType), keep normal flow
+    # ...
     vague_occasion_query = False
     is_explicit_outfit_session = (body.sessionType == "outfit_builder")
     
+    # ✨ FIX: If explicit outfit session (e.g. from UI button), SKIP conversation flow and force orchestrator
+    if is_explicit_outfit_session:
+        log.info(f"⏭️  Explicit outfit_builder session - skipping conversation flow to force build")
+        should_skip_flow = True
+
     if is_outfit_intent and not should_skip_flow and not is_explicit_outfit_session:
         # Check if query contains EXPLICIT outfit keywords (as full words, not substrings)
         q_lower = q.lower()
@@ -1134,11 +1151,14 @@ async def _agent_query_impl(
                 )
     # ===== END CONVERSATION FLOW HANDLER =====
 
-    # Route outfit requests to orchestrator (if we get here, conversation is complete or skipped)
-    if is_outfit_intent:
-        workflow_name = "outfit_builder"
+    # Route to orchestrator for complex workflows
+    if is_outfit_intent or is_multimodal_intent:
+        workflow_name = "multimodal_search" if is_multimodal_intent else "outfit_builder"
         log.debug(f" 🎯 Routing to Agent Orchestrator: {workflow_name}")
-        if body.sessionType == "outfit_builder":
+        
+        if is_multimodal_intent:
+            log.info(f"🌈 Multimodal search triggered by image input")
+        elif body.sessionType == "outfit_builder":
             log.info(f"🎨 Forced outfit builder from sessionType (bypassing intent classification)")
 
         # Use outfit_builder session type for separate conversation
@@ -1167,13 +1187,16 @@ async def _agent_query_impl(
         budget_max = gathered_context.get('budget_max')  # User's explicit answer to "What's your budget?"
         log.debug(f" 💰 budget_max from context = {budget_max}")
         
+        # Load profile early for budget AND gender
+        ai_profile = None
+        if body.clerkUserId:
+            ai_profile = await _load_ai_profile(body.clerkUserId)
+
         if not budget_max:
             # Fallback to user profile
             budget_max = 500  # Default
-            if body.clerkUserId:
-                ai_profile = await _load_ai_profile(body.clerkUserId)
-                if ai_profile and ai_profile.get('budget_max'):
-                    budget_max = float(ai_profile['budget_max'])
+            if ai_profile and ai_profile.get('budget_max'):
+                budget_max = float(ai_profile['budget_max'])
         
         log.info(f"💰 Using budget: €{budget_max} (from {'conversation' if gathered_context.get('budget_max') else 'profile/default'})")
         
@@ -1200,7 +1223,9 @@ async def _agent_query_impl(
                     "budget_max": budget_max,
                     "user_size_history": {},  # Could load from profile
                     "original_query": gathered_context.get("original_query", ""),  # Preserve for gender detection
-                    "gender": gathered_context.get("gender")  # Pass explicitly extracted gender
+                    "gender": gathered_context.get("gender") or SessionStateManager.get_gender_preference(body) or (ai_profile.get("gender") if ai_profile else None), # ✨ Use resolved gender from session/profile if available
+                    "imageUrl": body.imageUrl, # ✨ VISION SUPPORT
+                    "imageData": body.imageData  # ✨ VISION SUPPORT
                 },
                 stream=True  # Enable streaming!
             ):
@@ -1286,6 +1311,20 @@ async def _agent_query_impl(
                     answer="Sorry, I couldn't build your outfit right now. Please try again!",
                     items=[]
                 )
+
+            # Check for interactive confirmation request from Orchestrator
+            if result.get("needs_confirmation"):
+                return AgentOut(
+                    kind="answer",
+                    answer=result.get("question", "I need a bit more info."),
+                    question_options={
+                        "type": "button",
+                        "options": result.get("options", []),
+                        "allow_custom": False,
+                        "key": "gender"
+                    },
+                    reasoning=result.get("reasoning", "Asking for clarification")
+                )
             
             # Track agent executions
             for agent_name, timing_ms in result.get("agent_timings", {}).items():
@@ -1294,8 +1333,19 @@ async def _agent_query_impl(
             
             # Format as AgentOut response
             outfit_items = result.get("outfit_items", [])
+            vto_url = result.get("vto_image_url") # ✨ CHECK FOR VTO RESULT
             
             if not outfit_items:
+                # Special Case: Pure VTO workflow might not return outfit_items
+                if vto_url:
+                    return AgentOut(
+                        kind="answer",
+                        answer=result.get("reasoning", "Here is your virtual try-on preview!"),
+                        items=[],
+                        vto_image_url=vto_url,
+                        debug={"orchestrator": workflow_name}
+                    )
+                
                 # No items found, fallback to explanation
                 return AgentOut(
                     kind="answer",
@@ -1315,7 +1365,7 @@ async def _agent_query_impl(
                 agent_items.append(AgentItem(
                     slug=product.get("slug", ""),
                     title=product.get("title", "Unknown"),
-                    url=product.get("url", f"/product/{product.get('slug', '')}"),  # Required field!
+                    url=product.get("url") or f"/product/{product.get('slug', '')}",  # Required field!
                     score=product.get("score", 0.0),
                     reason=item.get("reason", ""),
                     type=product.get("type", ""),
@@ -1363,6 +1413,7 @@ async def _agent_query_impl(
                 answer=answer,
                 items=agent_items,
                 reasoning=" ".join(reasoning_parts),
+                vto_image_url=vto_url, # ✨ PASS VTO URL
                 debug={
                     "orchestrator": workflow_name,
                     "agent_timings": result.get("agent_timings", {}),
@@ -1479,6 +1530,17 @@ async def _agent_query_impl(
     from app.mcp_agents.intent_mapping import map_semantic_intent_to_orchestrator
     semantic_intent = classification_result["intent"]
     confidence = classification_result.get("confidence", 0.95)
+
+    # Merge LLM-extracted filters (Entities) into rec_filters
+    # This ensures 'brand' and other complex entities are applied
+    llm_entities = classification_result.get("entities") or {}
+    if llm_entities:
+        for field in ["type", "price_min", "price_max", "sort", "color", "gender", "brand", "tier", "fit"]:
+            if val := llm_entities.get(field):
+                # Prefer LLM extraction over regex/legacy
+                rec_filters[field] = val
+                numeric_filters[field] = val # Sync numeric_filters for down-stream tools
+                log.info(f"🧠 [INTELLIGENCE] Applied filter '{field}'='{val}' from semantic understanding")
     
     # === LLM-BASED "SHOW MORE" HANDLING ===
     # When LLM detects user wants more of same (e.g., "I'm not impressed", "got anything else?")
@@ -1531,7 +1593,11 @@ async def _agent_query_impl(
         # Treat as product discovery for the rest of the flow
         semantic_intent = "recommendations"
     
-    intent_kind = map_semantic_intent_to_orchestrator(semantic_intent)
+    intent_kind = map_semantic_intent_to_orchestrator(
+        semantic_intent=semantic_intent,
+        query=q,
+        entities=llm_entities
+    )
     
     # Phase 1: Complete thinking event
     thinking_tracker.complete(
@@ -2337,9 +2403,10 @@ async def _agent_query_impl(
                 "top_k": search_top_k,  # Use expanded top_k
                 "exclude_slugs": list(shown_slugs) if shown_slugs else None,
                 "visual_vibe": rec_filters.get("_visual_vibe"), # Pass vibe signal
-                "user_profile": accumulated_profile, # Pass session preferences for ranking
+                "user_profile": accumulated_profile, # Re-enabled user profile
                 "sku_boost": is_sku_query # Boost BM25 for exact matches
             }
+            log.info(f"🔍 [DEBUG] rec_payload: {json.dumps(rec_payload, default=str)}")
             rec_resp = await _call_recs_suggest(rec_payload)
             
             # Phase 1: Complete tool tracking
@@ -2489,8 +2556,15 @@ async def _agent_query_impl(
         # --- FALLBACK LOGIC (executes for empty results OR rejected results) ---
         should_show = availability.get("should_show_results", False)
         
+        if not should_show and items:
+            log.warning(f"❌ [AVAILABILITY] Quality Check flagged items, but forcing display (Visual Search Priority).")
+            # FORCE SHOW: Visual search is ground truth.
+            should_show = True
+            availability["should_show_results"] = True
+            availability["honesty_message"] = "These look like what you asked for."
+
         if not should_show:
-            log.warning(f"❌ [AVAILABILITY] Initial search failed/rejected (items={len(items)}). Attempting Semantic Fallback.")
+            log.warning(f"❌ [AVAILABILITY] Initial search failed (0 items). Attempting Semantic Fallback.")
             
             # Check if we have a mapped category we can fall back to
             types_list = attrs.get("types", [])
@@ -2767,7 +2841,7 @@ async def _agent_query_impl(
 
         intro_line = verification["refined_answer"]
         suggestions = verification["suggestions"]
-        print(f"✅ [VERIFIER] Status: {verification['status']} | Suggestions: {len(suggestions)}")
+        log.debug("✅ [VERIFIER] Status: %s | Suggestions: %s", verification.get("status"), len(suggestions))
 
         return AgentOut(
             kind="recommendations",
@@ -2779,6 +2853,103 @@ async def _agent_query_impl(
         )
 
         # no items → fall through to RAG / chat below
+
+    # --- Branch 3: Multi-Agent Orchestrator (Stylist/Outfit Builder) -----------
+    if intent_kind == "agent_stylist":
+        log.info(f"🚀 [ORCHESTRATOR] Triggering Multi-Agent Orchestrator for query: {q}")
+        
+        # Use orchestrator to execute the workflow
+        orchestrator = MultiAgentOrchestrator()
+        
+        # Build task and context
+        task = {
+            "query": q,
+            "budget_max": numeric_filters.get("price_max", 1000), # Default to 1000 if not specified
+            "brand_filter": rec_filters.get("brand"),
+            "gender": rec_filters.get("gender"),
+            "visual_context": body.visualMetadata
+        }
+        
+        # Use best-available identity for personalization
+        user_id = get_base_user_id(body.guestSessionId, body.clerkUserId)
+        if not user_id:
+            log.warning("Missing clerkUserId/guestSessionId; proceeding without user-scoped personalization.")
+        
+        orchestrator_context = {
+            "user_id": user_id,
+            "session_id": body.guestSessionId,
+            "original_query": body.message,
+            "gender": rec_filters.get("gender"),
+            "brand": rec_filters.get("brand")
+        }
+        
+        try:
+            # We use the standard (non-streaming) execution here because the 
+            # outer route _agent_query_impl expects a single AgentOut.
+            # (The streaming is handled by agent_stream.py calling this)
+            
+            # Since we want to emit agentic events, we actually need to yield from
+            # the orchestrator if we're in a streaming context.
+            # But the caller _agent_query_impl is NOT a generator.
+            
+            # DESIGN DECISION: We'll run the standard workflow and return final results.
+            # The agentic events (category_candidates etc.) will STILL be emitted
+            # to the global event emitter if we provide the callback.
+            
+            def orchestrator_callback(event):
+                emit_event(event.get("event_type", "thinking:step"), event)
+
+            # Standard execution with callback for event emission
+            # We need to use standard workflow for non-generator compatibility
+            result_dict = await orchestrator._execute_standard_workflow(
+                workflow=orchestrator.workflows.get("outfit_builder"),
+                state=WorkflowState(
+                    query=q,
+                    budget_max=task["budget_max"],
+                    context=orchestrator_context
+                ),
+                workflow_name="outfit_builder",
+                stream_callback=orchestrator_callback
+            )
+            
+            if result_dict.get("success"):
+                outfit_data = result_dict.get("outfit_items", [])
+                
+                # Convert to AgentItem list
+                items = []
+                agent_items = []
+                for it in outfit_data:
+                    if isinstance(it, dict):
+                        # Pydantic validation: Ensure 'url' and other fields exist
+                        # Default to # if missing to satisfy non-empty string requirement if it exists
+                        it["url"] = it.get("url") or f"/product/{it.get('slug', 'unknown')}"
+                        agent_items.append(AgentItem(**it))
+                
+                # Store in session
+                SessionStateManager.store_session_recs(body, agent_items)
+                SessionStateManager.mark_slugs_as_shown(body, [it.slug for it in agent_items if it.slug])
+                
+                # Format total cost string for answer (assuming result_dict has 'total')
+                # total_str = f"€{result_dict.get('total', 0):.2f}" # This line was in the example but not in the original context, adding it for completeness if needed.
+
+                return AgentOut(
+                    kind="recommendations",
+                    answer=result_dict.get("reasoning", "I've built a complete outfit for you!"),
+                    items=agent_items,
+                    vto_image_url=result_dict.get("vto_image_url"), # ✨ Phase 3: Virtual Try-On URL
+                    debug_plan={**debug_plan, "orchestrator_used": True}
+                )
+            else:
+                log.error(f"Orchestrator failed: {result_dict.get('error')}")
+                # Fallback to general discovery
+                intent_kind = "discover"
+                wants_recs = True
+        except Exception as e:
+            log.exception(f"Exception invoking orchestrator: {e}")
+            # Fallback to general discovery
+            intent_kind = "discover"
+            wants_recs = True
+
 
     # --- Branch 4: generic fallback (LLM chat or RAG) --------------------------
     log.debug(f"💬 [DEBUG] FALLBACK BRANCH: wants_cart={wants_cart}, wants_recs={wants_recs}, intent_kind={intent_kind}")
@@ -2853,7 +3024,7 @@ async def _agent_query_impl(
     )
     answer = verification["refined_answer"]
     suggestions = verification["suggestions"]
-    print(f"✅ [VERIFIER] Status: {verification['status']} | Suggestions: {len(suggestions)}")
+    log.debug("✅ [VERIFIER] Status: %s | Suggestions: %s", verification.get("status"), len(suggestions))
 
     return AgentOut(
         kind=api_response_kind,  # Use mapped API kind for Pydantic validation
@@ -2977,3 +3148,40 @@ async def agent_cart_add(body: AgentCartAddIn) -> AgentCartAddOut:
         cartId=cart_id,
         items=items,
     )
+
+
+@router.post("/ai/vto/generate")
+async def generate_vto(body: VTOIn):
+    """
+    On-demand Virtual Try-On generation.
+    """
+    from app.agents.vto_agent import VTOAgent
+    
+    log.info("🎨 On-demand VTO request received")
+    
+    # Instantiate the agent directly
+    agent = VTOAgent("vto_agent")
+    
+    # Prepare the task/context payload
+    # VTOAgent expects items in task and image in task or context
+    task = {
+        "items": body.items,
+        "imageUrl": body.imageUrl,
+        "imageData": body.imageData
+    }
+    context = {}
+    
+    result = await agent.run(task, context)
+    
+    if result.success:
+        return {
+            "ok": True,
+            "vto_image_url": result.data.get("vto_image_url"),
+            "reasoning": result.reasoning
+        }
+    else:
+        return {
+            "ok": False,
+            "error": result.errors[0] if result.errors else "Unknown VTO error",
+            "reasoning": result.reasoning
+        }

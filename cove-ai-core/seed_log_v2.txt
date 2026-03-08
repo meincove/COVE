@@ -1,0 +1,484 @@
+2026-01-25 04:45:34,613 - INFO - 🚀 Starting Premium Brand Seed...
+2026-01-25 04:45:34,613 - INFO - --- Seeding Aura Minimalist ---
+2026-01-25 04:45:34,613 - INFO - 🔨 Creating: Aura Minimalist Pure Sneakers
+2026-01-25 04:45:35,045 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:35,045 - INFO - 🔨 Creating: Aura Minimalist Pure Coat
+2026-01-25 04:45:35,357 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:35,357 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:45:35,649 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:35,649 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:45:35,948 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:35,948 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:45:36,208 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:36,208 - INFO - 🔨 Creating: Aura Minimalist Timeless Sneakers
+2026-01-25 04:45:36,509 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:36,510 - INFO - 🔨 Creating: Aura Minimalist Timeless Coat
+2026-01-25 04:45:36,782 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:36,782 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:45:37,093 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:37,093 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:45:37,383 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:37,383 - INFO - 🔨 Creating: Aura Minimalist Organic T-Shirt
+2026-01-25 04:45:37,673 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:37,673 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:45:38,022 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:38,033 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:45:38,314 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:38,314 - INFO - 🔨 Creating: Aura Minimalist Organic Sweater
+2026-01-25 04:45:38,611 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:38,611 - INFO - 🔨 Creating: Aura Minimalist Raw Sweater
+2026-01-25 04:45:38,892 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:38,892 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:45:39,203 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:39,203 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:45:39,491 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:39,491 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:45:39,779 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:39,780 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:45:40,074 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:40,074 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:45:40,360 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:40,360 - INFO - 🔨 Creating: Aura Minimalist Raw Trousers
+2026-01-25 04:45:40,669 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:40,669 - INFO - 🔨 Creating: Aura Minimalist Essential Sneakers
+2026-01-25 04:45:40,964 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:40,964 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:45:41,309 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:41,309 - INFO - 🔨 Creating: Aura Minimalist Organic Trousers
+2026-01-25 04:45:41,599 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:41,600 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:45:41,891 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:41,891 - INFO - 🔨 Creating: Aura Minimalist Timeless Sneakers
+2026-01-25 04:45:42,170 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:42,170 - INFO - 🔨 Creating: Aura Minimalist Pure T-Shirt
+2026-01-25 04:45:42,497 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:42,497 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:45:42,782 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:42,782 - INFO - 🔨 Creating: Aura Minimalist Essential Sneakers
+2026-01-25 04:45:43,078 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:43,078 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:45:43,427 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:43,427 - INFO - 🔨 Creating: Aura Minimalist Pure Coat
+2026-01-25 04:45:43,695 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:43,695 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:45:43,991 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:43,991 - INFO - 🔨 Creating: Aura Minimalist Organic Sweater
+2026-01-25 04:45:44,260 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:44,260 - INFO - 🔨 Creating: Aura Minimalist Pure Coat
+2026-01-25 04:45:44,534 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:44,534 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:45:44,808 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:44,808 - INFO - 🔨 Creating: Aura Minimalist Timeless Trousers
+2026-01-25 04:45:45,074 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:45,074 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:45:45,339 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:45,339 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:45:45,634 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:45,634 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:45:45,911 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:45,911 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:45:46,203 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:46,203 - INFO - 🔨 Creating: Aura Minimalist Organic Coat
+2026-01-25 04:45:46,459 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:46,459 - INFO - 🔨 Creating: Aura Minimalist Timeless T-Shirt
+2026-01-25 04:45:46,755 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:46,755 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:45:47,112 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:47,112 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:45:47,390 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:47,391 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:45:47,716 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:47,717 - INFO - 🔨 Creating: Aura Minimalist Raw Sneakers
+2026-01-25 04:45:48,014 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:48,014 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:45:48,320 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:48,320 - INFO - 🔨 Creating: Aura Minimalist Timeless Sweater
+2026-01-25 04:45:48,613 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:48,613 - INFO - 🔨 Creating: Aura Minimalist Essential Trousers
+2026-01-25 04:45:48,891 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:48,892 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:45:49,190 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:49,190 - INFO - 🔨 Creating: Aura Minimalist Pure Sweater
+2026-01-25 04:45:49,469 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:49,469 - INFO - 🔨 Creating: Aura Minimalist Pure Coat
+2026-01-25 04:45:49,744 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:49,744 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:45:50,040 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:50,040 - INFO - 🔨 Creating: Aura Minimalist Organic Sneakers
+2026-01-25 04:45:50,356 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:50,356 - INFO - 🔨 Creating: Aura Minimalist Raw T-Shirt
+2026-01-25 04:45:50,670 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:50,670 - INFO - 🔨 Creating: Aura Minimalist Pure Trousers
+2026-01-25 04:45:50,989 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:50,989 - INFO - 🔨 Creating: Aura Minimalist Essential Coat
+2026-01-25 04:45:51,408 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:51,408 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:45:51,715 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:51,716 - INFO - 🔨 Creating: Aura Minimalist Essential Sweater
+2026-01-25 04:45:52,041 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:52,041 - INFO - 🔨 Creating: Aura Minimalist Essential T-Shirt
+2026-01-25 04:45:52,326 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:52,326 - INFO - 🔨 Creating: Aura Minimalist Raw Sweater
+2026-01-25 04:45:52,591 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:52,592 - INFO - --- Seeding Vortex Streetwear ---
+2026-01-25 04:45:52,592 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 04:45:52,862 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:52,862 - INFO - 🔨 Creating: Vortex Streetwear Night High-tops
+2026-01-25 04:45:53,150 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:53,150 - INFO - 🔨 Creating: Vortex Streetwear Glitch Tech Jacket
+2026-01-25 04:45:53,441 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:53,441 - INFO - 🔨 Creating: Vortex Streetwear Tactical Vest
+2026-01-25 04:45:53,709 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:53,709 - INFO - 🔨 Creating: Vortex Streetwear Glitch Tech Jacket
+2026-01-25 04:45:54,008 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:54,008 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 04:45:54,274 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:54,274 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 04:45:54,568 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:54,568 - INFO - 🔨 Creating: Vortex Streetwear Night High-tops
+2026-01-25 04:45:54,839 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:54,840 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 04:45:55,130 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:55,130 - INFO - 🔨 Creating: Vortex Streetwear Urban Vest
+2026-01-25 04:45:55,402 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:55,403 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 04:45:55,693 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:55,693 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 04:45:55,997 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:55,998 - INFO - 🔨 Creating: Vortex Streetwear Urban Cargo Pants
+2026-01-25 04:45:56,291 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:56,291 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 04:45:56,603 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:56,603 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:45:56,970 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:56,970 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 04:45:57,235 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:57,235 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 04:45:57,556 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:57,556 - INFO - 🔨 Creating: Vortex Streetwear Night Tech Jacket
+2026-01-25 04:45:57,853 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:57,853 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 04:45:58,121 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:58,124 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:45:58,438 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:58,438 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 04:45:58,763 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:58,764 - INFO - 🔨 Creating: Vortex Streetwear Cyber Vest
+2026-01-25 04:45:59,045 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:59,045 - INFO - 🔨 Creating: Vortex Streetwear Cyber Tech Jacket
+2026-01-25 04:45:59,334 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:59,334 - INFO - 🔨 Creating: Vortex Streetwear Night High-tops
+2026-01-25 04:45:59,620 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:59,621 - INFO - 🔨 Creating: Vortex Streetwear Tactical Cargo Pants
+2026-01-25 04:45:59,928 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:45:59,929 - INFO - 🔨 Creating: Vortex Streetwear Night Cargo Pants
+2026-01-25 04:46:00,228 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:00,228 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 04:46:00,531 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:00,531 - INFO - 🔨 Creating: Vortex Streetwear Urban High-tops
+2026-01-25 04:46:00,832 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:00,832 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 04:46:01,122 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:01,122 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 04:46:01,408 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:01,408 - INFO - 🔨 Creating: Vortex Streetwear Urban Vest
+2026-01-25 04:46:01,753 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:01,753 - INFO - 🔨 Creating: Vortex Streetwear Cyber Cargo Pants
+2026-01-25 04:46:02,046 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:02,047 - INFO - 🔨 Creating: Vortex Streetwear Urban High-tops
+2026-01-25 04:46:02,316 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:02,316 - INFO - 🔨 Creating: Vortex Streetwear Urban High-tops
+2026-01-25 04:46:02,615 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:02,615 - INFO - 🔨 Creating: Vortex Streetwear Tactical Tech Jacket
+2026-01-25 04:46:02,916 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:02,916 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 04:46:03,212 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:03,212 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 04:46:03,642 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:03,643 - INFO - 🔨 Creating: Vortex Streetwear Tactical Cargo Pants
+2026-01-25 04:46:03,929 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:03,929 - INFO - 🔨 Creating: Vortex Streetwear Urban Tech Jacket
+2026-01-25 04:46:04,217 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:04,217 - INFO - 🔨 Creating: Vortex Streetwear Cyber Hoodie
+2026-01-25 04:46:04,520 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:04,520 - INFO - 🔨 Creating: Vortex Streetwear Cyber High-tops
+2026-01-25 04:46:04,815 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:04,815 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:05,129 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:05,131 - INFO - 🔨 Creating: Vortex Streetwear Tactical High-tops
+2026-01-25 04:46:05,607 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:05,610 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 04:46:05,935 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:05,935 - INFO - 🔨 Creating: Vortex Streetwear Tactical Vest
+2026-01-25 04:46:06,220 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:06,220 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:06,500 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:06,500 - INFO - 🔨 Creating: Vortex Streetwear Urban Hoodie
+2026-01-25 04:46:06,790 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:06,791 - INFO - 🔨 Creating: Vortex Streetwear Urban Cargo Pants
+2026-01-25 04:46:07,101 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:07,101 - INFO - 🔨 Creating: Vortex Streetwear Night Hoodie
+2026-01-25 04:46:07,386 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:07,386 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:07,712 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:07,712 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 04:46:08,018 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:08,018 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:08,325 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:08,325 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 04:46:08,638 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:08,638 - INFO - 🔨 Creating: Vortex Streetwear Glitch Cargo Pants
+2026-01-25 04:46:09,004 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:09,004 - INFO - 🔨 Creating: Vortex Streetwear Glitch Vest
+2026-01-25 04:46:09,326 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:09,327 - INFO - 🔨 Creating: Vortex Streetwear Glitch Hoodie
+2026-01-25 04:46:09,620 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:09,620 - INFO - 🔨 Creating: Vortex Streetwear Glitch High-tops
+2026-01-25 04:46:09,938 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:09,938 - INFO - 🔨 Creating: Vortex Streetwear Tactical Hoodie
+2026-01-25 04:46:10,229 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:10,229 - INFO - 🔨 Creating: Vortex Streetwear Urban Vest
+2026-01-25 04:46:10,507 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:10,508 - INFO - 🔨 Creating: Vortex Streetwear Cyber Cargo Pants
+2026-01-25 04:46:10,798 - ERROR - ❌ DB Insert Failed: column "content" of relation "docs" does not exist
+LINE 2:                     INSERT INTO ai_core.docs (content, embed...
+                                                      ^
+2026-01-25 04:46:10,798 - INFO - ✅ Seeding Complete!

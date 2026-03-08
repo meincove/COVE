@@ -12,7 +12,49 @@
                 "work"
             ],
             "default_style": "professional",
-            "description": "Professional business setting"
+            "description": "Professional business setting",
+            "rules": {
+                "tops": {
+                    "allowed": [
+                        "shirt",
+                        "blouse",
+                        "blazer",
+                        "jacket"
+                    ],
+                    "excluded": [
+                        "tee",
+                        "hoodie",
+                        "sweatshirt",
+                        "tank"
+                    ]
+                },
+                "bottoms": {
+                    "allowed": [
+                        "pants",
+                        "skirt"
+                    ],
+                    "excluded": [
+                        "shorts",
+                        "jeans",
+                        "joggers",
+                        "tracksuit"
+                    ]
+                },
+                "shoes": {
+                    "allowed": [
+                        "loafers",
+                        "heels",
+                        "oxfords",
+                        "boots",
+                        "flats"
+                    ],
+                    "excluded": [
+                        "sneakers",
+                        "sandals",
+                        "slides"
+                    ]
+                }
+            }
         },
         "date": {
             "keywords": [
@@ -23,7 +65,49 @@
                 "night out"
             ],
             "default_style": "smart_casual",
-            "description": "Romantic or social outing"
+            "description": "Romantic or social outing",
+            "rules": {
+                "tops": {
+                    "allowed": [
+                        "shirt",
+                        "blouse",
+                        "sweater",
+                        "jacket",
+                        "blazer"
+                    ],
+                    "excluded": [
+                        "hoodie",
+                        "sweatshirt",
+                        "graphic tee"
+                    ]
+                },
+                "bottoms": {
+                    "allowed": [
+                        "jeans",
+                        "pants",
+                        "skirt"
+                    ],
+                    "excluded": [
+                        "shorts",
+                        "sweatpants",
+                        "joggers"
+                    ]
+                },
+                "shoes": {
+                    "allowed": [
+                        "boots",
+                        "loafers",
+                        "heels",
+                        "clean sneakers",
+                        "shoes"
+                    ],
+                    "excluded": [
+                        "athletic sneakers",
+                        "slides",
+                        "flip flops"
+                    ]
+                }
+            }
         },
         "casual": {
             "keywords": [
@@ -35,7 +119,39 @@
                 "coffee"
             ],
             "default_style": "relaxed",
-            "description": "Relaxed everyday wear"
+            "description": "Relaxed everyday wear",
+            "rules": {
+                "tops": {
+                    "allowed": [
+                        "tee",
+                        "hoodie",
+                        "sweatshirt",
+                        "sweater",
+                        "shirt"
+                    ],
+                    "excluded": []
+                },
+                "bottoms": {
+                    "allowed": [
+                        "jeans",
+                        "shorts",
+                        "joggers",
+                        "pants"
+                    ],
+                    "excluded": []
+                },
+                "shoes": {
+                    "allowed": [
+                        "sneakers",
+                        "boots",
+                        "sandals",
+                        "shoes"
+                    ],
+                    "excluded": [
+                        "heels"
+                    ]
+                }
+            }
         },
         "formal": {
             "keywords": [
@@ -46,7 +162,49 @@
                 "black tie"
             ],
             "default_style": "formal",
-            "description": "Formal event or ceremony"
+            "description": "Formal event or ceremony",
+            "rules": {
+                "tops": {
+                    "allowed": [
+                        "shirt",
+                        "blouse",
+                        "blazer",
+                        "jacket"
+                    ],
+                    "excluded": [
+                        "tee",
+                        "hoodie",
+                        "sweatshirt",
+                        "sweater",
+                        "polo"
+                    ]
+                },
+                "bottoms": {
+                    "allowed": [
+                        "pants",
+                        "skirt"
+                    ],
+                    "excluded": [
+                        "jeans",
+                        "shorts",
+                        "joggers",
+                        "leggings"
+                    ]
+                },
+                "shoes": {
+                    "allowed": [
+                        "loafers",
+                        "heels",
+                        "oxfords",
+                        "dress shoes"
+                    ],
+                    "excluded": [
+                        "sneakers",
+                        "sandals",
+                        "boots"
+                    ]
+                }
+            }
         },
         "gym": {
             "keywords": [
@@ -57,7 +215,44 @@
                 "active"
             ],
             "default_style": "athletic",
-            "description": "Athletic or fitness activity"
+            "description": "Athletic or fitness activity",
+            "rules": {
+                "tops": {
+                    "allowed": [
+                        "tee",
+                        "tank",
+                        "hoodie"
+                    ],
+                    "excluded": [
+                        "shirt",
+                        "blouse",
+                        "blazer"
+                    ]
+                },
+                "bottoms": {
+                    "allowed": [
+                        "shorts",
+                        "joggers",
+                        "leggings"
+                    ],
+                    "excluded": [
+                        "jeans",
+                        "pants",
+                        "skirt"
+                    ]
+                },
+                "shoes": {
+                    "allowed": [
+                        "sneakers"
+                    ],
+                    "excluded": [
+                        "boots",
+                        "heels",
+                        "loafers",
+                        "sandals"
+                    ]
+                }
+            }
         },
         "outdoor": {
             "keywords": [
@@ -74,7 +269,45 @@
                 "vacation"
             ],
             "default_style": "relaxed",
-            "description": "Outdoor adventures and activities"
+            "description": "Outdoor adventures and activities",
+            "rules": {
+                "tops": {
+                    "allowed": [
+                        "tee",
+                        "hoodie",
+                        "flannel",
+                        "jacket",
+                        "vest"
+                    ],
+                    "excluded": [
+                        "blazer",
+                        "blouse"
+                    ]
+                },
+                "bottoms": {
+                    "allowed": [
+                        "shorts",
+                        "jeans",
+                        "pants",
+                        "leggings"
+                    ],
+                    "excluded": [
+                        "skirt",
+                        "pants"
+                    ]
+                },
+                "shoes": {
+                    "allowed": [
+                        "boots",
+                        "sneakers",
+                        "sandals"
+                    ],
+                    "excluded": [
+                        "heels",
+                        "loafers"
+                    ]
+                }
+            }
         }
     },
     "styles": {

@@ -34,6 +34,7 @@ export type StreamState = {
     agenticEvents: any[];
     // Interactive question options for conversation flow
     questionOptions: QuestionOptions | null;
+    vto_image_url: string | null;
 };
 
 export function useAgentStream() {
@@ -52,6 +53,7 @@ export function useAgentStream() {
         tools_used: null,
         agenticEvents: [],  // ✨ PHASE 6: Live exploration
         questionOptions: null,  // Interactive question options
+        vto_image_url: null,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -60,7 +62,10 @@ export function useAgentStream() {
         message: string,
         userId?: string,
         sessionId?: string,
-        sessionType?: string  // ✨ PHASE 6: For outfit_builder workflow
+        sessionType?: string,  // ✨ PHASE 6: For outfit_builder workflow
+        imageUrl?: string,     // ✨ VISION: Image URL
+        imageData?: string,    // ✨ VISION: Base64 data
+        brand?: string | null  // 🏷️ BRAND FILTER
     ) => {
         // Abort previous request if exists
         if (abortControllerRef.current) {
@@ -86,6 +91,7 @@ export function useAgentStream() {
             tools_used: null,
             agenticEvents: [],  // ✨ PHASE 6
             questionOptions: null,
+            vto_image_url: null,
         });
 
         try {
@@ -98,6 +104,9 @@ export function useAgentStream() {
                     guestSessionId: sessionId,
                     top_k: 4,
                     sessionType,  // ✨ PHASE 6: Triggers orchestrator for outfit_builder
+                    imageUrl,     // ✨ VISION
+                    imageData,    // ✨ VISION
+                    brand         // 🏷️ BRAND FILTER
                 }),
                 signal: abortController.signal,
             });
@@ -143,6 +152,8 @@ export function useAgentStream() {
                     handleEvent(eventType, data);
                 }
             }
+            // Stream finished naturally
+            setState(prev => ({ ...prev, isStreaming: false }));
         } catch (error: any) {
             if (error.name === 'AbortError') {
                 return; // Ignore abort errors
@@ -187,6 +198,7 @@ export function useAgentStream() {
                     // Phase 1: Capture thinking_events and tools_used from done event
                     thinking_events: data.thinking_events || null,
                     tools_used: data.tools_used || null,
+                    vto_image_url: data.vto_image_url || null,
                 }));
                 break;
 
@@ -236,11 +248,19 @@ export function useAgentStream() {
             case 'agentic:category_candidates':
             case 'agentic:item_selected':
             case 'agentic:category_vetting':
-            case 'agentic:budget_set':  // Budget from conversation flow
+            case 'agentic:budget_set':
+            // Also handle non-prefixed events (as sent by backend event_handler)
+            case 'category_start':
+            case 'category_candidates':
+            case 'item_selected':
+            case 'category_vetting':
+            case 'budget_set':
+            case 'complete': // ✨ Add complete event to agentic events
                 console.log('🎯 AGENTIC EVENT:', eventType, data);  // DEBUG
+                const normalizedType = eventType.startsWith('agentic:') ? eventType.replace('agentic:', '') : eventType;
                 setState(prev => ({
                     ...prev,
-                    agenticEvents: [...prev.agenticEvents, { event_type: eventType.replace('agentic:', ''), ...data }],
+                    agenticEvents: [...prev.agenticEvents, { event_type: normalizedType, ...data }],
                 }));
                 break;
         }

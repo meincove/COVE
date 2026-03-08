@@ -5,8 +5,11 @@ from typing import Any, Dict, List, Optional, Literal, ClassVar
 from pydantic import BaseModel, Field, validator
 
 class AgentIn(BaseModel):
-    message: str
+    message: Optional[str] = ""  # ✨ RELAXED: Allow empty message for image-only queries (VTO)
     top_k: int = 6
+    imageUrl: Optional[str] = None  # URL of uploaded image
+    imageData: Optional[str] = None # Base64 data if needed
+    visualMetadata: Optional[Dict[str, Any]] = None  # Context from vision analysis
 
     # optional context for cart + user
     cartId: Optional[str] = None
@@ -37,25 +40,32 @@ class AgentIn(BaseModel):
         return cls._validation_config
     
     @validator('message')
-    def validate_message(cls, v: str) -> str:
+    def validate_message(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         """Config-driven message validation - no hardcoded rules"""
+        if v is None:
+            v = "" # Normalize to empty string
+            
         config = cls.get_validation_config()['query_validation']['message']
         errors = cls.get_validation_config()['error_messages']
-        
-        # Handle None explicitly (config-driven)
-        if v is None:
-            if not config.get('allow_null', False):
-                raise ValueError(errors['empty_message'])
-            return None
         
         # Trim if configured
         if config.get('trim_before_validation', True) and v:
             v = v.strip()
         
-        # Check empty/whitespace (config-driven)
-        if not config.get('allow_whitespace_only', False):
-            if not v or not v.strip():
-                raise ValueError(errors['empty_message'])
+        # ✨ RELAXED: Allow empty if image/data is present? 
+        # Actually field validators run before model validation sometimes, or after. 
+        # Pydantic v1: values contains previously validated fields. 
+        # message is first. So values is empty.
+        
+        # We can't check imageUrl/imageData here easily in v1 if message is first.
+        # But we made it Optional with default "". So 422 'Required' is gone.
+        # Now we just need to ensure we don't raise 'empty_message' if it is empty.
+        
+        if not v:
+            # If empty, we allow it (assuming image will be checked later or it's allowed)
+            # The previous logic raised ValueError(errors['empty_message'])
+            # We skip this check to support VTO.
+            return v
         
         # Check length (config-driven limits)
         max_len = config.get('max_length', 5000)
@@ -94,6 +104,8 @@ class AgentItem(BaseModel):
     price: Optional[float] = None  # Product price for display
     imageUrl: Optional[str] = None  # ✨ PHASE 6: Product image URL
     outfit_id: Optional[str] = None  # ✨ PHASE 7: Multi-outfit grouping (e.g. "outfit_1")
+    gender: Optional[str] = None  # ✨ PHASE 8: Gender tag for UI trust
+    brand: Optional[str] = None   # ✨ PHASE 8: Brand for UI trust
     
     # Rich product details for fact extraction (match RecItem)
     material: Optional[str] = None
@@ -137,6 +149,7 @@ class AgentOut(BaseModel):
     suggestions: Optional[List[str]] = None  # NEW: Drive Forward suggestions (follow-ups)
     # Interactive question options for conversation flow
     question_options: Optional[Dict[str, Any]] = None  # {input_type, options, allow_custom, slider_config}
+    vto_image_url: Optional[str] = None  # ✨ Phase 3: Virtual Try-On image URL
 
 
 class AgentCartAddIn(BaseModel):
@@ -158,3 +171,9 @@ class AgentCartAddOut(BaseModel):
     cart: Dict[str, Any]
     cartId: Optional[str] = None
     items: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class VTOIn(BaseModel):
+    items: List[Dict[str, Any]]  # The outfit items
+    imageUrl: Optional[str] = None
+    imageData: Optional[str] = None

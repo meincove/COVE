@@ -12,6 +12,24 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "8000",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "via.placeholder.com",
         port: "",
         pathname: "/**",
@@ -35,10 +53,11 @@ const nextConfig: NextConfig = {
     "@dnd-kit/core",
     "@dnd-kit/sortable",
     "@dnd-kit/utilities",
-    "@clerk/nextjs",
     "@clerk/themes",
   ],
 
+  // Resolves "multiple lockfiles" warning
+  outputFileTracingRoot: path.join(__dirname, "../"),
 
   typescript: {
     ignoreBuildErrors: true,

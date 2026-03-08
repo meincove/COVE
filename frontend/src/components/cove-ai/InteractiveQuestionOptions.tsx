@@ -155,7 +155,7 @@ export default function InteractiveQuestionOptions({
                     >
                         {options.map((option, idx) => (
                             <motion.button
-                                key={option.value}
+                                key={`${option.value}-${idx}`}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: idx * 0.05 }}

@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 class ProductOut(BaseModel):
-    id: UUID
+    id: str
     title: str
     url: Optional[str] = None
     price: Optional[float] = None

@@ -68,7 +68,7 @@ export function fallbackResolveAgentItemForChat(
     type: item.type,
     colorName: item.color,
     priceLabel: undefined,
-    imageUrl: undefined,
+    imageUrl: item.imageUrl || item.image_url,
     productUrl:
       item.url && item.url.startsWith("/") ? item.url : undefined,
     fromCatalog: false,
@@ -201,9 +201,11 @@ export async function resolveAgentItemForChat(
     v.images && v.images.length > 0 ? v.images[0] : undefined;
 
   // Use external URL directly if it's a full URL, otherwise undefined
+  // Fallback to the original item.imageUrl if the catalog variant didn't provide one
+  // This fixes the 404 issue where catalog lookup fails but vector DB has the image
   const imageUrl = imgName && (imgName.startsWith('http://') || imgName.startsWith('https://'))
     ? imgName
-    : undefined;
+    : item.imageUrl; // Use vector image as reliable fallback
 
   const subtitle = `${product.tier ?? ""}${product.type ? ` • ${product.type}` : ""
     }`.trim();

@@ -1,0 +1,18 @@
+
+🔍 Testing Gender Logic for: male...
+✅ Generated 5 items.
+- simplestack sweater (tops)
+- corebasics pants (bottoms)
+- canvas slip-ons (shoes)
+- techurban jacket (outerwear)
+-  (accessories)
+✅ SUCCESS: No obviously wrong-gender items found.
+
+🔍 Testing Gender Logic for: female...
+✅ Generated 5 items.
+- corebasics sweater (tops)
+- comfortzone skirt (bottoms)
+- canvas slip-ons (shoes)
+- timelessco jacket (outerwear)
+-  (accessories)
+✅ SUCCESS: No obviously wrong-gender items found.

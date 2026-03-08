@@ -1,0 +1,478 @@
+INFO:cove.agents.orchestrator:🚀 Starting workflow: Outfit Builder
+INFO:cove.agents.orchestrator:   Query: build a complete aggressive cyberpunk streetwear outfit purely from Vortex Streetwear, budget €1000 for a man
+INFO:cove.agents.orchestrator:   Budget: €1000
+INFO:cove.agents.orchestrator:   Streaming: False
+INFO:cove.agents.orchestrator:   Execution plan: 3 groups
+INFO:cove.agents.orchestrator:   Group 0: ['stylist']
+INFO:cove.agents.base:Initialized stylist agent
+INFO:cove.agents.stylist:🔮 Detected Vibe Keywords: ['oversized', 'matte', 'tech', 'functional', 'waterproof', 'black', 'utility', 'cargo', 'neon green']
+INFO:cove.agents.stylist:Building outfit for: casual (streetwear style), budget: €1000
+INFO:cove.agent.intent:Loaded intent_config.json from /Users/ssg/Desktop/COVE/data/intent_config.json with intents=['cart_add', 'checkout_start', 'order_query', 'order_email', 'size_fit', 'policy', 'history_meta', 'product_question', 'lookup_product', 'discover', 'generic', 'greeting', 'small_talk']
+[92m20:46:03 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:👤 Using gender from context: male
+INFO:cove.agents.stylist:📋 LLM defined structure: ['tops', 'bottoms', 'shoes']
+INFO:cove.agents.stylist:🤖 Stylist Plan: The request is for a complete aggressive cyberpunk streetwear outfit, which aligns with a casual occasion. I prioritized oversized, matte, tech, functional, waterproof, black, utility, cargo, and neon green attributes to match the cyberpunk aesthetic. The outfit will consist of a top, bottom, and shoes that reflect these characteristics.
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category tops
+INFO:cove.agents.stylist:   🔍 Query expanded with types: tee t-shirt shirt blouse sweater hoodie sweatshirt jacket coat blazer vest tech jacket outerwear
+INFO:cove.agents.stylist:   🔮 Boosting based on Vibe: oversized matte tech functional waterproof black utility cargo neon green
+INFO:cove.agents.stylist:   🏷️ Applied Brand Filter: vortex streetwear
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for tops: {'price_max': 1000, 'type': 'hoodie', 'color': 'black', 'brand': 'vortex streetwear'}
+INFO:cove.agents.stylist:   👤 Enforcing gender filter: male -> men
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ No items found for tops with color=black. Retrying without color...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Urban Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Urban Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Tactical Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Tactical Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Tactical Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Glitch Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Glitch Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Glitch Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Cyber Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Cyber Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Night Hoodie'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Cyber Hoodie'
+INFO:cove.agents.stylist:   Stored 12 candidates for tops
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category bottoms
+INFO:cove.agents.stylist:   🔍 Query expanded with types: pants jeans trousers shorts skirt joggers leggings cargo pants
+INFO:cove.agents.stylist:   🔮 Boosting based on Vibe: oversized matte tech functional waterproof black utility cargo neon green
+INFO:cove.agents.stylist:   🏷️ Applied Brand Filter: vortex streetwear
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for bottoms: {'price_max': 1000, 'type': 'cargo pants', 'color': 'black', 'brand': 'vortex streetwear'}
+INFO:cove.agents.stylist:   👤 Enforcing gender filter: male -> men
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ No items found for bottoms with color=black. Retrying without color...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Night Cargo Pants'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Glitch Cargo Pants'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Glitch Cargo Pants'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Glitch Cargo Pants'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Tactical Cargo Pants'
+INFO:cove.agents.stylist:   Stored 5 candidates for bottoms
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category shoes
+INFO:cove.agents.stylist:   🔍 Query expanded with types: sneakers boots sandals heels loafers oxfords dress shoes high-tops
+INFO:cove.agents.stylist:   🔮 Boosting based on Vibe: oversized matte tech functional waterproof black utility cargo neon green
+INFO:cove.agents.stylist:   🏷️ Applied Brand Filter: vortex streetwear
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for shoes: {'price_max': 1000, 'type': 'high-tops', 'color': 'black', 'brand': 'vortex streetwear'}
+INFO:cove.agents.stylist:   👤 Enforcing gender filter: male -> men
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ No items found for shoes with color=black. Retrying without color...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Night High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Urban High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Night High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Tactical High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Tactical High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Cyber High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Cyber High-tops'
+INFO:cove.agents.stylist:🔍 Extracted brand 'Vortex Streetwear' for item 'Vortex Streetwear Cyber High-tops'
+INFO:cove.agents.stylist:   Stored 0 candidates for shoes
+INFO:cove.agents.orchestrator:   ✓ stylist: 12264ms
+INFO:cove.agents.orchestrator:   Group 1: ['outfit_builder']
+INFO:cove.agents.base:Initialized outfit_builder agent
+INFO:cove.agents.outfit_builder:🎨 OutfitBuilder v2: budget=1000, gender=male, style=aggressive cyberpunk streetwear, occasion=streetwear, num_outfits=3
+INFO:cove.agents.outfit_builder:   ✨ Using 3 pre-filtered candidate lists from Stylist
+[92m20:46:15 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[92m20:46:20 - LiteLLM:INFO[0m: utils.py:1237 - Wrapper: Completed Call, calling success_handler
+INFO:LiteLLM:Wrapper: Completed Call, calling success_handler
+INFO:cove.agents.outfit_builder:   📋 Plan Categories: ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories']
+INFO:cove.agents.outfit_builder:   🔍 Plan Queries: {'tops': 'cyberpunk graphic long sleeve, futuristic techwear shirts, asymmetrical cut tops, tactical vests', 'bottoms': 'cargo pants, techwear joggers, tactical shorts, distressed trousers', 'shoes': 'high-top combat boots, futuristic sneakers, platform shoes, chunky soles', 'outerwear': 'bombers, long trench coats, tactical jackets, reflective outerwear', 'accessories': 'futuristic sunglasses, utility belts, arm sleeves, tech gloves'}
+INFO:cove.agents.outfit_builder:   🚫 Plan Bans: {'tops': ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie'], 'bottoms': ['short', 'denim'], 'shoes': ['runner', 'slide', 'dress shoe', 'heel', 'formal', 'tennis', 'sneaker', 'flip-flop', 'trainer', 'sandal'], 'top': ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie'], 'bottom': ['short', 'denim'], 'shoe': ['runner', 'slide', 'dress shoe', 'heel', 'formal', 'tennis', 'sneaker', 'flip-flop', 'trainer', 'sandal']}
+INFO:cove.agents.outfit_builder:   🏷️ Re-enforced brand filter 'vortex streetwear' on 12 stylist candidates
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for tops: €0.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: bottoms, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 5 items in bottoms
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['short', 'denim']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for bottoms: €186.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: shoes, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 8 items in shoes
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['runner', 'slide', 'dress shoe', 'heel', 'formal', 'tennis', 'sneaker', 'flip-flop', 'trainer', 'sandal']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for shoes: €80.0 (Target: €250.00)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: outerwear, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 8 items in outerwear
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for outerwear: €318.0 (Target: €333.33)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: accessories, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 0 items in accessories
+WARNING:cove.agents.outfit_builder:   ⚠️ No accessories found under €83.33
+[92m20:46:23 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.outfit_builder:   ✅ outfit_1 complete: €584.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: tops, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 22 items in tops
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear urban hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear urban hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear tactical hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear tactical hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear tactical hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear glitch hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear glitch hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear glitch hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear cyber hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear cyber hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear night hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear cyber hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 12 items using bans: ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for tops: €195.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: bottoms, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 4 items in bottoms
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['short', 'denim']
+WARNING:cove.agents.outfit_builder:   ⚠️ Budget overrun for bottoms: selected cheapest €249.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: shoes, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 6 items in shoes
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['runner', 'slide', 'dress shoe', 'heel', 'formal', 'tennis', 'sneaker', 'flip-flop', 'trainer', 'sandal']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for shoes: €281.0 (Target: €250.00)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: outerwear, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 7 items in outerwear
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for outerwear: €172.0 (Target: €333.33)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: accessories, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 0 items in accessories
+WARNING:cove.agents.outfit_builder:   ⚠️ No accessories found under €83.33
+[92m20:46:27 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.outfit_builder:   ✅ outfit_2 complete: €897.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: tops, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 21 items in tops
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear urban hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear urban hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear tactical hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear tactical hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear tactical hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear glitch hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear glitch hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear glitch hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear cyber hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear cyber hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear night hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'vortex streetwear cyber hoodie' matched bans ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 12 items using bans: ['graphic', 'logo', 'tee', 'sweatshirt', 'polo', 't-shirt', 'hoodie']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for tops: €187.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: bottoms, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 3 items in bottoms
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['short', 'denim']
+WARNING:cove.agents.outfit_builder:   ⚠️ Budget overrun for bottoms: selected cheapest €286.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: shoes, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 5 items in shoes
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['runner', 'slide', 'dress shoe', 'heel', 'formal', 'tennis', 'sneaker', 'flip-flop', 'trainer', 'sandal']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for shoes: €157.0 (Target: €250.00)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: outerwear, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 2 items in outerwear
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for outerwear: €253.0 (Target: €333.33)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: accessories, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 0 items in accessories
+WARNING:cove.agents.outfit_builder:   ⚠️ No accessories found under €83.33
+[92m20:46:31 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.outfit_builder:   ✅ outfit_3 complete: €883.00
+INFO:cove.agents.orchestrator:   ✓ outfit_builder: 16654ms
+INFO:cove.agents.orchestrator:   Group 2: ['fit', 'budget']
+INFO:cove.agents.orchestrator:   ⚡ Executing 2 agents in parallel
+INFO:cove.agents.base:Initialized fit agent
+INFO:cove.agents.fit:Analyzing sizes for 15 items (preference: regular)
+INFO:cove.agents.base:✓ fit: Analyzed 15 items, recommended sizes for 15. 12 warnings (confidence: 76%, tools: 15)
+INFO:cove.agents.base:Initialized budget agent
+INFO:cove.agents.budget:Optimizing 15 items within €1000 budget (maximize_value)
+INFO:cove.agents.base:✓ budget: Within budget (€1000.00 remaining) (confidence: 70%, tools: 2)
+INFO:cove.agents.orchestrator:   ✓ fit: 7ms
+INFO:cove.agents.orchestrator:   ✓ budget: 3ms
+INFO:cove.agents.orchestrator:✅ Workflow complete: 28926ms
+
+
+✨ GENERATING LOOK: Vortex Streetwear - Cyberpunk Night Out ✨
+📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...
+📚 [VOCAB] Loaded 17 colors from ai_core.docs: ['beige', 'black', 'brown', 'burgundy', 'champagne', 'charcoal', 'chocolate', 'emerald', 'grey', 'light blue', 'navy', 'nude', 'pink', 'red', 'sand', 'tan', 'white']
+📚 [VOCAB] Loaded 24 types from ai_core.docs: ['accessories', 'blazer', 'boots', 'cargo pants', 'coat', 'dress', 'heels', 'high-tops', 'hoodie', 'jacket', 'loafers', 'pants', 'shirt', 'shoes', 'shorts', 'skirt', 'sneakers', 'sweater', 'sweatshirt', 't-shirt', 'tech jacket', 'tee', 'trousers', 'vest']
+📚 [VOCAB] Loaded 3 brands from ai_core.docs: ['aura minimalist', 'cove footwear', 'vortex streetwear']
+ERROR:asyncio:Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x12e15ac80>
+transport: <_SelectorSocketTransport closing fd=10>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 918, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/sslproto.py", line 684, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 924, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 719, in _fatal_error
+    self._force_close(exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 731, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 745, in call_soon
+    self._check_closed()
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 510, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+INFO:cove.agents.orchestrator:🚀 Starting workflow: Outfit Builder
+INFO:cove.agents.orchestrator:   Query: build a complete clean premium minimalist outfit purely from Aura Minimalist, budget €1000 for a man
+INFO:cove.agents.orchestrator:   Budget: €1000
+INFO:cove.agents.orchestrator:   Streaming: False
+INFO:cove.agents.orchestrator:   Execution plan: 3 groups
+INFO:cove.agents.orchestrator:   Group 0: ['stylist']
+INFO:cove.agents.base:Initialized stylist agent
+INFO:cove.agents.stylist:Building outfit for: casual (minimalist style), budget: €1000
+INFO:cove.agent.intent:Loaded intent_config.json from /Users/ssg/Desktop/COVE/data/intent_config.json with intents=['cart_add', 'checkout_start', 'order_query', 'order_email', 'size_fit', 'policy', 'history_meta', 'product_question', 'lookup_product', 'discover', 'generic', 'greeting', 'small_talk']
+[92m20:46:36 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:👤 Using gender from context: male
+INFO:cove.agents.stylist:📋 LLM defined structure: ['tops', 'bottoms', 'shoes']
+INFO:cove.agents.stylist:🤖 Stylist Plan: For a professional business setting, I selected items that align with the formal dress code. This includes a shirt and blazer for the top, formal pants for the bottom, and loafers for the shoes. All items are from Aura Minimalist to maintain a cohesive minimalist aesthetic while adhering to the budget.
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category tops
+INFO:cove.agents.stylist:   🔍 Query expanded with types: tee t-shirt shirt blouse sweater hoodie sweatshirt jacket coat blazer vest tech jacket outerwear
+INFO:cove.agents.stylist:   🔄 SPLIT types to list: ['shirt', 'blazer']
+INFO:cove.agents.stylist:   🏷️ Applied Brand Filter: aura minimalist
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for tops: {'price_max': 1000, 'type': ['shirt', 'blazer'], 'brand': 'aura minimalist'}
+INFO:cove.agents.stylist:   👤 Enforcing gender filter: male -> men
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ Still no items for tops. Retrying without strict type filter...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   🔄 Extreme fallback found 20 items for tops
+INFO:cove.agents.stylist:   Stored 10 candidates for tops
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category bottoms
+INFO:cove.agents.stylist:   🔍 Query expanded with types: pants jeans trousers shorts skirt joggers leggings cargo pants
+INFO:cove.agents.stylist:   🏷️ Applied Brand Filter: aura minimalist
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for bottoms: {'price_max': 1000, 'type': 'pants', 'brand': 'aura minimalist'}
+INFO:cove.agents.stylist:   👤 Enforcing gender filter: male -> men
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ Still no items for bottoms. Retrying without strict type filter...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   🔄 Extreme fallback found 20 items for bottoms
+INFO:cove.agents.stylist:   Stored 6 candidates for bottoms
+WARNING:cove.agents.stylist:⚠️ STYLIST: No stream_callback for category shoes
+INFO:cove.agents.stylist:   🔍 Query expanded with types: sneakers boots sandals heels loafers oxfords dress shoes high-tops
+INFO:cove.agents.stylist:   🏷️ Applied Brand Filter: aura minimalist
+INFO:cove.agents.stylist:   🛡️ Applied Hard Filters for shoes: {'price_max': 1000, 'type': 'loafers', 'brand': 'aura minimalist'}
+INFO:cove.agents.stylist:   👤 Enforcing gender filter: male -> men
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   ⚠️ Still no items for shoes. Retrying without strict type filter...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.agents.stylist:   🔄 Extreme fallback found 20 items for shoes
+INFO:cove.agents.stylist:   Stored 10 candidates for shoes
+INFO:cove.agents.orchestrator:   ✓ stylist: 10165ms
+INFO:cove.agents.orchestrator:   Group 1: ['outfit_builder']
+INFO:cove.agents.base:Initialized outfit_builder agent
+INFO:cove.agents.outfit_builder:🎨 OutfitBuilder v2: budget=1000, gender=male, style=premium minimalist, occasion=MEETING, num_outfits=3
+INFO:cove.agents.outfit_builder:   ✨ Using 3 pre-filtered candidate lists from Stylist
+[92m20:46:45 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[92m20:46:50 - LiteLLM:INFO[0m: utils.py:1237 - Wrapper: Completed Call, calling success_handler
+INFO:LiteLLM:Wrapper: Completed Call, calling success_handler
+INFO:cove.agents.outfit_builder:   📋 Plan Categories: ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories']
+INFO:cove.agents.outfit_builder:   🔍 Plan Queries: {'tops': 'button-up shirt, slim fit shirt, high-quality cotton shirt, merino wool sweater', 'bottoms': 'tailored trousers, chinos, slim-fit dress pants, premium joggers', 'shoes': 'leather loafers, minimalist oxford shoes, slip-on shoes', 'outerwear': 'tailored blazer, lightweight jacket, overcoat, trench coat', 'accessories': 'leather belt, minimalist watch, simple cufflinks'}
+INFO:cove.agents.outfit_builder:   🚫 Plan Bans: {'tops': ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic'], 'bottoms': ['short', 'denim'], 'shoes': ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop'], 'outerwear': [], 'accessories': [], 'top': ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic'], 'bottom': ['short', 'denim'], 'shoe': ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop'], 'accessorie': []}
+INFO:cove.agents.outfit_builder:   🏷️ Re-enforced brand filter 'aura minimalist' on 10 stylist candidates
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for tops: €0.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: bottoms, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 9 items in bottoms
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['short', 'denim']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for bottoms: €109.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: shoes, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 8 items in shoes
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist essential sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist essential sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 8 items using bans: ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+WARNING:cove.agents.outfit_builder:   ⚠️ Strict filter removed all items for shoes! Bans: ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+WARNING:cove.agents.outfit_builder:   ⚠️ No shoes found under €250.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: outerwear, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 10 items in outerwear
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for outerwear: €303.0 (Target: €333.33)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: accessories, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 0 items in accessories
+WARNING:cove.agents.outfit_builder:   ⚠️ No accessories found under €83.33
+[92m20:46:53 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.outfit_builder:   ✅ outfit_1 complete: €412.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: tops, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 17 items in tops
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist organic t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist organic t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 11 items using bans: ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for tops: €138.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: bottoms, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 6 items in bottoms
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['short', 'denim']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for bottoms: €134.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: shoes, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 8 items in shoes
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist essential sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist essential sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 8 items using bans: ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+WARNING:cove.agents.outfit_builder:   ⚠️ Strict filter removed all items for shoes! Bans: ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+WARNING:cove.agents.outfit_builder:   ⚠️ No shoes found under €250.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: outerwear, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 8 items in outerwear
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for outerwear: €357.0 (Target: €333.33)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: accessories, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 0 items in accessories
+WARNING:cove.agents.outfit_builder:   ⚠️ No accessories found under €83.33
+[92m20:46:57 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.outfit_builder:   ✅ outfit_2 complete: €629.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: tops, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 16 items in tops
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist organic t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist organic t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw t-shirt' matched bans ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 11 items using bans: ['sweatshirt', 'polo', 't-shirt', 'tee', 'hoodie', 'logo', 'graphic']
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for tops: €145.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: bottoms, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 3 items in bottoms
+INFO:cove.agents.outfit_builder:   🧹 Filtered 0 items using bans: ['short', 'denim']
+WARNING:cove.agents.outfit_builder:   ⚠️ Budget overrun for bottoms: selected cheapest €215.0 (Target: €166.67)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: shoes, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 8 items in shoes
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist pure sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist essential sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist essential sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist timeless sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:🚫 BANNED: 'aura minimalist raw sneakers' matched bans ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+INFO:cove.agents.outfit_builder:   🧹 Filtered 8 items using bans: ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+WARNING:cove.agents.outfit_builder:   ⚠️ Strict filter removed all items for shoes! Bans: ['trainer', 'tennis', 'sneaker', 'slide', 'runner', 'sandal', 'flip-flop']
+WARNING:cove.agents.outfit_builder:   ⚠️ No shoes found under €250.00
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: outerwear, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 5 items in outerwear
+INFO:cove.agents.outfit_builder:   ✅ Found budget-fitting item for outerwear: €89.0 (Target: €333.33)
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/embeddings "HTTP/1.1 200 OK"
+INFO:cove.outfit:🔍 Category search: accessories, gender=male, price_max=1000.0, top_k=50
+INFO:cove.outfit:   ✅ Found 0 items in accessories
+WARNING:cove.agents.outfit_builder:   ⚠️ No accessories found under €83.33
+[92m20:47:01 - LiteLLM:INFO[0m: utils.py:3227 - 
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:LiteLLM:
+LiteLLM completion() model= openai/gpt-4o-mini; provider = openrouter
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:cove.agents.outfit_builder:   ✅ outfit_3 complete: €449.00
+INFO:cove.agents.orchestrator:   ✓ outfit_builder: 16474ms
+INFO:cove.agents.orchestrator:   Group 2: ['fit', 'budget']
+INFO:cove.agents.orchestrator:   ⚡ Executing 2 agents in parallel
+INFO:cove.agents.base:Initialized fit agent
+INFO:cove.agents.fit:Analyzing sizes for 15 items (preference: regular)
+INFO:cove.agents.base:✓ fit: Analyzed 15 items, recommended sizes for 15. 12 warnings (confidence: 76%, tools: 15)
+INFO:cove.agents.base:Initialized budget agent
+INFO:cove.agents.budget:Optimizing 15 items within €1000 budget (maximize_value)
+INFO:cove.agents.base:✓ budget: Within budget (€1000.00 remaining) (confidence: 70%, tools: 2)
+INFO:cove.agents.orchestrator:   ✓ fit: 2ms
+INFO:cove.agents.orchestrator:   ✓ budget: 1ms
+INFO:cove.agents.orchestrator:✅ Workflow complete: 26643ms
+
+
+✨ GENERATING LOOK: Aura Minimalist - Premium Minimalist Evening ✨
+📚 [VOCAB] Cache expired or empty, refreshing from ai_core.docs...
+📚 [VOCAB] Loaded 17 colors from ai_core.docs: ['beige', 'black', 'brown', 'burgundy', 'champagne', 'charcoal', 'chocolate', 'emerald', 'grey', 'light blue', 'navy', 'nude', 'pink', 'red', 'sand', 'tan', 'white']
+📚 [VOCAB] Loaded 24 types from ai_core.docs: ['accessories', 'blazer', 'boots', 'cargo pants', 'coat', 'dress', 'heels', 'high-tops', 'hoodie', 'jacket', 'loafers', 'pants', 'shirt', 'shoes', 'shorts', 'skirt', 'sneakers', 'sweater', 'sweatshirt', 't-shirt', 'tech jacket', 'tee', 'trousers', 'vest']
+📚 [VOCAB] Loaded 3 brands from ai_core.docs: ['aura minimalist', 'cove footwear', 'vortex streetwear']
+ERROR:asyncio:Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x10f952b30>
+transport: <_SelectorSocketTransport closing fd=10>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 918, in write
+    n = self._sock.send(data)
+OSError: [Errno 9] Bad file descriptor
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/sslproto.py", line 684, in _process_write_backlog
+    self._transport.write(chunk)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 924, in write
+    self._fatal_error(exc, 'Fatal write error on socket transport')
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 719, in _fatal_error
+    self._force_close(exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/selector_events.py", line 731, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 745, in call_soon
+    self._check_closed()
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/asyncio/base_events.py", line 510, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed

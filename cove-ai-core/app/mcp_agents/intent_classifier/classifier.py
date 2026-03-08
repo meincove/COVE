@@ -241,6 +241,7 @@ Extract these specific fields into "filters" object if present:
 - `price_max` (float): Maximum price
 - `sort` (str): 'price_asc' (if user asks for cheapest, lowest price, budget), 'price_desc' (expensive, premium, luxury)
 - `type` (str): Product type (hoodie, tee, etc.)
+- `brand` (str): Brand name (e.g., Aura Minimalist, Vortex Streetwear, etc.)
 - `color` (str): Color name
 - `gender` (str): CRITICAL! Extract gender from context:
   - 'male' if: "boyfriend", "husband", "for him", "for my guy", "men's", "mens", "for men", "male", "son", "brother", "dad", "father"

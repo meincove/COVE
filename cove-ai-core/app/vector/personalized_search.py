@@ -269,7 +269,8 @@ def personalized_search(
     user_profile: Optional[Dict[str, Any]] = None,
     sku_boost: bool = False,
     recently_viewed_slugs: Optional[List[str]] = None,
-    embedding_map: Optional[Dict[str, List[float]]] = None
+    embedding_map: Optional[Dict[str, List[float]]] = None,
+    filters: Optional[Dict[str, Any]] = None
 ) -> List[PersonalizedResult]:
     """
     Personalized search with CF, Profile, and Session-based reranking.
@@ -287,6 +288,7 @@ def personalized_search(
         sku_boost: Boolean to boost BM25 for exact/SKU queries
         recently_viewed_slugs: Slugs of recently viewed products for session affinity
         embedding_map: Preloaded embeddings for session affinity calculation
+        filters: Optional dict of metadata filters (type, price, gender, etc.)
     """
     # 1. Get hybrid search results (larger pool for reranking)
     search_results = search_hybrid_rrf(
@@ -299,7 +301,8 @@ def personalized_search(
         vector_k=30,
         rrf_constant=60,
         visual_vibe=visual_vibe,
-        sku_boost=sku_boost
+        sku_boost=sku_boost,
+        filters=filters
     )
     
     # 2. Calculate scores
@@ -379,6 +382,7 @@ def personalized_results_to_dict(results: List[PersonalizedResult]) -> List[Dict
             'title': r.title,
             'text': r.text,
             'url': r.url,
+            'slug': r.meta.get('slug') or r.meta.get('groupSlug'),
             'meta': r.meta,
             'search_score': r.search_score,
             'cf_score': r.cf_score,

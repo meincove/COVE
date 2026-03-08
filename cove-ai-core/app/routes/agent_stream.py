@@ -6,6 +6,7 @@ Handles ALL agent response types - NO HARDCODING!
 """
 import json
 import asyncio
+import os
 from typing import AsyncGenerator
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -24,7 +25,8 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
     """
     
     # Buffer for events emitted by agent
-    events_queue = asyncio.Queue()
+    max_queue = int(os.getenv("AGENT_STREAM_MAX_QUEUE", "200"))
+    events_queue = asyncio.Queue(maxsize=max_queue)
     
     def event_handler(event_type: str, data: dict):
         """Capture events emitted by agent during work"""
@@ -128,7 +130,7 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
                 {"id": f"verifier_{i}", "text": s, "query": s, "type": "question", "icon": "sparkles", "priority": i+1}
                 for i, s in enumerate(result.suggestions)
             ]
-            print(f"[SUGGESTIONS DEBUG] Using {len(suggested_actions)} Verifier suggestions: {result.suggestions}")
+            log.debug("[SUGGESTIONS] Using %s verifier suggestions: %s", len(suggested_actions), result.suggestions)
         else:
             # Fallback to engine-generated suggestions
             suggestions_context = {
@@ -146,7 +148,7 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
                 intent=result.kind,
                 context=suggestions_context
             )
-            print(f"[SUGGESTIONS DEBUG] Using {len(suggested_actions) if suggested_actions else 0} engine suggestions")
+            log.debug("[SUGGESTIONS] Using %s engine suggestions", len(suggested_actions) if suggested_actions else 0)
         
         # Emit suggestions if any were generated
         if suggested_actions:
@@ -161,9 +163,9 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
         # Add items if they exist in the result
         if hasattr(result, 'items') and result.items:
             done_data['items'] = [item.dict() for item in result.items]
-            print(f"[STREAMING DEBUG] Added {len(result.items)} items to done_data")
+            log.debug("[STREAMING] Added %s items to done_data", len(result.items))
         else:
-            print(f"[STREAMING DEBUG] No items in result to add")
+            log.debug("[STREAMING] No items in result to add")
         
         # Phase 1: Serialize thinking_events and tools_used from trackers
         try:
@@ -171,20 +173,20 @@ async def stream_agent_with_events(body: AgentIn) -> AsyncGenerator[str, None]:
             thinking_events = thinking_tracker.get_all_events() if thinking_tracker else []
             tools_used = tool_tracker.get_summary() if tool_tracker else []
             
-            print(f"[STREAMING DEBUG] thinking_events count: {len(thinking_events)}")
-            print(f"[STREAMING DEBUG] tools_used count: {len(tools_used)}")
+            log.debug("[STREAMING] thinking_events count: %s", len(thinking_events))
+            log.debug("[STREAMING] tools_used count: %s", len(tools_used))
             
             if thinking_events:
                 done_data['thinking_events'] = thinking_events
-                print(f"[STREAMING DEBUG] Added {len(thinking_events)} thinking_events to done_data")
+                log.debug("[STREAMING] Added %s thinking_events to done_data", len(thinking_events))
             
             if tools_used:
                 done_data['tools_used'] = tools_used
-                print(f"[STREAMING DEBUG] Added {len(tools_used)} tools_used to done_data")
+                log.debug("[STREAMING] Added %s tools_used to done_data", len(tools_used))
         except Exception as e:
-            print(f"[STREAMING DEBUG] Error serializing trackers: {e}")
+            log.debug("[STREAMING] Error serializing trackers: %s", e)
         
-        print(f"[STREAMING DEBUG] Final done_data keys: {list(done_data.keys())}")
+        log.debug("[STREAMING] Final done_data keys: %s", list(done_data.keys()))
         yield f"event: done\ndata: {json.dumps(done_data)}\n\n"
         
     except Exception as e:

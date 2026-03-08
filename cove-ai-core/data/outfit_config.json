@@ -39,5 +39,37 @@
                 "shoes"
             ]
         }
+    },
+    "category_mappings": {
+        "tee": "tops",
+        "t-shirt": "tops",
+        "shirt": "tops",
+        "blouse": "tops",
+        "sweater": "tops",
+        "hoodie": "tops",
+        "sweatshirt": "tops",
+        "jacket": "tops",
+        "coat": "tops",
+        "blazer": "tops",
+        "vest": "tops",
+        "pants": "bottoms",
+        "jeans": "bottoms",
+        "trousers": "bottoms",
+        "shorts": "bottoms",
+        "skirt": "bottoms",
+        "joggers": "bottoms",
+        "leggings": "bottoms",
+        "cargo pants": "bottoms",
+        "sneakers": "shoes",
+        "boots": "shoes",
+        "sandals": "shoes",
+        "heels": "shoes",
+        "loafers": "shoes",
+        "oxfords": "shoes",
+        "dress shoes": "shoes",
+        "high-tops": "shoes",
+        "shoes": "shoes",
+        "tech jacket": "tops",
+        "outerwear": "tops"
     }
 }
