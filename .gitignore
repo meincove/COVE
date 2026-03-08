@@ -43,3 +43,14 @@ embedding_generation*.log
 # Static Assets
 cove-ai-core/static/assets/
 cove-ai-core/static/generated_assets/
+cove-ai-core/static/vto/
+backend/uploads/
+
+# Generated/temporary files
+*.json.bak
+seed_log*.txt
+reproduction_selection_log*.txt
+lookbook_output.txt
+lookbook_full.txt
+gender_test_output.txt
+test_output.json
