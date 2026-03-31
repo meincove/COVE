@@ -170,7 +170,8 @@ export default function NavbarController({ children }: PropsWithChildren<{}>) {
   const hideGlobalNavbar =
     pathname === "/" ||
     pathname?.startsWith("/shopping") ||
-    pathname?.startsWith("/brands")
+    pathname?.startsWith("/brands") ||
+    pathname?.startsWith("/outfit-builder")
 
   return (
     <>

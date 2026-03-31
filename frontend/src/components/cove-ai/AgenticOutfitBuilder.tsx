@@ -116,169 +116,211 @@ export default function AgenticOutfitBuilder({
     const currentOutfitItems = outfits[`outfit_${activeOutfit}`] || [];
 
 
+    // State for image generation simulation
+    const [generatingId, setGeneratingId] = useState<string | null>(null);
+
+    // Use store actions
+    const { setAnchoredItem, anchoredItem } = useOutfitStore();
+
+    // Helper to group items by slot for a specific outfit
+    const getGroupedItems = (items: ProductCandidate[]) => {
+        const groups = {
+            Tops: items.filter(i => ['top', 'tops', 'outerwear'].includes(i.category || '')),
+            Bottoms: items.filter(i => ['bottom', 'bottoms'].includes(i.category || '')),
+            Shoes: items.filter(i => ['shoe', 'shoes'].includes(i.category || ''))
+        };
+        // Catch-all for others
+        const others = items.filter(i => !['top', 'tops', 'outerwear', 'bottom', 'bottoms', 'shoe', 'shoes'].includes(i.category || ''));
+        if (others.length > 0) (groups as any)['Accessories'] = others;
+        return groups;
+    };
+
+    const handleImageGenerate = (slug: string) => {
+        setGeneratingId(slug);
+        // Mock generation delay
+        setTimeout(() => {
+            setGeneratingId(null);
+            // In a real app, this would trigger a store update or open a modal
+        }, 2000);
+    };
+
     return (
-        <div className="bg-white rounded-2xl p-4 border border-neutral-200 shadow-sm h-full flex flex-col font-sans">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-violet-100 flex items-center justify-center">
+        <div className="h-full flex flex-col font-sans overflow-hidden">
+            {/* Header - Minimal & Floating */}
+            <div className="flex items-center justify-between px-1 py-4 flex-shrink-0">
+                <div className="flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/50 shadow-sm">
+                    <div className="h-8 w-8 rounded-full bg-violet-50 flex items-center justify-center">
                         <Sparkles className="h-4 w-4 text-violet-600" />
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-neutral-900 leading-tight">
-                            {isBuilding ? "Curating Looks..." : "Your Outfits"}
+                            {isBuilding ? "Curating Collection..." : "Your Curated Collection"}
                         </h3>
-                        {isBuilding && (
-                            <p className="text-[10px] text-neutral-500"> finding matches...</p>
-                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Content: Always show tabs/items if we have any outfits, otherwise show loader */}
+            {/* Content: Side-by-Side Layout on Canvas */}
             {hasOutfits || isBuilding ? (
-                <>
-                    {/* Outfit Tabs */}
-                    <div className="flex bg-neutral-100 rounded-lg p-1 mb-4">
-                        {[1, 2, 3].map((num) => {
-                            const hasItems = outfits[`outfit_${num}`]?.length > 0;
-                            const total = outfitTotals[num - 1] || 0;
-                            const isActiveTab = activeOutfit === num;
+                <div className="flex-1 overflow-y-auto px-1 pb-6 custom-scrollbar">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                        {/* Column 1: Standard Match */}
+                        {[1, 2].map((outfitNum) => {
+                            const isPremium = outfitNum === 2;
+                            const items = outfits[`outfit_${outfitNum}`] || [];
+                            const total = outfitTotals[outfitNum - 1] || 0;
+                            const grouped = getGroupedItems(items);
+                            const hasItems = items.length > 0;
 
                             return (
-                                <button
-                                    key={num}
-                                    onClick={() => setActiveOutfit(num)}
-                                    className={`
-                                        flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all duration-200
-                                        ${isActiveTab
-                                            ? 'bg-white text-neutral-900 shadow-sm ring-1 ring-black/5'
-                                            : hasItems
-                                                ? 'text-neutral-500 hover:text-neutral-700 hover:bg-white/50'
-                                                : 'text-neutral-400 cursor-default'
-                                        }
-                                    `}
-                                    disabled={!hasItems && !isActiveTab}
-                                >
-                                    <div className="flex items-center justify-center gap-1">
-                                        Look {num}
-                                    </div>
-                                    {hasItems && (
-                                        <div className={`text-[10px] ${isActiveTab ? 'text-violet-600 font-bold' : 'opacity-75'}`}>
-                                            €{total.toFixed(0)}
+                                <div key={outfitNum} className="flex flex-col h-full rounded-3xl transition-all duration-500">
+                                    {/* Column Header - Floating Badge */}
+                                    <div className="mb-4 flex items-center justify-between px-2">
+                                        <div className={`px-4 py-1.5 rounded-full flex items-center gap-2 border shadow-sm ${isPremium
+                                            ? 'bg-amber-50/90 border-amber-200 text-amber-900'
+                                            : 'bg-white/90 border-neutral-200 text-neutral-900'
+                                            } backdrop-blur-md`}>
+                                            {isPremium && <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                                            <span className="text-xs font-bold">
+                                                {isPremium ? "Premium Collection" : "Standard Match"}
+                                            </span>
                                         </div>
-                                    )}
-                                </button>
+                                        {hasItems && (
+                                            <span className="text-sm font-bold text-neutral-900 bg-white/80 px-3 py-1 rounded-full shadow-sm border border-white/50 backdrop-blur-md">
+                                                €{total.toFixed(0)}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Items Area */}
+                                    <div className="flex-1 space-y-6">
+                                        {!hasItems && isBuilding ? (
+                                            <div className="h-64 flex flex-col items-center justify-center text-neutral-400 space-y-3 opacity-50 bg-white/20 rounded-3xl border-2 border-dashed border-neutral-200/50">
+                                                <div className="w-8 h-8 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                                                <p className="text-xs font-medium">Finding items...</p>
+                                            </div>
+                                        ) : (
+                                            Object.entries(grouped).map(([category, catItems]) => {
+                                                if (catItems.length === 0) return null;
+                                                return (
+                                                    <div key={category} className="space-y-3">
+                                                        <h4 className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 pl-2 opacity-80 backdrop-blur-sm self-start inline-block rounded-md">{category}</h4>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            {catItems.map((item, idx) => {
+                                                                const isAnchored = anchoredItem?.slug === item.slug;
+                                                                const isGenerating = generatingId === item.slug;
+
+                                                                return (
+                                                                    <motion.div
+                                                                        key={item.slug || idx}
+                                                                        initial={{ opacity: 0, scale: 0.9 }}
+                                                                        animate={{ opacity: 1, scale: 1 }}
+                                                                        transition={{ delay: idx * 0.05 }}
+                                                                        className={`group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full ring-1 ${isAnchored ? 'ring-violet-500 ring-2' : 'ring-black/5 hover:ring-violet-200'}`}
+                                                                    >
+                                                                        {/* Image - Compact Aspect Ratio */}
+                                                                        <div className="aspect-[4/5] bg-neutral-100 relative overflow-hidden">
+                                                                            {item.imageUrl ? (
+                                                                                <img
+                                                                                    src={item.imageUrl}
+                                                                                    alt={item.title}
+                                                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                                                />
+                                                                            ) : (
+                                                                                <div className="w-full h-full flex items-center justify-center">
+                                                                                    <ShoppingBag className="h-6 w-6 text-neutral-300" />
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Floating Actions on Image - Added z-10 for clickability */}
+                                                                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                                                {/* Anchor Button */}
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setAnchoredItem(isAnchored ? null : { category: item.category || '', slug: item.slug });
+                                                                                    }}
+                                                                                    className={`p-2 rounded-full shadow-md backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer ${isAnchored ? 'bg-violet-600 text-white' : 'bg-white/90 text-neutral-600 hover:text-violet-600'}`}
+                                                                                    title={isAnchored ? "Unanchor" : "Anchor Item"}
+                                                                                >
+                                                                                    <div className={`w-3.5 h-3.5 border-2 border-current rounded-full ${isAnchored ? 'bg-white' : ''}`} />
+                                                                                </button>
+                                                                            </div>
+
+                                                                            {/* Image Build / Generate Action */}
+                                                                            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        handleImageGenerate(item.slug);
+                                                                                    }}
+                                                                                    className={`p-2 rounded-full shadow-md backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer ${isGenerating ? 'bg-violet-100 text-violet-600' : 'bg-white/90 text-neutral-700 hover:bg-violet-50 hover:text-violet-600'
+                                                                                        }`}
+                                                                                    title="Generate Image"
+                                                                                    disabled={isGenerating}
+                                                                                >
+                                                                                    {isGenerating ? (
+                                                                                        <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                                                    ) : (
+                                                                                        <Sparkles className="w-3.5 h-3.5" />
+                                                                                    )}
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Info - Compact */}
+                                                                        <div className="p-3 flex flex-col flex-1 gap-1">
+                                                                            <div className="flex justify-between items-start gap-2">
+                                                                                <h5 className="text-xs font-medium text-neutral-900 line-clamp-2 leading-snug flex-1" title={item.title}>
+                                                                                    {item.title}
+                                                                                </h5>
+                                                                                <span className="text-xs font-bold text-neutral-900 whitespace-nowrap">
+                                                                                    €{item.price?.toFixed(0)}
+                                                                                </span>
+                                                                            </div>
+
+                                                                            {item.stylist_note && (
+                                                                                <div className="mt-auto pt-2">
+                                                                                    <p className="text-[9px] leading-tight text-amber-700 bg-amber-50 px-1.5 py-1 rounded border border-amber-100 line-clamp-2">
+                                                                                        {item.stylist_note.replace("⚠️ Stylist Note:", "").trim()}
+                                                                                    </p>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </motion.div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+
+                                    {/* Action Footer - Floating */}
+                                    <div className="mt-4">
+                                        <button
+                                            className={`w-full py-3 rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:scale-95 ${isPremium
+                                                    ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200'
+                                                    : 'bg-neutral-900 text-white hover:bg-black border border-neutral-900'
+                                                }`}
+                                            disabled={!hasItems}
+                                            onClick={() => window.open('/shopping', '_blank')}
+                                        >
+                                            {isPremium ? <Sparkles className="w-3.5 h-3.5" /> : <ShoppingBag className="w-3.5 h-3.5" />}
+                                            {isPremium ? "View Premium Details" : "Add Standard Match"}
+                                        </button>
+                                    </div>
+                                </div>
                             );
                         })}
                     </div>
-
-                    {/* Current Outfit Items - Vertical Stack */}
-                    <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeOutfit}
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -5 }}
-                                className="space-y-2"
-                            >
-                                {currentOutfitItems.length === 0 && isBuilding && (
-                                    <div className="p-4 text-center text-xs text-neutral-400">
-                                        Items will appear here...
-                                    </div>
-                                )}
-
-                                {currentOutfitItems.map((item, idx) => (
-                                    <motion.div
-                                        key={item.slug || idx}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        className="group flex gap-3 bg-white border border-neutral-100 hover:border-violet-200 hover:shadow-md rounded-xl p-2 transition-all cursor-pointer"
-                                        onClick={() => {
-                                            if (item.slug) {
-                                                window.location.href = `/product/${item.slug}`;
-                                            }
-                                        }}
-                                    >
-                                        {/* Image */}
-                                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-neutral-50 border border-neutral-100 flex-shrink-0 relative">
-                                            {item.imageUrl ? (
-                                                <img
-                                                    src={item.imageUrl}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <ShoppingBag className="h-5 w-5 text-neutral-300" />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Info */}
-                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
-                                                        {item.type || 'Item'}
-                                                    </p>
-                                                    <p className="text-xs text-neutral-900 font-medium truncate pr-2">
-                                                        {item.title}
-                                                    </p>
-                                                </div>
-                                                <div className="h-5 w-5 rounded-full bg-neutral-50 flex items-center justify-center group-hover:bg-violet-50 group-hover:text-violet-600 transition-colors">
-                                                    <Check className="h-3 w-3 text-neutral-300 group-hover:text-violet-600" />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <p className="text-xs text-violet-600 font-bold">
-                                                    €{item.price?.toFixed(2) || "0.00"}
-                                                </p>
-                                            </div>
-
-                                            {item.stylist_note && (
-                                                <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-100 rounded-md max-w-full">
-                                                    <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 flex-shrink-0 animate-pulse"></span>
-                                                    <p className="text-[10px] text-amber-700 font-medium leading-tight truncate">
-                                                        {item.stylist_note.replace("⚠️ Stylist Note:", "").trim()}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Total & Add All Button */}
-                    <div className="mt-3 pt-3 border-t border-neutral-100">
-                        <div className="flex items-center justify-between mb-3 px-1">
-                            <span className="text-xs font-medium text-neutral-500">Look {activeOutfit} Total</span>
-                            <span className="text-sm font-bold text-neutral-900">
-                                €{currentOutfitItems.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2)}
-                            </span>
-                        </div>
-                        <button className="w-full py-2.5 bg-neutral-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
-                            <ShoppingBag className="h-3.5 w-3.5" />
-                            Add Look to Cart
-                        </button>
-                    </div>
-                </>
+                </div>
             ) : (
-                /* Empty State */
-                <div className="flex-1 flex items-center justify-center text-neutral-400">
-                    <div className="text-center">
-                        <div className="h-10 w-10 mx-auto mb-2 rounded-full bg-neutral-50 flex items-center justify-center">
-                            <Sparkles className="h-5 w-5 text-neutral-300" />
-                        </div>
-                        <p className="text-xs font-medium text-neutral-500">Ready to style you</p>
-                        <p className="text-[10px] text-neutral-400 mt-1">
-                            "Create a date night look"
-                        </p>
+                /* Empty State - Transparent */
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center opacity-0">
+                        {/* Hidden until content loads to keep canvas clean */}
                     </div>
                 </div>
             )}

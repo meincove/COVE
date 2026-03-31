@@ -34,6 +34,7 @@ export type StreamState = {
     agenticEvents: any[];
     // Interactive question options for conversation flow
     questionOptions: QuestionOptions | null;
+    vto_image_url?: string | null;
 };
 
 export function useAgentStream() {
@@ -51,7 +52,9 @@ export function useAgentStream() {
         thinking_events: null,
         tools_used: null,
         agenticEvents: [],  // ✨ PHASE 6: Live exploration
+
         questionOptions: null,  // Interactive question options
+        vto_image_url: null,
     });
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -116,9 +119,33 @@ export function useAgentStream() {
             const decoder = new TextDecoder();
             let buffer = '';
 
+            // Safety timeout to prevent infinite "thinking" state
+            const TIMEOUT_MS = 30000;
+            let timeoutId: NodeJS.Timeout | undefined;
+
+            const resetTimeout = () => {
+                if (timeoutId) clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    console.warn('[useAgentStream] Stream timed out - no data received');
+                    if (abortControllerRef.current) abortControllerRef.current.abort();
+                    setState(prev => ({
+                        ...prev,
+                        isStreaming: false,
+                        error: 'Response timed out. Please try again.',
+                    }));
+                }, TIMEOUT_MS);
+            };
+
+            resetTimeout(); // Start timeout
+
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    clearTimeout(timeoutId);
+                    break;
+                }
+
+                resetTimeout(); // Reset on data received
 
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n\n');
@@ -150,6 +177,7 @@ export function useAgentStream() {
                 }
             }
             // Stream finished naturally
+            clearTimeout(timeoutId); // Ensure cleared
             setState(prev => ({ ...prev, isStreaming: false }));
         } catch (error: any) {
             if (error.name === 'AbortError') {
@@ -195,6 +223,7 @@ export function useAgentStream() {
                     // Phase 1: Capture thinking_events and tools_used from done event
                     thinking_events: data.thinking_events || null,
                     tools_used: data.tools_used || null,
+                    vto_image_url: data.vto_image_url || null,
                 }));
                 break;
 

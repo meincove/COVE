@@ -150,15 +150,18 @@ function isEmailConfirmationMeta(
 
 // ✨ PHASE 6: Props for mode-specific behavior
 // ✨ BUBBLES: Added onThinkingChange for status pill
-interface CoveChatWidgetProps {
-  mode?: 'chat' | 'outfit_builder';
-  onThinkingChange?: (thinking: boolean, steps: { icon: string; status: string }[]) => void;
-  onQuickAction?: (text: string) => void;
+export interface CoveChatWidgetProps {
+  onThinkingChange?: (isThinking: boolean, steps: { icon: string; status: string }[]) => void;
+  onQuickAction?: (action: string) => void;
   onTabChange?: (tab: 'chat' | 'outfit_builder' | 'cart') => void;
   onOutfitReady?: () => void;
+  mode?: 'chat' | 'outfit_builder'; // Explicitly add mode
 }
 
-function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, onTabChange, onOutfitReady }: CoveChatWidgetProps, ref: React.Ref<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }>) {
+const CoveChatWidget = forwardRef<{
+  sendQuickMessage: (text: string, image?: File) => void;
+  clearChat: () => void;
+}, CoveChatWidgetProps>(({ onThinkingChange, onQuickAction, onTabChange, onOutfitReady, mode = 'chat' }, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -243,7 +246,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
 
   // Week 6: Chat history persistence
   const sessionId = guestSessionId || ensureGuestSessionId();
-  const { history, isLoading: historyLoading, saveMessage } = useChatHistory(sessionId);
+  const { history, isLoading: historyLoading, saveMessage, clearHistory } = useChatHistory(sessionId);
 
   // ✨ PHASE 6: Centralized Outfit Event Processing
   // Updates the global outfit store from streaming events (normalizes categories etc.)
@@ -420,6 +423,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
   // ✨ BUBBLES: Expose sendQuickMessage method to parent via ref
   useImperativeHandle(ref, () => ({
     clearChat: () => {
+      clearHistory(); // Call backend to clear history!
       setMessages([]);
       setHasStartedChat(false);
       setHasSentGreeting(false);
@@ -600,7 +604,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       const msg: ChatMessage = {
         id: makeId(),
         role: "assistant",
-        content: data.answer,
+        content: data.answer || "",
       };
       setMessages((prev) => [...prev, msg]);
       return;
@@ -648,7 +652,10 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
         answerLower.includes('your outfit is ready') ||
         answerLower.includes('€0.00 total');  // Outfit builder signature
       if (items.length > 0 && isOutfitResponse) {
-        setGeneratedOutfit(items);
+        // Only open the global outfit modal if we are NOT in the dedicated outfit builder page
+        if (mode !== 'outfit_builder') {
+          setGeneratedOutfit(items);
+        }
       }
 
 
@@ -686,7 +693,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
       const aiMsg: ChatMessage = {
         id: makeId(),
         role: "assistant",
-        content: data.answer,
+        content: data.answer || "Suggested items:",
         meta: checkoutMeta,
       };
 
@@ -717,7 +724,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
         content: data.answer || "Email confirmation sent!",
         meta: {
           kind: "email_confirmed",
-          orderId: data.emailConfirmation.orderId,
+          orderId: Number(data.emailConfirmation.orderId),
           sentTo: data.emailConfirmation.sentTo,
         },
       };
@@ -728,7 +735,7 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
     const msg: ChatMessage = {
       id: makeId(),
       role: "assistant",
-      content: data.answer,
+      content: data.answer || "",
     };
     setMessages((prev) => [...prev, msg]);
   }
@@ -1214,42 +1221,18 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
   return (
     <div className="flex flex-col h-full bg-white overflow-hidden">
       {/* Messages list - Muted neutral background, hidden scrollbar */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-16 pb-4 space-y-4 bg-neutral-100/80 scrollbar-hide">
+      {/* Messages list - Muted neutral background, hidden scrollbar */}
+      <div className={`flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-4 bg-neutral-100/80 scrollbar-hide ${mode === 'outfit_builder' ? 'pt-4' : 'pt-16'}`}>
 
         {/* OUTFIT BUILDER MODE: Show only the outfit builder, no chat messages */}
-        {mode === 'outfit_builder' ? (
-          <div className="flex flex-col h-full">
-            <AgenticOutfitBuilder
-              streamEvents={agenticEvents}
-              isActive={true}
-              onBrandSelect={async (brand) => {
-                // Trigger outfit building when brand is selected
-                // This replaces the old auto-start or text-based start
-                console.log("🎨 Brand selected:", brand);
+        {/* OUTFIT BUILDER MODE: Standard Chat interface (Canvas handles visualization) */}
+        {mode === 'outfit_builder' && (
+          /* Optional: specific outfit builder welcome or hidden logic if needed, 
+             but we want standard chat bubbles now. */
+          null
+        )}
 
-                const sessionId = guestSessionId ?? ensureGuestSessionId();
-                const genderTerm = "outfit"; // We could track gender state here if needed, but backend handles context
-                // Or we can construct a prompt:
-                const prompt = brand
-                  ? `Build me a ${brand} outfit`
-                  : `Build me a complete outfit`;
-
-                // If brand is null (All Brands), we just proceed without a specific brand filter
-                // But we pass the 'brand' param to the API explicitly so it knows to filter if present
-
-                await sendStreamingQuery(
-                  prompt,
-                  isSignedIn && user ? user.id : undefined,
-                  sessionId,
-                  'outfit_builder', // sessionType
-                  undefined, // imageUrl
-                  undefined, // imageData
-                  brand      // brand filter
-                );
-              }}
-            />
-          </div>
-        ) : (
+        {(true) && (
           <>
             {/* CHAT MODE: Show personalized greeting when no messages */}
             {messages.length === 0 && !isStreamingProgress && (
@@ -1398,12 +1381,15 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
                             key={order.orderId}
                             className="p-2 rounded-lg bg-neutral-700/50 border border-neutral-600"
                           >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-gray-900 font-medium">Order #{order.orderId}</span>
+                              <span className="text-gray-500 text-xs">
+                                {new Date(order.createdAt || Date.now()).toLocaleDateString()}
+                              </span>
+                            </div>
                             <div className="flex justify-between items-start">
                               <div>
-                                <p className="font-medium">Order #{order.orderId}</p>
-                                <p className="text-xs text-neutral-400">
-                                  {new Date(order.createdAt).toLocaleDateString()}
-                                </p>
+                                {/* Original order ID and date lines removed as they are now in the new div above */}
                               </div>
                               <div className="text-right">
                                 <p className="font-medium">{order.currency}{order.total}</p>
@@ -1589,20 +1575,20 @@ function CoveChatWidgetInner({ mode = 'chat', onThinkingChange, onQuickAction, o
         />
       )}
 
-      {/* Candidate Exploration Panel - Visible in Chat Mode */}
-      <CandidateExplorationPanel
-        isOpen={isCandidatePanelOpen}
-        onClose={() => {
-          setIsCandidatePanelOpen(false);
-          manuallyClosedRef.current = true; // Prevent auto-reopen
-        }}
-        categories={outfitCategories}
-        isBuilding={isStreamingProgress}
-      />
+      {/* Candidate Exploration Panel - Visible in Chat Mode ONLY, not in Builder */}
+      {mode !== 'outfit_builder' && (
+        <CandidateExplorationPanel
+          isOpen={isCandidatePanelOpen}
+          onClose={() => {
+            setIsCandidatePanelOpen(false);
+            manuallyClosedRef.current = true; // Prevent auto-reopen
+          }}
+          categories={outfitCategories}
+          isBuilding={isStreamingProgress}
+        />
+      )}
     </div>
   );
-}
+});
 
-// Export with forwardRef
-const CoveChatWidget = forwardRef<{ sendQuickMessage: (msg: string, image?: File) => void; clearChat: () => void }, CoveChatWidgetProps>(CoveChatWidgetInner);
 export default CoveChatWidget;

@@ -70,9 +70,29 @@ export function useChatHistory(guestSessionId: string) {
         }
     }, [guestSessionId, isSignedIn, user]);
 
+    // Clear history
+    const clearHistory = useCallback(async () => {
+        if (!guestSessionId) return;
+
+        try {
+            await fetch('/api/history/clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    guestSessionId,
+                    clerkUserId: isSignedIn && user ? user.id : undefined,
+                }),
+            });
+            // Update local state
+            setHistory([]);
+        } catch (error) {
+            console.error('Failed to clear history:', error);
+        }
+    }, [guestSessionId, isSignedIn, user]);
+
     useEffect(() => {
         loadHistory();
     }, [loadHistory]);
 
-    return { history, isLoading, saveMessage, loadHistory };
+    return { history, isLoading, saveMessage, loadHistory, clearHistory };
 }

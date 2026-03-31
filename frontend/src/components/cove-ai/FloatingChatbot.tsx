@@ -59,7 +59,7 @@ export default function FloatingChatbot() {
 
     // Don't render on auth pages - keeps UI clean
     // State is preserved via localStorage ('cove_chat_should_restore') for return
-    if (pathname?.includes('/sign-in') || pathname?.includes('/sign-up')) {
+    if (pathname?.includes('/sign-in') || pathname?.includes('/sign-up') || pathname?.startsWith('/outfit-builder')) {
         return null;
     }
 
